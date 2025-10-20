@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/widgets/naviga_to.dart';
-import 'package:smart_fitness_assistant/ui/login/signup_view.dart';
-import 'package:smart_fitness_assistant/ui/splash/ui/widgets/on_boarding_page.dart';
+import 'package:smart_fitness_assistant/views/auth/login/ui/login_view.dart';
+import 'package:smart_fitness_assistant/views/auth/login/ui/signup_view.dart';
+import 'package:smart_fitness_assistant/views/splash/ui/widgets/on_boarding_page.dart';
 
 class OnBoardingView extends StatefulWidget {
   const OnBoardingView({super.key});
@@ -56,7 +57,8 @@ class _OnBoardingViewState extends State<OnBoardingView> {
         curve: Curves.fastOutSlowIn,
       );
     } else {
-      navigateTo(context, const SignUpView());
+      print("Navigating to LoginView");
+      navigateTo(context, const LoginView());
     }
   }
 

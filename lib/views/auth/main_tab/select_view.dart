@@ -1,9 +1,9 @@
 import 'package:smart_fitness_assistant/common_widget/round_button.dart';
-import 'package:smart_fitness_assistant/ui/meal_planner/meal_planner_view.dart';
-import 'package:smart_fitness_assistant/ui/workout_tracker/workout_tracker_view.dart';
+import 'package:smart_fitness_assistant/views/meal_planner/meal_planner_view.dart';
+import 'package:smart_fitness_assistant/views/workout_tracker/workout_tracker_view.dart';
 import 'package:flutter/material.dart';
 
-import '../sleep_tracker/sleep_tracker_view.dart';
+import '../../sleep_tracker/sleep_tracker_view.dart';
 
 class SelectView extends StatelessWidget {
   const SelectView({super.key});

@@ -1,9 +1,10 @@
 import 'package:smart_fitness_assistant/common_widget/round_button.dart';
-import 'package:smart_fitness_assistant/common_widget/round_textfield.dart';
+import 'package:smart_fitness_assistant/core/widgets/naviga_to.dart';
+import 'package:smart_fitness_assistant/core/widgets/round_textfield.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
-import 'package:smart_fitness_assistant/ui/login/complete_profile_view.dart';
+import 'package:smart_fitness_assistant/views/auth/login/ui/widgets/complete_profile_view.dart';
 import 'package:flutter/material.dart';
-import 'package:smart_fitness_assistant/ui/login/signup_view.dart';
+import 'package:smart_fitness_assistant/views/auth/login/ui/signup_view.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -13,7 +14,7 @@ class LoginView extends StatefulWidget {
 }
 
 class _LoginViewState extends State<LoginView> {
-  bool isCheck = false;
+  bool _isObscure = false;
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
@@ -50,20 +51,15 @@ class _LoginViewState extends State<LoginView> {
                 RoundTextField(
                   hitText: "Password",
                   icon: "assets/img/lock.png",
-                  obscureText: true,
+                  obscureText: _isObscure,
                   rigtIcon: TextButton(
-                    onPressed: () {},
-                    child: Container(
-                      alignment: Alignment.center,
-                      width: 20,
-                      height: 20,
-                      child: Image.asset(
-                        "assets/img/show_password.png",
-                        width: 20,
-                        height: 20,
-                        fit: BoxFit.contain,
-                        color: TColor.gray,
-                      ),
+                    onPressed: () {
+                      setState(() {
+                        _isObscure = !_isObscure;
+                      });
+                    },
+                    child: Icon(
+                      _isObscure ? Icons.visibility_off : Icons.visibility,
                     ),
                   ),
                 ),
@@ -84,12 +80,7 @@ class _LoginViewState extends State<LoginView> {
                 RoundButton(
                   title: "Login",
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const CompleteProfileView(),
-                      ),
-                    );
+                    navigateTo(context, CompleteProfileView());
                   },
                 ),
                 SizedBox(height: media.width * 0.04),
@@ -167,12 +158,7 @@ class _LoginViewState extends State<LoginView> {
                 TextButton(
                   onPressed: () {
                     // Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const SignUpView(),
-                      ),
-                    );
+                    navigateTo(context, SignUpView());
                   },
                   child: Row(
                     mainAxisSize: MainAxisSize.min,

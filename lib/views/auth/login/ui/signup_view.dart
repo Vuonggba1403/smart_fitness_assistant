@@ -1,9 +1,9 @@
-import 'package:smart_fitness_assistant/common_widget/round_button.dart';
-import 'package:smart_fitness_assistant/common_widget/round_textfield.dart';
-import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
-import 'package:smart_fitness_assistant/ui/login/complete_profile_view.dart';
-import 'package:smart_fitness_assistant/ui/login/login_view.dart';
 import 'package:flutter/material.dart';
+import 'package:smart_fitness_assistant/common_widget/round_button.dart';
+import 'package:smart_fitness_assistant/core/widgets/round_textfield.dart';
+import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/views/auth/login/ui/widgets/complete_profile_view.dart';
+import 'package:smart_fitness_assistant/views/auth/login/ui/login_view.dart';
 
 class SignUpView extends StatefulWidget {
   const SignUpView({super.key});
@@ -13,7 +13,9 @@ class SignUpView extends StatefulWidget {
 }
 
 class _SignUpViewState extends State<SignUpView> {
-  bool isCheck = false;
+  bool _isObscure = false; // password toggle
+  bool _isChecked = false; // privacy policy checkbox
+
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
@@ -39,16 +41,19 @@ class _SignUpViewState extends State<SignUpView> {
                   ),
                 ),
                 SizedBox(height: media.width * 0.05),
+
                 const RoundTextField(
                   hitText: "First Name",
                   icon: "assets/img/user_text.png",
                 ),
                 SizedBox(height: media.width * 0.04),
+
                 const RoundTextField(
                   hitText: "Last Name",
                   icon: "assets/img/user_text.png",
                 ),
                 SizedBox(height: media.width * 0.04),
+
                 const RoundTextField(
                   hitText: "Email",
                   icon: "assets/img/email.png",
@@ -58,50 +63,48 @@ class _SignUpViewState extends State<SignUpView> {
                 RoundTextField(
                   hitText: "Password",
                   icon: "assets/img/lock.png",
-                  obscureText: true,
-                  rigtIcon: TextButton(
-                    onPressed: () {},
-                    child: Container(
-                      alignment: Alignment.center,
-                      width: 20,
-                      height: 20,
-                      child: Image.asset(
-                        "assets/img/show_password.png",
-                        width: 20,
-                        height: 20,
-                        fit: BoxFit.contain,
-                        color: TColor.gray,
-                      ),
+                  obscureText: _isObscure,
+                  rigtIcon: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _isObscure = !_isObscure;
+                      });
+                    },
+                    icon: Icon(
+                      _isObscure ? Icons.visibility_off : Icons.visibility,
                     ),
                   ),
                 ),
+                SizedBox(height: media.width * 0.04),
+
+                // 🔹 Checkbox Privacy Policy
                 Row(
-                  // crossAxisAlignment: CrossAxisAlignment.,
                   children: [
                     IconButton(
                       onPressed: () {
                         setState(() {
-                          isCheck = !isCheck;
+                          _isChecked = !_isChecked;
                         });
                       },
                       icon: Icon(
-                        isCheck
+                        _isChecked
                             ? Icons.check_box_outlined
                             : Icons.check_box_outline_blank_outlined,
                         color: TColor.gray,
                         size: 20,
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
+                    Flexible(
                       child: Text(
-                        "By continuing you accept our Privacy Policy and\nTerm of Use",
+                        "By continuing you accept our Privacy Policy and Term of Use",
                         style: TextStyle(color: TColor.gray, fontSize: 10),
                       ),
                     ),
                   ],
                 ),
-                SizedBox(height: media.width * 0.4),
+                SizedBox(height: media.width * 0.05),
+
+                // 🔹 Register button
                 RoundButton(
                   title: "Register",
                   onPressed: () {
@@ -114,8 +117,9 @@ class _SignUpViewState extends State<SignUpView> {
                   },
                 ),
                 SizedBox(height: media.width * 0.04),
+
+                // 🔹 Or divider
                 Row(
-                  // crossAxisAlignment: CrossAxisAlignment.,
                   children: [
                     Expanded(
                       child: Container(
@@ -136,6 +140,8 @@ class _SignUpViewState extends State<SignUpView> {
                   ],
                 ),
                 SizedBox(height: media.width * 0.04),
+
+                // 🔹 Social login buttons
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -160,9 +166,7 @@ class _SignUpViewState extends State<SignUpView> {
                         ),
                       ),
                     ),
-
                     SizedBox(width: media.width * 0.04),
-
                     GestureDetector(
                       onTap: () {},
                       child: Container(
@@ -187,6 +191,8 @@ class _SignUpViewState extends State<SignUpView> {
                   ],
                 ),
                 SizedBox(height: media.width * 0.04),
+
+                // 🔹 Already have account
                 TextButton(
                   onPressed: () {
                     Navigator.push(

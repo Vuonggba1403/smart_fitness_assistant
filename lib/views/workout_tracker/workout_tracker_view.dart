@@ -1,6 +1,5 @@
-
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
-import 'package:smart_fitness_assistant/ui/workout_tracker/workour_detail_view.dart';
+import 'package:smart_fitness_assistant/views/workout_tracker/workour_detail_view.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 

@@ -1,9 +1,9 @@
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
-import 'package:smart_fitness_assistant/ui/login/what_your_goal_view.dart';
+import 'package:smart_fitness_assistant/views/auth/login/ui/widgets/what_your_goal_view.dart';
 import 'package:flutter/material.dart';
 
-import '../../common_widget/round_button.dart';
-import '../../common_widget/round_textfield.dart';
+import '../../../../../common_widget/round_button.dart';
+import '../../../../../core/widgets/round_textfield.dart';
 
 class CompleteProfileView extends StatefulWidget {
   const CompleteProfileView({super.key});

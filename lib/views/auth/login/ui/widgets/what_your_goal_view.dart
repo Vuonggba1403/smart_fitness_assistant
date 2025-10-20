@@ -2,8 +2,8 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:carousel_slider/carousel_controller.dart'; // ✅ thêm dòng này
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
-import 'package:smart_fitness_assistant/ui/login/welcome_view.dart';
-import '../../common_widget/round_button.dart';
+import 'package:smart_fitness_assistant/views/auth/login/ui/widgets/welcome_view.dart';
+import '../../../../../common_widget/round_button.dart';
 
 class WhatYourGoalView extends StatefulWidget {
   const WhatYourGoalView({super.key});
