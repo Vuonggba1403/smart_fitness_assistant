@@ -1,0 +1,73 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ / Android Studio
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VSCode
+.vscode/
+
+# Flutter/Dart/Pub related
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+.flutter-plugins
+.flutter-plugins-dependencies
+.fvm/
+.melos_tool/
+
+# Build outputs (rất quan trọng)
+build/
+android/app/build/
+android/build/
+ios/Flutter/
+ios/Pods/
+ios/build/
+web/.dart_tool/
+linux/build/
+windows/build/
+macos/Flutter/ephemeral/
+macos/build/
+
+# Generated files
+**/doc/api/
+**/ios/Flutter/.last_build_id
+coverage/
+app.*.symbols
+app.*.map.json
+
+# APK / AAB / IPA files (rất nặng, không nên commit)
+*.apk
+*.aab
+*.ipa
+
+# Firebase / keys / sensitive files
+google-services.json
+GoogleService-Info.plist
+
+# Local properties
+local.properties
+
+# IDE / System files
+Thumbs.db
+*.tmp
+*.bak
+*.swp
+*.swo
+*.orig
+*.rej
