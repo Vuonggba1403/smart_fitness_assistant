@@ -13,7 +13,7 @@ class SignUpView extends StatefulWidget {
 }
 
 class _SignUpViewState extends State<SignUpView> {
-  bool _isObscure = false; // password toggle
+  final _formKey = GlobalKey<FormState>();
   bool _isChecked = false; // privacy policy checkbox
 
   @override
@@ -25,203 +25,205 @@ class _SignUpViewState extends State<SignUpView> {
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  "Hey there,",
-                  style: TextStyle(color: TColor.gray, fontSize: 16),
-                ),
-                Text(
-                  "Create an Account",
-                  style: TextStyle(
-                    color: TColor.black,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
+            child: Form(
+              key: _formKey, // 🔹 Thêm form key
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    "Hey there,",
+                    style: TextStyle(color: TColor.gray, fontSize: 16),
                   ),
-                ),
-                SizedBox(height: media.width * 0.05),
-
-                const RoundTextField(
-                  hitText: "First Name",
-                  icon: "assets/img/user_text.png",
-                ),
-                SizedBox(height: media.width * 0.04),
-
-                const RoundTextField(
-                  hitText: "Last Name",
-                  icon: "assets/img/user_text.png",
-                ),
-                SizedBox(height: media.width * 0.04),
-
-                const RoundTextField(
-                  hitText: "Email",
-                  icon: "assets/img/email.png",
-                  keyboardType: TextInputType.emailAddress,
-                ),
-                SizedBox(height: media.width * 0.04),
-                RoundTextField(
-                  hitText: "Password",
-                  icon: "assets/img/lock.png",
-                  obscureText: _isObscure,
-                  rigtIcon: IconButton(
-                    onPressed: () {
-                      setState(() {
-                        _isObscure = !_isObscure;
-                      });
-                    },
-                    icon: Icon(
-                      _isObscure ? Icons.visibility_off : Icons.visibility,
+                  Text(
+                    "Create an Account",
+                    style: TextStyle(
+                      color: TColor.black,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                ),
-                SizedBox(height: media.width * 0.04),
+                  SizedBox(height: media.width * 0.05),
+                  const RoundTextField(
+                    hintText: "First Name",
+                    iconPath: "assets/img/user_text.png",
+                  ),
+                  const RoundTextField(
+                    hintText: "Last Name",
+                    iconPath: "assets/img/user_text.png",
+                  ),
+                  const RoundTextField(
+                    hintText: "Email",
+                    iconPath: "assets/img/email.png",
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                  RoundTextField(
+                    hintText: "Password",
+                    iconPath: "assets/img/lock.png",
+                    isPassword: true,
+                  ),
+                  SizedBox(height: media.width * 0.04),
 
-                // 🔹 Checkbox Privacy Policy
-                Row(
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        setState(() {
-                          _isChecked = !_isChecked;
-                        });
-                      },
-                      icon: Icon(
-                        _isChecked
-                            ? Icons.check_box_outlined
-                            : Icons.check_box_outline_blank_outlined,
-                        color: TColor.gray,
-                        size: 20,
-                      ),
-                    ),
-                    Flexible(
-                      child: Text(
-                        "By continuing you accept our Privacy Policy and Term of Use",
-                        style: TextStyle(color: TColor.gray, fontSize: 10),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: media.width * 0.05),
-
-                // 🔹 Register button
-                RoundButton(
-                  title: "Register",
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const CompleteProfileView(),
-                      ),
-                    );
-                  },
-                ),
-                SizedBox(height: media.width * 0.04),
-
-                // 🔹 Or divider
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        height: 1,
-                        color: TColor.gray.withOpacity(0.5),
-                      ),
-                    ),
-                    Text(
-                      "  Or  ",
-                      style: TextStyle(color: TColor.black, fontSize: 12),
-                    ),
-                    Expanded(
-                      child: Container(
-                        height: 1,
-                        color: TColor.gray.withOpacity(0.5),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: media.width * 0.04),
-
-                // 🔹 Social login buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    GestureDetector(
-                      onTap: () {},
-                      child: Container(
-                        width: 50,
-                        height: 50,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: TColor.white,
-                          border: Border.all(
-                            width: 1,
-                            color: TColor.gray.withOpacity(0.4),
-                          ),
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: Image.asset(
-                          "assets/img/google.png",
-                          width: 20,
-                          height: 20,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: media.width * 0.04),
-                    GestureDetector(
-                      onTap: () {},
-                      child: Container(
-                        width: 50,
-                        height: 50,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: TColor.white,
-                          border: Border.all(
-                            width: 1,
-                            color: TColor.gray.withOpacity(0.4),
-                          ),
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: Image.asset(
-                          "assets/img/facebook.png",
-                          width: 20,
-                          height: 20,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: media.width * 0.04),
-
-                // 🔹 Already have account
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const LoginView(),
-                      ),
-                    );
-                  },
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
+                  // 🔹 Checkbox Privacy Policy
+                  Row(
                     children: [
-                      Text(
-                        "Already have an account? ",
-                        style: TextStyle(color: TColor.black, fontSize: 14),
+                      IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _isChecked = !_isChecked;
+                          });
+                        },
+                        icon: Icon(
+                          _isChecked
+                              ? Icons.check_box_outlined
+                              : Icons.check_box_outline_blank_outlined,
+                          color: TColor.gray,
+                          size: 20,
+                        ),
                       ),
-                      Text(
-                        "Login",
-                        style: TextStyle(
-                          color: TColor.black,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
+                      Flexible(
+                        child: Text(
+                          "By continuing you accept our Privacy Policy and Term of Use",
+                          style: TextStyle(color: TColor.gray, fontSize: 10),
                         ),
                       ),
                     ],
                   ),
-                ),
-                SizedBox(height: media.width * 0.04),
-              ],
+                  SizedBox(height: media.width * 0.05),
+
+                  // 🔹 Register button
+                  RoundButton(
+                    title: "Register",
+                    onPressed: () {
+                      // 🔹 Validate form + check checkbox
+                      if (_formKey.currentState!.validate()) {
+                        if (_isChecked) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const CompleteProfileView(),
+                            ),
+                          );
+                        } else {
+                          // ⚠️ Thông báo yêu cầu tích checkbox
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                "You must accept Privacy Policy and Terms of Use",
+                              ),
+                            ),
+                          );
+                        }
+                      }
+                    },
+                  ),
+
+                  SizedBox(height: media.width * 0.04),
+
+                  // 🔹 Or divider
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 1,
+                          color: TColor.gray.withOpacity(0.5),
+                        ),
+                      ),
+                      Text(
+                        "  Or  ",
+                        style: TextStyle(color: TColor.black, fontSize: 12),
+                      ),
+                      Expanded(
+                        child: Container(
+                          height: 1,
+                          color: TColor.gray.withOpacity(0.5),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: media.width * 0.04),
+
+                  // 🔹 Social login buttons
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        onTap: () {},
+                        child: Container(
+                          width: 50,
+                          height: 50,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: TColor.white,
+                            border: Border.all(
+                              width: 1,
+                              color: TColor.gray.withOpacity(0.4),
+                            ),
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: Image.asset(
+                            "assets/img/google.png",
+                            width: 20,
+                            height: 20,
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: media.width * 0.04),
+                      GestureDetector(
+                        onTap: () {},
+                        child: Container(
+                          width: 50,
+                          height: 50,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: TColor.white,
+                            border: Border.all(
+                              width: 1,
+                              color: TColor.gray.withOpacity(0.4),
+                            ),
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: Image.asset(
+                            "assets/img/facebook.png",
+                            width: 20,
+                            height: 20,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: media.width * 0.04),
+
+                  // 🔹 Already have account
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const LoginView(),
+                        ),
+                      );
+                    },
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "Already have an account? ",
+                          style: TextStyle(color: TColor.black, fontSize: 14),
+                        ),
+                        Text(
+                          "Login",
+                          style: TextStyle(
+                            color: TColor.black,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: media.width * 0.04),
+                ],
+              ),
             ),
           ),
         ),

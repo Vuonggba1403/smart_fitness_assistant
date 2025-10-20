@@ -110,8 +110,8 @@ class _CompleteProfileViewState extends State<CompleteProfileView> {
                       SizedBox(height: media.width * 0.04),
                       RoundTextField(
                         controller: txtDate,
-                        hitText: "Date of Birth",
-                        icon: "assets/img/date.png",
+                        hintText: "Date of Birth",
+                        iconPath: "assets/img/date.png",
                       ),
                       SizedBox(height: media.width * 0.04),
                       Row(
@@ -119,8 +119,8 @@ class _CompleteProfileViewState extends State<CompleteProfileView> {
                           Expanded(
                             child: RoundTextField(
                               controller: txtDate,
-                              hitText: "Your Weight",
-                              icon: "assets/img/weight.png",
+                              hintText: "Your Weight",
+                              iconPath: "assets/img/weight.png",
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -150,8 +150,8 @@ class _CompleteProfileViewState extends State<CompleteProfileView> {
                           Expanded(
                             child: RoundTextField(
                               controller: txtDate,
-                              hitText: "Your Height",
-                              icon: "assets/img/hight.png",
+                              hintText: "Your Height",
+                              iconPath: "assets/img/hight.png",
                             ),
                           ),
                           const SizedBox(width: 8),

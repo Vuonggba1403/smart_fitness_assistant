@@ -1,37 +1,57 @@
 import 'package:flutter/material.dart';
 import '../functions/colo_extension.dart';
 
-class RoundTextField extends StatelessWidget {
+class RoundTextField extends StatefulWidget {
   final TextEditingController? controller;
   final TextInputType? keyboardType;
-  final String hitText;
-  final String icon;
-  final Widget? rigtIcon;
-  final bool obscureText;
+  final String hintText;
+  final String iconPath; // đường dẫn icon prefix
+  final bool isPassword;
+  final Widget? rightIcon;
   final EdgeInsets? margin;
+
   const RoundTextField({
     super.key,
-    required this.hitText,
-    required this.icon,
+    required this.hintText,
+    required this.iconPath,
     this.controller,
     this.margin,
     this.keyboardType,
-    this.obscureText = false,
-    this.rigtIcon,
+    this.isPassword = false,
+    this.rightIcon,
   });
+
+  @override
+  State<RoundTextField> createState() => _RoundTextFieldState();
+}
+
+class _RoundTextFieldState extends State<RoundTextField> {
+  bool _obscure = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _obscure = widget.isPassword;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: margin,
+      margin: widget.margin,
       decoration: BoxDecoration(
         color: TColor.lightGray,
         borderRadius: BorderRadius.circular(15),
       ),
-      child: TextField(
-        controller: controller,
-        keyboardType: keyboardType,
-        obscureText: obscureText,
+      child: TextFormField(
+        controller: widget.controller,
+        keyboardType: widget.keyboardType,
+        obscureText: _obscure,
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Please do not leave blank';
+          }
+          return null;
+        },
         decoration: InputDecoration(
           contentPadding: const EdgeInsets.symmetric(
             vertical: 15,
@@ -39,21 +59,32 @@ class RoundTextField extends StatelessWidget {
           ),
           enabledBorder: InputBorder.none,
           focusedBorder: InputBorder.none,
-          hintText: hitText,
-          suffixIcon: rigtIcon,
+          hintText: widget.hintText,
+          hintStyle: TextStyle(color: TColor.gray, fontSize: 12),
           prefixIcon: Container(
             alignment: Alignment.center,
             width: 20,
             height: 20,
             child: Image.asset(
-              icon,
+              widget.iconPath,
               width: 20,
               height: 20,
               fit: BoxFit.contain,
               color: TColor.gray,
             ),
           ),
-          hintStyle: TextStyle(color: TColor.gray, fontSize: 12),
+          suffixIcon: widget.isPassword
+              ? IconButton(
+                  icon: Icon(
+                    _obscure ? Icons.visibility_off : Icons.visibility,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscure = !_obscure;
+                    });
+                  },
+                )
+              : widget.rightIcon,
         ),
       ),
     );
