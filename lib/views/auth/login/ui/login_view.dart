@@ -2,6 +2,7 @@ import 'package:smart_fitness_assistant/common_widget/round_button.dart';
 import 'package:smart_fitness_assistant/core/widgets/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_textfield.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/views/auth/main_tab/ui/main_tab_view.dart';
 import 'package:smart_fitness_assistant/views/home/home_view.dart';
 import 'package:smart_fitness_assistant/views/auth/login/ui/widgets/complete_profile_view.dart';
 import 'package:flutter/material.dart';
@@ -74,7 +75,7 @@ class _LoginViewState extends State<LoginView> {
                     title: "Login",
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        navigateTo(context, const HomeView());
+                        navigateTo(context, const MainTabView());
                       }
                     },
                   ),

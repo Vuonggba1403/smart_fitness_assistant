@@ -29,20 +29,22 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   animated_toggle_switch: ^0.8.5
+  bloc: ^9.1.0
+  calendar_agenda:
+    path: dev_lib/calendar_agenda/
   carousel_slider: ^5.1.1
   cupertino_icons: ^1.0.8
   dotted_dashed_line: ^0.0.3
   fl_chart: ^1.1.1
   flutter:
     sdk: flutter
+  flutter_bloc: ^9.1.1
+  intl: ^0.18.1
   readmore: ^3.0.0
   simple_animation_progress_bar: ^1.9.2
   simple_circular_progress_bar: ^1.0.2
-  calendar_agenda:
-    path: dev_lib/calendar_agenda/
-  intl: ^0.18.1
 
-dependency_overrides: 
+dependency_overrides:
   intl: ^0.18.1
 
 dev_dependencies:
@@ -80,7 +82,6 @@ flutter:
           weight: 500
         - asset: assets/font/Poppins-Bold.ttf
           weight: 700
-  #
   #     fonts:
   #       - asset: fonts/TrajanPro.ttf
   #       - asset: fonts/TrajanPro_Bold.ttf

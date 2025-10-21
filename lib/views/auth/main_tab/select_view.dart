@@ -1,4 +1,5 @@
 import 'package:smart_fitness_assistant/common_widget/round_button.dart';
+import 'package:smart_fitness_assistant/core/widgets/naviga_to.dart';
 import 'package:smart_fitness_assistant/views/meal_planner/meal_planner_view.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/workout_tracker_view.dart';
 import 'package:flutter/material.dart';
@@ -21,12 +22,7 @@ class SelectView extends StatelessWidget {
             RoundButton(
               title: "Workout Tracker",
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const WorkoutTrackerView(),
-                  ),
-                );
+                navigateTo(context, WorkoutTrackerView());
               },
             ),
 
@@ -35,12 +31,7 @@ class SelectView extends StatelessWidget {
             RoundButton(
               title: "Meal Planner",
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const MealPlannerView(),
-                  ),
-                );
+                navigateTo(context, MealPlannerView());
               },
             ),
 
@@ -49,12 +40,7 @@ class SelectView extends StatelessWidget {
             RoundButton(
               title: "Sleep Tracker",
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const SleepTrackerView(),
-                  ),
-                );
+                navigateTo(context, SleepTrackerView());
               },
             ),
           ],

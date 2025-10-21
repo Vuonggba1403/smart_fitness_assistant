@@ -1,6 +1,6 @@
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/views/auth/login/ui/login_view.dart';
-import 'package:smart_fitness_assistant/views/auth/main_tab/main_tab_view.dart';
+import 'package:smart_fitness_assistant/views/auth/main_tab/ui/main_tab_view.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/views/splash/ui/started_view.dart';
 

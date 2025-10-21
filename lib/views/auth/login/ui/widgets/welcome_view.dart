@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import '../../../../../common_widget/round_button.dart';
-import '../../../main_tab/main_tab_view.dart';
+import '../../../main_tab/ui/main_tab_view.dart';
 
 class WelcomeView extends StatefulWidget {
   const WelcomeView({super.key});
