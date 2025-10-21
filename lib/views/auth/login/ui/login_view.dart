@@ -3,7 +3,7 @@ import 'package:smart_fitness_assistant/core/widgets/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_textfield.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/views/auth/main_tab/ui/main_tab_view.dart';
-import 'package:smart_fitness_assistant/views/home/home_view.dart';
+import 'package:smart_fitness_assistant/views/home/ui/home_view.dart';
 import 'package:smart_fitness_assistant/views/auth/login/ui/widgets/complete_profile_view.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/views/auth/login/ui/signup_view.dart';

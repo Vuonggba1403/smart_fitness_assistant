@@ -3,8 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_fitness_assistant/common_widget/tab_button.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/views/auth/main_tab/logic/cubit/main_tab_cubit.dart';
-import 'package:smart_fitness_assistant/views/auth/main_tab/select_view.dart';
-import '../../../home/home_view.dart';
+import 'package:smart_fitness_assistant/views/auth/main_tab/ui/select_view.dart';
+import '../../../home/ui/home_view.dart';
 import '../../../photo_progress/photo_progress_view.dart';
 import '../../../profile/profile_view.dart';
 

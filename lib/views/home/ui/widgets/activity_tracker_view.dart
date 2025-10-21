@@ -2,8 +2,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 
-import '../../common_widget/latest_activity_row.dart';
-import '../../common_widget/today_target_cell.dart';
+import '../../../../common_widget/latest_activity_row.dart';
+import '../../../../common_widget/today_target_cell.dart';
 
 class ActivityTrackerView extends StatefulWidget {
   const ActivityTrackerView({super.key});
