@@ -34,6 +34,7 @@ dependencies:
     path: dev_lib/calendar_agenda/
   carousel_slider: ^5.1.1
   cupertino_icons: ^1.0.8
+  delightful_toast: ^1.1.0
   dotted_dashed_line: ^0.0.3
   fl_chart: ^1.1.1
   flutter:
@@ -43,6 +44,7 @@ dependencies:
   readmore: ^3.0.0
   simple_animation_progress_bar: ^1.9.2
   simple_circular_progress_bar: ^1.0.2
+  
 
 dependency_overrides:
   intl: ^0.18.1

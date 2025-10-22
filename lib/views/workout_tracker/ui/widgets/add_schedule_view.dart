@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 
-import '../../core/functions/common.dart';
-import '../../common_widget/icon_title_next_row.dart';
-import '../../common_widget/round_button.dart';
+import '../../../../core/functions/common.dart';
+import '../../../../common_widget/icon_title_next_row.dart';
 
 class AddScheduleView extends StatefulWidget {
   final DateTime date;

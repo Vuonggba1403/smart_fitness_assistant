@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 
 import '../../../../core/functions/colo_extension.dart';
-import '../../../../common_widget/round_button.dart';
 
 class FinishedWorkoutView extends StatefulWidget {
   const FinishedWorkoutView({super.key});

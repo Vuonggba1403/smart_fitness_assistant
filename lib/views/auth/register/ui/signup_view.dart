@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:smart_fitness_assistant/common_widget/round_button.dart';
+import 'package:smart_fitness_assistant/core/widgets/naviga_to.dart';
+import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_textfield.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
-import 'package:smart_fitness_assistant/views/auth/login/ui/widgets/complete_profile_view.dart';
 import 'package:smart_fitness_assistant/views/auth/login/ui/login_view.dart';
 
+import 'widgets/complete_profile_view.dart';
 class SignUpView extends StatefulWidget {
   const SignUpView({super.key});
 
@@ -42,13 +43,9 @@ class _SignUpViewState extends State<SignUpView> {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  SizedBox(height: media.width * 0.05),
+
                   const RoundTextField(
-                    hintText: "First Name",
-                    iconPath: "assets/img/user_text.png",
-                  ),
-                  const RoundTextField(
-                    hintText: "Last Name",
+                    hintText: "UserName",
                     iconPath: "assets/img/user_text.png",
                   ),
                   const RoundTextField(
@@ -95,24 +92,10 @@ class _SignUpViewState extends State<SignUpView> {
                     title: "Register",
                     onPressed: () {
                       // 🔹 Validate form + check checkbox
-                      if (_formKey.currentState!.validate()) {
+                      if (_formKey.currentState!.validate() || _isChecked) {
                         if (_isChecked) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const CompleteProfileView(),
-                            ),
-                          );
-                        } else {
-                          // ⚠️ Thông báo yêu cầu tích checkbox
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                "You must accept Privacy Policy and Terms of Use",
-                              ),
-                            ),
-                          );
-                        }
+                          navigateTo(context, const CompleteProfileView());
+                        } else {}
                       }
                     },
                   ),
@@ -196,12 +179,7 @@ class _SignUpViewState extends State<SignUpView> {
                   // 🔹 Already have account
                   TextButton(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const LoginView(),
-                        ),
-                      );
+                      navigateTo(context, const LoginView());
                     },
                     child: Row(
                       mainAxisSize: MainAxisSize.min,

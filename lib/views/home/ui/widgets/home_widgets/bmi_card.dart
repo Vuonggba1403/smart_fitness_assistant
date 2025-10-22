@@ -1,7 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:smart_fitness_assistant/common_widget/round_button.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 
 class BMICard extends StatelessWidget {
   const BMICard({super.key});

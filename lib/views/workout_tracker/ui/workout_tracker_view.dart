@@ -1,11 +1,10 @@
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
-import 'package:smart_fitness_assistant/views/workout_tracker/workour_detail_view.dart';
+import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
+import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/workour_detail_view.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-
-import '../../common_widget/round_button.dart';
-import '../../common_widget/upcoming_workout_row.dart';
-import '../../common_widget/what_train_row.dart';
+import '../../../common_widget/upcoming_workout_row.dart';
+import '../../../common_widget/what_train_row.dart';
 
 class WorkoutTrackerView extends StatefulWidget {
   const WorkoutTrackerView({super.key});
@@ -268,7 +267,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                           ),
                         ),
                         SizedBox(
-                          width: 70,
+                          width: 80,
                           height: 25,
                           child: RoundButton(
                             title: "Check",

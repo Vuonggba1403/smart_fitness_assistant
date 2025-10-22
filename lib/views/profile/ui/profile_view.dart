@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_toggle_switch.dart';
-import '../../common_widget/round_button.dart';
-import '../../common_widget/setting_row.dart';
-import '../../common_widget/title_subtitle_cell.dart';
+import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
+import '../../../common_widget/setting_row.dart';
+import '../../../common_widget/title_subtitle_cell.dart';
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 
 class ProfileView extends StatefulWidget {

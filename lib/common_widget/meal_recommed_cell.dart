@@ -1,4 +1,5 @@
-import 'package:smart_fitness_assistant/common_widget/round_button.dart';
+import '../core/widgets/round_button.dart';
+
 import 'package:flutter/material.dart';
 import '../core/functions/colo_extension.dart';
 

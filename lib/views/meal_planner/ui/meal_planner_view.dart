@@ -1,11 +1,11 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
-import '../../common_widget/find_eat_cell.dart';
-import '../../common_widget/round_button.dart';
-import '../../common_widget/today_meal_row.dart';
-import 'meal_food_details_view.dart';
-import 'meal_schedule_view.dart';
+import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
+import '../../../common_widget/find_eat_cell.dart';
+import '../../../common_widget/today_meal_row.dart';
+import '../meal_food_details_view.dart';
+import '../meal_schedule_view.dart';
 
 class MealPlannerView extends StatefulWidget {
   const MealPlannerView({super.key});

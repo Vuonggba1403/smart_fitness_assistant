@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:readmore/readmore.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart'
     show TColor;
-import '../../common_widget/round_button.dart';
-import '../../common_widget/step_detail_row.dart';
+import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
+import '../../../../common_widget/step_detail_row.dart';
 
 class ExercisesStepDetails extends StatefulWidget {
   final Map eObj;

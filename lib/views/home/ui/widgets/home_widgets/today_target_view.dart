@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:smart_fitness_assistant/common_widget/round_button.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/activity_tracker_view.dart';
 
 class TodayTargetView extends StatelessWidget {

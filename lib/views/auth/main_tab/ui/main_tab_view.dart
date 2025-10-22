@@ -6,7 +6,7 @@ import 'package:smart_fitness_assistant/views/auth/main_tab/logic/cubit/main_tab
 import 'package:smart_fitness_assistant/views/auth/main_tab/ui/select_view.dart';
 import '../../../home/ui/home_view.dart';
 import '../../../photo_progress/photo_progress_view.dart';
-import '../../../profile/profile_view.dart';
+import '../../../profile/ui/profile_view.dart';
 
 class MainTabView extends StatelessWidget {
   const MainTabView({super.key});
@@ -46,7 +46,7 @@ class MainTabView extends StatelessWidget {
                       BoxShadow(color: Colors.black12, blurRadius: 2),
                     ],
                   ),
-                  child: Icon(Icons.search, color: TColor.white, size: 35),
+                  child: Icon(Icons.message, color: TColor.white, size: 35),
                 ),
               ),
             ),

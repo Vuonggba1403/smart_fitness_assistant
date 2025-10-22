@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
-import '../../common_widget/round_button.dart';
+import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'comparison_view.dart';
 
 class PhotoProgressView extends StatefulWidget {

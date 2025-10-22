@@ -1,5 +1,4 @@
 import 'package:dotted_dashed_line/dotted_dashed_line.dart';
-import 'package:smart_fitness_assistant/common_widget/round_button.dart';
 import 'package:smart_fitness_assistant/common_widget/workout_row.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';

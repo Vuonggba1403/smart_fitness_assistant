@@ -1,7 +1,7 @@
 import 'package:smart_fitness_assistant/common_widget/icon_title_next_row.dart';
-import 'package:smart_fitness_assistant/common_widget/round_button.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/views/photo_progress/result_view.dart';
 
 class ComparisonView extends StatefulWidget {

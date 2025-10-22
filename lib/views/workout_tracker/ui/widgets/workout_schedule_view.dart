@@ -2,8 +2,8 @@ import 'package:calendar_agenda/calendar_agenda.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
-import '../../core/functions/common.dart';
-import '../../common_widget/round_button.dart';
+import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
+import '../../../../core/functions/common.dart';
 import 'add_schedule_view.dart';
 
 class WorkoutScheduleView extends StatefulWidget {

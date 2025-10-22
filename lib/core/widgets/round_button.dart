@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 
 enum RoundButtonType { bgGradient, bgSGradient, textGradient }
 
