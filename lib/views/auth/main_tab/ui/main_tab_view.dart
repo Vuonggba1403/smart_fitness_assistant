@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_fitness_assistant/core/widgets/tab_button.dart';
-import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/views/auth/main_tab/logic/cubit/main_tab_cubit.dart';
-import 'package:smart_fitness_assistant/views/auth/main_tab/ui/select_view.dart';
 import '../../../home/ui/home_view.dart';
 import '../../../photo_progress/ui/photo_progress_view.dart';
 import '../../../profile/ui/profile_view.dart';
+import '../ui/select_view.dart';
 
 class MainTabView extends StatelessWidget {
   const MainTabView({super.key});
@@ -19,18 +18,26 @@ class MainTabView extends StatelessWidget {
       const PhotoProgressView(),
       const ProfileView(),
     ];
+
     return BlocProvider(
       create: (_) => MainTabCubit(),
-
       child: BlocBuilder<MainTabCubit, MainTabState>(
         builder: (context, state) {
           final cubit = context.watch<MainTabCubit>();
+
+          // 🟢 Lấy theme hiện tại
+          final theme = Theme.of(context);
+          final isDark = theme.brightness == Brightness.dark;
+
           return Scaffold(
-            backgroundColor: TColor.white,
+            // 🟢 Dùng màu theo theme
+            backgroundColor: theme.scaffoldBackgroundColor,
+
             body: PageStorage(
               bucket: PageStorageBucket(),
               child: pages[cubit.currentIndex],
             ),
+
             floatingActionButtonLocation:
                 FloatingActionButtonLocation.centerDocked,
             floatingActionButton: SizedBox(
@@ -40,26 +47,39 @@ class MainTabView extends StatelessWidget {
                 onTap: () {},
                 child: Container(
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(colors: TColor.primaryG),
+                    gradient: LinearGradient(
+                      colors: isDark
+                          ? [Colors.deepPurple, Colors.indigo]
+                          : [Colors.blue, Colors.cyan],
+                    ),
                     borderRadius: BorderRadius.circular(35),
                     boxShadow: const [
-                      BoxShadow(color: Colors.black12, blurRadius: 2),
+                      BoxShadow(color: Colors.black26, blurRadius: 4),
                     ],
                   ),
-                  child: Icon(Icons.message, color: TColor.white, size: 35),
+                  child: Icon(
+                    Icons.message,
+                    color: isDark ? Colors.white : Colors.black,
+                    size: 35,
+                  ),
                 ),
               ),
             ),
+
+            // 🟢 Bottom bar đổi màu theo theme
             bottomNavigationBar: BottomAppBar(
+              color: theme.bottomAppBarTheme.color ?? theme.cardColor,
               child: Container(
                 height: kToolbarHeight,
                 decoration: BoxDecoration(
-                  color: TColor.white,
-                  boxShadow: const [
+                  color: theme.cardColor,
+                  boxShadow: [
                     BoxShadow(
-                      color: Colors.black12,
+                      color: isDark
+                          ? Colors.white10
+                          : Colors.black12, // khác giữa 2 theme
                       blurRadius: 2,
-                      offset: Offset(0, -2),
+                      offset: const Offset(0, -2),
                     ),
                   ],
                 ),

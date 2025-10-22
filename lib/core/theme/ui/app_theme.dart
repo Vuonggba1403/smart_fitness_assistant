@@ -9,11 +9,6 @@ class AppTheme {
       foregroundColor: Colors.black,
       elevation: 0,
     ),
-    colorScheme: const ColorScheme.light(
-      primary: Colors.blue,
-      secondary: Colors.deepPurple,
-    ),
-    textTheme: const TextTheme(bodyMedium: TextStyle(color: Colors.black)),
   );
 
   static final darkTheme = ThemeData(
@@ -24,10 +19,5 @@ class AppTheme {
       foregroundColor: Colors.white,
       elevation: 0,
     ),
-    colorScheme: const ColorScheme.dark(
-      primary: Colors.blue,
-      secondary: Colors.deepPurple,
-    ),
-    textTheme: const TextTheme(bodyMedium: TextStyle(color: Colors.white)),
   );
 }
