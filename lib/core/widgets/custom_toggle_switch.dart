@@ -29,6 +29,7 @@ class CustomToggleSwitch extends StatelessWidget {
       onTap: (val) => onChanged(!value),
       iconsTappable: false,
       wrapperBuilder: (context, global, child) {
+        final isActive = value;
         return Stack(
           alignment: Alignment.center,
           children: [
@@ -38,9 +39,16 @@ class CustomToggleSwitch extends StatelessWidget {
               height: 30.0,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: TColor.secondaryG, // gradient màu
-                  ),
+                  border: Border.all(color: Colors.grey, width: 1.0),
+                  gradient: isActive
+                      ? LinearGradient(
+                          colors: TColor.secondaryG,
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        )
+                      : null,
+                  color: isActive ? null : TColor.white, // trắng khi tắt
+
                   borderRadius: const BorderRadius.all(Radius.circular(50.0)),
                 ),
               ),
