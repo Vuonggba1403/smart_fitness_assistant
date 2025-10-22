@@ -1,7 +1,7 @@
-import '../core/functions/colo_extension.dart';
+import '../functions/colo_extension.dart';
 import 'package:flutter/material.dart';
 
-import '../core/functions/common.dart';
+import '../functions/common.dart';
 
 class TodayMealRow extends StatelessWidget {
   final Map mObj;

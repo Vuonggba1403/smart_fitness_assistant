@@ -3,8 +3,8 @@ import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/workour_detail_view.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import '../../../common_widget/upcoming_workout_row.dart';
-import '../../../common_widget/what_train_row.dart';
+import '../../../core/widgets/upcoming_workout_row.dart';
+import '../../../core/widgets/what_train_row.dart';
 
 class WorkoutTrackerView extends StatefulWidget {
   const WorkoutTrackerView({super.key});

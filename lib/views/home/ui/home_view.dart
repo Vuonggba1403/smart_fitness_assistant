@@ -1,12 +1,12 @@
 import 'package:dotted_dashed_line/dotted_dashed_line.dart';
-import 'package:smart_fitness_assistant/common_widget/workout_row.dart';
+import 'package:smart_fitness_assistant/core/widgets/workout_row.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:simple_animation_progress_bar/simple_animation_progress_bar.dart';
 import 'package:simple_circular_progress_bar/simple_circular_progress_bar.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
-import 'package:smart_fitness_assistant/core/widgets/naviga_to.dart';
+import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/home_widgets/bmi_card.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/home_widgets/lastest_workout_view.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/home_widgets/today_target_view.dart';

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:simple_animation_progress_bar/simple_animation_progress_bar.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
-import '../../core/functions/common.dart';
+import '../../../../core/functions/common.dart';
 
 class ResultView extends StatefulWidget {
   final DateTime date1;

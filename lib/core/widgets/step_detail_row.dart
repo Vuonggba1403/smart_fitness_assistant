@@ -1,18 +1,24 @@
 import 'package:dotted_dashed_line/dotted_dashed_line.dart';
 import 'package:flutter/material.dart';
+import '../functions/colo_extension.dart';
 
-import '../core/functions/colo_extension.dart';
-
-class FoodStepDetailRow extends StatelessWidget {
+class StepDetailRow extends StatelessWidget {
   final Map sObj;
   final bool isLast;
-  const FoodStepDetailRow({super.key, required this.sObj, this.isLast = false});
+  const StepDetailRow({super.key, required this.sObj, this.isLast = false});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        SizedBox(
+          width: 25,
+          child: Text(
+            sObj["no"].toString(),
+            style: TextStyle(color: TColor.secondaryColor1, fontSize: 14),
+          ),
+        ),
         Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -36,7 +42,7 @@ class FoodStepDetailRow extends StatelessWidget {
             ),
             if (!isLast)
               DottedDashedLine(
-                height: 50,
+                height: 80,
                 width: 0,
                 dashColor: TColor.secondaryColor1,
                 axis: Axis.vertical,
@@ -50,12 +56,8 @@ class FoodStepDetailRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Step ${sObj["no"].toString()}",
-                style: TextStyle(
-                  color: TColor.black,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
+                sObj["title"].toString(),
+                style: TextStyle(color: TColor.black, fontSize: 14),
               ),
               Text(
                 sObj["detail"].toString(),

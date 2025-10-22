@@ -1,19 +1,19 @@
-import '../core/widgets/round_button.dart';
-
 import 'package:flutter/material.dart';
-import '../core/functions/colo_extension.dart';
 
-class MealRecommendCell extends StatelessWidget {
+import '../functions/colo_extension.dart';
+import 'round_button.dart';
+
+class FindEatCell extends StatelessWidget {
   final Map fObj;
   final int index;
-  const MealRecommendCell({super.key, required this.index, required this.fObj});
+  const FindEatCell({super.key, required this.index, required this.fObj});
 
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
     bool isEvent = index % 2 == 0;
     return Container(
-      margin: const EdgeInsets.all(5),
+      margin: const EdgeInsets.all(8),
       width: media.width * 0.5,
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -27,17 +27,26 @@ class MealRecommendCell extends StatelessWidget {
                   TColor.secondaryColor1.withOpacity(0.5),
                 ],
         ),
-        borderRadius: BorderRadius.circular(25),
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(25),
+          topRight: Radius.circular(75),
+          bottomLeft: Radius.circular(25),
+          bottomRight: Radius.circular(25),
+        ),
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Image.asset(
-            fObj["image"].toString(),
-            width: media.width * 0.3,
-            height: media.width * 0.25,
-            fit: BoxFit.contain,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Image.asset(
+                fObj["image"].toString(),
+                width: media.width * 0.3,
+                height: media.width * 0.25,
+                fit: BoxFit.contain,
+              ),
+            ],
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -53,7 +62,7 @@ class MealRecommendCell extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15),
             child: Text(
-              "${fObj["size"]} | ${fObj["time"]} | ${fObj["kcal"]}",
+              fObj["number"],
               style: TextStyle(color: TColor.gray, fontSize: 12),
             ),
           ),
@@ -62,13 +71,13 @@ class MealRecommendCell extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 15),
             child: SizedBox(
               width: 90,
-              height: 35,
+              height: 25,
               child: RoundButton(
                 fontSize: 12,
                 type: isEvent
                     ? RoundButtonType.bgGradient
                     : RoundButtonType.bgSGradient,
-                title: "View",
+                title: "Select",
                 onPressed: () {},
               ),
             ),

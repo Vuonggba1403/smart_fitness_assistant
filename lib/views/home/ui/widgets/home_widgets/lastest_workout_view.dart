@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:smart_fitness_assistant/common_widget/workout_row.dart';
+import 'package:smart_fitness_assistant/core/widgets/workout_row.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import '../finished_workout_view.dart';
 

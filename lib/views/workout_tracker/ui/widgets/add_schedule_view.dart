@@ -4,7 +4,7 @@ import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 
 import '../../../../core/functions/common.dart';
-import '../../../../common_widget/icon_title_next_row.dart';
+import '../../../../core/widgets/icon_title_next_row.dart';
 
 class AddScheduleView extends StatefulWidget {
   final DateTime date;

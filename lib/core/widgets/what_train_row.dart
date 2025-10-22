@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../core/functions/colo_extension.dart';
-import '../core/widgets/round_button.dart';
+import '../functions/colo_extension.dart';
+import 'round_button.dart';
 
 class WhatTrainRow extends StatelessWidget {
   final Map wObj;

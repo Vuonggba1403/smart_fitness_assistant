@@ -1,9 +1,9 @@
-import 'package:smart_fitness_assistant/common_widget/meal_recommed_cell.dart';
+import 'package:smart_fitness_assistant/core/widgets/meal_recommed_cell.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
-import '../../common_widget/meal_category_cell.dart';
-import '../../common_widget/popular_meal_row.dart';
-import '../../common_widget/today_meal_row.dart';
+import '../../../../core/widgets/meal_category_cell.dart';
+import '../../../../core/widgets/popular_meal_row.dart';
+import '../../../../core/widgets/today_meal_row.dart';
 import 'food_info_details_view.dart';
 
 class MealFoodDetailsView extends StatefulWidget {

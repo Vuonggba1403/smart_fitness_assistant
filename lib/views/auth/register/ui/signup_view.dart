@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:smart_fitness_assistant/core/widgets/naviga_to.dart';
+import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_textfield.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/views/auth/login/ui/login_view.dart';
 
 import 'widgets/complete_profile_view.dart';
+
 class SignUpView extends StatefulWidget {
   const SignUpView({super.key});
 

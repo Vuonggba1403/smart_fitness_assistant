@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:simple_animation_progress_bar/simple_animation_progress_bar.dart';
-import '../core/functions/colo_extension.dart';
+import '../functions/colo_extension.dart';
 
 class NutritionRow extends StatelessWidget {
   final Map nObj;

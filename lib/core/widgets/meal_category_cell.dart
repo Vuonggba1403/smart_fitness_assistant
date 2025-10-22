@@ -1,7 +1,7 @@
-import '../core/widgets/round_button.dart';
+import 'round_button.dart';
 
 import 'package:flutter/material.dart';
-import '../core/functions/colo_extension.dart';
+import '../functions/colo_extension.dart';
 
 class MealCategoryCell extends StatelessWidget {
   final Map cObj;

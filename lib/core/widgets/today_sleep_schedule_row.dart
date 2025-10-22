@@ -1,9 +1,9 @@
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
-import '../core/functions/colo_extension.dart';
+import '../functions/colo_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_toggle_switch.dart';
 
-import '../core/functions/common.dart';
+import '../functions/common.dart';
 
 class TodaySleepScheduleRow extends StatefulWidget {
   final Map sObj;

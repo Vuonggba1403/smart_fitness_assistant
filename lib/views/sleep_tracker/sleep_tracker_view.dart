@@ -4,7 +4,7 @@ import 'package:smart_fitness_assistant/views/sleep_tracker/sleep_schedule_view.
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import '../../core/functions/colo_extension.dart';
-import '../../common_widget/today_sleep_schedule_row.dart';
+import '../../core/widgets/today_sleep_schedule_row.dart';
 
 class SleepTrackerView extends StatefulWidget {
   const SleepTrackerView({super.key});

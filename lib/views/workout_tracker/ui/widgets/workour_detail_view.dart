@@ -1,11 +1,11 @@
-import 'package:smart_fitness_assistant/common_widget/icon_title_next_row.dart';
+import 'package:smart_fitness_assistant/core/widgets/icon_title_next_row.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/exercises_stpe_details.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/workout_schedule_view.dart';
 
-import '../../../../common_widget/exercises_set_section.dart';
+import '../../../../core/widgets/exercises_set_section.dart';
 
 class WorkoutDetailView extends StatefulWidget {
   final Map dObj;
