@@ -80,6 +80,7 @@ class _HomeViewState extends State<HomeView> {
     final theme = Theme.of(context); // 🌙 Lấy theme động
     final textColor = theme.textTheme.bodyMedium?.color; // Màu text chính
     final cardColor = theme.cardColor; // Màu nền cho các card
+    final shadow = theme.shadowColor; // Màu shadow động
 
     return Scaffold(
       // 🌙 Màu nền động
@@ -157,9 +158,7 @@ class _HomeViewState extends State<HomeView> {
                         decoration: BoxDecoration(
                           color: cardColor,
                           borderRadius: BorderRadius.circular(25),
-                          boxShadow: const [
-                            BoxShadow(color: Colors.black12, blurRadius: 2),
-                          ],
+                          boxShadow: [BoxShadow(color: shadow, blurRadius: 2)],
                         ),
                         child: Row(
                           children: [
@@ -333,8 +332,8 @@ class _HomeViewState extends State<HomeView> {
                             decoration: BoxDecoration(
                               color: cardColor,
                               borderRadius: BorderRadius.circular(25),
-                              boxShadow: const [
-                                BoxShadow(color: Colors.black12, blurRadius: 2),
+                              boxShadow: [
+                                BoxShadow(color: shadow, blurRadius: 2),
                               ],
                             ),
                             child: Column(
@@ -393,8 +392,8 @@ class _HomeViewState extends State<HomeView> {
                             decoration: BoxDecoration(
                               color: cardColor,
                               borderRadius: BorderRadius.circular(25),
-                              boxShadow: const [
-                                BoxShadow(color: Colors.black12, blurRadius: 2),
+                              boxShadow: [
+                                BoxShadow(color: shadow, blurRadius: 2),
                               ],
                             ),
                             child: Column(

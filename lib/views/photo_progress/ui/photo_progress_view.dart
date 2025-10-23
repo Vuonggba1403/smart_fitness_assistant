@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'widgets/comparison_view.dart';
 
@@ -36,9 +37,13 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
+    final theme = Theme.of(context); // 🌙 Lấy theme động
+    final textColor = theme.textTheme.bodyMedium?.color; // Màu text chính
+    final cardColor = theme.cardColor; // Màu nền cho các card
+    final shadow = theme.shadowColor; // Màu shadow
     return Scaffold(
       appBar: CustomAppBar(title: "Progress Photo", showBackButton: false),
-      backgroundColor: TColor.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -62,7 +67,7 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
                       children: [
                         Container(
                           decoration: BoxDecoration(
-                            color: TColor.white,
+                            color: cardColor,
                             borderRadius: BorderRadius.circular(30),
                           ),
                           width: 50,
@@ -141,10 +146,7 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
                             const SizedBox(height: 15),
                             Text(
                               "Track Your Progress Each\nMonth With Photo",
-                              style: TextStyle(
-                                color: TColor.black,
-                                fontSize: 12,
-                              ),
+                              style: TextStyle(color: textColor, fontSize: 12),
                             ),
                             const Spacer(),
                             SizedBox(
@@ -183,7 +185,7 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
                       Text(
                         "Compare my Photo",
                         style: TextStyle(
-                          color: TColor.black,
+                          color: textColor,
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),
@@ -197,12 +199,7 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
                           fontSize: 12,
                           fontWeight: FontWeight.w400,
                           onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const ComparisonView(),
-                              ),
-                            );
+                            navigateTo(context, const ComparisonView());
                           },
                         ),
                       ),
@@ -220,17 +217,13 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
                       Text(
                         "Gallery",
                         style: TextStyle(
-                          color: TColor.black,
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                       TextButton(
                         onPressed: () {},
-                        child: Text(
-                          "See more",
-                          style: TextStyle(color: TColor.gray, fontSize: 12),
-                        ),
+                        child: Text("See more", style: TextStyle(fontSize: 12)),
                       ),
                     ],
                   ),
