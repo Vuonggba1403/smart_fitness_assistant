@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
-import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/theme/logic/cubit/theme_cubit.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_toggle_switch.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/views/profile/logic/cubit/profile_cubit.dart';
-import '../../../core/widgets/setting_row.dart';
-import '../../../core/widgets/title_subtitle_cell.dart';
+import 'widgets/setting_row.dart';
+import 'widgets/title_subtitle_cell.dart';
 
 class ProfileView extends StatefulWidget {
   const ProfileView({super.key});
@@ -57,10 +56,11 @@ class _ProfileBody extends StatelessWidget {
       {"image": "assets/img/p_privacy.png", "name": "Privacy Policy"},
       {"image": "assets/img/p_setting.png", "name": "Setting"},
     ];
+    final theme = Theme.of(context); // 🌙 Lấy theme động
 
     return Scaffold(
       appBar: CustomAppBar(title: "Profile", showBackButton: false),
-      backgroundColor: TColor.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 25),
         child: Column(
@@ -79,20 +79,24 @@ class _ProfileBody extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 15),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         "Stefani Wong",
                         style: TextStyle(
+                          color: theme.textTheme.bodyMedium?.color,
                           fontWeight: FontWeight.w500,
                           fontSize: 14,
                         ),
                       ),
                       Text(
                         "Lose a Fat Program",
-                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: theme.textTheme.bodySmall?.color,
+                        ),
                       ),
                     ],
                   ),
@@ -133,7 +137,7 @@ class _ProfileBody extends StatelessWidget {
             const SizedBox(height: 25),
 
             /// Account section
-            _buildSection("Account", accountArr),
+            _buildSection(context, "Account", accountArr),
 
             const SizedBox(height: 25),
 
@@ -155,18 +159,21 @@ class _ProfileBody extends StatelessWidget {
             const SizedBox(height: 25),
 
             /// Other section
-            _buildSection("Other", otherArr),
+            _buildSection(context, "Other", otherArr),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSection(String title, List<Map> items) {
+  Widget _buildSection(BuildContext context, String title, List<Map> items) {
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color;
+    final cardColor = theme.cardColor;
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
       decoration: BoxDecoration(
-        color: TColor.white,
+        color: cardColor,
         borderRadius: BorderRadius.circular(15),
         boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 2)],
       ),
@@ -176,7 +183,7 @@ class _ProfileBody extends StatelessWidget {
           Text(
             title,
             style: TextStyle(
-              color: TColor.black,
+              color: textColor,
               fontSize: 16,
               fontWeight: FontWeight.w700,
             ),
@@ -207,11 +214,14 @@ class _ProfileBody extends StatelessWidget {
   ) {
     final profileCubit = context.read<ProfileCubit>();
     final themeCubit = context.read<ThemeCubit>();
+    final theme = Theme.of(context);
+    final cardColor = theme.cardColor;
+    final textColor = theme.textTheme.bodyMedium?.color;
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
       decoration: BoxDecoration(
-        color: TColor.white,
+        color: cardColor,
         borderRadius: BorderRadius.circular(15),
         boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 2)],
       ),
@@ -221,26 +231,25 @@ class _ProfileBody extends StatelessWidget {
           Text(
             "Notification & DarkMode",
             style: TextStyle(
-              color: TColor.black,
+              color: textColor,
               fontSize: 16,
               fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 8),
-
-          // 🔔 Notification toggle giữ nguyên
           Row(
             children: [
               Image.asset(
                 "assets/img/p_notification.png",
                 height: 15,
                 width: 15,
+                color: textColor,
               ),
               const SizedBox(width: 15),
-              const Expanded(
+              Expanded(
                 child: Text(
                   "Pop-up Notification",
-                  style: TextStyle(fontSize: 12),
+                  style: TextStyle(fontSize: 12, color: textColor),
                 ),
               ),
               CustomToggleSwitch(
@@ -249,21 +258,24 @@ class _ProfileBody extends StatelessWidget {
               ),
             ],
           ),
-
-          // 🌙 Dark mode toggle
           Row(
             children: [
-              Image.asset("assets/img/darkmode.png", height: 15, width: 15),
+              Image.asset(
+                "assets/img/darkmode.png",
+                height: 15,
+                width: 15,
+                color: textColor,
+              ),
               const SizedBox(width: 15),
-              const Expanded(
-                child: Text("Dark Mode", style: TextStyle(fontSize: 12)),
+              Expanded(
+                child: Text(
+                  "Dark Mode",
+                  style: TextStyle(fontSize: 12, color: textColor),
+                ),
               ),
               CustomToggleSwitch(
                 value: isDarkMode,
-                onChanged: (value) {
-                  // ✅ Chỉ ThemeCubit điều khiển dark mode toàn app
-                  themeCubit.toggleTheme(value);
-                },
+                onChanged: themeCubit.toggleTheme,
               ),
             ],
           ),

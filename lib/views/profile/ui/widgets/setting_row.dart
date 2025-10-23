@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../functions/colo_extension.dart';
 
 class SettingRow extends StatelessWidget {
   final String icon;
@@ -14,6 +13,8 @@ class SettingRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context); // 🌙 Lấy theme động
+    final textColor = theme.textTheme.bodyMedium?.color; // Màu text chính
     return InkWell(
       onTap: onPressed,
       child: SizedBox(
@@ -26,7 +27,7 @@ class SettingRow extends StatelessWidget {
             Expanded(
               child: Text(
                 title,
-                style: TextStyle(color: TColor.black, fontSize: 12),
+                style: TextStyle(color: textColor, fontSize: 12),
               ),
             ),
             Image.asset(

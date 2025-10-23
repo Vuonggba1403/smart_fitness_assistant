@@ -15,8 +15,11 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context); // 🌙 Lấy theme động
+    final textColor = theme.textTheme.bodyMedium?.color; // Màu text chính
+    final cardColor = theme.cardColor; // Màu nền cho các card
     return AppBar(
-      backgroundColor: TColor.white,
+      backgroundColor: cardColor,
       centerTitle: true,
       elevation: 0,
       leading: showBackButton
@@ -30,7 +33,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 width: 40,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: TColor.lightGray,
+                  color: textColor,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Image.asset(
@@ -44,11 +47,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           : const SizedBox(), // 🔹 Không hiển thị nếu false
       title: Text(
         title,
-        style: TextStyle(
-          color: TColor.black,
-          fontSize: 16,
-          fontWeight: FontWeight.w700,
-        ),
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
       ),
       actions: [
         InkWell(

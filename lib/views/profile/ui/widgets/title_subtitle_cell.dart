@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../functions/colo_extension.dart';
+import '../../../../core/functions/colo_extension.dart';
 
 class TitleSubtitleCell extends StatelessWidget {
   final String title;
@@ -12,10 +12,12 @@ class TitleSubtitleCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context); // 🌙 Lấy theme động
+    final cardColor = theme.cardColor; // Màu nền cho các card
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
       decoration: BoxDecoration(
-        color: TColor.white,
+        color: cardColor,
         borderRadius: BorderRadius.circular(15),
         boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 2)],
       ),
@@ -39,7 +41,7 @@ class TitleSubtitleCell extends StatelessWidget {
               ),
             ),
           ),
-          Text(subtitle, style: TextStyle(color: TColor.gray, fontSize: 12)),
+          Text(subtitle, style: TextStyle(fontSize: 12)),
         ],
       ),
     );
