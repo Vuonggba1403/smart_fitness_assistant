@@ -6,7 +6,6 @@ import 'package:smart_fitness_assistant/core/theme/logic/cubit/theme_cubit.dart'
 import 'package:smart_fitness_assistant/core/widgets/custom_toggle_switch.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/views/profile/logic/cubit/profile_cubit.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/widgets/setting_row.dart';
 import '../../../core/widgets/title_subtitle_cell.dart';
 
@@ -111,6 +110,7 @@ class _ProfileBody extends StatelessWidget {
                 ),
               ],
             ),
+
             const SizedBox(height: 15),
 
             /// Height / Weight / Age
@@ -137,7 +137,7 @@ class _ProfileBody extends StatelessWidget {
 
             const SizedBox(height: 25),
 
-            /// Notification & Dark Mode section
+            /// Notification & Dark Mode
             BlocBuilder<ThemeCubit, ThemeState>(
               builder: (context, themeState) {
                 return BlocBuilder<ProfileCubit, ProfileState>(
@@ -205,8 +205,9 @@ class _ProfileBody extends StatelessWidget {
     ProfileState state,
     bool isDarkMode,
   ) {
-    final cubit = context.read<ProfileCubit>();
+    final profileCubit = context.read<ProfileCubit>();
     final themeCubit = context.read<ThemeCubit>();
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
       decoration: BoxDecoration(
@@ -218,7 +219,7 @@ class _ProfileBody extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Notification && DarkMode",
+            "Notification & DarkMode",
             style: TextStyle(
               color: TColor.black,
               fontSize: 16,
@@ -226,43 +227,43 @@ class _ProfileBody extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          Column(
+
+          // 🔔 Notification toggle giữ nguyên
+          Row(
             children: [
-              Row(
-                children: [
-                  Image.asset(
-                    "assets/img/p_notification.png",
-                    height: 15,
-                    width: 15,
-                  ),
-                  const SizedBox(width: 15),
-                  const Expanded(
-                    child: Text(
-                      "Pop-up Notification",
-                      style: TextStyle(fontSize: 12),
-                    ),
-                  ),
-                  CustomToggleSwitch(
-                    value: state.isNotificationEnabled,
-                    onChanged: cubit.toggleNotification,
-                  ),
-                ],
+              Image.asset(
+                "assets/img/p_notification.png",
+                height: 15,
+                width: 15,
               ),
-              Row(
-                children: [
-                  Image.asset("assets/img/darkmode.png", height: 15, width: 15),
-                  const SizedBox(width: 15),
-                  const Expanded(
-                    child: Text("Dark Mode", style: TextStyle(fontSize: 12)),
-                  ),
-                  CustomToggleSwitch(
-                    value: isDarkMode,
-                    onChanged: (value) {
-                      cubit.toggleDarkMode(value);
-                      themeCubit.toggleTheme(value);
-                    },
-                  ),
-                ],
+              const SizedBox(width: 15),
+              const Expanded(
+                child: Text(
+                  "Pop-up Notification",
+                  style: TextStyle(fontSize: 12),
+                ),
+              ),
+              CustomToggleSwitch(
+                value: state.isNotificationEnabled,
+                onChanged: profileCubit.toggleNotification,
+              ),
+            ],
+          ),
+
+          // 🌙 Dark mode toggle
+          Row(
+            children: [
+              Image.asset("assets/img/darkmode.png", height: 15, width: 15),
+              const SizedBox(width: 15),
+              const Expanded(
+                child: Text("Dark Mode", style: TextStyle(fontSize: 12)),
+              ),
+              CustomToggleSwitch(
+                value: isDarkMode,
+                onChanged: (value) {
+                  // ✅ Chỉ ThemeCubit điều khiển dark mode toàn app
+                  themeCubit.toggleTheme(value);
+                },
               ),
             ],
           ),
