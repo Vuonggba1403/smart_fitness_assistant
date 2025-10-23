@@ -1,4 +1,4 @@
-import '../functions/colo_extension.dart';
+import '../../../../../core/functions/colo_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:simple_animation_progress_bar/simple_animation_progress_bar.dart';
 
@@ -9,11 +9,14 @@ class WorkoutRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
+    final theme = Theme.of(context); // 🌙 Lấy theme động
+    final textColor = theme.textTheme.bodyMedium?.color; // Màu text chính
+    final cardColor = theme.cardColor; // Màu nền cho các card
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
       padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
       decoration: BoxDecoration(
-        color: TColor.white,
+        color: cardColor,
         borderRadius: BorderRadius.circular(20),
         boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 2)],
       ),
@@ -36,12 +39,12 @@ class WorkoutRow extends StatelessWidget {
               children: [
                 Text(
                   wObj["name"].toString(),
-                  style: TextStyle(color: TColor.black, fontSize: 12),
+                  style: TextStyle(color: textColor, fontSize: 12),
                 ),
 
                 Text(
                   "${wObj["kcal"].toString()} Calories Burn | ${wObj["time"].toString()}minutes",
-                  style: TextStyle(color: TColor.gray, fontSize: 10),
+                  style: TextStyle(color: textColor, fontSize: 10),
                 ),
 
                 const SizedBox(height: 4),

@@ -1,5 +1,4 @@
 import 'package:dotted_dashed_line/dotted_dashed_line.dart';
-import 'package:smart_fitness_assistant/core/widgets/workout_row.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,8 +11,6 @@ import 'package:smart_fitness_assistant/views/home/ui/widgets/home_widgets/laste
 import 'package:smart_fitness_assistant/views/home/ui/widgets/home_widgets/today_target_view.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/home_widgets/workout_progress_view.dart';
 import '../../../core/functions/colo_extension.dart';
-import 'widgets/activity_tracker_view.dart';
-import 'widgets/finished_workout_view.dart';
 import 'widgets/notification_view.dart';
 import 'widgets/home_widgets/heart_rate_view.dart';
 import 'widgets/home_widgets/workout_progress_header.dart';
@@ -80,33 +77,13 @@ class _HomeViewState extends State<HomeView> {
 
   Widget _buildHomeScaffold(BuildContext context, HomeLoaded state) {
     var media = MediaQuery.of(context).size;
-
-    final lineBarsData = [
-      LineChartBarData(
-        showingIndicators: state.showingTooltipOnSpots,
-        spots: allSpots,
-        isCurved: false,
-        barWidth: 3,
-        belowBarData: BarAreaData(
-          show: true,
-          gradient: LinearGradient(
-            colors: [
-              TColor.primaryColor2.withOpacity(0.4),
-              TColor.primaryColor1.withOpacity(0.1),
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        dotData: FlDotData(show: false),
-        gradient: LinearGradient(colors: TColor.primaryG),
-      ),
-    ];
-
-    final tooltipsOnBar = lineBarsData[0];
+    final theme = Theme.of(context); // 🌙 Lấy theme động
+    final textColor = theme.textTheme.bodyMedium?.color; // Màu text chính
+    final cardColor = theme.cardColor; // Màu nền cho các card
 
     return Scaffold(
-      backgroundColor: TColor.white,
+      // 🌙 Màu nền động
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SingleChildScrollView(
         child: SafeArea(
           child: Padding(
@@ -122,12 +99,12 @@ class _HomeViewState extends State<HomeView> {
                       children: [
                         Text(
                           "Welcome Back,",
-                          style: TextStyle(color: TColor.gray, fontSize: 12),
+                          style: TextStyle(color: textColor, fontSize: 12),
                         ),
                         Text(
                           "Stefani Wong",
                           style: TextStyle(
-                            color: TColor.black,
+                            color: textColor,
                             fontSize: 20,
                             fontWeight: FontWeight.w700,
                           ),
@@ -142,12 +119,14 @@ class _HomeViewState extends State<HomeView> {
                         "assets/img/notification_active.png",
                         width: 25,
                         height: 25,
+                        color: textColor,
                         fit: BoxFit.fitHeight,
                       ),
                     ),
                   ],
                 ),
                 SizedBox(height: media.width * 0.05),
+                //BMI
                 BMICard(),
                 SizedBox(height: media.width * 0.05),
                 TodayTargetView(),
@@ -155,7 +134,7 @@ class _HomeViewState extends State<HomeView> {
                 Text(
                   "Activity Status",
                   style: TextStyle(
-                    color: TColor.black,
+                    color: textColor,
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                   ),
@@ -176,7 +155,7 @@ class _HomeViewState extends State<HomeView> {
                           horizontal: 20,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: cardColor,
                           borderRadius: BorderRadius.circular(25),
                           boxShadow: const [
                             BoxShadow(color: Colors.black12, blurRadius: 2),
@@ -208,7 +187,7 @@ class _HomeViewState extends State<HomeView> {
                                   Text(
                                     "Water Intake",
                                     style: TextStyle(
-                                      color: TColor.black,
+                                      color: textColor,
                                       fontSize: 12,
                                       fontWeight: FontWeight.w700,
                                     ),
@@ -232,7 +211,7 @@ class _HomeViewState extends State<HomeView> {
                                     child: Text(
                                       "4 Liters",
                                       style: TextStyle(
-                                        color: TColor.white.withOpacity(0.7),
+                                        color: textColor,
                                         fontWeight: FontWeight.w700,
                                         fontSize: 14,
                                       ),
@@ -352,7 +331,7 @@ class _HomeViewState extends State<HomeView> {
                               horizontal: 20,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: cardColor,
                               borderRadius: BorderRadius.circular(25),
                               boxShadow: const [
                                 BoxShadow(color: Colors.black12, blurRadius: 2),
@@ -364,7 +343,7 @@ class _HomeViewState extends State<HomeView> {
                                 Text(
                                   "Sleep",
                                   style: TextStyle(
-                                    color: TColor.black,
+                                    color: textColor,
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
                                   ),
@@ -412,7 +391,7 @@ class _HomeViewState extends State<HomeView> {
                               horizontal: 20,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: cardColor,
                               borderRadius: BorderRadius.circular(25),
                               boxShadow: const [
                                 BoxShadow(color: Colors.black12, blurRadius: 2),
@@ -424,7 +403,7 @@ class _HomeViewState extends State<HomeView> {
                                 Text(
                                   "Calories",
                                   style: TextStyle(
-                                    color: TColor.black,
+                                    color: textColor,
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
                                   ),

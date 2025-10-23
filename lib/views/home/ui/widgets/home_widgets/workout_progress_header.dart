@@ -8,15 +8,15 @@ class WorkoutProgressHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var media = MediaQuery.of(context).size;
-
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color; // Màu text chính
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           "Workout Progress",
           style: TextStyle(
-            color: TColor.black,
+            color: textColor,
             fontSize: 16,
             fontWeight: FontWeight.w700,
           ),
@@ -36,17 +36,17 @@ class WorkoutProgressHeader extends StatelessWidget {
                       value: name,
                       child: Text(
                         name,
-                        style: TextStyle(color: TColor.gray, fontSize: 14),
+                        style: TextStyle(color: textColor, fontSize: 14),
                       ),
                     ),
                   )
                   .toList(),
               onChanged: (value) => onDropdownChanged?.call(),
-              icon: Icon(Icons.expand_more, color: TColor.white),
+              icon: Icon(Icons.expand_more, color: textColor),
               hint: Text(
                 "Weekly",
                 textAlign: TextAlign.center,
-                style: TextStyle(color: TColor.white, fontSize: 12),
+                style: TextStyle(color: textColor, fontSize: 12),
               ),
             ),
           ),

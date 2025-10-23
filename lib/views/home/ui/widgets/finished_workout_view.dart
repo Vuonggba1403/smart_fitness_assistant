@@ -14,6 +14,8 @@ class _FinishedWorkoutViewState extends State<FinishedWorkoutView> {
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
+    final theme = Theme.of(context); // 🌙 Lấy theme động
+    final textColor = theme.textTheme.bodyMedium?.color; // Màu text chính
 
     return Scaffold(
       body: SafeArea(
@@ -35,7 +37,7 @@ class _FinishedWorkoutViewState extends State<FinishedWorkoutView> {
                 "Congratulations, You Have Finished Your Workout",
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: TColor.black,
+                  color: textColor,
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
                 ),
@@ -46,7 +48,7 @@ class _FinishedWorkoutViewState extends State<FinishedWorkoutView> {
               Text(
                 "Exercises is king and nutrition is queen. Combine the two and you will have a kingdom",
                 textAlign: TextAlign.center,
-                style: TextStyle(color: TColor.gray, fontSize: 12),
+                style: TextStyle(color: textColor, fontSize: 12),
               ),
 
               const SizedBox(height: 8),
@@ -54,7 +56,7 @@ class _FinishedWorkoutViewState extends State<FinishedWorkoutView> {
               Text(
                 "-Jack Lalanne",
                 textAlign: TextAlign.center,
-                style: TextStyle(color: TColor.gray, fontSize: 12),
+                style: TextStyle(color: textColor, fontSize: 12),
               ),
 
               const Spacer(),

@@ -9,6 +9,8 @@ class BMICard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context).size;
+    final theme = Theme.of(context); // 🌙 Lấy theme động
+    final textColor = theme.textTheme.bodyMedium?.color; // Màu text chính
     return Container(
       height: media.width * 0.4,
       decoration: BoxDecoration(
@@ -36,7 +38,7 @@ class BMICard extends StatelessWidget {
                     Text(
                       "BMI (Body Mass Index)",
                       style: TextStyle(
-                        color: TColor.white,
+                        color: textColor,
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                       ),

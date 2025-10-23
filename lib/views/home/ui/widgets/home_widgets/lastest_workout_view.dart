@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:smart_fitness_assistant/core/widgets/workout_row.dart';
+import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
+import 'package:smart_fitness_assistant/views/home/ui/widgets/home_widgets/workout_row.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import '../finished_workout_view.dart';
 
@@ -28,13 +29,16 @@ class LatestWorkoutView extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context) {
+    final theme = Theme.of(context); // 🌙 Lấy theme động
+    final textColor = theme.textTheme.bodyMedium?.color; // Màu text chính
+    final cardColor = theme.cardColor; // Màu nền cho các card
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           "Latest Workout",
           style: TextStyle(
-            color: TColor.black,
+            color: textColor,
             fontSize: 16,
             fontWeight: FontWeight.w700,
           ),
@@ -44,7 +48,7 @@ class LatestWorkoutView extends StatelessWidget {
           child: Text(
             "See More",
             style: TextStyle(
-              color: TColor.gray,
+              color: textColor,
               fontSize: 14,
               fontWeight: FontWeight.w700,
             ),
@@ -71,9 +75,6 @@ class LatestWorkoutView extends StatelessWidget {
   }
 
   void _navigateToDetail(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const FinishedWorkoutView()),
-    );
+    navigateTo(context, FinishedWorkoutView());
   }
 }
