@@ -1,9 +1,10 @@
 import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
+import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/widgets/icon_title_next_row.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
-import 'package:smart_fitness_assistant/views/photo_progress/ui/widgets/result_view.dart';
+import 'package:smart_fitness_assistant/views/result_view/ui/result_view.dart';
 
 class ComparisonView extends StatefulWidget {
   const ComparisonView({super.key});
@@ -15,9 +16,11 @@ class ComparisonView extends StatefulWidget {
 class _ComparisonViewState extends State<ComparisonView> {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color;
     return Scaffold(
       appBar: CustomAppBar(title: "Comparison"),
-      backgroundColor: TColor.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Padding(
         padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
         child: Column(
@@ -41,13 +44,11 @@ class _ComparisonViewState extends State<ComparisonView> {
             RoundButton(
               title: "Compare",
               onPressed: () {
-                Navigator.push(
+                navigateTo(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => ResultView(
-                      date1: DateTime(2023, 5, 1),
-                      date2: DateTime(2023, 6, 1),
-                    ),
+                  ResultView(
+                    date1: DateTime(2023, 5, 1),
+                    date2: DateTime(2023, 6, 1),
                   ),
                 );
               },

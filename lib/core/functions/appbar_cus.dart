@@ -16,7 +16,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context); // 🌙 Lấy theme động
-    final textColor = theme.textTheme.bodyMedium?.color; // Màu text chính
     final cardColor = theme.cardColor; // Màu nền cho các card
     return AppBar(
       backgroundColor: cardColor,
@@ -33,13 +32,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 width: 40,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: textColor,
+                  color: cardColor,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Image.asset(
                   "assets/img/black_btn.png",
                   width: 15,
                   height: 15,
+                  color: theme.iconTheme.color,
                   fit: BoxFit.contain,
                 ),
               ),
@@ -58,13 +58,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             width: 40,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: TColor.lightGray,
+              color: cardColor,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Image.asset(
               "assets/img/more_btn.png",
               width: 15,
               height: 15,
+              color: theme.iconTheme.color,
               fit: BoxFit.contain,
             ),
           ),

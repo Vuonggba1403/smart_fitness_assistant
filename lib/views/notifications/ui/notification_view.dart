@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
 
-import '../../../../core/functions/colo_extension.dart';
-import '../../../../core/widgets/notification_row.dart';
+import '../../../core/functions/colo_extension.dart';
+import 'widgets/notification_row.dart';
 
 class NotificationView extends StatefulWidget {
   const NotificationView({super.key});
@@ -47,9 +47,10 @@ class _NotificationViewState extends State<NotificationView> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: CustomAppBar(title: "Notification"),
-      backgroundColor: TColor.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: ListView.separated(
         padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 25),
         itemBuilder: ((context, index) {

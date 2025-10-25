@@ -40,7 +40,6 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
     final theme = Theme.of(context); // 🌙 Lấy theme động
     final textColor = theme.textTheme.bodyMedium?.color; // Màu text chính
     final cardColor = theme.cardColor; // Màu nền cho các card
-    final shadow = theme.shadowColor; // Màu shadow
     return Scaffold(
       appBar: CustomAppBar(title: "Progress Photo", showBackButton: false),
       backgroundColor: theme.scaffoldBackgroundColor,

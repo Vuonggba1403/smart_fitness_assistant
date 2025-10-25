@@ -1,4 +1,4 @@
-import '../functions/colo_extension.dart';
+import '../../../../core/functions/colo_extension.dart';
 import 'package:flutter/material.dart';
 
 class NotificationRow extends StatelessWidget {
@@ -7,6 +7,8 @@ class NotificationRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -28,14 +30,17 @@ class NotificationRow extends StatelessWidget {
                 Text(
                   nObj["title"].toString(),
                   style: TextStyle(
-                    color: TColor.black,
+                    color: textColor,
                     fontWeight: FontWeight.w500,
                     fontSize: 12,
                   ),
                 ),
                 Text(
                   nObj["time"].toString(),
-                  style: TextStyle(color: TColor.gray, fontSize: 10),
+                  style: TextStyle(
+                    color: textColor?.withOpacity(0.5),
+                    fontSize: 10,
+                  ),
                 ),
               ],
             ),

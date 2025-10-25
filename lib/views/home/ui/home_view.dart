@@ -11,7 +11,7 @@ import 'package:smart_fitness_assistant/views/home/ui/widgets/home_widgets/laste
 import 'package:smart_fitness_assistant/views/home/ui/widgets/home_widgets/today_target_view.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/home_widgets/workout_progress_view.dart';
 import '../../../core/functions/colo_extension.dart';
-import 'widgets/notification_view.dart';
+import '../../notifications/ui/notification_view.dart';
 import 'widgets/home_widgets/heart_rate_view.dart';
 import 'widgets/home_widgets/workout_progress_header.dart';
 import '../logic/cubit/home_cubit.dart';
