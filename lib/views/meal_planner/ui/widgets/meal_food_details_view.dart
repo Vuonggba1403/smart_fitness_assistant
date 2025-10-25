@@ -1,4 +1,5 @@
 import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
+import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/widgets/meal_recommed_cell.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
@@ -198,12 +199,9 @@ class _MealFoodDetailsViewState extends State<MealFoodDetailsView> {
                 var fObj = popularArr[index] as Map? ?? {};
                 return InkWell(
                   onTap: () {
-                    Navigator.push(
+                    navigateTo(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            FoodInfoDetailsView(dObj: fObj, mObj: widget.eObj),
-                      ),
+                      FoodInfoDetailsView(dObj: fObj, mObj: widget.eObj),
                     );
                   },
                   child: PopularMealRow(mObj: fObj),

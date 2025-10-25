@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/activity_tracker_view.dart';
 
@@ -34,12 +35,7 @@ class TodayTargetView extends StatelessWidget {
               fontSize: 12,
               fontWeight: FontWeight.w400,
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ActivityTrackerView(),
-                  ),
-                );
+                navigateTo(context, ActivityTrackerView());
               },
             ),
           ),

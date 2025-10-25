@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 
 class AppTheme {
-  // 🌞 ---------------- LIGHT THEME ----------------
   static final lightTheme = ThemeData(
     brightness: Brightness.light,
     scaffoldBackgroundColor: Colors.white,
     appBarTheme: AppBarTheme(
       backgroundColor: TColor.white,
       foregroundColor: TColor.black,
-      elevation: 0, // Bỏ đổ bóng
+      elevation: 0,
     ),
 
     colorScheme: ColorScheme.light(
@@ -17,11 +16,10 @@ class AppTheme {
       secondary: TColor.secondaryColor1, // Màu phụ
     ),
 
-    // 🧱 Card
     cardColor: TColor.white,
+    shadowColor: Colors.black12,
   );
 
-  // 🌚 ---------------- DARK THEME ----------------
   static final darkTheme = ThemeData(
     brightness: Brightness.dark,
     scaffoldBackgroundColor: const Color(0xFF0E0E0E),
@@ -37,23 +35,36 @@ class AppTheme {
       secondary: TColor.secondaryColor1,
     ),
 
-    // 🧱 Card - Màu tối phù hợp dark mode
     cardColor: const Color(0xFF1A1A1A),
+    shadowColor: Colors.black54,
   );
-  // 🎨 ---------------- GRADIENT HELPER ----------------
+
   static List<Color> gradientColors(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return isDark
         ? [TColor.secondaryColor1, TColor.secondaryColor2]
         : [TColor.primaryColor1, TColor.primaryColor2];
   }
+
+  static List<Color> gradientColors1(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark
+        ? [
+            TColor.secondaryColor2.withOpacity(0.3),
+            TColor.secondaryColor1.withOpacity(0.3),
+          ]
+        : [
+            TColor.primaryColor2.withOpacity(0.3),
+            TColor.primaryColor1.withOpacity(0.3),
+          ];
+  }
 }
 
 extension CustomDecorations on ThemeData {
   BoxDecoration get textFieldDecoration => BoxDecoration(
     color: brightness == Brightness.dark
-        ? const Color(0xFF1A1A1A) // 🌙 Dark mode
-        : TColor.lightGray, // 🌞 Light mode
+        ? const Color(0xFF1A1A1A)
+        : TColor.lightGray,
     borderRadius: BorderRadius.circular(15),
   );
 }

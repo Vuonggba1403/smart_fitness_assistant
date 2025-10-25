@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import '../../../core/widgets/find_eat_cell.dart';
 import '../../../core/widgets/today_meal_row.dart';
@@ -251,13 +252,7 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                             fontSize: 12,
                             fontWeight: FontWeight.w400,
                             onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const MealScheduleView(),
-                                ),
-                              );
+                              navigateTo(context, const MealScheduleView());
                             },
                           ),
                         ),
@@ -356,12 +351,7 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                   var fObj = findEatArr[index] as Map? ?? {};
                   return InkWell(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => MealFoodDetailsView(eObj: fObj),
-                        ),
-                      );
+                      navigateTo(context, MealFoodDetailsView(eObj: fObj));
                     },
                     child: FindEatCell(fObj: fObj, index: index),
                   );

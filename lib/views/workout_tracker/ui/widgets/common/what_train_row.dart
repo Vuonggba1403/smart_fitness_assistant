@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../functions/colo_extension.dart';
-import 'round_button.dart';
+import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
+import '../../../../../core/functions/colo_extension.dart';
+import '../../../../../core/widgets/round_button.dart';
 
 class WhatTrainRow extends StatelessWidget {
   final Map wObj;
@@ -8,6 +9,9 @@ class WhatTrainRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color;
+    final cardColor = theme.cardColor;
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
       decoration: BoxDecoration(
@@ -17,12 +21,7 @@ class WhatTrainRow extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              TColor.primaryColor2.withOpacity(0.3),
-              TColor.primaryColor1.withOpacity(0.3),
-            ],
-          ),
+          gradient: LinearGradient(colors: AppTheme.gradientColors1(context)),
           borderRadius: BorderRadius.circular(15),
         ),
         child: Row(
@@ -68,7 +67,7 @@ class WhatTrainRow extends StatelessWidget {
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.54),
+                    color: cardColor.withOpacity(0.54),
                     borderRadius: BorderRadius.circular(40),
                   ),
                 ),

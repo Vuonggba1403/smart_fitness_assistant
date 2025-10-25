@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: themeState.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-          home: const LoginView(),
+          home: const MainTabView(),
         );
       },
     );

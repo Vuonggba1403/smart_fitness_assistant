@@ -1,6 +1,7 @@
 import 'package:calendar_agenda/calendar_agenda.dart';
 import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/views/sleep_tracker/sleep_add_alarm_view.dart';
 import 'package:flutter/material.dart';
@@ -255,13 +256,7 @@ class _SleepScheduleViewState extends State<SleepScheduleView> {
       ),
       floatingActionButton: InkWell(
         onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  SleepAddAlarmView(date: _selectedDateAppBBar),
-            ),
-          );
+          navigateTo(context, SleepAddAlarmView(date: _selectedDateAppBBar));
         },
         child: Container(
           width: 55,
