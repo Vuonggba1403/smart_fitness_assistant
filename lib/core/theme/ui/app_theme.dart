@@ -20,12 +20,6 @@ class AppTheme {
 
     // 🧱 Card
     cardColor: Colors.white, // Màu nền cho các card, container
-    shadowColor: Colors.black12, // Màu bóng đổ nhẹ khi sáng
-    // 🔤 Text
-    textTheme: const TextTheme(
-      bodyMedium: TextStyle(color: Colors.black), // Màu chữ chính
-      bodySmall: TextStyle(color: Colors.black54), // Màu chữ phụ, nhạt hơn
-    ),
   );
 
   // 🌚 ---------------- DARK THEME ----------------
@@ -46,11 +40,5 @@ class AppTheme {
 
     // 🧱 Card - Màu tối phù hợp dark mode
     cardColor: const Color(0xFF1A1A1A), // ✅ Thay thành màu tối gần đen
-    shadowColor: Colors.black54, // Bóng đổ mạnh hơn để nổi khối
-    // 🔤 Text
-    textTheme: const TextTheme(
-      bodyMedium: TextStyle(color: Colors.white), // Màu chữ chính
-      bodySmall: TextStyle(color: Colors.white70), // Màu chữ phụ nhạt hơn
-    ),
   );
 }

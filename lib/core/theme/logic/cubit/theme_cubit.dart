@@ -6,11 +6,6 @@ import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
 
 part 'theme_state.dart';
 
-/// ThemeCubit chịu trách nhiệm:
-/// - Load theme khi khởi tạo (_loadTheme)
-/// - Toggle theme khi user đổi (toggleTheme)
-/// - Lưu trạng thái vào SharedPreferences (persistence)
-/// - Cung cấp getter currentTheme nếu cần trực tiếp ThemeData
 class ThemeCubit extends Cubit<ThemeState> {
   /// Khởi tạo với mặc định (isDarkMode = false).
   /// Sau đó _loadTheme sẽ đọc prefs và emit lại nếu có saved value.
