@@ -22,10 +22,13 @@ class _SleepAddAlarmViewState extends State<SleepAddAlarmView> {
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color;
+    final cardColor = theme.cardColor;
 
     return Scaffold(
       appBar: CustomAppBar(title: "Add Alarm"),
-      backgroundColor: TColor.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Container(
         padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 25),
         child: Column(

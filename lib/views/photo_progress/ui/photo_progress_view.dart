@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
+import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
+import 'package:smart_fitness_assistant/views/sleep_tracker/sleep_add_alarm_view.dart';
 import 'widgets/comparison_view.dart';
 
 class PhotoProgressView extends StatefulWidget {
@@ -287,20 +289,13 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
       ),
       floatingActionButton: InkWell(
         onTap: () {
-          // Navigator.push(
-          //   context,
-          //   MaterialPageRoute(
-          //     builder: (context) => SleepAddAlarmView(
-          //       date: _selectedDateAppBBar,
-          //     ),
-          //   ),
-          // );
+          // navigateTo(context, SleepAddAlarmView(date: DateTime.now()));
         },
         child: Container(
           width: 55,
           height: 55,
           decoration: BoxDecoration(
-            gradient: LinearGradient(colors: TColor.secondaryG),
+            gradient: LinearGradient(colors: AppTheme.gradientColors(context)),
             borderRadius: BorderRadius.circular(27.5),
             boxShadow: const [
               BoxShadow(

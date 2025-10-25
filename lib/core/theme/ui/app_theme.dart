@@ -7,12 +7,11 @@ class AppTheme {
     brightness: Brightness.light,
     scaffoldBackgroundColor: Colors.white,
     appBarTheme: const AppBarTheme(
-      backgroundColor: Colors.white, // Nền AppBar trắng
-      foregroundColor: Colors.black, // Màu icon & chữ trong AppBar
+      backgroundColor: Colors.white,
+      foregroundColor: Colors.black,
       elevation: 0, // Bỏ đổ bóng
     ),
 
-    // 🎨 ColorScheme: chứa các màu chính và phụ của ứng dụng
     colorScheme: ColorScheme.light(
       primary: TColor.primaryColor1, // Màu chủ đạo (nút, accent,...)
       secondary: TColor.secondaryColor1, // Màu phụ
@@ -41,4 +40,11 @@ class AppTheme {
     // 🧱 Card - Màu tối phù hợp dark mode
     cardColor: const Color(0xFF1A1A1A), // ✅ Thay thành màu tối gần đen
   );
+  // 🎨 ---------------- GRADIENT HELPER ----------------
+  static List<Color> gradientColors(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark
+        ? [TColor.secondaryColor1, TColor.secondaryColor2]
+        : [TColor.primaryColor1, TColor.primaryColor2];
+  }
 }
