@@ -4,6 +4,7 @@ import 'package:smart_fitness_assistant/core/theme/logic/cubit/theme_cubit.dart'
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
 import 'package:smart_fitness_assistant/views/auth/main_tab/ui/main_tab_view.dart';
 import 'package:smart_fitness_assistant/views/profile/logic/cubit/profile_cubit.dart';
+import 'package:smart_fitness_assistant/views/onboarding/ui/started_view.dart';
 
 void main() {
   runApp(
@@ -31,7 +32,7 @@ class MyApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: themeState.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-          home: const MainTabView(),
+          home: const StartedView(),
         );
       },
     );

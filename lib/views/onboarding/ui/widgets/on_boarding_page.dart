@@ -8,6 +8,8 @@ class OnBoardingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color;
     return SizedBox(
       width: media.width,
       height: media.height,
@@ -26,7 +28,7 @@ class OnBoardingPage extends StatelessWidget {
             child: Text(
               pObj["title"].toString(),
               style: TextStyle(
-                color: TColor.black,
+                color: textColor,
                 fontSize: 24,
                 fontWeight: FontWeight.w700,
               ),
@@ -36,7 +38,10 @@ class OnBoardingPage extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 15),
             child: Text(
               pObj["subtitle"].toString(),
-              style: TextStyle(color: TColor.gray, fontSize: 14),
+              style: TextStyle(
+                color: textColor?.withOpacity(0.6),
+                fontSize: 14,
+              ),
             ),
           ),
         ],
