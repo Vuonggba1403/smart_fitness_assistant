@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
 import '../functions/colo_extension.dart';
 
 class RoundTextField extends StatefulWidget {
@@ -36,10 +37,12 @@ class _RoundTextFieldState extends State<RoundTextField> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color;
     return Container(
       margin: widget.margin,
       decoration: BoxDecoration(
-        color: TColor.lightGray,
+        color: theme.textFieldDecoration.color,
         borderRadius: BorderRadius.circular(15),
       ),
       child: TextFormField(
@@ -60,7 +63,10 @@ class _RoundTextFieldState extends State<RoundTextField> {
           enabledBorder: InputBorder.none,
           focusedBorder: InputBorder.none,
           hintText: widget.hintText,
-          hintStyle: TextStyle(color: TColor.gray, fontSize: 12),
+          hintStyle: TextStyle(
+            color: textColor?.withOpacity(0.7),
+            fontSize: 12,
+          ),
           prefixIcon: Container(
             alignment: Alignment.center,
             width: 20,
@@ -70,7 +76,7 @@ class _RoundTextFieldState extends State<RoundTextField> {
               width: 20,
               height: 20,
               fit: BoxFit.contain,
-              color: TColor.gray,
+              color: textColor?.withOpacity(0.7),
             ),
           ),
           suffixIcon: widget.isPassword

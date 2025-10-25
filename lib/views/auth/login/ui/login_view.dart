@@ -19,8 +19,11 @@ class _LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color;
+    final cardColor = theme.cardColor;
     return Scaffold(
-      backgroundColor: TColor.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SingleChildScrollView(
         child: SafeArea(
           child: Form(
@@ -33,12 +36,15 @@ class _LoginViewState extends State<LoginView> {
                 children: [
                   Text(
                     "Hey there,",
-                    style: TextStyle(color: TColor.gray, fontSize: 16),
+                    style: TextStyle(
+                      color: textColor?.withOpacity(0.6),
+                      fontSize: 16,
+                    ),
                   ),
                   Text(
                     "Welcome Back",
                     style: TextStyle(
-                      color: TColor.black,
+                      color: textColor,
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
                     ),
@@ -56,14 +62,16 @@ class _LoginViewState extends State<LoginView> {
                     iconPath: "assets/img/lock.png",
                     isPassword: true,
                   ),
+                  SizedBox(height: media.width * 0.02),
+                  // const Spacer(),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         "Forgot your password?",
                         style: TextStyle(
-                          color: TColor.gray,
-                          fontSize: 10,
+                          color: textColor?.withOpacity(0.8),
+                          fontSize: 12,
                           decoration: TextDecoration.underline,
                         ),
                       ),
@@ -112,7 +120,7 @@ class _LoginViewState extends State<LoginView> {
                           height: 50,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
-                            color: TColor.white,
+                            color: cardColor,
                             border: Border.all(
                               width: 1,
                               color: TColor.gray.withOpacity(0.4),
@@ -134,7 +142,7 @@ class _LoginViewState extends State<LoginView> {
                           height: 50,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
-                            color: TColor.white,
+                            color: cardColor,
                             border: Border.all(
                               width: 1,
                               color: TColor.gray.withOpacity(0.4),
@@ -161,12 +169,12 @@ class _LoginViewState extends State<LoginView> {
                       children: [
                         Text(
                           "Don’t have an account yet? ",
-                          style: TextStyle(color: TColor.black, fontSize: 14),
+                          style: TextStyle(color: textColor, fontSize: 14),
                         ),
                         Text(
                           "Register",
                           style: TextStyle(
-                            color: TColor.black,
+                            color: textColor,
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
                           ),

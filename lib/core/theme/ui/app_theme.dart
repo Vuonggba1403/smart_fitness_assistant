@@ -6,9 +6,9 @@ class AppTheme {
   static final lightTheme = ThemeData(
     brightness: Brightness.light,
     scaffoldBackgroundColor: Colors.white,
-    appBarTheme: const AppBarTheme(
-      backgroundColor: Colors.white,
-      foregroundColor: Colors.black,
+    appBarTheme: AppBarTheme(
+      backgroundColor: TColor.white,
+      foregroundColor: TColor.black,
       elevation: 0, // Bỏ đổ bóng
     ),
 
@@ -18,16 +18,16 @@ class AppTheme {
     ),
 
     // 🧱 Card
-    cardColor: Colors.white, // Màu nền cho các card, container
+    cardColor: TColor.white,
   );
 
   // 🌚 ---------------- DARK THEME ----------------
   static final darkTheme = ThemeData(
     brightness: Brightness.dark,
     scaffoldBackgroundColor: const Color(0xFF0E0E0E),
-    appBarTheme: const AppBarTheme(
+    appBarTheme: AppBarTheme(
       backgroundColor: Color(0xFF0E0E0E), // AppBar trùng với nền
-      foregroundColor: Colors.white, // Màu chữ và icon trắng
+      foregroundColor: TColor.white, // Màu chữ và icon trắng
       elevation: 0,
     ),
 
@@ -38,7 +38,7 @@ class AppTheme {
     ),
 
     // 🧱 Card - Màu tối phù hợp dark mode
-    cardColor: const Color(0xFF1A1A1A), // ✅ Thay thành màu tối gần đen
+    cardColor: const Color(0xFF1A1A1A),
   );
   // 🎨 ---------------- GRADIENT HELPER ----------------
   static List<Color> gradientColors(BuildContext context) {
@@ -47,4 +47,13 @@ class AppTheme {
         ? [TColor.secondaryColor1, TColor.secondaryColor2]
         : [TColor.primaryColor1, TColor.primaryColor2];
   }
+}
+
+extension CustomDecorations on ThemeData {
+  BoxDecoration get textFieldDecoration => BoxDecoration(
+    color: brightness == Brightness.dark
+        ? const Color(0xFF1A1A1A) // 🌙 Dark mode
+        : TColor.lightGray, // 🌞 Light mode
+    borderRadius: BorderRadius.circular(15),
+  );
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_fitness_assistant/core/theme/logic/cubit/theme_cubit.dart';
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
+import 'package:smart_fitness_assistant/views/auth/login/ui/login_view.dart';
 import 'package:smart_fitness_assistant/views/auth/main_tab/ui/main_tab_view.dart';
 import 'package:smart_fitness_assistant/views/profile/logic/cubit/profile_cubit.dart';
 import 'package:smart_fitness_assistant/views/onboarding/ui/started_view.dart';
@@ -32,7 +33,7 @@ class MyApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: themeState.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-          home: const StartedView(),
+          home: const LoginView(),
         );
       },
     );
