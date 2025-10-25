@@ -49,7 +49,7 @@ class PhotoView extends StatelessWidget {
             Text(
               "Average Progress",
               style: TextStyle(
-                color: TColor.black,
+                color: textColor,
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
               ),
@@ -94,7 +94,7 @@ class PhotoView extends StatelessWidget {
             Text(
               dateToString(date1, formatStr: "MMMM"),
               style: TextStyle(
-                color: TColor.gray,
+                color: textColor,
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
               ),
@@ -102,7 +102,7 @@ class PhotoView extends StatelessWidget {
             Text(
               dateToString(date2, formatStr: "MMMM"),
               style: TextStyle(
-                color: TColor.gray,
+                color: textColor,
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
               ),
@@ -122,7 +122,7 @@ class PhotoView extends StatelessWidget {
                 Text(
                   iObj["title"].toString(),
                   style: TextStyle(
-                    color: TColor.gray,
+                    color: textColor,
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
