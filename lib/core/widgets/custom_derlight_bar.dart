@@ -21,8 +21,11 @@ void showCustomDelightToastBar(
 
   DelightToastBar(
     builder: (context) {
+      final theme = Theme.of(context);
+      final textColor = theme.textTheme.bodyMedium?.color;
+      final cardColor = theme.cardColor;
       return ToastCard(
-        color: TColor.primaryColor1,
+        color: cardColor,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -33,7 +36,7 @@ void showCustomDelightToastBar(
               style: TextStyle(
                 fontFamily: "OpenSans",
                 fontWeight: FontWeight.bold,
-                color: TColor.primaryColor2,
+                color: textColor,
                 fontSize: 16,
               ),
             ),

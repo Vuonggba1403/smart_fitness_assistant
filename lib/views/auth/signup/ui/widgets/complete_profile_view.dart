@@ -1,8 +1,9 @@
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:flutter/material.dart';
-import 'package:smart_fitness_assistant/views/auth/register/ui/widgets/what_your_goal_view.dart';
 import '../../../../../core/widgets/round_textfield.dart';
+import 'what_your_goal_view.dart';
 
 class CompleteProfileView extends StatefulWidget {
   const CompleteProfileView({super.key});
@@ -13,12 +14,17 @@ class CompleteProfileView extends StatefulWidget {
 
 class _CompleteProfileViewState extends State<CompleteProfileView> {
   TextEditingController txtDate = TextEditingController();
+  TextEditingController txtHeight = TextEditingController();
+  TextEditingController txtWeight = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color;
+    final cardColor = theme.cardColor;
     return Scaffold(
-      backgroundColor: TColor.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SingleChildScrollView(
         child: SafeArea(
           child: Padding(
@@ -34,14 +40,17 @@ class _CompleteProfileViewState extends State<CompleteProfileView> {
                 Text(
                   "Let’s complete your profile",
                   style: TextStyle(
-                    color: TColor.black,
+                    color: textColor,
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 Text(
                   "It will help us to know more about you!",
-                  style: TextStyle(color: TColor.gray, fontSize: 12),
+                  style: TextStyle(
+                    color: textColor?.withOpacity(0.7),
+                    fontSize: 12,
+                  ),
                 ),
                 SizedBox(height: media.width * 0.05),
                 Padding(
@@ -50,7 +59,7 @@ class _CompleteProfileViewState extends State<CompleteProfileView> {
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          color: TColor.lightGray,
+                          color: cardColor,
                           borderRadius: BorderRadius.circular(15),
                         ),
                         child: Row(
@@ -68,7 +77,7 @@ class _CompleteProfileViewState extends State<CompleteProfileView> {
                                 width: 20,
                                 height: 20,
                                 fit: BoxFit.contain,
-                                color: TColor.gray,
+                                color: textColor,
                               ),
                             ),
 
@@ -82,7 +91,7 @@ class _CompleteProfileViewState extends State<CompleteProfileView> {
                                           child: Text(
                                             name,
                                             style: TextStyle(
-                                              color: TColor.gray,
+                                              color: textColor,
                                               fontSize: 14,
                                             ),
                                           ),
@@ -94,7 +103,7 @@ class _CompleteProfileViewState extends State<CompleteProfileView> {
                                   hint: Text(
                                     "Choose Gender",
                                     style: TextStyle(
-                                      color: TColor.gray,
+                                      color: textColor?.withOpacity(0.7),
                                       fontSize: 12,
                                     ),
                                   ),
@@ -117,7 +126,7 @@ class _CompleteProfileViewState extends State<CompleteProfileView> {
                         children: [
                           Expanded(
                             child: RoundTextField(
-                              controller: txtDate,
+                              controller: txtWeight,
                               hintText: "Your Weight",
                               iconPath: "assets/img/weight.png",
                             ),
@@ -148,7 +157,7 @@ class _CompleteProfileViewState extends State<CompleteProfileView> {
                         children: [
                           Expanded(
                             child: RoundTextField(
-                              controller: txtDate,
+                              controller: txtHeight,
                               hintText: "Your Height",
                               iconPath: "assets/img/hight.png",
                             ),
@@ -178,12 +187,7 @@ class _CompleteProfileViewState extends State<CompleteProfileView> {
                       RoundButton(
                         title: "Next >",
                         onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const WhatYourGoalView(),
-                            ),
-                          );
+                          navigateTo(context, const WhatYourGoalView());
                         },
                       ),
                     ],

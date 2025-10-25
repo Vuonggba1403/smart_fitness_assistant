@@ -14,8 +14,10 @@ class _WelcomeViewState extends State<WelcomeView> {
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color;
     return Scaffold(
-      backgroundColor: TColor.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Container(
           width: media.width,
@@ -34,7 +36,7 @@ class _WelcomeViewState extends State<WelcomeView> {
               Text(
                 "Welcome, Stefani",
                 style: TextStyle(
-                  color: TColor.black,
+                  color: textColor,
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
                 ),
@@ -42,7 +44,10 @@ class _WelcomeViewState extends State<WelcomeView> {
               Text(
                 "You are all set now, let’s reach your\ngoals together with us",
                 textAlign: TextAlign.center,
-                style: TextStyle(color: TColor.gray, fontSize: 12),
+                style: TextStyle(
+                  color: textColor?.withOpacity(0.7),
+                  fontSize: 12,
+                ),
               ),
               const Spacer(),
 

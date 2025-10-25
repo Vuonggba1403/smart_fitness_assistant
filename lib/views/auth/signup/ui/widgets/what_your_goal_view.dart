@@ -1,9 +1,10 @@
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:carousel_slider/carousel_controller.dart'; // ✅ thêm dòng này
+import 'package:carousel_slider/carousel_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
-import 'package:smart_fitness_assistant/views/auth/register/ui/widgets/welcome_view.dart';
+import 'package:smart_fitness_assistant/views/auth/signup/ui/widgets/welcome_view.dart';
 
 class WhatYourGoalView extends StatefulWidget {
   const WhatYourGoalView({super.key});
@@ -40,8 +41,10 @@ class _WhatYourGoalViewState extends State<WhatYourGoalView> {
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color;
     return Scaffold(
-      backgroundColor: TColor.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Stack(
           children: [
@@ -119,7 +122,7 @@ class _WhatYourGoalViewState extends State<WhatYourGoalView> {
                   Text(
                     "What is your goal ?",
                     style: TextStyle(
-                      color: TColor.black,
+                      color: textColor,
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
                     ),
@@ -127,19 +130,17 @@ class _WhatYourGoalViewState extends State<WhatYourGoalView> {
                   Text(
                     "It will help us to choose a best\nprogram for you",
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: TColor.gray, fontSize: 12),
+                    style: TextStyle(
+                      color: textColor?.withOpacity(0.7),
+                      fontSize: 12,
+                    ),
                   ),
                   const Spacer(),
                   SizedBox(height: media.width * 0.05),
                   RoundButton(
                     title: "Confirm",
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const WelcomeView(),
-                        ),
-                      );
+                      navigateTo(context, const WelcomeView());
                     },
                   ),
                 ],
