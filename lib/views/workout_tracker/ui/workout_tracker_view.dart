@@ -7,6 +7,7 @@ import 'package:smart_fitness_assistant/core/widgets/custom_sliverbar.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/workour_detail_view.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:smart_fitness_assistant/views/workout_tracker/logic/cubit/workout_tracker_cubit.dart';
 import 'widgets/common/upcoming_workout_row.dart';
 import 'widgets/common/what_train_row.dart';
 
@@ -57,216 +58,220 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
     var media = MediaQuery.of(context).size;
     final theme = Theme.of(context);
     final textColor = theme.textTheme.bodyMedium?.color;
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(colors: TColor.primaryG),
-      ),
-      child: NestedScrollView(
-        headerSliverBuilder: (context, innerBoxIsScrolled) {
-          return [
-            CustomSliverAppBar(text: "Workout Tracker"),
-            SliverAppBar(
-              backgroundColor: Colors.transparent,
-              centerTitle: true,
-              elevation: 0,
-              leadingWidth: 0,
-              leading: const SizedBox(),
-              expandedHeight: media.width * 0.5,
-              flexibleSpace: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                height: media.width * 0.5,
-                width: double.maxFinite,
-                child: LineChart(
-                  LineChartData(
-                    lineTouchData: LineTouchData(
-                      enabled: true,
-                      handleBuiltInTouches: false,
-                      touchCallback:
-                          (FlTouchEvent event, LineTouchResponse? response) {
-                            if (response == null ||
-                                response.lineBarSpots == null) {
-                              return;
-                            }
-                            // if (event is FlTapUpEvent) {
-                            //   final spotIndex =
-                            //       response.lineBarSpots!.first.spotIndex;
-                            //   showingTooltipOnSpots.clear();
-                            //   setState(() {
-                            //     showingTooltipOnSpots.add(spotIndex);
-                            //   });
-                            // }
-                          },
-                      mouseCursorResolver:
-                          (FlTouchEvent event, LineTouchResponse? response) {
-                            if (response == null ||
-                                response.lineBarSpots == null) {
-                              return SystemMouseCursors.basic;
-                            }
-                            return SystemMouseCursors.click;
-                          },
-                      getTouchedSpotIndicator:
-                          (LineChartBarData barData, List<int> spotIndexes) {
-                            return spotIndexes.map((index) {
-                              return TouchedSpotIndicatorData(
-                                FlLine(color: Colors.transparent),
-                                FlDotData(
-                                  show: true,
-                                  getDotPainter:
-                                      (spot, percent, barData, index) =>
-                                          FlDotCirclePainter(
-                                            radius: 3,
-                                            color: Colors.white,
-                                            strokeWidth: 3,
-                                            strokeColor: TColor.secondaryColor1,
-                                          ),
+    return BlocProvider(
+      create: (context) => WorkoutTrackerCubit(),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(colors: TColor.primaryG),
+        ),
+        child: NestedScrollView(
+          headerSliverBuilder: (context, innerBoxIsScrolled) {
+            return [
+              CustomSliverAppBar(text: "Workout Tracker"),
+              SliverAppBar(
+                backgroundColor: Colors.transparent,
+                centerTitle: true,
+                elevation: 0,
+                leadingWidth: 0,
+                leading: const SizedBox(),
+                expandedHeight: media.width * 0.5,
+                flexibleSpace: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  height: media.width * 0.5,
+                  width: double.maxFinite,
+                  child: LineChart(
+                    LineChartData(
+                      lineTouchData: LineTouchData(
+                        enabled: true,
+                        handleBuiltInTouches: false,
+                        touchCallback:
+                            (FlTouchEvent event, LineTouchResponse? response) {
+                              if (response == null ||
+                                  response.lineBarSpots == null) {
+                                return;
+                              }
+                              // if (event is FlTapUpEvent) {
+                              //   final spotIndex =
+                              //       response.lineBarSpots!.first.spotIndex;
+                              //   showingTooltipOnSpots.clear();
+                              //   setState(() {
+                              //     showingTooltipOnSpots.add(spotIndex);
+                              //   });
+                              // }
+                            },
+                        mouseCursorResolver:
+                            (FlTouchEvent event, LineTouchResponse? response) {
+                              if (response == null ||
+                                  response.lineBarSpots == null) {
+                                return SystemMouseCursors.basic;
+                              }
+                              return SystemMouseCursors.click;
+                            },
+                        getTouchedSpotIndicator:
+                            (LineChartBarData barData, List<int> spotIndexes) {
+                              return spotIndexes.map((index) {
+                                return TouchedSpotIndicatorData(
+                                  FlLine(color: Colors.transparent),
+                                  FlDotData(
+                                    show: true,
+                                    getDotPainter:
+                                        (spot, percent, barData, index) =>
+                                            FlDotCirclePainter(
+                                              radius: 3,
+                                              color: Colors.white,
+                                              strokeWidth: 3,
+                                              strokeColor:
+                                                  TColor.secondaryColor1,
+                                            ),
+                                  ),
+                                );
+                              }).toList();
+                            },
+                        touchTooltipData: LineTouchTooltipData(
+                          // tooltipBgColor: TColor.secondaryColor1,
+                          // tooltipRoundedRadius: 20,
+                          tooltipBorderRadius: BorderRadius.circular(20),
+                          getTooltipItems: (List<LineBarSpot> lineBarsSpot) {
+                            return lineBarsSpot.map((lineBarSpot) {
+                              return LineTooltipItem(
+                                "${lineBarSpot.x.toInt()} mins ago",
+                                const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               );
                             }).toList();
                           },
-                      touchTooltipData: LineTouchTooltipData(
-                        // tooltipBgColor: TColor.secondaryColor1,
-                        // tooltipRoundedRadius: 20,
-                        tooltipBorderRadius: BorderRadius.circular(20),
-                        getTooltipItems: (List<LineBarSpot> lineBarsSpot) {
-                          return lineBarsSpot.map((lineBarSpot) {
-                            return LineTooltipItem(
-                              "${lineBarSpot.x.toInt()} mins ago",
-                              const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            );
-                          }).toList();
+                        ),
+                      ),
+                      lineBarsData: lineBarsData1,
+                      minY: -0.5,
+                      maxY: 110,
+                      titlesData: FlTitlesData(
+                        show: true,
+                        leftTitles: AxisTitles(),
+                        topTitles: AxisTitles(),
+                        bottomTitles: AxisTitles(sideTitles: bottomTitles),
+                        rightTitles: AxisTitles(sideTitles: rightTitles),
+                      ),
+                      gridData: FlGridData(
+                        show: true,
+                        drawHorizontalLine: true,
+                        horizontalInterval: 25,
+                        drawVerticalLine: false,
+                        getDrawingHorizontalLine: (value) {
+                          return FlLine(
+                            color: TColor.white.withOpacity(0.15),
+                            strokeWidth: 2,
+                          );
                         },
                       ),
-                    ),
-                    lineBarsData: lineBarsData1,
-                    minY: -0.5,
-                    maxY: 110,
-                    titlesData: FlTitlesData(
-                      show: true,
-                      leftTitles: AxisTitles(),
-                      topTitles: AxisTitles(),
-                      bottomTitles: AxisTitles(sideTitles: bottomTitles),
-                      rightTitles: AxisTitles(sideTitles: rightTitles),
-                    ),
-                    gridData: FlGridData(
-                      show: true,
-                      drawHorizontalLine: true,
-                      horizontalInterval: 25,
-                      drawVerticalLine: false,
-                      getDrawingHorizontalLine: (value) {
-                        return FlLine(
-                          color: TColor.white.withOpacity(0.15),
-                          strokeWidth: 2,
-                        );
-                      },
-                    ),
-                    borderData: FlBorderData(
-                      show: true,
-                      border: Border.all(color: Colors.transparent),
+                      borderData: FlBorderData(
+                        show: true,
+                        border: Border.all(color: Colors.transparent),
+                      ),
                     ),
                   ),
                 ),
               ),
+            ];
+          },
+          body: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            decoration: BoxDecoration(
+              color: theme.scaffoldBackgroundColor,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(25),
+                topRight: Radius.circular(25),
+              ),
             ),
-          ];
-        },
-        body: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          decoration: BoxDecoration(
-            color: theme.scaffoldBackgroundColor,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(25),
-              topRight: Radius.circular(25),
-            ),
-          ),
-          child: Scaffold(
-            backgroundColor: Colors.transparent,
-            body: SingleChildScrollView(
-              child: Column(
-                children: [
-                  const SizedBox(height: 10),
-                  Container(
-                    width: 50,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: TColor.gray.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                  ),
-                  SizedBox(height: media.width * 0.05),
-                  CustomContainerCheck(
-                    name: "Daily Workout Schedule",
-                    title: "Check",
-                  ),
-                  SizedBox(height: media.width * 0.05),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Upcoming Workout",
-                        style: TextStyle(
-                          color: textColor,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
+            child: Scaffold(
+              backgroundColor: Colors.transparent,
+              body: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 10),
+                    Container(
+                      width: 50,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: TColor.gray.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(3),
                       ),
-                      TextButton(
-                        onPressed: () {},
-                        child: Text(
-                          "See More",
+                    ),
+                    SizedBox(height: media.width * 0.05),
+                    CustomContainerCheck(
+                      name: "Daily Workout Schedule",
+                      title: "Check",
+                    ),
+                    SizedBox(height: media.width * 0.05),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Upcoming Workout",
                           style: TextStyle(
-                            color: textColor?.withOpacity(0.6),
-                            fontSize: 14,
+                            color: textColor,
+                            fontSize: 16,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  ListView.builder(
-                    padding: EdgeInsets.zero,
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemCount: latestArr.length,
-                    itemBuilder: (context, index) {
-                      var wObj = latestArr[index] as Map? ?? {};
-                      return UpcomingWorkoutRow(wObj: wObj);
-                    },
-                  ),
-                  SizedBox(height: media.width * 0.05),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "What Do You Want to Train",
-                        style: TextStyle(
-                          color: textColor,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
+                        TextButton(
+                          onPressed: () {},
+                          child: Text(
+                            "See More",
+                            style: TextStyle(
+                              color: textColor?.withOpacity(0.6),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  ListView.builder(
-                    padding: EdgeInsets.zero,
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemCount: whatArr.length,
-                    itemBuilder: (context, index) {
-                      var wObj = whatArr[index] as Map? ?? {};
-                      return InkWell(
-                        onTap: () {
-                          navigateTo(context, WorkoutDetailView(dObj: wObj));
-                        },
-                        child: WhatTrainRow(wObj: wObj),
-                      );
-                    },
-                  ),
-                  SizedBox(height: media.width * 0.1),
-                ],
+                      ],
+                    ),
+                    ListView.builder(
+                      padding: EdgeInsets.zero,
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: latestArr.length,
+                      itemBuilder: (context, index) {
+                        var wObj = latestArr[index] as Map? ?? {};
+                        return UpcomingWorkoutRow(wObj: wObj, index: index);
+                      },
+                    ),
+                    SizedBox(height: media.width * 0.05),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "What Do You Want to Train",
+                          style: TextStyle(
+                            color: textColor,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                    ListView.builder(
+                      padding: EdgeInsets.zero,
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: whatArr.length,
+                      itemBuilder: (context, index) {
+                        var wObj = whatArr[index] as Map? ?? {};
+                        return InkWell(
+                          onTap: () {
+                            navigateTo(context, WorkoutDetailView(dObj: wObj));
+                          },
+                          child: WhatTrainRow(wObj: wObj),
+                        );
+                      },
+                    ),
+                    SizedBox(height: media.width * 0.1),
+                  ],
+                ),
               ),
             ),
           ),

@@ -3,8 +3,10 @@ import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_container_check.dart';
 import 'package:smart_fitness_assistant/views/sleep_tracker/logic/cubit/sleep_tracker_cubit.dart';
+import 'package:smart_fitness_assistant/views/sleep_tracker/ui/widgets/sleep_schedule_view.dart';
 import 'widgets/components/today_sleep_schedule_row.dart';
 
 class SleepTrackerView extends StatefulWidget {
@@ -224,6 +226,8 @@ class _SleepTrackerViewState extends State<SleepTrackerView> {
                     CustomContainerCheck(
                       name: "Daily Sleep Schedule",
                       title: "Check",
+                      onPressed: () =>
+                          navigateTo(context, const SleepScheduleView()),
                     ),
                     SizedBox(height: media.width * 0.05),
                     Text(
