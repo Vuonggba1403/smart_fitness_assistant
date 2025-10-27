@@ -289,7 +289,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                                     height: media.width * 0.35,
                                     width: media.width * 0.35,
                                     decoration: BoxDecoration(
-                                      color: TColor.lightGray,
+                                      color: cardColor,
                                       borderRadius: BorderRadius.circular(15),
                                     ),
                                     alignment: Alignment.center,

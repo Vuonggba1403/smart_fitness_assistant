@@ -1,6 +1,6 @@
 import 'package:dotted_dashed_line/dotted_dashed_line.dart';
 import 'package:flutter/material.dart';
-import '../functions/colo_extension.dart';
+import '../../../../../core/functions/colo_extension.dart';
 
 class StepDetailRow extends StatelessWidget {
   final Map sObj;
@@ -9,6 +9,8 @@ class StepDetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -57,11 +59,14 @@ class StepDetailRow extends StatelessWidget {
             children: [
               Text(
                 sObj["title"].toString(),
-                style: TextStyle(color: TColor.black, fontSize: 14),
+                style: TextStyle(color: textColor, fontSize: 14),
               ),
               Text(
                 sObj["detail"].toString(),
-                style: TextStyle(color: TColor.gray, fontSize: 12),
+                style: TextStyle(
+                  color: textColor?.withOpacity(0.7),
+                  fontSize: 12,
+                ),
               ),
             ],
           ),

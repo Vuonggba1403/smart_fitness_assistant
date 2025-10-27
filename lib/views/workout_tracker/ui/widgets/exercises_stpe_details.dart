@@ -1,10 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:readmore/readmore.dart';
+import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart'
     show TColor;
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
-import '../../../../core/widgets/step_detail_row.dart';
+import 'common/step_detail_row.dart';
 
 class ExercisesStepDetails extends StatefulWidget {
   final Map eObj;
@@ -45,55 +46,12 @@ class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
+    final theme = Theme.of(context);
+    final cardColor = theme.cardColor;
+    final textColor = theme.textTheme.bodyMedium?.color;
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: TColor.white,
-        centerTitle: true,
-        elevation: 0,
-        leading: InkWell(
-          onTap: () {
-            Navigator.pop(context);
-          },
-          child: Container(
-            margin: const EdgeInsets.all(8),
-            height: 40,
-            width: 40,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: TColor.lightGray,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Image.asset(
-              "assets/img/closed_btn.png",
-              width: 15,
-              height: 15,
-              fit: BoxFit.contain,
-            ),
-          ),
-        ),
-        actions: [
-          InkWell(
-            onTap: () {},
-            child: Container(
-              margin: const EdgeInsets.all(8),
-              height: 40,
-              width: 40,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: TColor.lightGray,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Image.asset(
-                "assets/img/more_btn.png",
-                width: 15,
-                height: 15,
-                fit: BoxFit.contain,
-              ),
-            ),
-          ),
-        ],
-      ),
-      backgroundColor: TColor.white,
+      appBar: CustomAppBar(title: widget.eObj["title"].toString()),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SingleChildScrollView(
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 25),
@@ -139,7 +97,7 @@ class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
               Text(
                 widget.eObj["title"].toString(),
                 style: TextStyle(
-                  color: TColor.black,
+                  color: textColor,
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),
@@ -147,13 +105,16 @@ class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
               const SizedBox(height: 4),
               Text(
                 "Easy | 390 Calories Burn",
-                style: TextStyle(color: TColor.gray, fontSize: 12),
+                style: TextStyle(
+                  color: textColor?.withOpacity(0.7),
+                  fontSize: 12,
+                ),
               ),
               const SizedBox(height: 15),
               Text(
                 "Descriptions",
                 style: TextStyle(
-                  color: TColor.black,
+                  color: textColor,
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),
@@ -162,11 +123,14 @@ class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
               ReadMoreText(
                 'A jumping jack, also known as a star jump and called a side-straddle hop in the US military, is a physical jumping exercise performed by jumping to a position with the legs spread wide A jumping jack, also known as a star jump and called a side-straddle hop in the US military, is a physical jumping exercise performed by jumping to a position with the legs spread wide',
                 trimLines: 4,
-                colorClickableText: TColor.black,
+                colorClickableText: textColor,
                 trimMode: TrimMode.Line,
                 trimCollapsedText: ' Read More ...',
                 trimExpandedText: ' Read Less',
-                style: TextStyle(color: TColor.gray, fontSize: 12),
+                style: TextStyle(
+                  color: textColor?.withOpacity(0.7),
+                  fontSize: 12,
+                ),
                 moreStyle: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
@@ -179,7 +143,7 @@ class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
                   Text(
                     "How To Do It",
                     style: TextStyle(
-                      color: TColor.black,
+                      color: textColor,
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                     ),
@@ -188,7 +152,10 @@ class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
                     onPressed: () {},
                     child: Text(
                       "${stepArr.length} Sets",
-                      style: TextStyle(color: TColor.gray, fontSize: 12),
+                      style: TextStyle(
+                        color: textColor?.withOpacity(0.7),
+                        fontSize: 12,
+                      ),
                     ),
                   ),
                 ],
@@ -209,7 +176,7 @@ class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
               Text(
                 "Custom Repetitions",
                 style: TextStyle(
-                  color: TColor.black,
+                  color: textColor,
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),
@@ -224,11 +191,11 @@ class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
                     decoration: BoxDecoration(
                       border: Border(
                         top: BorderSide(
-                          color: TColor.gray.withOpacity(0.2),
+                          color: textColor!.withOpacity(0.2),
                           width: 1,
                         ),
                         bottom: BorderSide(
-                          color: TColor.gray.withOpacity(0.2),
+                          color: textColor!.withOpacity(0.2),
                           width: 1,
                         ),
                       ),
@@ -248,19 +215,25 @@ class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
                         ),
                         Text(
                           " ${(index + 1) * 15} Calories Burn",
-                          style: TextStyle(color: TColor.gray, fontSize: 10),
+                          style: TextStyle(
+                            color: textColor?.withOpacity(0.7),
+                            fontSize: 10,
+                          ),
                         ),
                         Text(
                           " ${index + 1} ",
                           style: TextStyle(
-                            color: TColor.gray,
+                            color: textColor?.withOpacity(0.7),
                             fontSize: 24,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
                         Text(
                           " times",
-                          style: TextStyle(color: TColor.gray, fontSize: 16),
+                          style: TextStyle(
+                            color: textColor?.withOpacity(0.7),
+                            fontSize: 16,
+                          ),
                         ),
                       ],
                     );
