@@ -2,11 +2,12 @@ import 'package:calendar_agenda/calendar_agenda.dart';
 import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
+import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
-import 'package:smart_fitness_assistant/views/sleep_tracker/sleep_add_alarm_view.dart';
+import 'package:smart_fitness_assistant/views/sleep_tracker/ui/widgets/sleep_add_alarm_view.dart';
 import 'package:flutter/material.dart';
 import 'package:simple_animation_progress_bar/simple_animation_progress_bar.dart';
-import '../../core/widgets/today_sleep_schedule_row.dart';
+import 'components/today_sleep_schedule_row.dart';
 
 class SleepScheduleView extends StatefulWidget {
   const SleepScheduleView({super.key});
@@ -186,16 +187,16 @@ class _SleepScheduleViewState extends State<SleepScheduleView> {
                   ),
                 ),
                 SizedBox(height: media.width * 0.03),
-                ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  physics: const NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  itemCount: todaySleepArr.length,
-                  itemBuilder: (context, index) {
-                    var sObj = todaySleepArr[index] as Map? ?? {};
-                    return TodaySleepScheduleRow(sObj: sObj);
-                  },
-                ),
+                // ListView.builder(
+                //   padding: const EdgeInsets.symmetric(horizontal: 20),
+                //   physics: const NeverScrollableScrollPhysics(),
+                //   shrinkWrap: true,
+                //   itemCount: todaySleepArr.length,
+                //   itemBuilder: (context, index) {
+                //     var sObj = todaySleepArr[index] as Map? ?? {};
+                //     return TodaySleepScheduleRow(sObj: sObj);
+                //   },
+                // ),
                 Container(
                   width: double.maxFinite,
                   margin: const EdgeInsets.symmetric(
@@ -205,10 +206,7 @@ class _SleepScheduleViewState extends State<SleepScheduleView> {
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [
-                        TColor.secondaryColor2.withOpacity(0.4),
-                        TColor.secondaryColor1.withOpacity(0.4),
-                      ],
+                      colors: AppTheme.gradientColors(context),
                     ),
                     borderRadius: BorderRadius.circular(20),
                   ),

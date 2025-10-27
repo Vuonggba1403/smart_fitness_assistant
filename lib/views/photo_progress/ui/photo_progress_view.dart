@@ -5,7 +5,7 @@ import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_container_check.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
-import 'package:smart_fitness_assistant/views/sleep_tracker/sleep_add_alarm_view.dart';
+import 'package:smart_fitness_assistant/views/sleep_tracker/ui/widgets/sleep_add_alarm_view.dart';
 import 'widgets/comparison_view.dart';
 
 class PhotoProgressView extends StatefulWidget {

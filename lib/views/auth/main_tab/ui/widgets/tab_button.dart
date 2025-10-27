@@ -1,4 +1,4 @@
-import '../functions/colo_extension.dart';
+import '../../../../../core/functions/colo_extension.dart';
 import 'package:flutter/material.dart';
 
 class TabButton extends StatelessWidget {

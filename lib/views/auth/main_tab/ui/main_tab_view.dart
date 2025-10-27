@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
-import 'package:smart_fitness_assistant/core/widgets/tab_button.dart';
+import 'package:smart_fitness_assistant/views/auth/main_tab/ui/widgets/tab_button.dart';
 import 'package:smart_fitness_assistant/views/auth/main_tab/logic/cubit/main_tab_cubit.dart';
 import '../../../home/ui/home_view.dart';
 import '../../../photo_progress/ui/photo_progress_view.dart';
 import '../../../profile/ui/profile_view.dart';
-import '../ui/select_view.dart';
+import 'widgets/select_view.dart';
 
 class MainTabView extends StatelessWidget {
   const MainTabView({super.key});

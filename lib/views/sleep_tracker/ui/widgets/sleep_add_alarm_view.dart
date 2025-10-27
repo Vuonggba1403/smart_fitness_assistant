@@ -5,8 +5,8 @@ import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_toggle_switch.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
-import '../../core/functions/common.dart';
-import '../../core/widgets/icon_title_next_row.dart';
+import '../../../../core/functions/common.dart';
+import '../../../../core/widgets/icon_title_next_row.dart';
 
 class SleepAddAlarmView extends StatefulWidget {
   final DateTime date;

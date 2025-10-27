@@ -1,7 +1,7 @@
 import 'package:dotted_dashed_line/dotted_dashed_line.dart';
 import 'package:flutter/material.dart';
 
-import '../functions/colo_extension.dart';
+import '../../../../../core/functions/colo_extension.dart';
 
 class FoodStepDetailRow extends StatelessWidget {
   final Map sObj;
@@ -10,6 +10,8 @@ class FoodStepDetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -52,14 +54,17 @@ class FoodStepDetailRow extends StatelessWidget {
               Text(
                 "Step ${sObj["no"].toString()}",
                 style: TextStyle(
-                  color: TColor.black,
+                  color: textColor,
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
               ),
               Text(
                 sObj["detail"].toString(),
-                style: TextStyle(color: TColor.gray, fontSize: 12),
+                style: TextStyle(
+                  color: textColor?.withOpacity(0.6),
+                  fontSize: 12,
+                ),
               ),
             ],
           ),

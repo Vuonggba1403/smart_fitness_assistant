@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:readmore/readmore.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_sliverbar.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 
-import '../../../../core/widgets/food_step_detail_row.dart';
+import 'components/food_step_detail_row.dart';
 import 'meal_schedule_view.dart';
 
 class FoodInfoDetailsView extends StatefulWidget {
@@ -62,6 +63,9 @@ class _FoodInfoDetailsViewState extends State<FoodInfoDetailsView> {
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color; // Màu text chính
+    final cardColor = theme.cardColor;
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(colors: TColor.primaryG),
@@ -114,7 +118,7 @@ class _FoodInfoDetailsViewState extends State<FoodInfoDetailsView> {
         },
         body: Container(
           decoration: BoxDecoration(
-            color: TColor.white,
+            color: theme.scaffoldBackgroundColor,
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(25),
               topRight: Radius.circular(25),
@@ -155,7 +159,7 @@ class _FoodInfoDetailsViewState extends State<FoodInfoDetailsView> {
                                   Text(
                                     widget.dObj["name"].toString(),
                                     style: TextStyle(
-                                      color: TColor.black,
+                                      color: textColor,
                                       fontSize: 16,
                                       fontWeight: FontWeight.w700,
                                     ),
@@ -163,7 +167,7 @@ class _FoodInfoDetailsViewState extends State<FoodInfoDetailsView> {
                                   Text(
                                     "by James Ruth",
                                     style: TextStyle(
-                                      color: TColor.gray,
+                                      color: textColor?.withOpacity(0.6),
                                       fontSize: 12,
                                     ),
                                   ),
@@ -188,7 +192,7 @@ class _FoodInfoDetailsViewState extends State<FoodInfoDetailsView> {
                         child: Text(
                           "Nutrition",
                           style: TextStyle(
-                            color: TColor.black,
+                            color: textColor,
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
                           ),
@@ -213,10 +217,7 @@ class _FoodInfoDetailsViewState extends State<FoodInfoDetailsView> {
                               ),
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
-                                  colors: [
-                                    TColor.primaryColor2.withOpacity(0.4),
-                                    TColor.primaryColor1.withOpacity(0.4),
-                                  ],
+                                  colors: AppTheme.gradientColors(context),
                                 ),
                                 borderRadius: BorderRadius.circular(10),
                               ),
@@ -252,7 +253,7 @@ class _FoodInfoDetailsViewState extends State<FoodInfoDetailsView> {
                         child: Text(
                           "Descriptions",
                           style: TextStyle(
-                            color: TColor.black,
+                            color: textColor,
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
                           ),
@@ -264,11 +265,14 @@ class _FoodInfoDetailsViewState extends State<FoodInfoDetailsView> {
                         child: ReadMoreText(
                           'Pancakes are some people\'s favorite breakfast, who doesn\'t like pancakes? Especially with the real honey splash on top of the pancakes, of course everyone loves that! besides being Pancakes are some people\'s favorite breakfast, who doesn\'t like pancakes? Especially with the real honey splash on top of the pancakes, of course everyone loves that! besides being',
                           trimLines: 4,
-                          colorClickableText: TColor.black,
+                          colorClickableText: textColor,
                           trimMode: TrimMode.Line,
                           trimCollapsedText: ' Read More ...',
                           trimExpandedText: ' Read Less',
-                          style: TextStyle(color: TColor.gray, fontSize: 12),
+                          style: TextStyle(
+                            color: textColor?.withOpacity(0.6),
+                            fontSize: 12,
+                          ),
                           moreStyle: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
@@ -284,7 +288,7 @@ class _FoodInfoDetailsViewState extends State<FoodInfoDetailsView> {
                             Text(
                               "Ingredients That You\nWill Need",
                               style: TextStyle(
-                                color: TColor.black,
+                                color: textColor,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
                               ),
@@ -294,7 +298,7 @@ class _FoodInfoDetailsViewState extends State<FoodInfoDetailsView> {
                               child: Text(
                                 "${stepArr.length} Items",
                                 style: TextStyle(
-                                  color: TColor.gray,
+                                  color: textColor?.withOpacity(0.6),
                                   fontSize: 12,
                                 ),
                               ),
@@ -337,14 +341,14 @@ class _FoodInfoDetailsViewState extends State<FoodInfoDetailsView> {
                                   Text(
                                     nObj["title"].toString(),
                                     style: TextStyle(
-                                      color: TColor.black,
+                                      color: textColor,
                                       fontSize: 12,
                                     ),
                                   ),
                                   Text(
                                     nObj["value"].toString(),
                                     style: TextStyle(
-                                      color: TColor.gray,
+                                      color: textColor?.withOpacity(0.6),
                                       fontSize: 10,
                                     ),
                                   ),
@@ -362,7 +366,7 @@ class _FoodInfoDetailsViewState extends State<FoodInfoDetailsView> {
                             Text(
                               "Step by Step",
                               style: TextStyle(
-                                color: TColor.black,
+                                color: textColor,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
                               ),
@@ -372,7 +376,7 @@ class _FoodInfoDetailsViewState extends State<FoodInfoDetailsView> {
                               child: Text(
                                 "${stepArr.length} Steps",
                                 style: TextStyle(
-                                  color: TColor.gray,
+                                  color: textColor?.withOpacity(0.6),
                                   fontSize: 12,
                                 ),
                               ),
