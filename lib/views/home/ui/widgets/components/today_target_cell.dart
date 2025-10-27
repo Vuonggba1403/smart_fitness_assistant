@@ -1,5 +1,6 @@
-import '../functions/colo_extension.dart';
 import 'package:flutter/material.dart';
+
+import '../../../../../core/functions/colo_extension.dart';
 
 class TodayTargetCell extends StatelessWidget {
   final String icon;
@@ -14,11 +15,14 @@ class TodayTargetCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color;
+    final cardColor = theme.cardColor;
     return Container(
       height: 70,
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: TColor.white,
+        color: cardColor,
         borderRadius: BorderRadius.circular(15),
       ),
       child: Row(
@@ -44,16 +48,13 @@ class TodayTargetCell extends StatelessWidget {
                   child: Text(
                     value,
                     style: TextStyle(
-                      color: TColor.white.withOpacity(0.7),
+                      color: textColor?.withOpacity(0.6),
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
                     ),
                   ),
                 ),
-                Text(
-                  title,
-                  style: TextStyle(color: TColor.black, fontSize: 12),
-                ),
+                Text(title, style: TextStyle(color: textColor, fontSize: 12)),
               ],
             ),
           ),

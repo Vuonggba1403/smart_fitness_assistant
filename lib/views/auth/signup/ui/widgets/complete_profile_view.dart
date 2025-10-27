@@ -86,6 +86,9 @@ class _CompleteProfileViewState extends State<CompleteProfileView> {
                               child: CustomDropButtonUnder(
                                 items: ["Male", "Female"],
                                 hint: "Choose Gender",
+                                onChanged: (value) {
+                                  print("Selected: $value");
+                                },
                               ),
                             ),
 

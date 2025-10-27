@@ -236,6 +236,9 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                             "Dessert",
                           ],
                           hint: "Breakfast",
+                          onChanged: (value) {
+                            print("Selected: $value");
+                          },
                         ),
                       ),
                     ],

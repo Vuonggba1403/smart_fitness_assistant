@@ -2,10 +2,11 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_drop_but.dart';
 
-import '../../../../core/widgets/latest_activity_row.dart';
-import '../../../../core/widgets/today_target_cell.dart';
+import 'components/latest_activity_row.dart';
+import 'components/today_target_cell.dart';
 
 class ActivityTrackerView extends StatefulWidget {
   const ActivityTrackerView({super.key});
@@ -33,9 +34,13 @@ class _ActivityTrackerViewState extends State<ActivityTrackerView> {
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color; // Màu text chính
+    final cardColor = theme.cardColor; // Màu nền cho các card
+    final shadow = theme.shadowColor; // Màu shadow
     return Scaffold(
       appBar: CustomAppBar(title: "Activity Tracker"),
-      backgroundColor: TColor.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SingleChildScrollView(
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 25, horizontal: 25),
@@ -48,10 +53,7 @@ class _ActivityTrackerViewState extends State<ActivityTrackerView> {
                 ),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [
-                      TColor.primaryColor2.withOpacity(0.3),
-                      TColor.primaryColor1.withOpacity(0.3),
-                    ],
+                    colors: AppTheme.gradientColors1(context),
                   ),
                   borderRadius: BorderRadius.circular(15),
                 ),
@@ -63,7 +65,7 @@ class _ActivityTrackerViewState extends State<ActivityTrackerView> {
                         Text(
                           "Today Target",
                           style: TextStyle(
-                            color: TColor.black,
+                            color: textColor,
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
                           ),
@@ -73,7 +75,9 @@ class _ActivityTrackerViewState extends State<ActivityTrackerView> {
                           height: 30,
                           child: Container(
                             decoration: BoxDecoration(
-                              gradient: LinearGradient(colors: TColor.primaryG),
+                              gradient: LinearGradient(
+                                colors: AppTheme.gradientColors1(context),
+                              ),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: MaterialButton(
@@ -127,7 +131,7 @@ class _ActivityTrackerViewState extends State<ActivityTrackerView> {
                   Text(
                     "Activity  Progress",
                     style: TextStyle(
-                      color: TColor.black,
+                      color: textColor,
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                     ),
@@ -142,6 +146,9 @@ class _ActivityTrackerViewState extends State<ActivityTrackerView> {
                     child: CustomDropButtonUnder(
                       items: ["Weekly", "Monthly"],
                       hint: "Weekly",
+                      onChanged: (value) {
+                        print("Selected: $value");
+                      },
                     ),
                   ),
                 ],
@@ -156,11 +163,9 @@ class _ActivityTrackerViewState extends State<ActivityTrackerView> {
                   horizontal: 0,
                 ),
                 decoration: BoxDecoration(
-                  color: TColor.white,
+                  color: cardColor,
                   borderRadius: BorderRadius.circular(15),
-                  boxShadow: const [
-                    BoxShadow(color: Colors.black12, blurRadius: 3),
-                  ],
+                  boxShadow: [BoxShadow(color: shadow, blurRadius: 3)],
                 ),
                 child: BarChart(
                   BarChartData(
@@ -207,7 +212,7 @@ class _ActivityTrackerViewState extends State<ActivityTrackerView> {
                               TextSpan(
                                 text: (rod.toY - 1).toString(),
                                 style: TextStyle(
-                                  color: TColor.white,
+                                  color: textColor,
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -262,7 +267,7 @@ class _ActivityTrackerViewState extends State<ActivityTrackerView> {
                   Text(
                     "Latest Workout",
                     style: TextStyle(
-                      color: TColor.black,
+                      color: textColor,
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                     ),
@@ -272,7 +277,7 @@ class _ActivityTrackerViewState extends State<ActivityTrackerView> {
                     child: Text(
                       "See More",
                       style: TextStyle(
-                        color: TColor.gray,
+                        color: textColor?.withOpacity(0.6),
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                       ),

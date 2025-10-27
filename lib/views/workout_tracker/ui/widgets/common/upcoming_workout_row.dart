@@ -17,8 +17,8 @@ class UpcomingWorkoutRow extends StatelessWidget {
 
     return BlocBuilder<WorkoutTrackerCubit, Map<String, bool>>(
       builder: (context, state) {
-        final isOn =
-            state[wObj["id"]] ?? false; // trạng thái hiện tại của toggle
+        final workoutId = wObj["id"]?.toString() ?? '';
+        final isOn = workoutId.isNotEmpty ? (state[workoutId] ?? false) : false;
 
         return Container(
           margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
@@ -68,13 +68,13 @@ class UpcomingWorkoutRow extends StatelessWidget {
 
               // 🎚 Toggle
               CustomToggleSwitch(
-                key: ValueKey(wObj["id"]),
                 value: isOn,
-                onChanged: (val) {
-                  context.read<WorkoutTrackerCubit>().setWorkout(
-                    wObj["id"].toString(),
-                    val,
-                  );
+                onChanged: (_) {
+                  if (workoutId.isNotEmpty) {
+                    context.read<WorkoutTrackerCubit>().toggleWorkout(
+                      workoutId,
+                    );
+                  }
                 },
               ),
             ],

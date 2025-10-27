@@ -1,4 +1,4 @@
-import '../functions/colo_extension.dart';
+import '../../../../../core/functions/colo_extension.dart';
 import 'package:flutter/material.dart';
 
 class LatestActivityRow extends StatelessWidget {
@@ -7,6 +7,8 @@ class LatestActivityRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color; // Màu text chính
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
 
@@ -30,7 +32,7 @@ class LatestActivityRow extends StatelessWidget {
                 Text(
                   wObj["title"].toString(),
                   style: TextStyle(
-                    color: TColor.black,
+                    color: textColor,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
@@ -38,7 +40,10 @@ class LatestActivityRow extends StatelessWidget {
 
                 Text(
                   wObj["time"].toString(),
-                  style: TextStyle(color: TColor.gray, fontSize: 10),
+                  style: TextStyle(
+                    color: textColor?.withOpacity(0.6),
+                    fontSize: 10,
+                  ),
                 ),
               ],
             ),
