@@ -6,8 +6,8 @@ import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_container_check.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_drop_but.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
-import '../../../core/widgets/find_eat_cell.dart';
-import '../../../core/widgets/today_meal_row.dart';
+import 'widgets/components/find_eat_cell.dart';
+import 'widgets/components/today_meal_row.dart';
 import 'widgets/meal_food_details_view.dart';
 import 'widgets/meal_schedule_view.dart';
 
@@ -262,7 +262,7 @@ class _MealPlannerViewState extends State<MealPlannerView> {
               child: Text(
                 "Find Something to Eat",
                 style: TextStyle(
-                  color: TColor.black,
+                  color: textColor,
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),

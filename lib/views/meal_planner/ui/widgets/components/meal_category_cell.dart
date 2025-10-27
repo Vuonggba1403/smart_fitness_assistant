@@ -1,7 +1,9 @@
-import 'round_button.dart';
+import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
+
+import '../../../../../core/widgets/round_button.dart';
 
 import 'package:flutter/material.dart';
-import '../functions/colo_extension.dart';
+import '../../../../../core/functions/colo_extension.dart';
 
 class MealCategoryCell extends StatelessWidget {
   final Map cObj;
@@ -15,17 +17,7 @@ class MealCategoryCell extends StatelessWidget {
       margin: const EdgeInsets.all(4),
       width: 80,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: isEvent
-              ? [
-                  TColor.primaryColor2.withOpacity(0.5),
-                  TColor.primaryColor1.withOpacity(0.5),
-                ]
-              : [
-                  TColor.secondaryColor2.withOpacity(0.5),
-                  TColor.secondaryColor1.withOpacity(0.5),
-                ],
-        ),
+        gradient: LinearGradient(colors: AppTheme.gradientColors1(context)),
         borderRadius: BorderRadius.circular(15),
       ),
       child: Column(

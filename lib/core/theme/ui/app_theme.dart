@@ -50,11 +50,11 @@ class AppTheme {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return isDark
         ? [
-            TColor.secondaryColor2.withOpacity(0.3),
+            TColor.primaryColor2.withOpacity(0.3),
             TColor.secondaryColor1.withOpacity(0.3),
           ]
         : [
-            TColor.primaryColor2.withOpacity(0.3),
+            TColor.secondaryColor2.withOpacity(0.3),
             TColor.primaryColor1.withOpacity(0.3),
           ];
   }

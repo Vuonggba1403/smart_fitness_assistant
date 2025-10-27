@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
-import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
-import 'package:smart_fitness_assistant/views/home/ui/widgets/home_widgets/workout_row.dart';
+import 'package:smart_fitness_assistant/views/home/ui/widgets/components/workout_row.dart';
 import '../finished_workout_view.dart';
 
 class LatestWorkoutView extends StatelessWidget {
@@ -67,14 +66,10 @@ class LatestWorkoutView extends StatelessWidget {
       itemBuilder: (context, index) {
         var wObj = lastWorkoutArr[index];
         return InkWell(
-          onTap: () => _navigateToDetail(context),
+          onTap: () => navigateTo(context, FinishedWorkoutView()),
           child: WorkoutRow(wObj: wObj),
         );
       },
     );
-  }
-
-  void _navigateToDetail(BuildContext context) {
-    navigateTo(context, FinishedWorkoutView());
   }
 }

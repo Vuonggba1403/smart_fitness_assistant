@@ -1,52 +1,35 @@
+import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
+
+import '../../../../../core/widgets/round_button.dart';
+
 import 'package:flutter/material.dart';
+import '../../../../../core/functions/colo_extension.dart';
 
-import '../functions/colo_extension.dart';
-import 'round_button.dart';
-
-class FindEatCell extends StatelessWidget {
+class MealRecommendCell extends StatelessWidget {
   final Map fObj;
   final int index;
-  const FindEatCell({super.key, required this.index, required this.fObj});
+  const MealRecommendCell({super.key, required this.index, required this.fObj});
 
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
     bool isEvent = index % 2 == 0;
     return Container(
-      margin: const EdgeInsets.all(8),
+      margin: const EdgeInsets.all(5),
       width: media.width * 0.5,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: isEvent
-              ? [
-                  TColor.primaryColor2.withOpacity(0.5),
-                  TColor.primaryColor1.withOpacity(0.5),
-                ]
-              : [
-                  TColor.secondaryColor2.withOpacity(0.5),
-                  TColor.secondaryColor1.withOpacity(0.5),
-                ],
-        ),
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(25),
-          topRight: Radius.circular(75),
-          bottomLeft: Radius.circular(25),
-          bottomRight: Radius.circular(25),
-        ),
+        gradient: LinearGradient(colors: AppTheme.gradientColors1(context)),
+        borderRadius: BorderRadius.circular(25),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Image.asset(
-                fObj["image"].toString(),
-                width: media.width * 0.3,
-                height: media.width * 0.25,
-                fit: BoxFit.contain,
-              ),
-            ],
+          Image.asset(
+            fObj["image"].toString(),
+            width: media.width * 0.3,
+            height: media.width * 0.25,
+            fit: BoxFit.contain,
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -62,7 +45,7 @@ class FindEatCell extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15),
             child: Text(
-              fObj["number"],
+              "${fObj["size"]} | ${fObj["time"]} | ${fObj["kcal"]}",
               style: TextStyle(color: TColor.gray, fontSize: 12),
             ),
           ),
@@ -71,13 +54,13 @@ class FindEatCell extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 15),
             child: SizedBox(
               width: 90,
-              height: 25,
+              height: 35,
               child: RoundButton(
                 fontSize: 12,
                 type: isEvent
                     ? RoundButtonType.bgGradient
                     : RoundButtonType.bgSGradient,
-                title: "Select",
+                title: "View",
                 onPressed: () {},
               ),
             ),

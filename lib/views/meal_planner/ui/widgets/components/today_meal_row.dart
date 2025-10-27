@@ -1,7 +1,7 @@
-import '../functions/colo_extension.dart';
+import '../../../../../core/functions/colo_extension.dart';
 import 'package:flutter/material.dart';
 
-import '../functions/common.dart';
+import '../../../../../core/functions/common.dart';
 
 class TodayMealRow extends StatelessWidget {
   final Map mObj;
@@ -9,11 +9,14 @@ class TodayMealRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color;
+    final cardColor = theme.cardColor;
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: TColor.white,
+        color: cardColor,
         borderRadius: BorderRadius.circular(15),
         boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 2)],
       ),
@@ -36,14 +39,17 @@ class TodayMealRow extends StatelessWidget {
                 Text(
                   mObj["name"].toString(),
                   style: TextStyle(
-                    color: TColor.black,
+                    color: textColor,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
                 Text(
                   "${getDayTitle(mObj["time"].toString())} | ${getStringDateToOtherFormate(mObj["time"].toString(), outFormatStr: "h:mm aa")}",
-                  style: TextStyle(color: TColor.gray, fontSize: 10),
+                  style: TextStyle(
+                    color: textColor?.withOpacity(0.6),
+                    fontSize: 10,
+                  ),
                 ),
               ],
             ),
