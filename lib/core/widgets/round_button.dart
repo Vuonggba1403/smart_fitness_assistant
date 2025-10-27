@@ -6,7 +6,7 @@ enum RoundButtonType { bgGradient, bgSGradient, textGradient }
 class RoundButton extends StatelessWidget {
   final String title;
   final RoundButtonType type;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final double fontSize;
   final double elevation;
   final FontWeight fontWeight;

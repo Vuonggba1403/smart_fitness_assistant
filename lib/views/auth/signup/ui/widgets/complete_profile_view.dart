@@ -1,5 +1,6 @@
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_drop_but.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:flutter/material.dart';
 import '../../../../../core/widgets/round_textfield.dart';
@@ -82,32 +83,9 @@ class _CompleteProfileViewState extends State<CompleteProfileView> {
                             ),
 
                             Expanded(
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton(
-                                  items: ["Male", "Female"]
-                                      .map(
-                                        (name) => DropdownMenuItem(
-                                          value: name,
-                                          child: Text(
-                                            name,
-                                            style: TextStyle(
-                                              color: textColor,
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                        ),
-                                      )
-                                      .toList(),
-                                  onChanged: (value) {},
-                                  isExpanded: true,
-                                  hint: Text(
-                                    "Choose Gender",
-                                    style: TextStyle(
-                                      color: textColor?.withOpacity(0.7),
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ),
+                              child: CustomDropButtonUnder(
+                                items: ["Male", "Female"],
+                                hint: "Choose Gender",
                               ),
                             ),
 

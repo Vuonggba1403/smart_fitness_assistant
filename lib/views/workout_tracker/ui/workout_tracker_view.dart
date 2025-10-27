@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_container_check.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/activity_tracker_view.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/logic/cubit/workout_tracker_cubit.dart';
@@ -259,41 +260,9 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                       ),
                     ),
                     SizedBox(height: media.width * 0.05),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 15,
-                        horizontal: 15,
-                      ),
-                      decoration: BoxDecoration(
-                        color: TColor.primaryColor2.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "Daily Workout Schedule",
-                            style: TextStyle(
-                              color: textColor,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          SizedBox(
-                            width: 80,
-                            height: 25,
-                            child: RoundButton(
-                              title: "Check",
-                              type: RoundButtonType.bgGradient,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w400,
-                              onPressed: () {
-                                // navigateTo(context, WorkoutScheduleView());
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
+                    CustomContainerCheck(
+                      name: "Daily Workout Schedule",
+                      title: "Check",
                     ),
                     SizedBox(height: media.width * 0.05),
                     Row(

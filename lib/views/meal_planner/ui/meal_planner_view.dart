@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_container_check.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_drop_but.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import '../../../core/widgets/find_eat_cell.dart';
 import '../../../core/widgets/today_meal_row.dart';
@@ -42,10 +44,13 @@ class _MealPlannerViewState extends State<MealPlannerView> {
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
+    final theme = Theme.of(context);
+    final cardColor = theme.cardColor;
+    final textColor = theme.textTheme.bodyMedium?.color;
 
     return Scaffold(
       appBar: CustomAppBar(title: "Meal Planner"),
-      backgroundColor: TColor.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,7 +66,7 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                       Text(
                         "Meal Nutritions",
                         style: TextStyle(
-                          color: TColor.black,
+                          color: textColor,
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
                         ),
@@ -73,34 +78,7 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                           gradient: LinearGradient(colors: TColor.primaryG),
                           borderRadius: BorderRadius.circular(15),
                         ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton(
-                            items: ["Weekly", "Monthly"]
-                                .map(
-                                  (name) => DropdownMenuItem(
-                                    value: name,
-                                    child: Text(
-                                      name,
-                                      style: TextStyle(
-                                        color: TColor.gray,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (value) {},
-                            icon: Icon(Icons.expand_more, color: TColor.white),
-                            hint: Text(
-                              "Weekly",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: TColor.white,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                        ),
+                        child: CustomDropButton(textColor: textColor),
                       ),
                     ],
                   ),
@@ -223,41 +201,12 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                     ),
                   ),
                   SizedBox(height: media.width * 0.05),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 15,
-                      horizontal: 15,
-                    ),
-                    decoration: BoxDecoration(
-                      color: TColor.primaryColor2.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Daily Meal Schedule",
-                          style: TextStyle(
-                            color: TColor.black,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        SizedBox(
-                          width: 70,
-                          height: 25,
-                          child: RoundButton(
-                            title: "Check",
-                            type: RoundButtonType.bgGradient,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w400,
-                            onPressed: () {
-                              navigateTo(context, const MealScheduleView());
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
+                  CustomContainerCheck(
+                    name: "Daily Meal Schedule",
+                    title: "Check",
+                    onPressed: () {
+                      navigateTo(context, const MealScheduleView());
+                    },
                   ),
                   SizedBox(height: media.width * 0.05),
                   Row(
@@ -266,7 +215,7 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                       Text(
                         "Today Meals",
                         style: TextStyle(
-                          color: TColor.black,
+                          color: textColor,
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
                         ),
@@ -278,40 +227,15 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                           gradient: LinearGradient(colors: TColor.primaryG),
                           borderRadius: BorderRadius.circular(15),
                         ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton(
-                            items:
-                                [
-                                      "Breakfast",
-                                      "Lunch",
-                                      "Dinner",
-                                      "Snack",
-                                      "Dessert",
-                                    ]
-                                    .map(
-                                      (name) => DropdownMenuItem(
-                                        value: name,
-                                        child: Text(
-                                          name,
-                                          style: TextStyle(
-                                            color: TColor.gray,
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                    .toList(),
-                            onChanged: (value) {},
-                            icon: Icon(Icons.expand_more, color: TColor.white),
-                            hint: Text(
-                              "Breakfast",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: TColor.white,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
+                        child: CustomDropButtonUnder(
+                          items: const [
+                            "Breakfast",
+                            "Lunch",
+                            "Dinner",
+                            "Snack",
+                            "Dessert",
+                          ],
+                          hint: "Breakfast",
                         ),
                       ),
                     ],
@@ -474,6 +398,41 @@ class _MealPlannerViewState extends State<MealPlannerView> {
     return SideTitleWidget(
       meta: meta,
       child: Padding(padding: const EdgeInsets.only(top: 8.0), child: text),
+    );
+  }
+}
+
+class CustomDropButton extends StatelessWidget {
+  const CustomDropButton({super.key, required this.textColor});
+
+  final Color? textColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButtonHideUnderline(
+      child: DropdownButton(
+        items: ["Weekly", "Monthly"]
+            .map(
+              (name) => DropdownMenuItem(
+                value: name,
+                child: Text(
+                  name,
+                  style: TextStyle(
+                    color: textColor?.withOpacity(0.7),
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            )
+            .toList(),
+        onChanged: (value) {},
+        icon: Icon(Icons.expand_more, color: TColor.white),
+        hint: Text(
+          "Weekly",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: TColor.white, fontSize: 12),
+        ),
+      ),
     );
   }
 }

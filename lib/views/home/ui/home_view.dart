@@ -6,14 +6,15 @@ import 'package:simple_animation_progress_bar/simple_animation_progress_bar.dart
 import 'package:simple_circular_progress_bar/simple_circular_progress_bar.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_container_check.dart';
+import 'package:smart_fitness_assistant/views/home/ui/widgets/activity_tracker_view.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/home_widgets/bmi_card.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/home_widgets/lastest_workout_view.dart';
-import 'package:smart_fitness_assistant/views/home/ui/widgets/home_widgets/today_target_view.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/home_widgets/workout_progress_view.dart';
+import 'package:smart_fitness_assistant/views/meal_planner/ui/meal_planner_view.dart';
 import '../../../core/functions/colo_extension.dart';
 import '../../notifications/ui/notification_view.dart';
 import 'widgets/home_widgets/heart_rate_view.dart';
-import 'widgets/home_widgets/workout_progress_header.dart';
 import '../logic/cubit/home_cubit.dart';
 
 class HomeView extends StatefulWidget {
@@ -130,7 +131,15 @@ class _HomeViewState extends State<HomeView> {
                 //BMI
                 BMICard(),
                 SizedBox(height: media.width * 0.05),
-                TodayTargetView(),
+                //Custom container
+                CustomContainerCheck(
+                  name: "Today Target",
+                  title: "Check",
+                  onPressed: () {
+                    // Handle check button press
+                    navigateTo(context, ActivityTrackerView());
+                  },
+                ),
                 SizedBox(height: media.width * 0.05),
                 Text(
                   "Activity Status",
@@ -485,10 +494,23 @@ class _HomeViewState extends State<HomeView> {
                   ],
                 ),
                 SizedBox(height: media.width * 0.1),
-                WorkoutProgressHeader(
-                  onDropdownChanged: () {
-                    // Handle dropdown change
-                  },
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Workout Progress",
+                      style: TextStyle(
+                        color: textColor,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    // CustomDropButton(
+                    //   items: ["Weekly", "Monthly"],
+                    //   hint: "Weekly",
+                    //   onChanged: (value) => onDropdownChanged?.call(),
+                    // ),
+                  ],
                 ),
                 SizedBox(height: media.width * 0.05),
                 WorkoutProgressView(

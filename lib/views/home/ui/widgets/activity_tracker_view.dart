@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_drop_but.dart';
 
 import '../../../../core/widgets/latest_activity_row.dart';
 import '../../../../core/widgets/today_target_cell.dart';
@@ -138,30 +139,9 @@ class _ActivityTrackerViewState extends State<ActivityTrackerView> {
                       gradient: LinearGradient(colors: TColor.primaryG),
                       borderRadius: BorderRadius.circular(15),
                     ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton(
-                        items: ["Weekly", "Monthly"]
-                            .map(
-                              (name) => DropdownMenuItem(
-                                value: name,
-                                child: Text(
-                                  name,
-                                  style: TextStyle(
-                                    color: TColor.gray,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (value) {},
-                        icon: Icon(Icons.expand_more, color: TColor.white),
-                        hint: Text(
-                          "Weekly",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: TColor.white, fontSize: 12),
-                        ),
-                      ),
+                    child: CustomDropButtonUnder(
+                      items: ["Weekly", "Monthly"],
+                      hint: "Weekly",
                     ),
                   ),
                 ],

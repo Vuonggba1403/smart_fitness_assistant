@@ -3,6 +3,7 @@ import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_container_check.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/views/sleep_tracker/sleep_add_alarm_view.dart';
 import 'widgets/comparison_view.dart';
@@ -170,41 +171,14 @@ class _PhotoProgressViewState extends State<PhotoProgressView> {
                   ),
                 ),
                 SizedBox(height: media.width * 0.05),
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 20),
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 15,
-                    horizontal: 15,
-                  ),
-                  decoration: BoxDecoration(
-                    color: TColor.primaryColor2.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Compare my Photo",
-                        style: TextStyle(
-                          color: textColor,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      SizedBox(
-                        width: 100,
-                        height: 25,
-                        child: RoundButton(
-                          title: "Compare",
-                          type: RoundButtonType.bgGradient,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w400,
-                          onPressed: () {
-                            navigateTo(context, const ComparisonView());
-                          },
-                        ),
-                      ),
-                    ],
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 14.0),
+                  child: CustomContainerCheck(
+                    name: "Compare Photos",
+                    title: "Compare",
+                    onPressed: () {
+                      navigateTo(context, const ComparisonView());
+                    },
                   ),
                 ),
                 Padding(

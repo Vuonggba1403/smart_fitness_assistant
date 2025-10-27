@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_drop_but.dart';
 
 class WorkoutProgressHeader extends StatelessWidget {
   final VoidCallback? onDropdownChanged;
@@ -28,27 +29,9 @@ class WorkoutProgressHeader extends StatelessWidget {
             gradient: LinearGradient(colors: TColor.primaryG),
             borderRadius: BorderRadius.circular(15),
           ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton(
-              items: ["Weekly", "Monthly"]
-                  .map(
-                    (name) => DropdownMenuItem(
-                      value: name,
-                      child: Text(
-                        name,
-                        style: TextStyle(color: textColor, fontSize: 14),
-                      ),
-                    ),
-                  )
-                  .toList(),
-              onChanged: (value) => onDropdownChanged?.call(),
-              icon: Icon(Icons.expand_more, color: textColor),
-              hint: Text(
-                "Weekly",
-                textAlign: TextAlign.center,
-                style: TextStyle(color: textColor, fontSize: 12),
-              ),
-            ),
+          child: CustomDropButtonUnder(
+            items: const ["Weekly", "Monthly"],
+            hint: "Weekly",
           ),
         ),
       ],
