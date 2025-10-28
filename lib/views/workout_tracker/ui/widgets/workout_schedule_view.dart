@@ -21,15 +21,15 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
   late DateTime _selectedDateAppBBar;
 
   List eventArr = [
-    {"name": "Ab Workout", "start_time": "25/05/2023 07:30 AM"},
-    {"name": "Upperbody Workout", "start_time": "25/05/2023 09:00 AM"},
-    {"name": "Lowerbody Workout", "start_time": "25/05/2023 03:00 PM"},
-    {"name": "Ab Workout", "start_time": "26/05/2023 07:30 AM"},
-    {"name": "Upperbody Workout", "start_time": "26/05/2023 09:00 AM"},
-    {"name": "Lowerbody Workout", "start_time": "26/05/2023 03:00 PM"},
-    {"name": "Ab Workout", "start_time": "27/05/2023 07:30 AM"},
-    {"name": "Upperbody Workout", "start_time": "27/05/2023 09:00 AM"},
-    {"name": "Lowerbody Workout", "start_time": "27/05/2023 03:00 PM"},
+    {"name": "Ab Workout", "start_time": "25/05/2025 07:30 AM"},
+    {"name": "Upperbody Workout", "start_time": "25/05/2025 09:00 AM"},
+    {"name": "Lowerbody Workout", "start_time": "25/05/2025 03:00 PM"},
+    {"name": "Ab Workout", "start_time": "26/05/2025 07:30 AM"},
+    {"name": "Upperbody Workout", "start_time": "26/05/2025 09:00 AM"},
+    {"name": "Lowerbody Workout", "start_time": "26/05/2025 03:00 PM"},
+    {"name": "Ab Workout", "start_time": "27/05/2025 07:30 AM"},
+    {"name": "Upperbody Workout", "start_time": "27/05/2025 09:00 AM"},
+    {"name": "Lowerbody Workout", "start_time": "27/05/2025 03:00 PM"},
   ];
 
   List selectDayEventArr = [];
@@ -67,9 +67,11 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color;
     return Scaffold(
       appBar: CustomAppBar(title: "Workout Schedule"),
-      backgroundColor: TColor.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -277,7 +279,7 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                                                     Text(
                                                       sObj["name"].toString(),
                                                       style: TextStyle(
-                                                        color: TColor.black,
+                                                        color: textColor,
                                                         fontSize: 14,
                                                         fontWeight:
                                                             FontWeight.w700,
@@ -297,7 +299,10 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                                                         Text(
                                                           "${getDayTitle(sObj["start_time"].toString())}|${getStringDateToOtherFormate(sObj["start_time"].toString(), outFormatStr: "h:mm aa")}",
                                                           style: TextStyle(
-                                                            color: TColor.gray,
+                                                            color: textColor
+                                                                ?.withOpacity(
+                                                                  0.6,
+                                                                ),
                                                             fontSize: 12,
                                                           ),
                                                         ),

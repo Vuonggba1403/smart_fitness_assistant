@@ -4,15 +4,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_container_check.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_drop_but.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/activity_tracker_view.dart';
-import 'package:smart_fitness_assistant/views/home/ui/widgets/home_widgets/bmi_card.dart';
-import 'package:smart_fitness_assistant/views/home/ui/widgets/home_widgets/lastest_workout_view.dart';
-import 'package:smart_fitness_assistant/views/home/ui/widgets/home_widgets/workout_progress_view.dart';
+import 'package:smart_fitness_assistant/views/home/ui/widgets/bmi_card.dart';
+import 'package:smart_fitness_assistant/views/home/ui/widgets/home_widgets/health_summary_section.dart';
+import 'package:smart_fitness_assistant/views/home/ui/widgets/home_widgets/heart_rate_view.dart';
+import 'package:smart_fitness_assistant/views/home/ui/widgets/lastest_workout_view.dart';
+import 'package:smart_fitness_assistant/views/home/ui/widgets/workout_progress_view.dart';
 import '../../../core/functions/colo_extension.dart';
 import '../../notifications/ui/notification_view.dart';
-import 'widgets/home_widgets/heart_rate_view.dart';
 import '../logic/cubit/home_cubit.dart';
-import 'widgets/home_widgets/health_summary_section.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -110,17 +111,36 @@ class _HomeViewState extends State<HomeView> {
                         ),
                       ],
                     ),
-                    IconButton(
-                      onPressed: () {
-                        navigateTo(context, NotificationView());
-                      },
-                      icon: Image.asset(
-                        "assets/img/notification_active.png",
-                        width: 25,
-                        height: 25,
-                        color: textColor,
-                        fit: BoxFit.fitHeight,
-                      ),
+                    Row(
+                      children: [
+                        Container(
+                          height: 40,
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(colors: TColor.secondaryG),
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: CustomDropButtonUnder(
+                            items: ["Weekly", "Monthly"],
+                            hint: "Weekly",
+                            onChanged: (value) {
+                              print("Selected: $value");
+                            },
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            navigateTo(context, NotificationView());
+                          },
+                          icon: Image.asset(
+                            "assets/img/notification_active.png",
+                            width: 25,
+                            height: 25,
+                            color: textColor,
+                            fit: BoxFit.fitHeight,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

@@ -46,7 +46,7 @@ class BMICard extends StatelessWidget {
                     Text(
                       "You have a normal weight",
                       style: TextStyle(
-                        color: TColor.white.withOpacity(0.7),
+                        color: textColor?.withOpacity(0.7),
                         fontSize: 12,
                       ),
                     ),

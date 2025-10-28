@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/components/workout_row.dart';
-import '../finished_workout_view.dart';
+import 'finished_workout_view.dart';
 
 class LatestWorkoutView extends StatelessWidget {
   final List<dynamic> lastWorkoutArr;

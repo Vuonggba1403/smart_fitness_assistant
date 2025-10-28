@@ -8,6 +8,7 @@ import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/workour
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/logic/cubit/workout_tracker_cubit.dart';
+import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/workout_schedule_view.dart';
 import 'widgets/common/upcoming_workout_row.dart';
 import 'widgets/common/what_train_row.dart';
 
@@ -204,6 +205,8 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                     CustomContainerCheck(
                       name: "Daily Workout Schedule",
                       title: "Check",
+                      onPressed: () =>
+                          navigateTo(context, WorkoutScheduleView()),
                     ),
                     SizedBox(height: media.width * 0.05),
                     Row(

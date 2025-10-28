@@ -144,15 +144,7 @@ class _ProfileBody extends StatelessWidget {
             /// Notification & Dark Mode
             BlocBuilder<ThemeCubit, ThemeState>(
               builder: (context, themeState) {
-                return BlocBuilder<ProfileCubit, ProfileState>(
-                  builder: (context, profileState) {
-                    return _buildNotificationSection(
-                      context,
-                      profileState,
-                      themeState.isDarkMode,
-                    );
-                  },
-                );
+                return _buildDarkModeSection(context, themeState.isDarkMode);
               },
             ),
 
@@ -207,12 +199,7 @@ class _ProfileBody extends StatelessWidget {
     );
   }
 
-  Widget _buildNotificationSection(
-    BuildContext context,
-    ProfileState state,
-    bool isDarkMode,
-  ) {
-    final profileCubit = context.read<ProfileCubit>();
+  Widget _buildDarkModeSection(BuildContext context, bool isDarkMode) {
     final themeCubit = context.read<ThemeCubit>();
     final theme = Theme.of(context);
     final cardColor = theme.cardColor;
@@ -225,59 +212,24 @@ class _ProfileBody extends StatelessWidget {
         borderRadius: BorderRadius.circular(15),
         boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 2)],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Text(
-            "Notification & DarkMode",
-            style: TextStyle(
-              color: textColor,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
+          Image.asset(
+            "assets/img/darkmode.png",
+            height: 15,
+            width: 15,
+            color: textColor,
+          ),
+          const SizedBox(width: 15),
+          Expanded(
+            child: Text(
+              "Dark Mode",
+              style: TextStyle(fontSize: 12, color: textColor),
             ),
           ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Image.asset(
-                "assets/img/p_notification.png",
-                height: 15,
-                width: 15,
-                color: textColor,
-              ),
-              const SizedBox(width: 15),
-              Expanded(
-                child: Text(
-                  "Pop-up Notification",
-                  style: TextStyle(fontSize: 12, color: textColor),
-                ),
-              ),
-              CustomToggleSwitch(
-                value: state.isNotificationEnabled,
-                onChanged: profileCubit.toggleNotification,
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              Image.asset(
-                "assets/img/darkmode.png",
-                height: 15,
-                width: 15,
-                color: textColor,
-              ),
-              const SizedBox(width: 15),
-              Expanded(
-                child: Text(
-                  "Dark Mode",
-                  style: TextStyle(fontSize: 12, color: textColor),
-                ),
-              ),
-              CustomToggleSwitch(
-                value: isDarkMode,
-                onChanged: themeCubit.toggleTheme,
-              ),
-            ],
+          CustomToggleSwitch(
+            value: isDarkMode,
+            onChanged: themeCubit.toggleTheme,
           ),
         ],
       ),
