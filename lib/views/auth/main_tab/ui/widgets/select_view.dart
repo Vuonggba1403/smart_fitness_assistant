@@ -5,14 +5,14 @@ import 'package:smart_fitness_assistant/views/workout_tracker/ui/workout_tracker
 import 'package:flutter/material.dart';
 
 import '../../../../sleep_tracker/ui/sleep_tracker_view.dart';
+import '../../../../../locale/locale_key.dart';
+import 'package:get/get.dart';
 
 class SelectView extends StatelessWidget {
   const SelectView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // var media = MediaQuery.of(context).size;
-
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -20,7 +20,7 @@ class SelectView extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             RoundButton(
-              title: "Workout Tracker",
+              title: LocaleKey.workoutTracker.tr,
               onPressed: () {
                 navigateTo(context, WorkoutTrackerView());
               },
@@ -29,7 +29,7 @@ class SelectView extends StatelessWidget {
             const SizedBox(height: 15),
 
             RoundButton(
-              title: "Meal Planner",
+              title: LocaleKey.mealPlanner.tr,
               onPressed: () {
                 navigateTo(context, MealPlannerView());
               },
@@ -38,7 +38,7 @@ class SelectView extends StatelessWidget {
             const SizedBox(height: 15),
 
             RoundButton(
-              title: "Sleep Tracker",
+              title: LocaleKey.sleepTracker.tr,
               onPressed: () {
                 navigateTo(context, SleepTrackerView());
               },

@@ -1,17 +1,19 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_container_check.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_drop_but.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/activity_tracker_view.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/bmi_card.dart';
-import 'package:smart_fitness_assistant/views/home/ui/widgets/home_widgets/health_summary_section.dart';
-import 'package:smart_fitness_assistant/views/home/ui/widgets/home_widgets/heart_rate_view.dart';
+import 'package:smart_fitness_assistant/views/home/ui/widgets/health_summary_section.dart';
+import 'package:smart_fitness_assistant/views/home/ui/widgets/heart_rate_view.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/lastest_workout_view.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/workout_progress_view.dart';
 import '../../../core/functions/colo_extension.dart';
+import '../../../locale/translation_manager.dart';
 import '../../notifications/ui/notification_view.dart';
 import '../logic/cubit/home_cubit.dart';
 
@@ -76,13 +78,11 @@ class _HomeViewState extends State<HomeView> {
 
   Widget _buildHomeScaffold(BuildContext context, HomeLoaded state) {
     var media = MediaQuery.of(context).size;
-    final theme = Theme.of(context); // 🌙 Lấy theme động
-    final textColor = theme.textTheme.bodyMedium?.color; // Màu text chính
-    final cardColor = theme.cardColor; // Màu nền cho các card
-    final shadow = theme.shadowColor; // Màu shadow động
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color;
+    final hintText = state.currentLanguage == 'vi' ? 'VI' : 'EN';
 
     return Scaffold(
-      // 🌙 Màu nền động
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SingleChildScrollView(
         child: SafeArea(
@@ -113,21 +113,28 @@ class _HomeViewState extends State<HomeView> {
                     ),
                     Row(
                       children: [
-                        Container(
-                          height: 40,
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(colors: TColor.secondaryG),
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: CustomDropButtonUnder(
-                            items: ["Weekly", "Monthly"],
-                            hint: "Weekly",
-                            onChanged: (value) {
-                              print("Selected: $value");
-                            },
-                          ),
+                        CustomDropButtonUnder(
+                          items: ["EN", "VI"],
+                          imagePaths: [
+                            "assets/img/english.png",
+                            "assets/img/vietnamese.png",
+                          ],
+                          hint: hintText,
+                          onChanged: (value) async {
+                            if (value == "EN") {
+                              await Get.find<TranslationManager>().updateLocale(
+                                TranslationManager.fallbackLocaleUS,
+                              );
+                              context.read<HomeCubit>().updateLanguage('en');
+                            } else if (value == "VI") {
+                              await Get.find<TranslationManager>().updateLocale(
+                                TranslationManager.fallbackLocaleVN,
+                              );
+                              context.read<HomeCubit>().updateLanguage('vi');
+                            }
+                          },
                         ),
+
                         IconButton(
                           onPressed: () {
                             navigateTo(context, NotificationView());

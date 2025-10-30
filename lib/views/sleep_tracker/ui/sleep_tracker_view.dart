@@ -226,8 +226,8 @@ class _SleepTrackerViewState extends State<SleepTrackerView> {
                     CustomContainerCheck(
                       name: "Daily Sleep Schedule",
                       title: "Check",
-                      onPressed: () =>
-                          navigateTo(context, const SleepScheduleView()),
+                      // onPressed: () =>
+                      // navigateTo(context, const SleepScheduleView()),
                     ),
                     SizedBox(height: media.width * 0.05),
                     Text(

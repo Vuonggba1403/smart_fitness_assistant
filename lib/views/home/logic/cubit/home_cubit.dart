@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
+import 'package:smart_fitness_assistant/core/functions/app_shared.dart';
 
 part 'home_state.dart';
 
@@ -8,7 +9,10 @@ class HomeCubit extends Cubit<HomeState> {
     _initializeHome();
   }
 
-  void _initializeHome() {
+  void _initializeHome() async {
+    // Lấy ngôn ngữ đã lưu
+    final savedLanguage = await AppShared.getLanguageCode();
+
     final lastWorkoutArr = [
       {
         "name": "Full Body Workout",
@@ -46,6 +50,7 @@ class HomeCubit extends Cubit<HomeState> {
         showingTooltipOnSpots: [21],
         lastWorkoutArr: lastWorkoutArr,
         waterArr: waterArr,
+        currentLanguage: savedLanguage,
       ),
     );
   }
@@ -54,6 +59,27 @@ class HomeCubit extends Cubit<HomeState> {
     if (state is HomeLoaded) {
       final currentState = state as HomeLoaded;
       emit(currentState.copyWith(showingTooltipOnSpots: [spotIndex]));
+    }
+  }
+
+  void refreshUI() {
+    if (state is HomeLoaded) {
+      final currentState = state as HomeLoaded;
+      emit(
+        currentState.copyWith(
+          showingTooltipOnSpots: currentState.showingTooltipOnSpots,
+          lastWorkoutArr: currentState.lastWorkoutArr,
+          waterArr: currentState.waterArr,
+        ),
+      );
+    }
+  }
+
+  void updateLanguage(String language) {
+    if (state is HomeLoaded) {
+      final currentState = state as HomeLoaded;
+      AppShared.setLanguageCode(language); // Lưu ngôn ngữ
+      emit(currentState.copyWith(currentLanguage: language));
     }
   }
 }

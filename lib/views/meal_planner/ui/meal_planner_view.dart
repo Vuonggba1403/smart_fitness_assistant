@@ -205,7 +205,7 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                     name: "Daily Meal Schedule",
                     title: "Check",
                     onPressed: () {
-                      navigateTo(context, const MealScheduleView());
+                      // navigateTo(context, const MealScheduleView());
                     },
                   ),
                   SizedBox(height: media.width * 0.05),

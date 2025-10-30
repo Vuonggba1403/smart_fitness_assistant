@@ -4,7 +4,6 @@ import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
 import 'package:smart_fitness_assistant/core/theme/logic/cubit/theme_cubit.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_toggle_switch.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
-import 'package:smart_fitness_assistant/views/profile/logic/cubit/profile_cubit.dart';
 import 'widgets/setting_row.dart';
 import 'widgets/title_subtitle_cell.dart';
 
@@ -16,26 +15,9 @@ class ProfileView extends StatefulWidget {
 }
 
 class _ProfileViewState extends State<ProfileView> {
-  late ProfileCubit _profileCubit;
-
-  @override
-  void initState() {
-    super.initState();
-    _profileCubit = ProfileCubit();
-  }
-
-  @override
-  void dispose() {
-    _profileCubit.close();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: _profileCubit,
-      child: const _ProfileBody(),
-    );
+    return const _ProfileBody();
   }
 }
 

@@ -205,8 +205,8 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                     CustomContainerCheck(
                       name: "Daily Workout Schedule",
                       title: "Check",
-                      onPressed: () =>
-                          navigateTo(context, WorkoutScheduleView()),
+                      // onPressed: () =>
+                      // navigateTo(context, WorkoutScheduleView()),
                     ),
                     SizedBox(height: media.width * 0.05),
                     Row(

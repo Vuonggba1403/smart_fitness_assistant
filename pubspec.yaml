@@ -30,12 +30,12 @@ environment:
 dependencies:
   animated_toggle_switch: ^0.8.5
   bloc: ^9.1.0
-  calendar_agenda:
-    path: dev_lib/calendar_agenda/
+  calendar_agenda: ^0.0.2+3
   carousel_slider: ^5.1.1
   cupertino_icons: ^1.0.8
   delightful_toast: ^1.1.0
   dotted_dashed_line: ^0.0.3
+  dropdown_button2: ^2.3.8
   fl_chart: ^1.1.1
   flutter:
     sdk: flutter

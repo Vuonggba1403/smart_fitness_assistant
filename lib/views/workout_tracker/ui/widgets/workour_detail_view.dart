@@ -189,7 +189,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                         time: "5/27, 09:00 AM",
                         color: TColor.primaryColor2.withOpacity(0.3),
                         onPressed: () {
-                          navigateTo(context, WorkoutScheduleView());
+                          // navigateTo(context, WorkoutScheduleView());
                         },
                       ),
                       SizedBox(height: media.width * 0.02),
