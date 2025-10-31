@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/views/auth/login/ui/login_view.dart';
 import 'package:smart_fitness_assistant/views/onboarding/logic/cubit/onboarding_cubit.dart';
 import 'package:smart_fitness_assistant/views/onboarding/ui/widgets/on_boarding_page.dart';
+import 'package:get/get.dart';
 
 class OnBoardingView extends StatelessWidget {
   const OnBoardingView({super.key});
@@ -13,27 +15,23 @@ class OnBoardingView extends StatelessWidget {
   Widget build(BuildContext context) {
     final pageArr = [
       {
-        "title": "Track Your Goal",
-        "subtitle":
-            "Don't worry if you have trouble determining your goals, We can help you determine your goals and track your goals",
+        "title": LocaleKey.titleOnBoarding1.tr,
+        "subtitle": LocaleKey.subtitleOnBoarding.tr,
         "image": "assets/img/on_1.png",
       },
       {
-        "title": "Get Burn",
-        "subtitle":
-            "Let’s keep burning, to achieve your goals. It hurts only temporarily — if you give up now, you will be in pain forever.",
+        "title": LocaleKey.titleOnBoarding2.tr,
+        "subtitle": LocaleKey.subtitleOnBoarding2.tr,
         "image": "assets/img/on_2.png",
       },
       {
-        "title": "Eat Well",
-        "subtitle":
-            "Let's start a healthy lifestyle with us. We can determine your diet every day — healthy eating is fun!",
+        "title": LocaleKey.titleOnBoarding3.tr,
+        "subtitle": LocaleKey.subtitleOnBoarding3.tr,
         "image": "assets/img/on_3.png",
       },
       {
-        "title": "Improve Sleep\nQuality",
-        "subtitle":
-            "Improve your sleep quality with us. Good quality sleep brings a good mood in the morning.",
+        "title": LocaleKey.titleOnBoarding4.tr,
+        "subtitle": LocaleKey.subtitleOnBoarding4.tr,
         "image": "assets/img/on_4.png",
       },
     ];

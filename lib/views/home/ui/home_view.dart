@@ -6,6 +6,7 @@ import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_container_check.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_drop_but.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/activity_tracker_view.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/bmi_card.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/health_summary_section.dart';
@@ -25,7 +26,7 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-  List<FlSpot> get allSpots => const [
+  static const List<FlSpot> allSpots = [
     FlSpot(0, 20),
     FlSpot(1, 25),
     FlSpot(2, 40),
@@ -65,153 +66,160 @@ class _HomeViewState extends State<HomeView> {
       create: (context) => HomeCubit(),
       child: BlocBuilder<HomeCubit, HomeState>(
         builder: (context, state) {
-          if (state is! HomeLoaded) {
-            return const Scaffold(
-              body: Center(child: CustomCircleProgIndicator()),
-            );
-          }
-          return _buildHomeScaffold(context, state);
+          return _buildHomeView(context, state);
         },
       ),
     );
   }
 
-  Widget _buildHomeScaffold(BuildContext context, HomeLoaded state) {
-    var media = MediaQuery.of(context).size;
+  Widget _buildHomeView(BuildContext context, HomeState state) {
     final theme = Theme.of(context);
-    final textColor = theme.textTheme.bodyMedium?.color;
-    final hintText = state.currentLanguage == 'vi' ? 'VI' : 'EN';
+    final media = MediaQuery.of(context).size;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      body: SingleChildScrollView(
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: SafeArea(
+        child: state is! HomeLoaded
+            ? const Center(child: CustomCircleProgIndicator())
+            : SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 15),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Welcome Back,",
-                          style: TextStyle(color: textColor, fontSize: 12),
-                        ),
-                        Text(
-                          "Stefani Wong",
-                          style: TextStyle(
-                            color: textColor,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
+                    _buildHeader(context, state),
+                    SizedBox(height: media.width * 0.05),
+                    const BMICard(),
+                    SizedBox(height: media.width * 0.05),
+                    _buildTodayTarget(context),
+                    SizedBox(height: media.width * 0.05),
+                    _buildActivityStatus(context, state, media),
+                    SizedBox(height: media.width * 0.05),
+                    HealthSummarySection(
+                      waterArr: state.waterArr,
+                      mediaWidth: media.width,
                     ),
-                    Row(
-                      children: [
-                        CustomDropButtonUnder(
-                          items: ["EN", "VI"],
-                          imagePaths: [
-                            "assets/img/english.png",
-                            "assets/img/vietnamese.png",
-                          ],
-                          hint: hintText,
-                          onChanged: (value) async {
-                            if (value == "EN") {
-                              await Get.find<TranslationManager>().updateLocale(
-                                TranslationManager.fallbackLocaleUS,
-                              );
-                              context.read<HomeCubit>().updateLanguage('en');
-                            } else if (value == "VI") {
-                              await Get.find<TranslationManager>().updateLocale(
-                                TranslationManager.fallbackLocaleVN,
-                              );
-                              context.read<HomeCubit>().updateLanguage('vi');
-                            }
-                          },
-                        ),
-
-                        IconButton(
-                          onPressed: () {
-                            navigateTo(context, NotificationView());
-                          },
-                          icon: Image.asset(
-                            "assets/img/notification_active.png",
-                            width: 25,
-                            height: 25,
-                            color: textColor,
-                            fit: BoxFit.fitHeight,
-                          ),
-                        ),
-                      ],
+                    SizedBox(height: media.width * 0.1),
+                    WorkoutProgressView(
+                      lineBarsData: _getLineBarsData(),
+                      showingTooltipOnSpots: state.showingTooltipOnSpots,
+                      rightTitles: _getRightTitles(),
+                      bottomTitles: _getBottomTitles(),
                     ),
+                    SizedBox(height: media.width * 0.05),
+                    LatestWorkoutView(
+                      lastWorkoutArr: state.lastWorkoutArr,
+                      onSeeMorePressed: () {},
+                    ),
+                    SizedBox(height: media.width * 0.1),
                   ],
                 ),
-                SizedBox(height: media.width * 0.05),
-                //BMI
-                BMICard(),
-                SizedBox(height: media.width * 0.05),
-                //Custom container
-                CustomContainerCheck(
-                  name: "Today Target",
-                  title: "Check",
-                  onPressed: () {
-                    // Handle check button press
-                    navigateTo(context, ActivityTrackerView());
-                  },
-                ),
-                SizedBox(height: media.width * 0.05),
-                Text(
-                  "Activity Status",
-                  style: TextStyle(
-                    color: textColor,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                SizedBox(height: media.width * 0.02),
-                HeartRateView(
-                  allSpots: allSpots,
-                  showingTooltipOnSpots: state.showingTooltipOnSpots,
-                ),
-                SizedBox(height: media.width * 0.05),
-                HealthSummarySection(
-                  waterArr: state.waterArr,
-                  mediaWidth: media.width,
-                ),
-                SizedBox(height: media.width * 0.1),
-                WorkoutProgressView(
-                  lineBarsData: lineBarsData1,
-                  showingTooltipOnSpots: state.showingTooltipOnSpots,
-                  rightTitles: rightTitles,
-                  bottomTitles: bottomTitles,
-                ),
-                SizedBox(height: media.width * 0.05),
-                LatestWorkoutView(
-                  lastWorkoutArr: state.lastWorkoutArr,
-                  onSeeMorePressed: () {
-                    // Handle see more
-                  },
-                ),
-                SizedBox(height: media.width * 0.1),
-              ],
-            ),
-          ),
-        ),
+              ),
       ),
     );
   }
 
-  List<LineChartBarData> get lineBarsData1 => [
-    lineChartBarData1_1,
-    lineChartBarData1_2,
+  // HEADER
+  Widget _buildHeader(BuildContext context, HomeLoaded state) {
+    final textColor = Theme.of(context).textTheme.bodyMedium?.color;
+    final hintText = state.currentLanguage == 'vi' ? 'VI' : 'EN';
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              LocaleKey.welCome.tr,
+              style: TextStyle(color: textColor, fontSize: 12),
+            ),
+            const Text(
+              "Stefani Wong",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            CustomDropButtonUnder(
+              items: ["EN", "VI"],
+              imagePaths: [
+                "assets/img/english.png",
+                "assets/img/vietnamese.png",
+              ],
+              hint: hintText,
+              onChanged: (value) async {
+                if (value == "EN") {
+                  await Get.find<TranslationManager>().updateLocale(
+                    TranslationManager.fallbackLocaleUS,
+                  );
+                  context.read<HomeCubit>().updateLanguage('en');
+                } else if (value == "VI") {
+                  await Get.find<TranslationManager>().updateLocale(
+                    TranslationManager.fallbackLocaleVN,
+                  );
+                  context.read<HomeCubit>().updateLanguage('vi');
+                }
+              },
+            ),
+            IconButton(
+              onPressed: () => navigateTo(context, const NotificationView()),
+              icon: Image.asset(
+                "assets/img/notification_active.png",
+                width: 25,
+                height: 25,
+                color: Theme.of(context).textTheme.bodyMedium?.color,
+                fit: BoxFit.fitHeight,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTodayTarget(BuildContext context) {
+    return CustomContainerCheck(
+      name: "Today Target",
+      title: "Check",
+      onPressed: () => navigateTo(context, const ActivityTrackerView()),
+    );
+  }
+
+  Widget _buildActivityStatus(
+    BuildContext context,
+    HomeLoaded state,
+    Size media,
+  ) {
+    final textColor = Theme.of(context).textTheme.bodyMedium?.color;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          LocaleKey.activityStatus.tr,
+          style: TextStyle(
+            color: textColor,
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        SizedBox(height: media.width * 0.02),
+        HeartRateView(
+          allSpots: allSpots,
+          showingTooltipOnSpots: state.showingTooltipOnSpots,
+        ),
+      ],
+    );
+  }
+
+  // === Chart Data ===
+  List<LineChartBarData> _getLineBarsData() => [
+    _lineChartBarData1,
+    _lineChartBarData2,
   ];
 
-  LineChartBarData get lineChartBarData1_1 => LineChartBarData(
+  LineChartBarData get _lineChartBarData1 => LineChartBarData(
     isCurved: true,
     gradient: LinearGradient(
       colors: [
@@ -234,7 +242,7 @@ class _HomeViewState extends State<HomeView> {
     ],
   );
 
-  LineChartBarData get lineChartBarData1_2 => LineChartBarData(
+  LineChartBarData get _lineChartBarData2 => LineChartBarData(
     isCurved: true,
     gradient: LinearGradient(
       colors: [
@@ -257,37 +265,23 @@ class _HomeViewState extends State<HomeView> {
     ],
   );
 
-  SideTitles get rightTitles => SideTitles(
-    getTitlesWidget: rightTitleWidgets,
+  SideTitles _getRightTitles() => SideTitles(
+    getTitlesWidget: _rightTitleWidgets,
     showTitles: true,
     interval: 20,
     reservedSize: 40,
   );
 
-  Widget rightTitleWidgets(double value, TitleMeta meta) {
-    String text;
-    switch (value.toInt()) {
-      case 0:
-        text = '0%';
-        break;
-      case 20:
-        text = '20%';
-        break;
-      case 40:
-        text = '40%';
-        break;
-      case 60:
-        text = '60%';
-        break;
-      case 80:
-        text = '80%';
-        break;
-      case 100:
-        text = '100%';
-        break;
-      default:
-        return Container();
-    }
+  Widget _rightTitleWidgets(double value, TitleMeta meta) {
+    const textMap = {
+      0: '0%',
+      20: '20%',
+      40: '40%',
+      60: '60%',
+      80: '80%',
+      100: '100%',
+    };
+    final text = textMap[value.toInt()] ?? '';
 
     return Text(
       text,
@@ -296,46 +290,23 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
-  SideTitles get bottomTitles => SideTitles(
+  SideTitles _getBottomTitles() => SideTitles(
     showTitles: true,
     reservedSize: 32,
     interval: 1,
-    getTitlesWidget: bottomTitleWidgets,
+    getTitlesWidget: _bottomTitleWidgets,
   );
 
-  Widget bottomTitleWidgets(double value, TitleMeta meta) {
-    var style = TextStyle(color: TColor.gray, fontSize: 12);
-    Widget text;
-    switch (value.toInt()) {
-      case 1:
-        text = Text('Sun', style: style);
-        break;
-      case 2:
-        text = Text('Mon', style: style);
-        break;
-      case 3:
-        text = Text('Tue', style: style);
-        break;
-      case 4:
-        text = Text('Wed', style: style);
-        break;
-      case 5:
-        text = Text('Thu', style: style);
-        break;
-      case 6:
-        text = Text('Fri', style: style);
-        break;
-      case 7:
-        text = Text('Sat', style: style);
-        break;
-      default:
-        text = const Text('');
-        break;
-    }
+  Widget _bottomTitleWidgets(double value, TitleMeta meta) {
+    const days = ['', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    final text = value.toInt() < days.length ? days[value.toInt()] : '';
 
     return SideTitleWidget(
       meta: meta,
-      child: Padding(padding: const EdgeInsets.only(top: 8.0), child: text),
+      child: Padding(
+        padding: const EdgeInsets.only(top: 8.0),
+        child: Text(text, style: TextStyle(color: TColor.gray, fontSize: 12)),
+      ),
     );
   }
 }

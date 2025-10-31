@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'on_boarding_view.dart';
+import 'package:get/get.dart';
 
 class StartedView extends StatefulWidget {
   const StartedView({super.key});
@@ -34,9 +36,10 @@ class _StartedViewState extends State<StartedView>
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: TColor.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: AnimatedContainer(
         duration: const Duration(seconds: 2), // ⏳ thời gian đổi màu
         width: media.width,
@@ -62,7 +65,7 @@ class _StartedViewState extends State<StartedView>
               ),
             ),
             Text(
-              "Everybody Can Train",
+              LocaleKey.textOnboarding.tr,
               style: TextStyle(
                 color: isChangeColor ? Colors.white70 : TColor.gray,
                 fontSize: 18,

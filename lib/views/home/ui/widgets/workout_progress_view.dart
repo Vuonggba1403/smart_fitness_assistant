@@ -37,20 +37,12 @@ class WorkoutProgressView extends StatelessWidget {
                 fontWeight: FontWeight.w700,
               ),
             ),
-            Container(
-              height: 30,
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(colors: TColor.primaryG),
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: CustomDropButtonUnder(
-                items: const ["Weekly", "Monthly"],
-                hint: "Weekly",
-                onChanged: (value) {
-                  print("Selected: $value");
-                },
-              ),
+            CustomDropButtonUnder(
+              items: const ["Weekly", "Monthly"],
+              hint: "Weekly",
+              onChanged: (value) {
+                print("Selected: $value");
+              },
             ),
           ],
         ),
