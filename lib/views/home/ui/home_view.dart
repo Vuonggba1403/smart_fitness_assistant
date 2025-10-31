@@ -2,30 +2,26 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_alertdialog.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_container_check.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_drop_but.dart';
+import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
+import 'package:smart_fitness_assistant/locale/translation_manager.dart';
+import 'package:smart_fitness_assistant/views/home/logic/cubit/home_cubit.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/activity_tracker_view.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/bmi_card.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/health_summary_section.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/heart_rate_view.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/lastest_workout_view.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/workout_progress_view.dart';
-import '../../../core/functions/colo_extension.dart';
-import '../../../locale/translation_manager.dart';
 import '../../notifications/ui/notification_view.dart';
-import '../logic/cubit/home_cubit.dart';
 
-class HomeView extends StatefulWidget {
+class HomeView extends StatelessWidget {
   const HomeView({super.key});
 
-  @override
-  State<HomeView> createState() => _HomeViewState();
-}
-
-class _HomeViewState extends State<HomeView> {
   static const List<FlSpot> allSpots = [
     FlSpot(0, 20),
     FlSpot(1, 25),
@@ -62,16 +58,14 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => HomeCubit(),
-      child: BlocBuilder<HomeCubit, HomeState>(
-        builder: (context, state) {
-          return _buildHomeView(context, state);
-        },
-      ),
+    return BlocBuilder<HomeCubit, HomeState>(
+      builder: (context, state) {
+        return _buildHomeView(context, state);
+      },
     );
   }
 
+  /// Giao diện chính của HomeView
   Widget _buildHomeView(BuildContext context, HomeState state) {
     final theme = Theme.of(context);
     final media = MediaQuery.of(context).size;
@@ -118,7 +112,7 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
-  // HEADER
+  /// Header gồm: Welcome + DropDown ngôn ngữ + Notification
   Widget _buildHeader(BuildContext context, HomeLoaded state) {
     final textColor = Theme.of(context).textTheme.bodyMedium?.color;
     final hintText = state.currentLanguage == 'vi' ? 'VI' : 'EN';
@@ -141,6 +135,7 @@ class _HomeViewState extends State<HomeView> {
         ),
         Row(
           children: [
+            // DropDown chọn ngôn ngữ
             CustomDropButtonUnder(
               items: ["EN", "VI"],
               imagePaths: [
@@ -148,27 +143,33 @@ class _HomeViewState extends State<HomeView> {
                 "assets/img/vietnamese.png",
               ],
               hint: hintText,
+              selectedValue: hintText,
               onChanged: (value) async {
-                if (value == "EN") {
-                  await Get.find<TranslationManager>().updateLocale(
-                    TranslationManager.fallbackLocaleUS,
-                  );
-                  context.read<HomeCubit>().updateLanguage('en');
-                } else if (value == "VI") {
-                  await Get.find<TranslationManager>().updateLocale(
-                    TranslationManager.fallbackLocaleVN,
-                  );
-                  context.read<HomeCubit>().updateLanguage('vi');
+                final translationManager = Get.find<TranslationManager>();
+
+                final localeMap = {
+                  "EN": TranslationManager.fallbackLocaleUS,
+                  "VI": TranslationManager.fallbackLocaleVN,
+                };
+
+                final languageMap = {"EN": "en", "VI": "vi"};
+
+                if (localeMap.containsKey(value)) {
+                  await translationManager.updateLocale(localeMap[value]!);
+                  context.read<HomeCubit>().updateLanguage(languageMap[value]!);
+                  CustomDialog.show(context, message: LocaleKey.langChanged.tr);
                 }
               },
             ),
+
+            // Nút Notification
             IconButton(
               onPressed: () => navigateTo(context, const NotificationView()),
               icon: Image.asset(
                 "assets/img/notification_active.png",
                 width: 25,
                 height: 25,
-                color: Theme.of(context).textTheme.bodyMedium?.color,
+                color: textColor,
                 fit: BoxFit.fitHeight,
               ),
             ),
@@ -178,6 +179,7 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
+  /// Ô Today Target
   Widget _buildTodayTarget(BuildContext context) {
     return CustomContainerCheck(
       name: "Today Target",
@@ -186,6 +188,7 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
+  /// Biểu đồ nhịp tim
   Widget _buildActivityStatus(
     BuildContext context,
     HomeLoaded state,
@@ -214,6 +217,7 @@ class _HomeViewState extends State<HomeView> {
   }
 
   // === Chart Data ===
+
   List<LineChartBarData> _getLineBarsData() => [
     _lineChartBarData1,
     _lineChartBarData2,

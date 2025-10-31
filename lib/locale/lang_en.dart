@@ -1,5 +1,3 @@
-import 'package:flutter/cupertino.dart';
-
 import 'locale_key.dart';
 
 Map<String, String> enUs = {
@@ -28,6 +26,11 @@ Map<String, String> enUs = {
 
   //permission Message
   LocaleKey.permissionMessage: "Please do not leave blank ",
+
+  //change language dialog
+  LocaleKey.langChanged: "Language changed successfully!",
+
+  LocaleKey.changeDarkMode: "Dark mode changed successfully!",
 
   //Login View
   LocaleKey.textLogin: "Hey there",

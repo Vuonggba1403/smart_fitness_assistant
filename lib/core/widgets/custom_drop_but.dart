@@ -17,20 +17,19 @@ class CustomDropButtonUnder extends StatelessWidget {
   final String hint;
   final String? selectedValue;
   final ValueChanged<String?>? onChanged;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color;
 
     return DropdownButtonHideUnderline(
-      // THÊM DÒNG NÀY
       child: DropdownButton2<String>(
         value: selectedValue,
         isExpanded: true,
-        iconStyleData: const IconStyleData(
-          icon: Icon(Icons.arrow_drop_down, size: 22),
-        ),
+        iconStyleData: const IconStyleData(icon: SizedBox.shrink()),
         dropdownStyleData: DropdownStyleData(
-          width: 100,
+          width: 90,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             color: theme.cardColor,
@@ -41,7 +40,7 @@ class CustomDropButtonUnder extends StatelessWidget {
         ),
         buttonStyleData: ButtonStyleData(
           height: 35,
-          width: 100,
+          width: 90,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15),
             gradient: LinearGradient(colors: TColor.secondaryG),
@@ -52,6 +51,65 @@ class CustomDropButtonUnder extends StatelessWidget {
           height: 35,
           padding: EdgeInsets.symmetric(horizontal: 10),
         ),
+
+        /// ✳️ Phần hiển thị trên button chính (không có icon check)
+        selectedItemBuilder: (context) {
+          return items.map((item) {
+            final index = items.indexOf(item);
+            final imagePath = (imagePaths != null && index < imagePaths!.length)
+                ? imagePaths![index]
+                : null;
+
+            return Row(
+              children: [
+                if (imagePath != null)
+                  Image.asset(
+                    imagePath,
+                    width: 20,
+                    height: 20,
+                    fit: BoxFit.cover,
+                  ),
+                if (imagePath != null) const SizedBox(width: 8),
+                Text(item, style: theme.textTheme.bodyMedium),
+              ],
+            );
+          }).toList();
+        },
+
+        /// ✳️ Các item trong dropdown menu (có icon check nếu đang được chọn)
+        items: List.generate(items.length, (index) {
+          final item = items[index];
+          final imagePath = (imagePaths != null && index < imagePaths!.length)
+              ? imagePaths![index]
+              : null;
+
+          return DropdownMenuItem<String>(
+            value: item,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    if (imagePath != null)
+                      Image.asset(
+                        imagePath,
+                        width: 20,
+                        height: 20,
+                        fit: BoxFit.cover,
+                      ),
+                    if (imagePath != null) const SizedBox(width: 8),
+                    Text(item, style: theme.textTheme.bodyMedium),
+                  ],
+                ),
+                if (selectedValue == item)
+                  Icon(Icons.check, color: textColor, size: 18),
+              ],
+            ),
+          );
+        }),
+        onChanged: onChanged,
+
+        /// Hint mặc định (chưa chọn gì)
         hint: Row(
           children: [
             if (imagePaths != null && imagePaths!.isNotEmpty) ...[
@@ -66,29 +124,6 @@ class CustomDropButtonUnder extends StatelessWidget {
             Text(hint, style: theme.textTheme.bodyMedium),
           ],
         ),
-        items: List.generate(items.length, (index) {
-          final imagePath = (imagePaths != null && index < imagePaths!.length)
-              ? imagePaths![index]
-              : null;
-          return DropdownMenuItem<String>(
-            value: items[index],
-            child: Row(
-              children: [
-                if (imagePath != null && imagePath.isNotEmpty) ...[
-                  Image.asset(
-                    imagePath,
-                    width: 20,
-                    height: 20,
-                    fit: BoxFit.cover,
-                  ),
-                  const SizedBox(width: 8),
-                ],
-                Text(items[index], style: theme.textTheme.bodyMedium),
-              ],
-            ),
-          );
-        }),
-        onChanged: onChanged,
       ),
     );
   }

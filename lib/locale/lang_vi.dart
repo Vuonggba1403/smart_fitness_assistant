@@ -4,11 +4,6 @@ Map<String, String> viVN = {
   LocaleKey.language: 'VI',
   LocaleKey.appName: 'Smart Fitness',
 
-  //Select view
-  LocaleKey.workoutTracker: 'Theo dõi Tập Luyện',
-  LocaleKey.mealPlanner: 'Kế Hoạch Ăn Uống',
-  LocaleKey.sleepTracker: 'Theo dõi Giấc Ngủ',
-
   //Onboarding view
   LocaleKey.textOnboarding: 'Ai cũng có thể tập luyện',
   LocaleKey.titleOnBoarding1: 'Theo dõi mục tiêu của bạn',
@@ -26,6 +21,11 @@ Map<String, String> viVN = {
 
   //permission Message
   LocaleKey.permissionMessage: "Vui lòng không để trống",
+
+  //change language dialog
+  LocaleKey.langChanged: "Đã thay đổi ngôn ngữ thành công!",
+
+  LocaleKey.changeDarkMode: "Đã thay đổi chế độ thành công!",
 
   //Login View
   LocaleKey.textLogin: "Xin chào",
@@ -45,4 +45,9 @@ Map<String, String> viVN = {
   //Home View
   LocaleKey.welcomeBack: 'Chào mừng trở lại',
   LocaleKey.activityStatus: 'Trạng thái hoạt động',
+
+  //Select view
+  LocaleKey.workoutTracker: 'Theo dõi Tập Luyện',
+  LocaleKey.mealPlanner: 'Kế Hoạch Ăn Uống',
+  LocaleKey.sleepTracker: 'Theo dõi Giấc Ngủ',
 };

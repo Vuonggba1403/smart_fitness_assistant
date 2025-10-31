@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
 import 'package:smart_fitness_assistant/core/theme/logic/cubit/theme_cubit.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_alertdialog.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_toggle_switch.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'widgets/setting_row.dart';
 import 'widgets/title_subtitle_cell.dart';
 
@@ -15,15 +18,6 @@ class ProfileView extends StatefulWidget {
 }
 
 class _ProfileViewState extends State<ProfileView> {
-  @override
-  Widget build(BuildContext context) {
-    return const _ProfileBody();
-  }
-}
-
-class _ProfileBody extends StatelessWidget {
-  const _ProfileBody();
-
   @override
   Widget build(BuildContext context) {
     final accountArr = [
@@ -91,7 +85,12 @@ class _ProfileBody extends StatelessWidget {
                     type: RoundButtonType.bgGradient,
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
-                    onPressed: () {},
+                    onPressed: () {
+                      // CustomDialog.show(
+                      //   context,
+                      //   message: "Đăng ký thành công!",
+                      // );
+                    },
                   ),
                 ),
               ],
@@ -211,7 +210,10 @@ class _ProfileBody extends StatelessWidget {
           ),
           CustomToggleSwitch(
             value: isDarkMode,
-            onChanged: themeCubit.toggleTheme,
+            onChanged: (value) {
+              themeCubit.toggleTheme(value);
+              CustomDialog.show(context, message: LocaleKey.changeDarkMode.tr);
+            },
           ),
         ],
       ),

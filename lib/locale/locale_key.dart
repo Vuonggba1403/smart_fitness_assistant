@@ -21,6 +21,9 @@ class LocaleKey {
 
   //permission Message
   static const String permissionMessage = "permission_message";
+  //change language dialog
+  static const String langChanged = "lang_changed";
+  static const String changeDarkMode = "change_dark_mode";
 
   //Login View
   static const String textLogin = "text_login";
