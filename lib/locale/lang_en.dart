@@ -25,7 +25,26 @@ Map<String, String> enUs = {
       "Let's start a healthy lifestyle with us. We can determine your diet every day — healthy eating is fun!",
   LocaleKey.subtitleOnBoarding4:
       "Improve your sleep quality with us. Good quality sleep brings a good mood in the morning.",
+
+  //permission Message
+  LocaleKey.permissionMessage: "Please do not leave blank ",
+
+  //Login View
+  LocaleKey.textLogin: "Hey there",
+  LocaleKey.forgotPassword: "Forgot your Password?",
+  LocaleKey.buttonLogin: "Login",
+  LocaleKey.dontAccount: "Don't have an account yet?",
+  LocaleKey.buttonRegis: "Register",
+  LocaleKey.or: "Or",
+
+  //Register View
+  LocaleKey.textRegister: "Create your Account",
+  LocaleKey.haveAccount: "Already have an account?",
+  LocaleKey.privacy:
+      "By continuing you accept our Privacy Policy and Term of Use",
+  LocaleKey.permissionError: "Check the box to continue",
+
   //Home View
-  LocaleKey.welCome: 'Welcome Back',
+  LocaleKey.welcomeBack: 'Welcome Back',
   LocaleKey.activityStatus: 'Activity Status',
 };

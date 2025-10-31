@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_derlight_bar.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_textfield.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/views/auth/login/ui/login_view.dart';
 import 'package:smart_fitness_assistant/views/auth/signup/logic/cubit/signup_cubit.dart';
 import 'widgets/complete_profile_view.dart';
@@ -50,14 +52,14 @@ class _SignUpFormState extends State<_SignUpForm> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    "Hey there,",
+                    LocaleKey.textLogin.tr,
                     style: TextStyle(
                       color: textColor?.withOpacity(0.7),
                       fontSize: 16,
                     ),
                   ),
                   Text(
-                    "Create an Account",
+                    LocaleKey.textRegister.tr,
                     style: TextStyle(
                       color: textColor,
                       fontSize: 20,
@@ -102,7 +104,7 @@ class _SignUpFormState extends State<_SignUpForm> {
                           ),
                           Flexible(
                             child: Text(
-                              "By continuing you accept our Privacy Policy and Term of Use",
+                              LocaleKey.privacy.tr,
                               style: TextStyle(
                                 color: textColor?.withOpacity(0.7),
                                 fontSize: 10,
@@ -119,13 +121,13 @@ class _SignUpFormState extends State<_SignUpForm> {
                   BlocBuilder<SignUpCubit, SignUpState>(
                     builder: (context, state) {
                       return RoundButton(
-                        title: "Register",
+                        title: LocaleKey.buttonRegis.tr,
                         onPressed: () {
                           if (!state.isChecked) {
                             // Show toast yêu cầu check
                             showCustomDelightToastBar(
                               context,
-                              "Check the box to continue",
+                              LocaleKey.permissionError.tr,
                               Icon(Icons.info_outline, color: textColor),
                             );
                             return;
@@ -151,7 +153,7 @@ class _SignUpFormState extends State<_SignUpForm> {
                         ),
                       ),
                       Text(
-                        "  Or  ",
+                        "  ${LocaleKey.or.tr}  ",
                         style: TextStyle(color: textColor, fontSize: 12),
                       ),
                       Expanded(
@@ -187,11 +189,12 @@ class _SignUpFormState extends State<_SignUpForm> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          "Already have an account? ",
+                          LocaleKey.haveAccount.tr,
                           style: TextStyle(color: textColor, fontSize: 14),
                         ),
+                        SizedBox(width: 2),
                         Text(
-                          "Login",
+                          LocaleKey.buttonLogin.tr,
                           style: TextStyle(
                             color: textColor,
                             fontSize: 14,

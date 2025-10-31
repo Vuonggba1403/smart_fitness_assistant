@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_textfield.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/views/auth/main_tab/ui/main_tab_view.dart';
 import 'package:smart_fitness_assistant/views/auth/signup/ui/signup_view.dart';
 
@@ -16,9 +18,13 @@ class LoginView extends StatefulWidget {
 
 class _LoginViewState extends State<LoginView> {
   final _formKey = GlobalKey<FormState>();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
+
     final theme = Theme.of(context);
     final textColor = theme.textTheme.bodyMedium?.color;
     final cardColor = theme.cardColor;
@@ -35,14 +41,14 @@ class _LoginViewState extends State<LoginView> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    "Hey there,",
+                    LocaleKey.textLogin.tr,
                     style: TextStyle(
                       color: textColor?.withOpacity(0.6),
                       fontSize: 16,
                     ),
                   ),
                   Text(
-                    "Welcome Back",
+                    LocaleKey.welcomeBack.tr,
                     style: TextStyle(
                       color: textColor,
                       fontSize: 20,
@@ -51,13 +57,15 @@ class _LoginViewState extends State<LoginView> {
                   ),
                   SizedBox(height: media.width * 0.05),
                   SizedBox(height: media.width * 0.04),
-                  const RoundTextField(
+                  RoundTextField(
+                    controller: _emailController,
                     iconPath: "assets/img/email.png",
                     keyboardType: TextInputType.emailAddress,
                     hintText: 'Email',
                   ),
                   SizedBox(height: media.width * 0.04),
                   RoundTextField(
+                    controller: _passwordController,
                     hintText: "Password",
                     iconPath: "assets/img/lock.png",
                     isPassword: true,
@@ -68,7 +76,7 @@ class _LoginViewState extends State<LoginView> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "Forgot your password?",
+                        LocaleKey.forgotPassword.tr,
                         style: TextStyle(
                           color: textColor?.withOpacity(0.8),
                           fontSize: 12,
@@ -79,7 +87,7 @@ class _LoginViewState extends State<LoginView> {
                   ),
                   const Spacer(),
                   RoundButton(
-                    title: "Login",
+                    title: LocaleKey.buttonLogin.tr,
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
                         navigateTo(context, const MainTabView());
@@ -98,8 +106,8 @@ class _LoginViewState extends State<LoginView> {
                         ),
                       ),
                       Text(
-                        "  Or  ",
-                        style: TextStyle(color: TColor.black, fontSize: 12),
+                        "  ${LocaleKey.or.tr}  ",
+                        style: TextStyle(color: textColor, fontSize: 12),
                       ),
                       Expanded(
                         child: Container(
@@ -168,11 +176,12 @@ class _LoginViewState extends State<LoginView> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          "Don’t have an account yet? ",
+                          LocaleKey.dontAccount.tr,
                           style: TextStyle(color: textColor, fontSize: 14),
                         ),
+                        SizedBox(width: 5),
                         Text(
-                          "Register",
+                          LocaleKey.buttonRegis.tr,
                           style: TextStyle(
                             color: textColor,
                             fontSize: 14,
@@ -190,5 +199,12 @@ class _LoginViewState extends State<LoginView> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import '../functions/colo_extension.dart';
 
 class RoundTextField extends StatefulWidget {
@@ -51,7 +53,7 @@ class _RoundTextFieldState extends State<RoundTextField> {
         obscureText: _obscure,
         validator: (value) {
           if (value == null || value.isEmpty) {
-            return 'Please do not leave blank';
+            return "${LocaleKey.permissionMessage.tr}";
           }
           return null;
         },

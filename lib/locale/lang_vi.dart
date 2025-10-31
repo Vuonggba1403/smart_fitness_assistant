@@ -24,7 +24,25 @@ Map<String, String> viVN = {
   LocaleKey.subtitleOnBoarding4:
       'Cải thiện chất lượng giấc ngủ cùng chúng tôi. Một giấc ngủ ngon sẽ mang lại tâm trạng tuyệt vời vào buổi sáng.',
 
+  //permission Message
+  LocaleKey.permissionMessage: "Vui lòng không để trống",
+
+  //Login View
+  LocaleKey.textLogin: "Xin chào",
+  LocaleKey.forgotPassword: "Quên mật khẩu?",
+  LocaleKey.buttonLogin: "Đăng nhập",
+  LocaleKey.dontAccount: "Chưa có tài khoản?",
+  LocaleKey.buttonRegis: "Đăng ký",
+  LocaleKey.or: "Hoặc",
+
+  //Register View
+  LocaleKey.textRegister: "Tạo tài khoản của bạn",
+  LocaleKey.haveAccount: "Đã có tài khoản?",
+  LocaleKey.privacy:
+      "Bằng cách tiếp tục, bạn đồng ý với Chính sách bảo mật và Điều khoản sử dụng",
+  LocaleKey.permissionError: "Vui lòng chọn vào ô để tiếp tục",
+
   //Home View
-  LocaleKey.welCome: 'Chào mừng trở lại',
+  LocaleKey.welcomeBack: 'Chào mừng trở lại',
   LocaleKey.activityStatus: 'Trạng thái hoạt động',
 };

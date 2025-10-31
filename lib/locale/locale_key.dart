@@ -19,7 +19,24 @@ class LocaleKey {
   static const String subtitleOnBoarding3 = 'subtitle_onboarding_3';
   static const String subtitleOnBoarding4 = 'subtitle_onboarding_4';
 
+  //permission Message
+  static const String permissionMessage = "permission_message";
+
+  //Login View
+  static const String textLogin = "text_login";
+  static const String forgotPassword = "forgot_password";
+  static const String buttonLogin = "button_login";
+  static const String dontAccount = "dont_account";
+  static const String buttonRegis = "button_regis";
+  static const String or = "or";
+
+  //Register View
+  static const String textRegister = "text_register";
+  static const String haveAccount = "have_account";
+  static const String privacy = "privacy";
+  static const String permissionError = "permission_error";
+
   //Home view
-  static const String welCome = "welcome_back";
+  static const String welcomeBack = "welcome_back";
   static const String activityStatus = "activity_status";
 }

@@ -4,58 +4,54 @@ import 'package:smart_fitness_assistant/core/functions/app_shared.dart';
 import 'lang_en.dart';
 import 'lang_vi.dart';
 
+/// Quản lý đa ngôn ngữ cho ứng dụng
 class TranslationManager extends Translations {
-  late Locale _locale;
+  // Ngôn ngữ mặc định
+  static const Locale fallbackLocaleVN = Locale('vi', 'VI');
+  static const Locale fallbackLocaleUS = Locale('en', 'US');
 
-  // Get current locale
+  // Danh sách ngôn ngữ hỗ trợ
+  static final List<Locale> supportedLocales = [
+    fallbackLocaleUS,
+    fallbackLocaleVN,
+  ];
+
+  // Locale hiện tại
+  late Locale _locale;
   Locale get locale => _locale;
 
-  // Constructor
   TranslationManager() {
-    _initLanguageCodeFromCached();
+    _initLocale();
   }
 
-  /// Convert string to Locale
-  Locale? _convertStringToLocale(String languageCode) => appLocales
-      .firstWhereOrNull((element) => element.languageCode == languageCode);
-
-  /// Init language code when load app
-  void _initLanguageCodeFromCached() {
-    String? cachedLanguage = AppShared.getLanguageCodeSync();
-
-    if (cachedLanguage == null) {
-      _locale = fallbackLocaleVN;
-      AppShared.setLanguageCode(_locale.languageCode);
-    } else {
-      _locale = _convertStringToLocale(cachedLanguage) ?? fallbackLocaleVN;
-    }
+  /// Lấy locale từ cache hoặc mặc định
+  void _initLocale() {
+    final cached = AppShared.getLanguageCodeSync();
+    _locale = supportedLocales.firstWhere(
+      (e) => e.languageCode == cached,
+      orElse: () => fallbackLocaleVN,
+    );
+    AppShared.setLanguageCode(_locale.languageCode);
   }
 
-  static Locale fallbackLocaleVN = const Locale('vi', 'VI');
-  static Locale fallbackLocaleUS = const Locale('en', 'US');
-
-  List<Locale> appLocales = [fallbackLocaleUS, fallbackLocaleVN];
-
-  /// Support translate language
+  /// Map ngôn ngữ
   @override
   Map<String, Map<String, String>> get keys => {'en_US': enUs, 'vi_VI': viVN};
 
-  /// Update locale to GetX and AppShared
+  /// Cập nhật locale hiện tại
   Future<void> updateLocale(Locale locale) async {
+    _locale = locale;
     Get.updateLocale(locale);
     await AppShared.setLanguageCode(locale.languageCode);
-    _locale = locale;
   }
 
-  /// Toggle language
+  /// Chuyển đổi Anh ↔ Việt
   Future<void> toggleLanguage() async {
-    final newLocale = _locale.languageCode == 'vi'
-        ? fallbackLocaleUS
-        : fallbackLocaleVN;
-    await updateLocale(newLocale);
+    final isVN = _locale.languageCode == 'vi';
+    await updateLocale(isVN ? fallbackLocaleUS : fallbackLocaleVN);
   }
 
-  Locale getLocale(String languageCode) {
-    return languageCode == 'vi' ? fallbackLocaleVN : fallbackLocaleUS;
-  }
+  /// Trả locale từ code
+  Locale getLocale(String code) =>
+      code == 'vi' ? fallbackLocaleVN : fallbackLocaleUS;
 }

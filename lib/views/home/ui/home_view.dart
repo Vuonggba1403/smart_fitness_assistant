@@ -130,7 +130,7 @@ class _HomeViewState extends State<HomeView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              LocaleKey.welCome.tr,
+              LocaleKey.welcomeBack.tr,
               style: TextStyle(color: textColor, fontSize: 12),
             ),
             const Text(
