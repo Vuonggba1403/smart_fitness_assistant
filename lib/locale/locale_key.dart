@@ -42,4 +42,7 @@ class LocaleKey {
   //Home view
   static const String welcomeBack = "welcome_back";
   static const String activityStatus = "activity_status";
+  static const String workoutProgress = "workout_progress";
+  static const String latestWorkout = "latest_workout";
+  static const String seeMore = "see_more";
 }

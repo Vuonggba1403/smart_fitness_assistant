@@ -1,8 +1,10 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_drop_but.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/views/home/logic/cubit/home_cubit.dart';
 
 class WorkoutProgressView extends StatelessWidget {
@@ -30,7 +32,7 @@ class WorkoutProgressView extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              "Workout Progress",
+              LocaleKey.workoutProgress.tr,
               style: TextStyle(
                 color: textColor,
                 fontSize: 16,

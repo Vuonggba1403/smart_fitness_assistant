@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/components/workout_row.dart';
 import 'finished_workout_view.dart';
 
@@ -30,12 +32,11 @@ class LatestWorkoutView extends StatelessWidget {
   Widget _buildHeader(BuildContext context) {
     final theme = Theme.of(context); // 🌙 Lấy theme động
     final textColor = theme.textTheme.bodyMedium?.color; // Màu text chính
-    final cardColor = theme.cardColor; // Màu nền cho các card
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          "Latest Workout",
+          LocaleKey.latestWorkout.tr,
           style: TextStyle(
             color: textColor,
             fontSize: 16,
@@ -45,7 +46,7 @@ class LatestWorkoutView extends StatelessWidget {
         TextButton(
           onPressed: onSeeMorePressed,
           child: Text(
-            "See More",
+            LocaleKey.seeMore.tr,
             style: TextStyle(
               color: textColor,
               fontSize: 14,

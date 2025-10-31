@@ -45,6 +45,9 @@ Map<String, String> viVN = {
   //Home View
   LocaleKey.welcomeBack: 'Chào mừng trở lại',
   LocaleKey.activityStatus: 'Trạng thái hoạt động',
+  LocaleKey.workoutProgress: 'Tiến độ tập luyện',
+  LocaleKey.latestWorkout: 'Buổi tập gần đây',
+  LocaleKey.seeMore: 'Xem thêm',
 
   //Select view
   LocaleKey.workoutTracker: 'Theo dõi Tập Luyện',

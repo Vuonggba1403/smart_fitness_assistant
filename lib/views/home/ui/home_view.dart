@@ -146,6 +146,7 @@ class HomeView extends StatelessWidget {
               selectedValue: hintText,
               onChanged: (value) async {
                 final translationManager = Get.find<TranslationManager>();
+                final homeCubit = context.read<HomeCubit>();
 
                 final localeMap = {
                   "EN": TranslationManager.fallbackLocaleUS,
@@ -155,9 +156,17 @@ class HomeView extends StatelessWidget {
                 final languageMap = {"EN": "en", "VI": "vi"};
 
                 if (localeMap.containsKey(value)) {
-                  await translationManager.updateLocale(localeMap[value]!);
-                  context.read<HomeCubit>().updateLanguage(languageMap[value]!);
-                  CustomDialog.show(context, message: LocaleKey.langChanged.tr);
+                  final newLanguage = languageMap[value]!;
+
+                  // Only proceed if language is different
+                  if (state.currentLanguage != newLanguage) {
+                    await translationManager.updateLocale(localeMap[value]!);
+                    homeCubit.updateLanguage(newLanguage);
+                    CustomDialog.show(
+                      context,
+                      message: LocaleKey.langChanged.tr,
+                    );
+                  }
                 }
               },
             ),
