@@ -11,7 +11,7 @@ class CustomContainerCheck extends StatelessWidget {
   });
 
   final String name;
-  final VoidCallback? onPressed; // 🔹 Sửa thành nullable
+  final VoidCallback? onPressed;
   final String title;
 
   @override

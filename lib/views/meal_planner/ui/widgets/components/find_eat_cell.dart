@@ -68,14 +68,7 @@ class FindEatCell extends StatelessWidget {
             child: SizedBox(
               width: 90,
               height: 25,
-              child: RoundButton(
-                fontSize: 12,
-                type: isEvent
-                    ? RoundButtonType.bgGradient
-                    : RoundButtonType.bgSGradient,
-                title: "Select",
-                onPressed: () {},
-              ),
+              child: RoundButton(title: "Select", onPressed: () {}),
             ),
           ),
         ],

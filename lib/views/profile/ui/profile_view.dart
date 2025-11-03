@@ -20,29 +20,31 @@ class ProfileView extends StatefulWidget {
 class _ProfileViewState extends State<ProfileView> {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color;
+
     final accountArr = [
-      {"image": "assets/img/p_personal.png", "name": "Personal Data"},
-      {"image": "assets/img/p_achi.png", "name": "Achievement"},
-      {"image": "assets/img/p_activity.png", "name": "Activity History"},
-      {"image": "assets/img/p_workout.png", "name": "Workout Progress"},
+      {"image": "assets/img/p_personal.png", "name": LocaleKey.accountArr1.tr},
+      {"image": "assets/img/p_achi.png", "name": LocaleKey.accountArr2.tr},
+      {"image": "assets/img/p_activity.png", "name": LocaleKey.accountArr3.tr},
+      {"image": "assets/img/p_workout.png", "name": LocaleKey.accountArr4.tr},
     ];
 
     final otherArr = [
-      {"image": "assets/img/p_contact.png", "name": "Contact Us"},
-      {"image": "assets/img/p_privacy.png", "name": "Privacy Policy"},
-      {"image": "assets/img/p_setting.png", "name": "Setting"},
+      {"image": "assets/img/p_contact.png", "name": LocaleKey.otherArr1.tr},
+      {"image": "assets/img/p_privacy.png", "name": LocaleKey.otherArr2.tr},
+      {"image": "assets/img/p_setting.png", "name": LocaleKey.otherArr3.tr},
     ];
-    final theme = Theme.of(context); // 🌙 Lấy theme động
 
     return Scaffold(
-      appBar: CustomAppBar(title: "Profile", showBackButton: false),
+      appBar: CustomAppBar(title: LocaleKey.profile.tr, showBackButton: false),
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 25),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            /// Avatar + Edit
+            /// --- Header: Avatar + Name + Edit ---
             Row(
               children: [
                 ClipRRect(
@@ -62,7 +64,7 @@ class _ProfileViewState extends State<ProfileView> {
                       Text(
                         "Stefani Wong",
                         style: TextStyle(
-                          color: theme.textTheme.bodyMedium?.color,
+                          color: textColor,
                           fontWeight: FontWeight.w500,
                           fontSize: 14,
                         ),
@@ -78,19 +80,14 @@ class _ProfileViewState extends State<ProfileView> {
                   ),
                 ),
                 SizedBox(
-                  width: 70,
+                  width: 100,
                   height: 25,
                   child: RoundButton(
-                    title: "Edit",
+                    title: LocaleKey.editProfile.tr,
                     type: RoundButtonType.bgGradient,
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
-                    onPressed: () {
-                      // CustomDialog.show(
-                      //   context,
-                      //   message: "Đăng ký thành công!",
-                      // );
-                    },
+                    onPressed: () {},
                   ),
                 ),
               ],
@@ -98,124 +95,168 @@ class _ProfileViewState extends State<ProfileView> {
 
             const SizedBox(height: 15),
 
-            /// Height / Weight / Age
-            const Row(
+            /// --- Height / Weight / Age ---
+            Row(
               children: [
                 Expanded(
-                  child: TitleSubtitleCell(title: "180cm", subtitle: "Height"),
+                  child: TitleSubtitleCell(
+                    title: "180cm",
+                    subtitle: LocaleKey.textHeight.tr,
+                  ),
                 ),
                 SizedBox(width: 15),
                 Expanded(
-                  child: TitleSubtitleCell(title: "65kg", subtitle: "Weight"),
+                  child: TitleSubtitleCell(
+                    title: "65kg",
+                    subtitle: LocaleKey.textWeight.tr,
+                  ),
                 ),
                 SizedBox(width: 15),
                 Expanded(
-                  child: TitleSubtitleCell(title: "22yo", subtitle: "Age"),
+                  child: TitleSubtitleCell(
+                    title: "22yo",
+                    subtitle: LocaleKey.textAge.tr,
+                  ),
                 ),
               ],
             ),
 
             const SizedBox(height: 25),
 
-            /// Account section
-            _buildSection(context, "Account", accountArr),
+            /// --- Account section ---
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+              decoration: BoxDecoration(
+                color: theme.cardColor,
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: const [
+                  BoxShadow(color: Colors.black12, blurRadius: 2),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    LocaleKey.account.tr,
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Column(
+                    children: List.generate(accountArr.length, (index) {
+                      final item = accountArr[index];
+                      return SettingRow(
+                        icon: item["image"].toString(),
+                        title: item["name"].toString(),
+                        onPressed: () {},
+                      );
+                    }),
+                  ),
+                ],
+              ),
+            ),
 
             const SizedBox(height: 25),
 
-            /// Notification & Dark Mode
+            /// --- Dark mode toggle ---
             BlocBuilder<ThemeCubit, ThemeState>(
               builder: (context, themeState) {
-                return _buildDarkModeSection(context, themeState.isDarkMode);
+                final themeCubit = context.read<ThemeCubit>();
+                return Container(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 10,
+                    horizontal: 15,
+                  ),
+                  decoration: BoxDecoration(
+                    color: theme.cardColor,
+                    borderRadius: BorderRadius.circular(15),
+                    boxShadow: const [
+                      BoxShadow(color: Colors.black12, blurRadius: 2),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Image.asset(
+                        "assets/img/darkmode.png",
+                        height: 15,
+                        width: 15,
+                        color: textColor,
+                      ),
+                      const SizedBox(width: 15),
+                      Expanded(
+                        child: Text(
+                          LocaleKey.darkMode.tr,
+                          style: TextStyle(fontSize: 12, color: textColor),
+                        ),
+                      ),
+                      CustomToggleSwitch(
+                        value: themeState.isDarkMode,
+                        onChanged: (value) {
+                          themeCubit.toggleTheme(value);
+                          CustomDialog.show(
+                            context,
+                            message: LocaleKey.changeDarkMode.tr,
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                );
               },
             ),
 
             const SizedBox(height: 25),
 
-            /// Other section
-            _buildSection(context, "Other", otherArr),
+            /// --- Other section ---
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+              decoration: BoxDecoration(
+                color: theme.cardColor,
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: const [
+                  BoxShadow(color: Colors.black12, blurRadius: 2),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    LocaleKey.other.tr,
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Column(
+                    children: List.generate(otherArr.length, (index) {
+                      final item = otherArr[index];
+                      return SettingRow(
+                        icon: item["image"].toString(),
+                        title: item["name"].toString(),
+                        onPressed: () {},
+                      );
+                    }),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 25),
+
+            /// --- Logout ---
+            RoundButton(
+              title: LocaleKey.logout.tr,
+              onPressed: () {
+                // CustomDialog.show(context, message: LocaleKey.logoutSuccess.tr);
+              },
+            ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildSection(BuildContext context, String title, List<Map> items) {
-    final theme = Theme.of(context);
-    final textColor = theme.textTheme.bodyMedium?.color;
-    final cardColor = theme.cardColor;
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 2)],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              color: textColor,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 8),
-          ListView.builder(
-            physics: const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              var iObj = items[index];
-              return SettingRow(
-                icon: iObj["image"].toString(),
-                title: iObj["name"].toString(),
-                onPressed: () {},
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDarkModeSection(BuildContext context, bool isDarkMode) {
-    final themeCubit = context.read<ThemeCubit>();
-    final theme = Theme.of(context);
-    final cardColor = theme.cardColor;
-    final textColor = theme.textTheme.bodyMedium?.color;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 2)],
-      ),
-      child: Row(
-        children: [
-          Image.asset(
-            "assets/img/darkmode.png",
-            height: 15,
-            width: 15,
-            color: textColor,
-          ),
-          const SizedBox(width: 15),
-          Expanded(
-            child: Text(
-              "Dark Mode",
-              style: TextStyle(fontSize: 12, color: textColor),
-            ),
-          ),
-          CustomToggleSwitch(
-            value: isDarkMode,
-            onChanged: (value) {
-              themeCubit.toggleTheme(value);
-              CustomDialog.show(context, message: LocaleKey.changeDarkMode.tr);
-            },
-          ),
-        ],
       ),
     );
   }

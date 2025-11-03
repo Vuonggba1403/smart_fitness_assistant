@@ -45,4 +45,22 @@ class LocaleKey {
   static const String workoutProgress = "workout_progress";
   static const String latestWorkout = "latest_workout";
   static const String seeMore = "see_more";
+
+  //Profile View
+  static const String profile = "profile";
+  static const String editProfile = "edit_profile";
+  static const String textHeight = "text_height";
+  static const String textWeight = "text_weight";
+  static const String textAge = "text_age";
+  static const String account = "account";
+  static const String darkMode = "dark_mode";
+  static const String accountArr1 = "account_arr1";
+  static const String accountArr2 = "account_arr2";
+  static const String accountArr3 = "account_arr3";
+  static const String accountArr4 = "account_arr4";
+  static const String other = "other";
+  static const String otherArr1 = "other_arr1";
+  static const String otherArr2 = "other_arr2";
+  static const String otherArr3 = "other_arr3";
+  static const String logout = "logout";
 }

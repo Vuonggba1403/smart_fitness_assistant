@@ -53,4 +53,22 @@ Map<String, String> enUs = {
   LocaleKey.workoutProgress: 'Workout Progress',
   LocaleKey.latestWorkout: 'Latest Workout',
   LocaleKey.seeMore: 'See More',
+
+  //Profile View
+  LocaleKey.profile: "Profile",
+  LocaleKey.editProfile: "Edit",
+  LocaleKey.textHeight: "Height",
+  LocaleKey.textWeight: "Weight",
+  LocaleKey.textAge: "Age",
+  LocaleKey.account: "Account",
+  LocaleKey.darkMode: "Dark Mode",
+  LocaleKey.accountArr1: "Personal Data",
+  LocaleKey.accountArr2: "Achievement",
+  LocaleKey.accountArr3: "Activity History",
+  LocaleKey.accountArr4: "Workout Progress",
+  LocaleKey.other: "Other",
+  LocaleKey.otherArr1: "Contact Us",
+  LocaleKey.otherArr2: "Privacy Policy",
+  LocaleKey.otherArr3: "Setting",
+  LocaleKey.logout: "Log Out",
 };

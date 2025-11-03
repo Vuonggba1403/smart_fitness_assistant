@@ -53,4 +53,23 @@ Map<String, String> viVN = {
   LocaleKey.workoutTracker: 'Theo dõi Tập Luyện',
   LocaleKey.mealPlanner: 'Kế Hoạch Ăn Uống',
   LocaleKey.sleepTracker: 'Theo dõi Giấc Ngủ',
+
+  //Profile View
+  LocaleKey.profile: "Trang cá nhân",
+  LocaleKey.editProfile: "Chỉnh sửa",
+  LocaleKey.textHeight: "Chiều cao",
+  LocaleKey.textWeight: "Cân nặng",
+
+  LocaleKey.textAge: "Tuổi",
+  LocaleKey.account: "Tài khoản",
+  LocaleKey.darkMode: "Chế độ tối",
+  LocaleKey.accountArr1: "Dữ liệu cá nhân",
+  LocaleKey.accountArr2: "Thành tích",
+  LocaleKey.accountArr3: "Lịch sử hoạt động",
+  LocaleKey.accountArr4: "Tiến độ tập luyện",
+  LocaleKey.other: "Khác",
+  LocaleKey.otherArr1: "Liên hệ với chúng tôi",
+  LocaleKey.otherArr2: "Chính sách quyền riêng tư",
+  LocaleKey.otherArr3: "Cài đặt",
+  LocaleKey.logout: "Đăng xuất",
 };

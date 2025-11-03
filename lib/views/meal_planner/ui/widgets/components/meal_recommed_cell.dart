@@ -55,14 +55,7 @@ class MealRecommendCell extends StatelessWidget {
             child: SizedBox(
               width: 90,
               height: 35,
-              child: RoundButton(
-                fontSize: 12,
-                type: isEvent
-                    ? RoundButtonType.bgGradient
-                    : RoundButtonType.bgSGradient,
-                title: "View",
-                onPressed: () {},
-              ),
+              child: RoundButton(title: "View", onPressed: () {}),
             ),
           ),
         ],

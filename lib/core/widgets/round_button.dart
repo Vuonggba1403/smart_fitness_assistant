@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
 
 enum RoundButtonType { bgGradient, bgSGradient, textGradient }
 
@@ -25,11 +26,7 @@ class RoundButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: type == RoundButtonType.bgSGradient
-              ? TColor.secondaryG
-              : TColor.primaryG,
-        ),
+        gradient: LinearGradient(colors: AppTheme.gradientColors(context)),
         borderRadius: BorderRadius.circular(25),
         boxShadow:
             type == RoundButtonType.bgGradient ||

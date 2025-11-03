@@ -53,7 +53,7 @@ class _RoundTextFieldState extends State<RoundTextField> {
         obscureText: _obscure,
         validator: (value) {
           if (value == null || value.isEmpty) {
-            return "${LocaleKey.permissionMessage.tr}";
+            return LocaleKey.permissionMessage.tr;
           }
           return null;
         },
