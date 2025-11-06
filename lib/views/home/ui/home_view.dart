@@ -164,8 +164,8 @@ class HomeView extends StatelessWidget {
 
                   // === Ô Today Target ===
                   CustomContainerCheck(
-                    name: "Today Target",
-                    title: "Check",
+                    name: LocaleKey.todayTarget.tr,
+                    title: LocaleKey.check.tr,
                     onPressed: () =>
                         navigateTo(context, const ActivityTrackerView()),
                   ),

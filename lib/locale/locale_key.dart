@@ -38,6 +38,16 @@ class LocaleKey {
   static const String haveAccount = "have_account";
   static const String privacy = "privacy";
   static const String permissionError = "permission_error";
+  //Register View-Complete profile
+  static const String titleCompleteProfile = "complete_profile";
+  static const String textCompleteProfile = "text_complete_profile";
+  static const String hintHeight = "hint_height";
+  static const String hintWeight = "hint_weight";
+  static const String hintWeightGoal = "hint_weight_goal";
+  static const String textHeight1 = "text_height1";
+  static const String textWeight1 = "text_weight1";
+  static const String textWeightGoal1 = "text_weight_goal1";
+  static const String buttonNext = "button_next";
 
   //Home view
   static const String welcomeBack = "welcome_back";
@@ -45,6 +55,11 @@ class LocaleKey {
   static const String workoutProgress = "workout_progress";
   static const String latestWorkout = "latest_workout";
   static const String seeMore = "see_more";
+  static const String todayTarget = "today_target";
+  static const String check = "check";
+  //BMI
+  static const String bmi = "bmi";
+  static const String textBMI = "text_bmi";
 
   //Profile View
   static const String profile = "profile";

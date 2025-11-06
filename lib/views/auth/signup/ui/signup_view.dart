@@ -192,7 +192,7 @@ class _SignUpFormState extends State<_SignUpForm> {
                           LocaleKey.haveAccount.tr,
                           style: TextStyle(color: textColor, fontSize: 14),
                         ),
-                        SizedBox(width: 2),
+                        SizedBox(width: 3),
                         Text(
                           LocaleKey.buttonLogin.tr,
                           style: TextStyle(

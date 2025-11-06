@@ -46,6 +46,16 @@ Map<String, String> enUs = {
   LocaleKey.privacy:
       "By continuing you accept our Privacy Policy and Term of Use",
   LocaleKey.permissionError: "Check the box to continue",
+  //Register View-Complete profile
+  LocaleKey.titleCompleteProfile: "Complete your profile",
+  LocaleKey.textCompleteProfile: "It will help us to know more about you!",
+  LocaleKey.hintHeight: "Enter your height",
+  LocaleKey.hintWeight: "Enter your weight",
+  LocaleKey.hintWeightGoal: "Enter your weight goal",
+  LocaleKey.textHeight1: "Your Height",
+  LocaleKey.textWeight1: "Your Weight",
+  LocaleKey.textWeightGoal1: "Your Weight Goal",
+  LocaleKey.buttonNext: "Next",
 
   //Home View
   LocaleKey.welcomeBack: 'Welcome Back',
@@ -53,6 +63,11 @@ Map<String, String> enUs = {
   LocaleKey.workoutProgress: 'Workout Progress',
   LocaleKey.latestWorkout: 'Latest Workout',
   LocaleKey.seeMore: 'See More',
+  LocaleKey.todayTarget: "Today Target",
+  LocaleKey.check: "Check",
+  //BMI
+  LocaleKey.bmi: "BMI (Body Mass Index)",
+  LocaleKey.textBMI: "You have a normal weight",
 
   //Profile View
   LocaleKey.profile: "Profile",

@@ -1,7 +1,9 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 
 class BMICard extends StatelessWidget {
   const BMICard({super.key});
@@ -36,7 +38,7 @@ class BMICard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "BMI (Body Mass Index)",
+                      LocaleKey.bmi.tr,
                       style: TextStyle(
                         color: textColor,
                         fontSize: 14,
@@ -44,7 +46,7 @@ class BMICard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      "You have a normal weight",
+                      LocaleKey.textBMI.tr,
                       style: TextStyle(
                         color: textColor?.withOpacity(0.7),
                         fontSize: 12,
@@ -54,7 +56,10 @@ class BMICard extends StatelessWidget {
                     SizedBox(
                       width: 120,
                       height: 35,
-                      child: RoundButton(title: "View More", onPressed: () {}),
+                      child: RoundButton(
+                        title: LocaleKey.seeMore.tr,
+                        onPressed: () {},
+                      ),
                     ),
                   ],
                 ),

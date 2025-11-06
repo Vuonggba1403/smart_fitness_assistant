@@ -41,6 +41,16 @@ Map<String, String> viVN = {
   LocaleKey.privacy:
       "Bằng cách tiếp tục, bạn đồng ý với Chính sách bảo mật và Điều khoản sử dụng",
   LocaleKey.permissionError: "Vui lòng chọn vào ô để tiếp tục",
+  //Register View-Complete profile
+  LocaleKey.titleCompleteProfile: "Hoàn thành hồ sơ của bạn",
+  LocaleKey.textCompleteProfile: "Nó sẽ giúp chúng tôi hiểu rõ hơn về bạn!",
+  LocaleKey.hintHeight: "Nhập chiều cao của bạn",
+  LocaleKey.hintWeight: "Nhập cân nặng của bạn",
+  LocaleKey.hintWeightGoal: "Nhập mục tiêu cân nặng của bạn",
+  LocaleKey.textHeight1: "Chiều cao của bạn",
+  LocaleKey.textWeight1: "Cân nặng của bạn",
+  LocaleKey.textWeightGoal1: "Mục tiêu cân nặng của bạn",
+  LocaleKey.buttonNext: "Tiếp theo",
 
   //Home View
   LocaleKey.welcomeBack: 'Chào mừng trở lại',
@@ -48,18 +58,23 @@ Map<String, String> viVN = {
   LocaleKey.workoutProgress: 'Tiến độ tập luyện',
   LocaleKey.latestWorkout: 'Buổi tập gần đây',
   LocaleKey.seeMore: 'Xem thêm',
+  LocaleKey.todayTarget: "Mục tiêu hôm nay",
+  LocaleKey.check: "Kiểm tra",
+  //BMI
+  LocaleKey.bmi: "BMI (Chỉ số khối cơ thể)",
+  LocaleKey.textBMI: "Bạn có cân nặng bình thường",
 
   //Select view
   LocaleKey.workoutTracker: 'Theo dõi Tập Luyện',
   LocaleKey.mealPlanner: 'Kế Hoạch Ăn Uống',
   LocaleKey.sleepTracker: 'Theo dõi Giấc Ngủ',
+  LocaleKey.changeLanguage: 'Thay đổi Ngôn ngữ',
 
   //Profile View
   LocaleKey.profile: "Trang cá nhân",
   LocaleKey.editProfile: "Chỉnh sửa",
   LocaleKey.textHeight: "Chiều cao",
   LocaleKey.textWeight: "Cân nặng",
-
   LocaleKey.textAge: "Tuổi",
   LocaleKey.account: "Tài khoản",
   LocaleKey.darkMode: "Chế độ tối",
