@@ -28,25 +28,26 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-  animated_toggle_switch: ^0.8.5
-  bloc: ^9.1.0
-  calendar_agenda: ^0.0.2+3
-  carousel_slider: ^5.1.1
-  cupertino_icons: ^1.0.8
-  delightful_toast: ^1.1.0
-  dotted_dashed_line: ^0.0.3
-  dropdown_button2: ^2.3.8
-  fl_chart: ^1.1.1
+  animated_toggle_switch: ^0.8.5        # Nút gạt chuyển đổi có hiệu ứng animation
+  bloc: ^9.1.0                          # Quản lý trạng thái (logic business)
+  calendar_agenda: ^0.0.2+3             # Lịch có thanh agenda
+  carousel_slider: ^5.1.1               # Hiển thị slider ảnh hoặc nội dung
+  cupertino_icons: ^1.0.8               # Icon phong cách iOS
+  delightful_toast: ^1.1.0              # Hiển thị thông báo (toast) đẹp mắt
+  dotted_dashed_line: ^0.0.3            # Kẻ đường nét đứt hoặc chấm
+  dropdown_button2: ^2.3.8              # Dropdown tùy chỉnh linh hoạt
+  fl_chart: ^1.1.1                      # Biểu đồ (line, bar, pie,...)
   flutter:
-    sdk: flutter
-  flutter_bloc: ^9.1.1
-  get: ^4.7.2
-  intl: ^0.18.1
-  readmore: ^3.0.0
-  shared_preferences: ^2.5.3
-  simple_animation_progress_bar: ^1.9.2
-  simple_circular_progress_bar: ^1.0.2
-  supabase_flutter: ^2.10.3
+    sdk: flutter                        # SDK chính của Flutter
+  flutter_bloc: ^9.1.1                  # Tích hợp Bloc vào Flutter widget
+  get: ^4.7.2                           # Quản lý trạng thái & điều hướng (GetX)
+  intl: ^0.18.1                         # Định dạng số, ngày, ngôn ngữ
+  readmore: ^3.0.0                      # Ẩn/bật nội dung dài (Read more)
+  shared_preferences: ^2.5.3            # Lưu dữ liệu cục bộ dạng key–value
+  simple_animation_progress_bar: ^1.9.2 # Thanh tiến trình có animation
+  simple_circular_progress_bar: ^1.0.2  # Vòng tròn tiến trình đơn giản
+  supabase_flutter: ^2.10.3             # Kết nối Supabase (auth, DB, storage)
+
 
 dependency_overrides:
   intl: ^0.18.1 # Override intl version for compatibility

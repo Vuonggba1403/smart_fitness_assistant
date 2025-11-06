@@ -10,14 +10,22 @@ import 'package:smart_fitness_assistant/views/onboarding/ui/started_view.dart';
 import 'package:smart_fitness_assistant/views/onboarding/ui/widgets/on_boarding_page.dart';
 import 'core/functions/app_shared.dart';
 import 'locale/translation_manager.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await AppShared.init();
 
+  //Khoi tao SharedPreferences
+  await AppShared.init();
+  //Khoi tao da ngon ngu
   final translationManager = TranslationManager();
   Get.put<TranslationManager>(translationManager);
-
+  //Connect to Supabase
+  await Supabase.initialize(
+    url: 'https://tlmvkajvubxejucfxibw.supabase.co',
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRsbXZrYWp2dWJ4ZWp1Y2Z4aWJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5OTQ4NTIsImV4cCI6MjA3NjU3MDg1Mn0.jLYPFLGWMQDxqp8gfZLoVxQBLl82Imyezq_mJ0sHzFE',
+  );
   runApp(
     MultiBlocProvider(
       providers: [
