@@ -54,6 +54,9 @@ Map<String, String> viVN = {
   LocaleKey.textWeight1: "Cân nặng của bạn",
   LocaleKey.textWeightGoal1: "Mục tiêu cân nặng của bạn",
   LocaleKey.buttonNext: "Tiếp theo",
+  //Register-Message
+  LocaleKey.registerSuccess: "Đăng ký thành công",
+  LocaleKey.registerError: "Đăng ký thất bại",
 
   //Home View
   LocaleKey.welcomeBack: 'Chào mừng trở lại',

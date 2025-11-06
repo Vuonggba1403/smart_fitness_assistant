@@ -51,6 +51,10 @@ class LocaleKey {
   static const String textWeight1 = "text_weight1";
   static const String textWeightGoal1 = "text_weight_goal1";
   static const String buttonNext = "button_next";
+  //Register-Message
+  //Login View - Message
+  static const String registerSuccess = "register_success";
+  static const String registerError = "register_error";
 
   //Home view
   static const String welcomeBack = "welcome_back";

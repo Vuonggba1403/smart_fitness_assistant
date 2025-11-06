@@ -1,12 +1,15 @@
 part of 'signup_cubit.dart';
 
 @immutable
-class SignUpState {
-  final bool isChecked;
+sealed class SignupState {}
 
-  const SignUpState({this.isChecked = false});
+final class SignupInitial extends SignupState {}
 
-  SignUpState copyWith({bool? isChecked}) {
-    return SignUpState(isChecked: isChecked ?? this.isChecked);
-  }
+final class SignUpSuccess extends SignupState {}
+
+final class SignUpLoading extends SignupState {}
+
+final class SignUpError extends SignupState {
+  final String message;
+  SignUpError(this.message);
 }

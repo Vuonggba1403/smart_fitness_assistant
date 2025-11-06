@@ -2,13 +2,14 @@ import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-part 'authentication_state.dart';
+part 'login_state.dart';
 
-class AuthenticationCubit extends Cubit<AuthenticationState> {
-  AuthenticationCubit() : super(AuthenticationInitial());
+class LoginCubit extends Cubit<LoginState> {
+  LoginCubit() : super(LoginInitial());
+  // Lấy Supabase client toàn cục đã được khởi tạo trong Supabase.initialize()
+  SupabaseClient client = Supabase.instance.client;
 
-  var client = Supabase.instance.client;
-
+  //Login function
   Future<void> login({required String email, required String password}) async {
     emit(LoginLoading());
     try {

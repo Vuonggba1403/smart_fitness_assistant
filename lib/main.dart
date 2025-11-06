@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:smart_fitness_assistant/core/sensitive_data.dart';
 import 'package:smart_fitness_assistant/core/theme/logic/cubit/theme_cubit.dart';
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
-import 'package:smart_fitness_assistant/views/auth/login/logic/cubit/authentication_cubit.dart';
+import 'package:smart_fitness_assistant/views/auth/login/logic/cubit/login_cubit.dart';
 import 'package:smart_fitness_assistant/views/auth/login/ui/login_view.dart';
 import 'package:smart_fitness_assistant/views/auth/main_tab/ui/main_tab_view.dart';
+import 'package:smart_fitness_assistant/views/auth/signup/logic/cubit/signup_cubit.dart';
 import 'package:smart_fitness_assistant/views/home/logic/cubit/home_cubit.dart';
 import 'package:smart_fitness_assistant/views/onboarding/ui/started_view.dart';
 import 'package:smart_fitness_assistant/views/onboarding/ui/widgets/on_boarding_page.dart';
@@ -24,15 +26,15 @@ void main() async {
   //Connect to Supabase
   await Supabase.initialize(
     url: 'https://tlmvkajvubxejucfxibw.supabase.co',
-    anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRsbXZrYWp2dWJ4ZWp1Y2Z4aWJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA5OTQ4NTIsImV4cCI6MjA3NjU3MDg1Mn0.jLYPFLGWMQDxqp8gfZLoVxQBLl82Imyezq_mJ0sHzFE',
+    anonKey: anonKey,
   );
   runApp(
     MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => ThemeCubit()),
         BlocProvider(create: (_) => HomeCubit()),
-        BlocProvider(create: (_) => AuthenticationCubit()),
+        BlocProvider(create: (_) => LoginCubit()),
+        BlocProvider(create: (_) => SignupCubit()),
       ],
       child: const MyApp(),
     ),

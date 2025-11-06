@@ -16,10 +16,7 @@ class SignUpView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => SignUpCubit(),
-      child: const _SignUpForm(),
-    );
+    return const _SignUpForm();
   }
 }
 
@@ -32,6 +29,7 @@ class _SignUpForm extends StatefulWidget {
 
 class _SignUpFormState extends State<_SignUpForm> {
   final _formKey = GlobalKey<FormState>();
+  bool isChecked = false;
 
   @override
   Widget build(BuildContext context) {
@@ -40,62 +38,78 @@ class _SignUpFormState extends State<_SignUpForm> {
     final textColor = theme.textTheme.bodyMedium?.color;
     final cardColor = theme.cardColor;
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      body: SingleChildScrollView(
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    LocaleKey.textLogin.tr,
-                    style: TextStyle(
-                      color: textColor?.withOpacity(0.7),
-                      fontSize: 16,
-                    ),
-                  ),
-                  Text(
-                    LocaleKey.textRegister.tr,
-                    style: TextStyle(
-                      color: textColor,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  SizedBox(height: media.width * 0.05),
+    return BlocConsumer<SignupCubit, SignupState>(
+      listener: (context, state) {
+        if (state is SignUpSuccess) {
+          showCustomDelightToastBar(
+            context,
+            LocaleKey.registerSuccess.tr,
+            Icon(Icons.check, color: Colors.green),
+          );
+        }
+        if (state is SignUpError) {
+          showCustomDelightToastBar(
+            context,
+            LocaleKey.registerError.tr,
+            Icon(Icons.error, color: Colors.red),
+          );
+        }
+      },
+      builder: (context, state) {
+        return Scaffold(
+          backgroundColor: theme.scaffoldBackgroundColor,
+          body: SingleChildScrollView(
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        LocaleKey.textLogin.tr,
+                        style: TextStyle(
+                          color: textColor?.withOpacity(0.7),
+                          fontSize: 16,
+                        ),
+                      ),
+                      Text(
+                        LocaleKey.textRegister.tr,
+                        style: TextStyle(
+                          color: textColor,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      SizedBox(height: media.width * 0.05),
 
-                  const RoundTextField(
-                    hintText: "UserName",
-                    iconPath: "assets/img/user_text.png",
-                  ),
-                  SizedBox(height: media.width * 0.04),
-                  const RoundTextField(
-                    hintText: "Email",
-                    iconPath: "assets/img/email.png",
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                  SizedBox(height: media.width * 0.04),
-                  const RoundTextField(
-                    hintText: "Password",
-                    iconPath: "assets/img/lock.png",
-                    isPassword: true,
-                  ),
-                  SizedBox(height: media.width * 0.04),
+                      const RoundTextField(
+                        hintText: "UserName",
+                        iconPath: "assets/img/user_text.png",
+                      ),
+                      SizedBox(height: media.width * 0.04),
+                      const RoundTextField(
+                        hintText: "Email",
+                        iconPath: "assets/img/email.png",
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                      SizedBox(height: media.width * 0.04),
+                      const RoundTextField(
+                        hintText: "Password",
+                        iconPath: "assets/img/lock.png",
+                        isPassword: true,
+                      ),
+                      SizedBox(height: media.width * 0.04),
 
-                  // 🔹 Checkbox Privacy Policy
-                  BlocBuilder<SignUpCubit, SignUpState>(
-                    builder: (context, state) {
-                      return Row(
+                      // 🔹 Checkbox Privacy Policy
+                      Row(
                         children: [
                           IconButton(
                             onPressed: () =>
-                                context.read<SignUpCubit>().toggleCheck(),
+                                setState(() => isChecked = !isChecked),
                             icon: Icon(
-                              state.isChecked
+                              isChecked
                                   ? Icons.check_box_outlined
                                   : Icons.check_box_outline_blank_outlined,
                               color: TColor.gray,
@@ -112,18 +126,14 @@ class _SignUpFormState extends State<_SignUpForm> {
                             ),
                           ),
                         ],
-                      );
-                    },
-                  ),
-                  SizedBox(height: media.width * 0.05),
+                      ),
+                      SizedBox(height: media.width * 0.05),
 
-                  // 🔹 Register button
-                  BlocBuilder<SignUpCubit, SignUpState>(
-                    builder: (context, state) {
-                      return RoundButton(
+                      // 🔹 Register button
+                      RoundButton(
                         title: LocaleKey.buttonRegis.tr,
                         onPressed: () {
-                          if (!state.isChecked) {
+                          if (!isChecked) {
                             // Show toast yêu cầu check
                             showCustomDelightToastBar(
                               context,
@@ -137,83 +147,88 @@ class _SignUpFormState extends State<_SignUpForm> {
                             navigateTo(context, const CompleteProfileView());
                           }
                         },
-                      );
-                    },
-                  ),
-
-                  SizedBox(height: media.width * 0.04),
-
-                  // 🔹 Or divider
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          height: 1,
-                          color: textColor?.withOpacity(0.5),
-                        ),
                       ),
-                      Text(
-                        "  ${LocaleKey.or.tr}  ",
-                        style: TextStyle(color: textColor, fontSize: 12),
-                      ),
-                      Expanded(
-                        child: Container(
-                          height: 1,
-                          color: textColor?.withOpacity(0.5),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: media.width * 0.04),
 
-                  // 🔹 Social login buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _socialButton(theme, "assets/img/google.png", cardColor),
-                      SizedBox(width: media.width * 0.04),
-                      _socialButton(
-                        theme,
-                        "assets/img/facebook.png",
-                        cardColor,
-                      ),
-                    ],
-                  ),
+                      SizedBox(height: media.width * 0.04),
 
-                  SizedBox(height: media.width * 0.04),
-
-                  // 🔹 Already have account
-                  TextButton(
-                    onPressed: () => navigateTo(context, const LoginView()),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          LocaleKey.haveAccount.tr,
-                          style: TextStyle(color: textColor, fontSize: 14),
-                        ),
-                        SizedBox(width: 3),
-                        Text(
-                          LocaleKey.buttonLogin.tr,
-                          style: TextStyle(
-                            color: textColor,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
+                      // 🔹 Or divider
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              height: 1,
+                              color: textColor?.withOpacity(0.5),
+                            ),
                           ),
+                          Text(
+                            "  ${LocaleKey.or.tr}  ",
+                            style: TextStyle(color: textColor, fontSize: 12),
+                          ),
+                          Expanded(
+                            child: Container(
+                              height: 1,
+                              color: textColor?.withOpacity(0.5),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: media.width * 0.04),
+
+                      // 🔹 Social login buttons
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _socialButton(
+                            theme,
+                            "assets/img/google.png",
+                            cardColor,
+                          ),
+                          SizedBox(width: media.width * 0.04),
+                          _socialButton(
+                            theme,
+                            "assets/img/facebook.png",
+                            cardColor,
+                          ),
+                        ],
+                      ),
+
+                      SizedBox(height: media.width * 0.04),
+
+                      // 🔹 Already have account
+                      TextButton(
+                        onPressed: () => navigateTo(context, const LoginView()),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              LocaleKey.haveAccount.tr,
+                              style: TextStyle(color: textColor, fontSize: 14),
+                            ),
+                            SizedBox(width: 3),
+                            Text(
+                              LocaleKey.buttonLogin.tr,
+                              style: TextStyle(
+                                color: textColor,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                      SizedBox(height: media.width * 0.04),
+                    ],
                   ),
-                  SizedBox(height: media.width * 0.04),
-                ],
+                ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
+  //Button social login
   Widget _socialButton(ThemeData theme, String path, Color cardColor) {
     return Container(
       width: 50,

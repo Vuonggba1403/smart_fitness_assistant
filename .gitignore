@@ -30,6 +30,8 @@ migrate_working_dir/
 .flutter-plugins-dependencies
 .fvm/
 .melos_tool/
+/lib/core/sensitive_data.dart
+
 
 # Build outputs (rất quan trọng)
 build/
