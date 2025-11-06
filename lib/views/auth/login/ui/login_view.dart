@@ -8,6 +8,7 @@ import 'package:smart_fitness_assistant/core/widgets/custom_derlight_bar.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_textfield.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/views/auth/login/logic/cubit/login_cubit.dart';
+import 'package:smart_fitness_assistant/views/auth/login/ui/forgot_password_view.dart';
 import 'package:smart_fitness_assistant/views/auth/main_tab/ui/main_tab_view.dart';
 import 'package:smart_fitness_assistant/views/auth/signup/ui/signup_view.dart';
 
@@ -81,8 +82,7 @@ class _LoginViewState extends State<LoginView> {
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
-                            SizedBox(height: media.width * 0.05),
-                            SizedBox(height: media.width * 0.04),
+                            SizedBox(height: media.width * 0.09),
                             RoundTextField(
                               controller: _emailController,
                               iconPath: "assets/img/email.png",
@@ -98,20 +98,28 @@ class _LoginViewState extends State<LoginView> {
                             ),
                             SizedBox(height: media.width * 0.02),
                             // const Spacer(),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  LocaleKey.forgotPassword.tr,
-                                  style: TextStyle(
-                                    color: textColor?.withOpacity(0.8),
-                                    fontSize: 12,
-                                    decoration: TextDecoration.underline,
+                            // Forgot Password Button
+                            GestureDetector(
+                              onTap: () {
+                                navigateTo(context, ForgotPasswordView());
+                              },
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    LocaleKey.forgotPassword.tr,
+                                    style: TextStyle(
+                                      color: textColor?.withOpacity(0.8),
+                                      fontSize: 12,
+                                      decoration: TextDecoration.underline,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                             const Spacer(),
+
+                            // Login Button
                             RoundButton(
                               title: LocaleKey.buttonLogin.tr,
                               onPressed: () {
@@ -126,6 +134,7 @@ class _LoginViewState extends State<LoginView> {
                             ),
 
                             SizedBox(height: media.width * 0.04),
+                            //Phan tach button
                             Row(
                               // crossAxisAlignment: CrossAxisAlignment.,
                               children: [
@@ -151,6 +160,7 @@ class _LoginViewState extends State<LoginView> {
                               ],
                             ),
                             SizedBox(height: media.width * 0.04),
+                            // Social Login Buttons
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -200,6 +210,7 @@ class _LoginViewState extends State<LoginView> {
                               ],
                             ),
                             SizedBox(height: media.width * 0.04),
+                            // Don't have an account
                             TextButton(
                               onPressed: () {
                                 // Navigator.pop(context);

@@ -23,4 +23,27 @@ class LoginCubit extends Cubit<LoginState> {
       return;
     }
   }
+
+  //logout
+  Future<void> signOut() async {
+    emit(LogoutLoading());
+    try {
+      await client.auth.signOut();
+      emit(LogoutSuccess());
+    } catch (e) {
+      emit(LogoutError(e.toString()));
+    }
+  }
+
+  //forgot password
+  Future<void> resetPassword({required String email}) async {
+    emit(PasswordResetLoading());
+    try {
+      await client.auth.resetPasswordForEmail(email);
+      emit(PasswordResetSuccess());
+    } catch (e) {
+      //  log(e.toString());
+      emit(PasswordResetError(e.toString()));
+    }
+  }
 }

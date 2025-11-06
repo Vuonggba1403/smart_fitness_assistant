@@ -54,6 +54,11 @@ Map<String, String> viVN = {
   //Register-Message
   LocaleKey.registerSuccess: "Đăng ký thành công",
   LocaleKey.registerError: "Đăng ký thất bại",
+  //Forgot Password View
+  LocaleKey.titleForgotPassword: "Quên mật khẩu",
+  LocaleKey.textForgotPassword:
+      "Vui lòng nhập địa chỉ email của bạn để nhận liên kết đặt lại mật khẩu.",
+  LocaleKey.buttonSend: "Gửi",
 
   //Home View
   LocaleKey.welcomeBack: 'Chào mừng trở lại',

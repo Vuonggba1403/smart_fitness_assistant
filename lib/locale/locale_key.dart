@@ -35,6 +35,10 @@ class LocaleKey {
   //Login View - Message
   static const String loginSuccess = "login_success";
   static const String loginError = "login_error";
+  //Forgot Password View
+  static const String titleForgotPassword = "title_forgot_password";
+  static const String textForgotPassword = "text_forgot_password";
+  static const String buttonSend = "button_send";
 
   //Register View
   static const String textRegister = "text_register";

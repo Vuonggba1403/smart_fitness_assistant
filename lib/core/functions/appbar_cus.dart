@@ -18,7 +18,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     final theme = Theme.of(context); // 🌙 Lấy theme động
     final cardColor = theme.cardColor; // Màu nền cho các card
     return AppBar(
-      backgroundColor: cardColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       centerTitle: true,
       elevation: 0,
       leading: showBackButton

@@ -59,6 +59,11 @@ Map<String, String> enUs = {
   //Register-Message
   LocaleKey.registerSuccess: "Registration successful",
   LocaleKey.registerError: "Registration failed",
+  //Forgot Password View
+  LocaleKey.titleForgotPassword: "Forgot Password",
+  LocaleKey.textForgotPassword:
+      "Please enter your email address to receive a password reset link.",
+  LocaleKey.buttonSend: "Send",
 
   //Home View
   LocaleKey.welcomeBack: 'Welcome Back',
