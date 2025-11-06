@@ -29,7 +29,9 @@ class _SignUpForm extends StatefulWidget {
 
 class _SignUpFormState extends State<_SignUpForm> {
   final _formKey = GlobalKey<FormState>();
-  bool isChecked = false;
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +48,7 @@ class _SignUpFormState extends State<_SignUpForm> {
             LocaleKey.registerSuccess.tr,
             Icon(Icons.check, color: Colors.green),
           );
+          navigateTo(context, const CompleteProfileView());
         }
         if (state is SignUpError) {
           showCustomDelightToastBar(
@@ -84,67 +87,38 @@ class _SignUpFormState extends State<_SignUpForm> {
                       ),
                       SizedBox(height: media.width * 0.05),
 
-                      const RoundTextField(
+                      RoundTextField(
                         hintText: "UserName",
+
                         iconPath: "assets/img/user_text.png",
+                        controller: _usernameController,
                       ),
                       SizedBox(height: media.width * 0.04),
-                      const RoundTextField(
+                      RoundTextField(
                         hintText: "Email",
                         iconPath: "assets/img/email.png",
+                        controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
                       ),
                       SizedBox(height: media.width * 0.04),
-                      const RoundTextField(
+                      RoundTextField(
                         hintText: "Password",
                         iconPath: "assets/img/lock.png",
                         isPassword: true,
+                        controller: _passwordController,
                       ),
                       SizedBox(height: media.width * 0.04),
-
-                      // 🔹 Checkbox Privacy Policy
-                      Row(
-                        children: [
-                          IconButton(
-                            onPressed: () =>
-                                setState(() => isChecked = !isChecked),
-                            icon: Icon(
-                              isChecked
-                                  ? Icons.check_box_outlined
-                                  : Icons.check_box_outline_blank_outlined,
-                              color: TColor.gray,
-                              size: 20,
-                            ),
-                          ),
-                          Flexible(
-                            child: Text(
-                              LocaleKey.privacy.tr,
-                              style: TextStyle(
-                                color: textColor?.withOpacity(0.7),
-                                fontSize: 10,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: media.width * 0.05),
 
                       // 🔹 Register button
                       RoundButton(
                         title: LocaleKey.buttonRegis.tr,
                         onPressed: () {
-                          if (!isChecked) {
-                            // Show toast yêu cầu check
-                            showCustomDelightToastBar(
-                              context,
-                              LocaleKey.permissionError.tr,
-                              Icon(Icons.info_outline, color: textColor),
-                            );
-                            return;
-                          }
-
                           if (_formKey.currentState!.validate()) {
-                            navigateTo(context, const CompleteProfileView());
+                            context.read<SignupCubit>().register(
+                              email: _emailController.text,
+                              password: _passwordController.text,
+                              name: _usernameController.text,
+                            );
                           }
                         },
                       ),
@@ -241,5 +215,13 @@ class _SignUpFormState extends State<_SignUpForm> {
       ),
       child: Image.asset(path, width: 20, height: 20),
     );
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _usernameController.dispose();
+    super.dispose();
   }
 }

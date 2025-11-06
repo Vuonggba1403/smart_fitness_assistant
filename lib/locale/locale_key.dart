@@ -39,8 +39,6 @@ class LocaleKey {
   //Register View
   static const String textRegister = "text_register";
   static const String haveAccount = "have_account";
-  static const String privacy = "privacy";
-  static const String permissionError = "permission_error";
   //Register View-Complete profile
   static const String titleCompleteProfile = "complete_profile";
   static const String textCompleteProfile = "text_complete_profile";

@@ -46,9 +46,6 @@ Map<String, String> enUs = {
   //Register View
   LocaleKey.textRegister: "Create your Account",
   LocaleKey.haveAccount: "Already have an account?",
-  LocaleKey.privacy:
-      "By continuing you accept our Privacy Policy and Term of Use",
-  LocaleKey.permissionError: "Check the box to continue",
   //Register View-Complete profile
   LocaleKey.titleCompleteProfile: "Complete your profile",
   LocaleKey.textCompleteProfile: "It will help us to know more about you!",

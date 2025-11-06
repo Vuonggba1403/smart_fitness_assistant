@@ -41,9 +41,6 @@ Map<String, String> viVN = {
   //Register View
   LocaleKey.textRegister: "Tạo tài khoản của bạn",
   LocaleKey.haveAccount: "Đã có tài khoản?",
-  LocaleKey.privacy:
-      "Bằng cách tiếp tục, bạn đồng ý với Chính sách bảo mật và Điều khoản sử dụng",
-  LocaleKey.permissionError: "Vui lòng chọn vào ô để tiếp tục",
   //Register View-Complete profile
   LocaleKey.titleCompleteProfile: "Hoàn thành hồ sơ của bạn",
   LocaleKey.textCompleteProfile: "Nó sẽ giúp chúng tôi hiểu rõ hơn về bạn!",
