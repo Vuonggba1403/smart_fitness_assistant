@@ -4,6 +4,8 @@ import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:get/get.dart';
+import 'package:smart_fitness_assistant/views/auth/main_tab/ui/main_tab_view.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'on_boarding_view.dart';
 
 class StartedView extends StatefulWidget {
@@ -14,6 +16,7 @@ class StartedView extends StatefulWidget {
 }
 
 class _StartedViewState extends State<StartedView> {
+  SupabaseClient client = Supabase.instance.client;
   @override
   void initState() {
     super.initState();
@@ -22,7 +25,14 @@ class _StartedViewState extends State<StartedView> {
 
   void _navigateToOnBoarding() {
     Future.delayed(const Duration(seconds: 3), () {
-      navigateTo(context, const OnBoardingView());
+      if (!mounted) return;
+
+      navigateTo(
+        context,
+        client.auth.currentUser != null
+            ? const MainTabView()
+            : const OnBoardingView(),
+      );
     });
   }
 
