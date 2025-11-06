@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/theme/logic/cubit/theme_cubit.dart';
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
+import 'package:smart_fitness_assistant/views/auth/login/logic/cubit/authentication_cubit.dart';
 import 'package:smart_fitness_assistant/views/auth/login/ui/login_view.dart';
 import 'package:smart_fitness_assistant/views/auth/main_tab/ui/main_tab_view.dart';
 import 'package:smart_fitness_assistant/views/home/logic/cubit/home_cubit.dart';
@@ -31,6 +32,7 @@ void main() async {
       providers: [
         BlocProvider(create: (_) => ThemeCubit()),
         BlocProvider(create: (_) => HomeCubit()),
+        BlocProvider(create: (_) => AuthenticationCubit()),
       ],
       child: const MyApp(),
     ),

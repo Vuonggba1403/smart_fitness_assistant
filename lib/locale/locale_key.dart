@@ -32,6 +32,9 @@ class LocaleKey {
   static const String dontAccount = "dont_account";
   static const String buttonRegis = "button_regis";
   static const String or = "or";
+  //Login View - Message
+  static const String loginSuccess = "login_success";
+  static const String loginError = "login_error";
 
   //Register View
   static const String textRegister = "text_register";

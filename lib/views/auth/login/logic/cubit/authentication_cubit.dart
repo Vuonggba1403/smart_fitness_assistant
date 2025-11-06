@@ -9,7 +9,7 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
 
   var client = Supabase.instance.client;
 
-  Future<void> login(String email, String password) async {
+  Future<void> login({required String email, required String password}) async {
     emit(LoginLoading());
     try {
       //Gui yeu cau dang nhap

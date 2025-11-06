@@ -39,6 +39,9 @@ Map<String, String> enUs = {
   LocaleKey.dontAccount: "Don't have an account yet?",
   LocaleKey.buttonRegis: "Register",
   LocaleKey.or: "Or",
+  //Login View - Message
+  LocaleKey.loginSuccess: "Login successful",
+  LocaleKey.loginError: "Login failed",
 
   //Register View
   LocaleKey.textRegister: "Create your Account",

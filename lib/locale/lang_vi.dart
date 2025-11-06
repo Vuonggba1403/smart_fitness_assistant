@@ -34,6 +34,9 @@ Map<String, String> viVN = {
   LocaleKey.dontAccount: "Chưa có tài khoản?",
   LocaleKey.buttonRegis: "Đăng ký",
   LocaleKey.or: "Hoặc",
+  //Login View - Message
+  LocaleKey.loginSuccess: "Đăng nhập thành công",
+  LocaleKey.loginError: "Đăng nhập thất bại",
 
   //Register View
   LocaleKey.textRegister: "Tạo tài khoản của bạn",
