@@ -59,6 +59,7 @@ Map<String, String> viVN = {
   LocaleKey.textForgotPassword:
       "Vui lòng nhập địa chỉ email của bạn để nhận liên kết đặt lại mật khẩu.",
   LocaleKey.buttonSend: "Gửi",
+  LocaleKey.passwordResetError: "Lỗi đặt lại mật khẩu",
 
   //Home View
   LocaleKey.welcomeBack: 'Chào mừng trở lại',

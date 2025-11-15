@@ -39,6 +39,7 @@ class LocaleKey {
   static const String titleForgotPassword = "title_forgot_password";
   static const String textForgotPassword = "text_forgot_password";
   static const String buttonSend = "button_send";
+  static const String passwordResetError = "password_reset_error";
 
   //Register View
   static const String textRegister = "text_register";

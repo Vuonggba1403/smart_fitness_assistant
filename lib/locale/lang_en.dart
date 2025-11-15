@@ -64,6 +64,7 @@ Map<String, String> enUs = {
   LocaleKey.textForgotPassword:
       "Please enter your email address to receive a password reset link.",
   LocaleKey.buttonSend: "Send",
+  LocaleKey.passwordResetError: "Password reset error",
 
   //Home View
   LocaleKey.welcomeBack: 'Welcome Back',

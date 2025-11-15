@@ -40,7 +40,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
         if (state is PasswordResetError) {
           showCustomDelightToastBar(
             context,
-            state.message,
+            LocaleKey.passwordResetError.tr,
             const Icon(Icons.error, color: Colors.red),
           );
         }
