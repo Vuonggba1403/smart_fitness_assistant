@@ -52,7 +52,6 @@ class LocaleKey {
   static const String hintWeightGoal = "hint_weight_goal";
   static const String textHeight1 = "text_height1";
   static const String textWeight1 = "text_weight1";
-  static const String textWeightGoal1 = "text_weight_goal1";
   static const String buttonNext = "button_next";
   //Register-Message
   //Login View - Message
@@ -77,7 +76,7 @@ class LocaleKey {
   static const String editProfile = "edit_profile";
   static const String textHeight = "text_height";
   static const String textWeight = "text_weight";
-  static const String textAge = "text_age";
+  static const String textWeightGoal = "text_weight_goal";
   static const String account = "account";
   static const String darkMode = "dark_mode";
   static const String accountArr1 = "account_arr1";

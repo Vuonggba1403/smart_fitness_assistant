@@ -9,7 +9,7 @@ import 'package:smart_fitness_assistant/core/widgets/custom_derlight_bar.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_textfield.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
-import 'package:smart_fitness_assistant/views/auth/login/logic/cubit/login_cubit.dart';
+import 'package:smart_fitness_assistant/views/auth/cubit/authentication_cubit.dart';
 import 'package:smart_fitness_assistant/views/auth/login/ui/login_view.dart';
 
 class ForgotPasswordView extends StatefulWidget {
@@ -27,7 +27,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
     final size = MediaQuery.of(context).size;
     final theme = Theme.of(context);
     final textColor = theme.textTheme.bodyMedium?.color;
-    return BlocConsumer<LoginCubit, LoginState>(
+    return BlocConsumer<AuthenticationCubit, AuthenticationState>(
       listener: (context, state) {
         if (state is PasswordResetSuccess) {
           showCustomDelightToastBar(
@@ -89,9 +89,11 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                             onPressed: () {
                               if (_formKey.currentState!.validate()) {
                                 // navigateTo(context, const MainTabView());
-                                context.read<LoginCubit>().resetPassword(
-                                  email: _emailController.text,
-                                );
+                                context
+                                    .read<AuthenticationCubit>()
+                                    .resetPassword(
+                                      email: _emailController.text,
+                                    );
                               }
                             },
                           ),

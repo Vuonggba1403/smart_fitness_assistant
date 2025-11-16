@@ -6,7 +6,7 @@ import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_textfield.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
-import 'package:smart_fitness_assistant/views/auth/signup/logic/cubit/signup_cubit.dart';
+import 'package:smart_fitness_assistant/views/auth/cubit/authentication_cubit.dart';
 import 'package:smart_fitness_assistant/views/auth/signup/ui/widgets/what_your_goal_view.dart';
 
 void showCompleteProfileDialog(BuildContext context) {
@@ -36,6 +36,7 @@ void showCompleteProfileDialog(BuildContext context) {
             child: Form(
               key: formKey,
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     LocaleKey.titleCompleteProfile.tr,
@@ -95,7 +96,7 @@ void showCompleteProfileDialog(BuildContext context) {
                   SizedBox(height: media.width * 0.04),
 
                   // Goal Weight
-                  Text(LocaleKey.textWeightGoal1.tr),
+                  Text(LocaleKey.textWeightGoal.tr),
                   SizedBox(height: media.width * 0.02),
                   Row(
                     children: [
@@ -120,7 +121,7 @@ void showCompleteProfileDialog(BuildContext context) {
                     onPressed: () {
                       if (formKey.currentState!.validate()) {
                         // ✅ Sử dụng context gốc (không phải dialogContext)
-                        context.read<SignupCubit>().saveProfileInfo(
+                        context.read<AuthenticationCubit>().saveProfileInfo(
                           height: txtHeight.text.trim(),
                           weight: txtWeight.text.trim(),
                           weightGoal: txtWeightGoal.text.trim(),
@@ -128,7 +129,7 @@ void showCompleteProfileDialog(BuildContext context) {
 
                         // ✅ Đóng dialog
                         Navigator.of(dialogContext).pop();
-                        
+
                         // ✅ Navigate sau khi dialog đóng
                         Future.delayed(Duration(milliseconds: 100), () {
                           if (context.mounted) {

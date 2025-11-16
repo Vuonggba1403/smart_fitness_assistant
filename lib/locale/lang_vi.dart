@@ -49,7 +49,6 @@ Map<String, String> viVN = {
   LocaleKey.hintWeightGoal: "Nhập mục tiêu cân nặng của bạn",
   LocaleKey.textHeight1: "Chiều cao của bạn",
   LocaleKey.textWeight1: "Cân nặng của bạn",
-  LocaleKey.textWeightGoal1: "Mục tiêu cân nặng của bạn",
   LocaleKey.buttonNext: "Tiếp theo",
   //Register-Message
   LocaleKey.registerSuccess: "Đăng ký thành công",
@@ -85,7 +84,7 @@ Map<String, String> viVN = {
   LocaleKey.editProfile: "Chỉnh sửa",
   LocaleKey.textHeight: "Chiều cao",
   LocaleKey.textWeight: "Cân nặng",
-  LocaleKey.textAge: "Tuổi",
+  LocaleKey.textWeightGoal: "Mục tiêu",
   LocaleKey.account: "Tài khoản",
   LocaleKey.darkMode: "Chế độ tối",
   LocaleKey.accountArr1: "Dữ liệu cá nhân",

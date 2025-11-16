@@ -8,7 +8,7 @@ import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.
 import 'package:smart_fitness_assistant/core/widgets/custom_derlight_bar.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_textfield.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
-import 'package:smart_fitness_assistant/views/auth/login/logic/cubit/login_cubit.dart';
+import 'package:smart_fitness_assistant/views/auth/cubit/authentication_cubit.dart';
 import 'package:smart_fitness_assistant/views/auth/login/ui/forgot_password_view.dart';
 import 'package:smart_fitness_assistant/views/auth/main_tab/ui/main_tab_view.dart';
 import 'package:smart_fitness_assistant/views/auth/signup/ui/signup_view.dart';
@@ -34,7 +34,7 @@ class _LoginViewState extends State<LoginView> {
     final theme = Theme.of(context);
     final textColor = theme.textTheme.bodyMedium?.color;
     final cardColor = theme.cardColor;
-    return BlocConsumer<LoginCubit, LoginState>(
+    return BlocConsumer<AuthenticationCubit, AuthenticationState>(
       listener: (context, state) {
         log('🔄 Login State: ${state.runtimeType}');
 
@@ -70,7 +70,7 @@ class _LoginViewState extends State<LoginView> {
         }
       },
       builder: (context, state) {
-        LoginCubit cubit = context.read<LoginCubit>();
+        AuthenticationCubit cubit = context.read<AuthenticationCubit>();
         return Scaffold(
           backgroundColor: theme.scaffoldBackgroundColor,
           body: state is LoginLoading

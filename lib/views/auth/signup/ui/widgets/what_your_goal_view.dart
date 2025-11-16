@@ -4,8 +4,8 @@ import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_derlight_bar.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
+import 'package:smart_fitness_assistant/views/auth/cubit/authentication_cubit.dart';
 import 'package:smart_fitness_assistant/views/auth/login/ui/login_view.dart';
-import 'package:smart_fitness_assistant/views/auth/signup/logic/cubit/signup_cubit.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 
 class WhatYourGoalView extends StatefulWidget {
@@ -30,7 +30,7 @@ class _WhatYourGoalViewState extends State<WhatYourGoalView> {
     final theme = Theme.of(context);
     final textColor = theme.textTheme.bodyMedium?.color;
 
-    return BlocConsumer<SignupCubit, SignupState>(
+    return BlocConsumer<AuthenticationCubit, AuthenticationState>(
       listener: (context, state) {
         if (state is SignUpSuccess) {
           if (!mounted) return;
@@ -136,9 +136,9 @@ class _WhatYourGoalViewState extends State<WhatYourGoalView> {
                   onPressed: isLoading || selectedGoal.isEmpty
                       ? null
                       : () {
-                          context.read<SignupCubit>().completeRegistration(
-                            yourGoals: selectedGoal,
-                          );
+                          context
+                              .read<AuthenticationCubit>()
+                              .completeRegistration(yourGoals: selectedGoal);
                         },
                 ),
               ],

@@ -54,7 +54,6 @@ Map<String, String> enUs = {
   LocaleKey.hintWeightGoal: "Enter your weight goal",
   LocaleKey.textHeight1: "Your Height",
   LocaleKey.textWeight1: "Your Weight",
-  LocaleKey.textWeightGoal1: "Your Weight Goal",
   LocaleKey.buttonNext: "Next",
   LocaleKey.whatYourGoal: "Your Goal",
   //Register-Message
@@ -84,7 +83,7 @@ Map<String, String> enUs = {
   LocaleKey.editProfile: "Edit",
   LocaleKey.textHeight: "Height",
   LocaleKey.textWeight: "Weight",
-  LocaleKey.textAge: "Age",
+  LocaleKey.textWeightGoal: "Goal",
   LocaleKey.account: "Account",
   LocaleKey.darkMode: "Dark Mode",
   LocaleKey.accountArr1: "Personal Data",

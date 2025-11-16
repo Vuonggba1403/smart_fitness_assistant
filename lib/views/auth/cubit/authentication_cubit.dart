@@ -1,16 +1,71 @@
 import 'dart:developer';
 
 import 'package:bloc/bloc.dart';
+import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'package:smart_fitness_assistant/core/models/user_models.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-part 'signup_state.dart';
+part 'authentication_state.dart';
 
-class SignupCubit extends Cubit<SignupState> {
-  SignupCubit() : super(SignupInitial());
+class AuthenticationCubit extends Cubit<AuthenticationState> {
+  AuthenticationCubit() : super(const AuthenticationInitial());
   // Lấy Supabase client toàn cục đã được khởi tạo trong Supabase.initialize()
   SupabaseClient client = Supabase.instance.client;
+
+  //Login function
+  Future<void> login({required String email, required String password}) async {
+    emit(const LoginLoading());
+    try {
+      log('🔐 Attempting login for: $email');
+
+      //Gui yeu cau dang nhap
+      final response = await client.auth.signInWithPassword(
+        email: email.trim(),
+        password: password,
+      );
+
+      log('✅ Login response: ${response.user?.id}');
+
+      // ✅ QUAN TRỌNG: Phải emit LoginSuccess
+      if (response.user != null) {
+        log('✅ Login successful, emitting LoginSuccess');
+        emit(const LoginSuccess());
+      } else {
+        log('❌ No user found');
+        emit(const LoginError('Login failed'));
+      }
+    } on AuthException catch (e) {
+      log('❌ Auth Error: ${e.message}');
+      emit(LoginError(e.message));
+    } catch (e) {
+      log('❌ Login Error: $e');
+      emit(LoginError(e.toString()));
+    }
+  }
+
+  //logout
+  Future<void> signOut() async {
+    emit(const LogoutLoading());
+    try {
+      await client.auth.signOut();
+      emit(const LogoutSuccess());
+    } catch (e) {
+      emit(LogoutError(e.toString()));
+    }
+  }
+
+  //forgot password
+  Future<void> resetPassword({required String email}) async {
+    emit(const PasswordResetLoading());
+    try {
+      await client.auth.resetPasswordForEmail(email);
+      emit(const PasswordResetSuccess());
+    } catch (e) {
+      log(e.toString());
+      emit(PasswordResetError(e.toString()));
+    }
+  }
 
   // Lưu thông tin user tạm thời
   Map<String, String> tempUserInfo = {};
@@ -41,7 +96,7 @@ class SignupCubit extends Cubit<SignupState> {
 
   // Lưu goal và thực hiện đăng ký
   Future<void> completeRegistration({required String yourGoals}) async {
-    emit(SignUpLoading());
+    emit(const SignUpLoading());
     try {
       tempUserInfo['your_goals'] = yourGoals;
 
@@ -65,7 +120,7 @@ class SignupCubit extends Cubit<SignupState> {
       // Xóa thông tin tạm
       tempUserInfo.clear();
 
-      emit(SignUpSuccess());
+      emit(const SignUpSuccess());
     } on AuthException catch (e) {
       log(e.toString());
       emit(SignUpError(e.message));
@@ -85,10 +140,10 @@ class SignupCubit extends Cubit<SignupState> {
     required String weight_goal,
     required String your_goals,
   }) async {
-    emit(SignUpLoading());
+    emit(const SignUpLoading());
     try {
       await client.auth.signUp(password: password, email: email);
-      emit(SignUpSuccess());
+      emit(const SignUpSuccess());
     } on AuthException catch (e) {
       log(e.toString());
       emit(SignUpError(e.message));
@@ -98,8 +153,9 @@ class SignupCubit extends Cubit<SignupState> {
     }
   }
 
-  // Deprecated: Sử dụng completeRegistration thay thế
-  Future<void> UserData({
+  // ✅ Sửa tên method theo chuẩn Dart (camelCase)
+  @Deprecated('Use completeRegistration instead')
+  Future<void> userData({
     required String email,
     required String password,
     required String username,
@@ -108,7 +164,7 @@ class SignupCubit extends Cubit<SignupState> {
     required String weight_goal,
     required String your_goals,
   }) async {
-    emit(UserDataLoading());
+    emit(const UserDataLoading());
     try {
       //insert => only add
       //update => update or add
@@ -121,17 +177,16 @@ class SignupCubit extends Cubit<SignupState> {
         "weight_goal": weight_goal,
         "your_goals": your_goals,
       });
-      emit(UserDataSuccess());
+      emit(const UserDataSuccess());
     } catch (e) {
-      // print(e);
-      emit(UserDataFailure());
+      emit(const UserDataFailure());
     }
   }
 
   //get User Data
   UserDataModel? userDataModel;
   Future<void> getUserData() async {
-    emit(GetUserDataLoading());
+    emit(const GetUserDataLoading());
     try {
       final data = await client
           .from('user')
@@ -147,10 +202,10 @@ class SignupCubit extends Cubit<SignupState> {
         weight_goal: data[0]['weight_goal'],
         your_goals: data[0]['your_goals'],
       );
-      emit(GetUserDataSuccess());
+      emit(const GetUserDataSuccess());
     } catch (e) {
       log(e.toString());
-      emit(GetUserDataFailure());
+      emit(const GetUserDataError());
     }
   }
 }

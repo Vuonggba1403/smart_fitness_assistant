@@ -9,8 +9,8 @@ import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_textfield.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
+import 'package:smart_fitness_assistant/views/auth/cubit/authentication_cubit.dart';
 import 'package:smart_fitness_assistant/views/auth/login/ui/login_view.dart';
-import 'package:smart_fitness_assistant/views/auth/signup/logic/cubit/signup_cubit.dart';
 import 'package:smart_fitness_assistant/views/auth/signup/ui/widgets/dialog_complete.dart';
 import 'package:smart_fitness_assistant/views/auth/signup/ui/widgets/what_your_goal_view.dart';
 
@@ -43,7 +43,7 @@ class _SignUpFormState extends State<_SignUpForm> {
     final textColor = theme.textTheme.bodyMedium?.color;
     final cardColor = theme.cardColor;
 
-    return BlocConsumer<SignupCubit, SignupState>(
+    return BlocConsumer<AuthenticationCubit, AuthenticationState>(
       listener: (context, state) {
         if (state is SignUpSuccess) {
           // ✅ Kiểm tra mounted
@@ -130,7 +130,7 @@ class _SignUpFormState extends State<_SignUpForm> {
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
                             // Lưu thông tin cơ bản
-                            context.read<SignupCubit>().saveBasicInfo(
+                            context.read<AuthenticationCubit>().saveBasicInfo(
                               email: _emailController.text.trim(),
                               password: _passwordController.text,
                               username: _usernameController.text.trim(),

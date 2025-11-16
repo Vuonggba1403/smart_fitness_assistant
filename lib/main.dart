@@ -4,10 +4,9 @@ import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/sensitive_data.dart';
 import 'package:smart_fitness_assistant/core/theme/logic/cubit/theme_cubit.dart';
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
-import 'package:smart_fitness_assistant/views/auth/login/logic/cubit/login_cubit.dart';
+import 'package:smart_fitness_assistant/views/auth/cubit/authentication_cubit.dart';
 import 'package:smart_fitness_assistant/views/auth/login/ui/login_view.dart';
 import 'package:smart_fitness_assistant/views/auth/main_tab/ui/main_tab_view.dart';
-import 'package:smart_fitness_assistant/views/auth/signup/logic/cubit/signup_cubit.dart';
 import 'package:smart_fitness_assistant/views/home/logic/cubit/home_cubit.dart';
 import 'package:smart_fitness_assistant/views/onboarding/ui/started_view.dart';
 import 'package:smart_fitness_assistant/views/onboarding/ui/widgets/on_boarding_page.dart';
@@ -33,8 +32,7 @@ void main() async {
       providers: [
         BlocProvider(create: (_) => ThemeCubit()),
         BlocProvider(create: (_) => HomeCubit()),
-        BlocProvider(create: (_) => LoginCubit()),
-        BlocProvider(create: (_) => SignupCubit()),
+        BlocProvider(create: (_) => AuthenticationCubit()),
       ],
       child: const MyApp(),
     ),
