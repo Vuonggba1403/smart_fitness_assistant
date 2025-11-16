@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -13,14 +14,30 @@ class LoginCubit extends Cubit<LoginState> {
   Future<void> login({required String email, required String password}) async {
     emit(LoginLoading());
     try {
+      log('🔐 Attempting login for: $email');
+
       //Gui yeu cau dang nhap
-      await client.auth.signInWithPassword(email: email, password: password);
+      final response = await client.auth.signInWithPassword(
+        email: email.trim(),
+        password: password,
+      );
+
+      log('✅ Login response: ${response.user?.id}');
+
+      // ✅ QUAN TRỌNG: Phải emit LoginSuccess
+      if (response.user != null) {
+        log('✅ Login successful, emitting LoginSuccess');
+        emit(LoginSuccess());
+      } else {
+        log('❌ No user found');
+        emit(LoginError('Login failed'));
+      }
     } on AuthException catch (e) {
+      log('❌ Auth Error: ${e.message}');
       emit(LoginError(e.message));
-      return;
     } catch (e) {
+      log('❌ Login Error: $e');
       emit(LoginError(e.toString()));
-      return;
     }
   }
 
@@ -42,7 +59,7 @@ class LoginCubit extends Cubit<LoginState> {
       await client.auth.resetPasswordForEmail(email);
       emit(PasswordResetSuccess());
     } catch (e) {
-      //  log(e.toString());
+      log(e.toString());
       emit(PasswordResetError(e.toString()));
     }
   }

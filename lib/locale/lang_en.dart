@@ -56,6 +56,7 @@ Map<String, String> enUs = {
   LocaleKey.textWeight1: "Your Weight",
   LocaleKey.textWeightGoal1: "Your Weight Goal",
   LocaleKey.buttonNext: "Next",
+  LocaleKey.whatYourGoal: "Your Goal",
   //Register-Message
   LocaleKey.registerSuccess: "Registration successful",
   LocaleKey.registerError: "Registration failed",

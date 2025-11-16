@@ -58,6 +58,7 @@ class LocaleKey {
   //Login View - Message
   static const String registerSuccess = "register_success";
   static const String registerError = "register_error";
+  static const String whatYourGoal = "your_goal";
 
   //Home view
   static const String welcomeBack = "welcome_back";

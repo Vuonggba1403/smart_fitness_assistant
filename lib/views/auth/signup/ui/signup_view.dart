@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
@@ -9,8 +11,8 @@ import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/views/auth/login/ui/login_view.dart';
 import 'package:smart_fitness_assistant/views/auth/signup/logic/cubit/signup_cubit.dart';
+import 'package:smart_fitness_assistant/views/auth/signup/ui/widgets/dialog_complete.dart';
 import 'package:smart_fitness_assistant/views/auth/signup/ui/widgets/what_your_goal_view.dart';
-import 'widgets/complete_profile_view.dart';
 
 class SignUpView extends StatelessWidget {
   const SignUpView({super.key});
@@ -44,15 +46,27 @@ class _SignUpFormState extends State<_SignUpForm> {
     return BlocConsumer<SignupCubit, SignupState>(
       listener: (context, state) {
         if (state is SignUpSuccess) {
-          showCustomDelightToastBar(
-            context,
-            LocaleKey.registerSuccess.tr,
-            Icon(Icons.check, color: Colors.green),
-          );
-          // Navigate to home or login
-          navigateTo(context, const LoginView());
+          // ✅ Kiểm tra mounted
+          if (!mounted) return;
+
+          log('✅ SignUp Success - Navigating to LoginView');
+
+          // ✅ Navigate ngay mà không show toast để tránh conflict
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (_) => const LoginView()),
+              (route) => false,
+            );
+          });
         }
+
         if (state is SignUpError) {
+          if (!mounted) return;
+
+          log('❌ SignUp Error: ${state.message}');
+
           showCustomDelightToastBar(
             context,
             state.message,
@@ -228,151 +242,4 @@ class _SignUpFormState extends State<_SignUpForm> {
     _usernameController.dispose();
     super.dispose();
   }
-}
-
-void showCompleteProfileDialog(BuildContext context) {
-  final txtHeight = TextEditingController();
-  final txtWeight = TextEditingController();
-  final txtWeightGoal = TextEditingController();
-
-  final theme = Theme.of(context);
-  final textColor = theme.textTheme.bodyMedium?.color;
-  final media = MediaQuery.of(context).size;
-  final _formKey = GlobalKey<FormState>();
-
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (context) {
-      return Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Container(
-          height: media.height * 0.66,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 25),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: theme.dividerColor),
-          ),
-          child: SingleChildScrollView(
-            child: Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  Text(
-                    LocaleKey.titleCompleteProfile.tr,
-                    style: TextStyle(
-                      color: textColor,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  Text(
-                    LocaleKey.textCompleteProfile.tr,
-                    style: TextStyle(
-                      color: textColor?.withOpacity(0.7),
-                      fontSize: 12,
-                    ),
-                  ),
-                  SizedBox(height: media.width * 0.05),
-
-                  // Your Height
-                  Text(LocaleKey.textHeight1.tr),
-                  SizedBox(height: media.width * 0.02),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: RoundTextField(
-                          controller: txtHeight,
-                          hintText: LocaleKey.hintHeight.tr,
-                          keyboardType: TextInputType.number,
-                          iconPath: "assets/img/hight.png",
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      buildUnitBox("CM"),
-                    ],
-                  ),
-
-                  SizedBox(height: media.width * 0.04),
-
-                  // Your Weight
-                  Text(LocaleKey.textWeight1.tr),
-                  SizedBox(height: media.width * 0.02),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: RoundTextField(
-                          controller: txtWeight,
-                          hintText: LocaleKey.hintWeight.tr,
-                          keyboardType: TextInputType.number,
-                          iconPath: "assets/img/weight.png",
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      buildUnitBox("KG"),
-                    ],
-                  ),
-
-                  SizedBox(height: media.width * 0.04),
-
-                  // Goal Weight
-                  Text(LocaleKey.textWeightGoal1.tr),
-                  SizedBox(height: media.width * 0.02),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: RoundTextField(
-                          controller: txtWeightGoal,
-                          hintText: LocaleKey.hintWeightGoal.tr,
-                          keyboardType: TextInputType.number,
-                          iconPath: "assets/img/weight.png",
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      buildUnitBox("KG"),
-                    ],
-                  ),
-
-                  SizedBox(height: media.width * 0.06),
-
-                  // Button
-                  RoundButton(
-                    title: LocaleKey.buttonNext.tr,
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        // Lưu thông tin profile
-                        context.read<SignupCubit>().saveProfileInfo(
-                          height: txtHeight.text.trim(),
-                          weight: txtWeight.text.trim(),
-                          weightGoal: txtWeightGoal.text.trim(),
-                        );
-
-                        // Đóng dialog và chuyển sang màn hình What Your Goal
-                        Navigator.pop(context);
-                        navigateTo(context, const WhatYourGoalView());
-                      }
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-    },
-  );
-}
-
-// Widget phụ: đơn vị "CM", "KG"
-Widget buildUnitBox(String text) {
-  return Container(
-    width: 50,
-    height: 50,
-    alignment: Alignment.center,
-    decoration: BoxDecoration(
-      gradient: LinearGradient(colors: TColor.secondaryG),
-      borderRadius: BorderRadius.circular(15),
-    ),
-    child: Text(text, style: TextStyle(color: TColor.white, fontSize: 12)),
-  );
 }

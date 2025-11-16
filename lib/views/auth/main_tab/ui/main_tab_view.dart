@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
 import 'package:smart_fitness_assistant/views/auth/main_tab/ui/widgets/tab_button.dart';
@@ -9,9 +10,14 @@ import '../../../photo_progress/ui/photo_progress_view.dart';
 import '../../../profile/ui/profile_view.dart';
 import 'widgets/select_view.dart';
 
-class MainTabView extends StatelessWidget {
+class MainTabView extends StatefulWidget {
   const MainTabView({super.key});
 
+  @override
+  State<MainTabView> createState() => _MainTabViewState();
+}
+
+class _MainTabViewState extends State<MainTabView> {
   @override
   Widget build(BuildContext context) {
     final pages = [
@@ -32,6 +38,9 @@ class MainTabView extends StatelessWidget {
           final isDark = theme.brightness == Brightness.dark;
 
           return Scaffold(
+            // ✅ Thêm key dựa trên locale để rebuild khi đổi ngôn ngữ
+            key: ValueKey(Get.locale?.languageCode ?? 'en'),
+
             // 🟢 Dùng màu theo theme
             backgroundColor: theme.scaffoldBackgroundColor,
 

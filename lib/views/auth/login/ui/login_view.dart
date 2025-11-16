@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
@@ -35,20 +36,37 @@ class _LoginViewState extends State<LoginView> {
     final cardColor = theme.cardColor;
     return BlocConsumer<LoginCubit, LoginState>(
       listener: (context, state) {
+        log('🔄 Login State: ${state.runtimeType}');
+
         if (state is LoginError) {
+          log('❌ Error: ${state.message}');
+
+          // ✅ Kiểm tra mounted trước khi show toast
+          if (!mounted) return;
+
           showCustomDelightToastBar(
             context,
-            LocaleKey.loginError.tr,
+            state.message,
             Icon(Icons.error, color: Colors.red),
           );
         }
+
         if (state is LoginSuccess) {
-          showCustomDelightToastBar(
-            context,
-            LocaleKey.loginSuccess.tr,
-            Icon(Icons.check, color: Colors.green),
-          );
-          navigateTo(context, const MainTabView());
+          log('✅ Login Success - Navigating to MainTabView');
+
+          // ✅ Kiểm tra mounted trước khi navigate
+          if (!mounted) return;
+
+          // ✅ Navigate sau khi frame build hoàn thành
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+
+            // ✅ Không show toast trước khi navigate để tránh conflict
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (_) => const MainTabView()),
+              (route) => false,
+            );
+          });
         }
       },
       builder: (context, state) {

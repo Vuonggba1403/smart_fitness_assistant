@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_derlight_bar.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
+import 'package:smart_fitness_assistant/views/auth/login/ui/login_view.dart';
 import 'package:smart_fitness_assistant/views/auth/signup/logic/cubit/signup_cubit.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 
@@ -31,15 +33,27 @@ class _WhatYourGoalViewState extends State<WhatYourGoalView> {
     return BlocConsumer<SignupCubit, SignupState>(
       listener: (context, state) {
         if (state is SignUpSuccess) {
+          if (!mounted) return;
+
           showCustomDelightToastBar(
             context,
             LocaleKey.registerSuccess.tr,
             Icon(Icons.check, color: Colors.green),
           );
-          // Navigate to home or login
-          Navigator.of(context).popUntil((route) => route.isFirst);
+
+          // ✅ Navigate an toàn
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => const LoginView()),
+              (route) => false,
+            );
+          });
         }
         if (state is SignUpError) {
+          if (!mounted) return;
+
           showCustomDelightToastBar(
             context,
             state.message,
@@ -51,7 +65,7 @@ class _WhatYourGoalViewState extends State<WhatYourGoalView> {
         final isLoading = state is SignUpLoading;
 
         return Scaffold(
-          appBar: AppBar(title: Text('What is your goal?')),
+          appBar: CustomAppBar(title: LocaleKey.whatYourGoal.tr),
           body: Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
