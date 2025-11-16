@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
+import 'package:smart_fitness_assistant/views/auth/cubit/authentication_cubit.dart';
 import 'package:smart_fitness_assistant/views/auth/main_tab/ui/widgets/tab_button.dart';
 import 'package:smart_fitness_assistant/views/auth/main_tab/logic/cubit/main_tab_cubit.dart';
 import '../../../home/ui/home_view.dart';
@@ -18,6 +19,13 @@ class MainTabView extends StatefulWidget {
 }
 
 class _MainTabViewState extends State<MainTabView> {
+  @override
+  void initState() {
+    super.initState();
+    // Load user data một lần khi app khởi động
+    context.read<AuthenticationCubit>().getUserData();
+  }
+
   @override
   Widget build(BuildContext context) {
     final pages = [

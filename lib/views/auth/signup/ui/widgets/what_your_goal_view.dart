@@ -6,6 +6,7 @@ import 'package:smart_fitness_assistant/core/widgets/custom_derlight_bar.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/views/auth/cubit/authentication_cubit.dart';
 import 'package:smart_fitness_assistant/views/auth/login/ui/login_view.dart';
+
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 
 class WhatYourGoalView extends StatefulWidget {

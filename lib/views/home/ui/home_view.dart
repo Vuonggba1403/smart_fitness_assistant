@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:smart_fitness_assistant/core/models/user_models.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_alertdialog.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
@@ -10,6 +11,7 @@ import 'package:smart_fitness_assistant/core/widgets/custom_drop_but.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/locale/translation_manager.dart';
+import 'package:smart_fitness_assistant/views/auth/cubit/authentication_cubit.dart';
 import 'package:smart_fitness_assistant/views/home/logic/cubit/home_cubit.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/activity_tracker_view.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/bmi_card.dart';
@@ -58,268 +60,289 @@ class HomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<HomeCubit, HomeState>(
-      builder: (context, state) {
-        final theme = Theme.of(context);
-        final media = MediaQuery.of(context).size;
+    // Trigger load user data khi vào HomeView
+    context.read<AuthenticationCubit>().getUserData();
 
-        if (state is! HomeLoaded) {
-          return const Scaffold(
-            body: SafeArea(child: Center(child: CustomCircleProgIndicator())),
-          );
-        }
+    return BlocBuilder<AuthenticationCubit, AuthenticationState>(
+      builder: (context, authState) {
+        return BlocBuilder<HomeCubit, HomeState>(
+          builder: (context, homeState) {
+            final theme = Theme.of(context);
+            final media = MediaQuery.of(context).size;
 
-        final textColor = theme.textTheme.bodyMedium?.color;
-        final hintText = state.currentLanguage == 'vi' ? 'VI' : 'EN';
+            // Lấy user data từ AuthenticationCubit
+            final user = context.read<AuthenticationCubit>().userDataModel;
 
-        return Scaffold(
-          backgroundColor: theme.scaffoldBackgroundColor,
-          body: SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 15),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // === Header ===
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            if (homeState is! HomeLoaded) {
+              return const Scaffold(
+                body: SafeArea(
+                  child: Center(child: CustomCircleProgIndicator()),
+                ),
+              );
+            }
+
+            final textColor = theme.textTheme.bodyMedium?.color;
+            final hintText = homeState.currentLanguage == 'vi' ? 'VI' : 'EN';
+
+            return Scaffold(
+              backgroundColor: theme.scaffoldBackgroundColor,
+              body: SafeArea(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // === Header ===
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                LocaleKey.welcomeBack.tr,
+                                style: TextStyle(
+                                  color: textColor,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              Text(
+                                user?.username ?? "UserName",
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              // --- DropDown chọn ngôn ngữ ---
+                              CustomDropButtonUnder(
+                                items: ["EN", "VI"],
+                                imagePaths: [
+                                  "assets/img/english.png",
+                                  "assets/img/vietnamese.png",
+                                ],
+                                hint: hintText,
+                                selectedValue: hintText,
+                                onChanged: (value) async {
+                                  final translationManager =
+                                      Get.find<TranslationManager>();
+                                  final homeCubit = context.read<HomeCubit>();
+
+                                  final localeMap = {
+                                    "EN": TranslationManager.fallbackLocaleUS,
+                                    "VI": TranslationManager.fallbackLocaleVN,
+                                  };
+                                  final languageMap = {"EN": "en", "VI": "vi"};
+
+                                  if (localeMap.containsKey(value)) {
+                                    final newLang = languageMap[value]!;
+                                    if (homeState.currentLanguage != newLang) {
+                                      await translationManager.updateLocale(
+                                        localeMap[value]!,
+                                      );
+                                      homeCubit.updateLanguage(newLang);
+                                      CustomDialog.show(
+                                        context,
+                                        message: LocaleKey.langChanged.tr,
+                                      );
+                                    }
+                                  }
+                                },
+                              ),
+
+                              // --- Nút Notification ---
+                              IconButton(
+                                onPressed: () => navigateTo(
+                                  context,
+                                  const NotificationView(),
+                                ),
+                                icon: Image.asset(
+                                  "assets/img/notification_active.png",
+                                  width: 25,
+                                  height: 25,
+                                  color: textColor,
+                                  fit: BoxFit.fitHeight,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+
+                      SizedBox(height: media.width * 0.05),
+
+                      // === BMI Card ===
+                      const BMICard(),
+
+                      SizedBox(height: media.width * 0.05),
+
+                      // === Ô Today Target ===
+                      CustomContainerCheck(
+                        name: LocaleKey.todayTarget.tr,
+                        title: LocaleKey.check.tr,
+                        onPressed: () =>
+                            navigateTo(context, const ActivityTrackerView()),
+                      ),
+
+                      SizedBox(height: media.width * 0.05),
+
+                      // === Activity Status ===
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            LocaleKey.welcomeBack.tr,
-                            style: TextStyle(color: textColor, fontSize: 12),
-                          ),
-                          const Text(
-                            "Stefani Wong",
+                            LocaleKey.activityStatus.tr,
                             style: TextStyle(
-                              fontSize: 20,
+                              color: textColor,
+                              fontSize: 16,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
+                          SizedBox(height: media.width * 0.02),
+                          HeartRateView(
+                            allSpots: allSpots,
+                            showingTooltipOnSpots:
+                                homeState.showingTooltipOnSpots,
+                          ),
                         ],
                       ),
-                      Row(
-                        children: [
-                          // --- DropDown chọn ngôn ngữ ---
-                          CustomDropButtonUnder(
-                            items: ["EN", "VI"],
-                            imagePaths: [
-                              "assets/img/english.png",
-                              "assets/img/vietnamese.png",
-                            ],
-                            hint: hintText,
-                            selectedValue: hintText,
-                            onChanged: (value) async {
-                              final translationManager =
-                                  Get.find<TranslationManager>();
-                              final homeCubit = context.read<HomeCubit>();
 
-                              final localeMap = {
-                                "EN": TranslationManager.fallbackLocaleUS,
-                                "VI": TranslationManager.fallbackLocaleVN,
-                              };
-                              final languageMap = {"EN": "en", "VI": "vi"};
+                      SizedBox(height: media.width * 0.05),
 
-                              if (localeMap.containsKey(value)) {
-                                final newLang = languageMap[value]!;
-                                if (state.currentLanguage != newLang) {
-                                  await translationManager.updateLocale(
-                                    localeMap[value]!,
-                                  );
-                                  homeCubit.updateLanguage(newLang);
-                                  CustomDialog.show(
-                                    context,
-                                    message: LocaleKey.langChanged.tr,
-                                  );
-                                }
-                              }
-                            },
-                          ),
+                      // === Health Summary ===
+                      HealthSummarySection(
+                        waterArr: homeState.waterArr,
+                        mediaWidth: media.width,
+                      ),
 
-                          // --- Nút Notification ---
-                          IconButton(
-                            onPressed: () =>
-                                navigateTo(context, const NotificationView()),
-                            icon: Image.asset(
-                              "assets/img/notification_active.png",
-                              width: 25,
-                              height: 25,
-                              color: textColor,
-                              fit: BoxFit.fitHeight,
+                      SizedBox(height: media.width * 0.1),
+
+                      // === Workout Progress Chart ===
+                      WorkoutProgressView(
+                        lineBarsData: [
+                          LineChartBarData(
+                            isCurved: true,
+                            gradient: LinearGradient(
+                              colors: [
+                                TColor.primaryColor2.withOpacity(0.5),
+                                TColor.primaryColor1.withOpacity(0.5),
+                              ],
                             ),
+                            barWidth: 4,
+                            isStrokeCapRound: true,
+                            dotData: FlDotData(show: false),
+                            belowBarData: BarAreaData(show: false),
+                            spots: const [
+                              FlSpot(1, 35),
+                              FlSpot(2, 70),
+                              FlSpot(3, 40),
+                              FlSpot(4, 80),
+                              FlSpot(5, 25),
+                              FlSpot(6, 70),
+                              FlSpot(7, 35),
+                            ],
+                          ),
+                          LineChartBarData(
+                            isCurved: true,
+                            gradient: LinearGradient(
+                              colors: [
+                                TColor.secondaryColor2.withOpacity(0.5),
+                                TColor.secondaryColor1.withOpacity(0.5),
+                              ],
+                            ),
+                            barWidth: 2,
+                            isStrokeCapRound: true,
+                            dotData: FlDotData(show: false),
+                            belowBarData: BarAreaData(show: false),
+                            spots: const [
+                              FlSpot(1, 80),
+                              FlSpot(2, 50),
+                              FlSpot(3, 90),
+                              FlSpot(4, 40),
+                              FlSpot(5, 80),
+                              FlSpot(6, 35),
+                              FlSpot(7, 60),
+                            ],
                           ),
                         ],
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: media.width * 0.05),
-
-                  // === BMI Card ===
-                  const BMICard(),
-
-                  SizedBox(height: media.width * 0.05),
-
-                  // === Ô Today Target ===
-                  CustomContainerCheck(
-                    name: LocaleKey.todayTarget.tr,
-                    title: LocaleKey.check.tr,
-                    onPressed: () =>
-                        navigateTo(context, const ActivityTrackerView()),
-                  ),
-
-                  SizedBox(height: media.width * 0.05),
-
-                  // === Activity Status ===
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        LocaleKey.activityStatus.tr,
-                        style: TextStyle(
-                          color: textColor,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      SizedBox(height: media.width * 0.02),
-                      HeartRateView(
-                        allSpots: allSpots,
-                        showingTooltipOnSpots: state.showingTooltipOnSpots,
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: media.width * 0.05),
-
-                  // === Health Summary ===
-                  HealthSummarySection(
-                    waterArr: state.waterArr,
-                    mediaWidth: media.width,
-                  ),
-
-                  SizedBox(height: media.width * 0.1),
-
-                  // === Workout Progress Chart ===
-                  WorkoutProgressView(
-                    lineBarsData: [
-                      LineChartBarData(
-                        isCurved: true,
-                        gradient: LinearGradient(
-                          colors: [
-                            TColor.primaryColor2.withOpacity(0.5),
-                            TColor.primaryColor1.withOpacity(0.5),
-                          ],
-                        ),
-                        barWidth: 4,
-                        isStrokeCapRound: true,
-                        dotData: FlDotData(show: false),
-                        belowBarData: BarAreaData(show: false),
-                        spots: const [
-                          FlSpot(1, 35),
-                          FlSpot(2, 70),
-                          FlSpot(3, 40),
-                          FlSpot(4, 80),
-                          FlSpot(5, 25),
-                          FlSpot(6, 70),
-                          FlSpot(7, 35),
-                        ],
-                      ),
-                      LineChartBarData(
-                        isCurved: true,
-                        gradient: LinearGradient(
-                          colors: [
-                            TColor.secondaryColor2.withOpacity(0.5),
-                            TColor.secondaryColor1.withOpacity(0.5),
-                          ],
-                        ),
-                        barWidth: 2,
-                        isStrokeCapRound: true,
-                        dotData: FlDotData(show: false),
-                        belowBarData: BarAreaData(show: false),
-                        spots: const [
-                          FlSpot(1, 80),
-                          FlSpot(2, 50),
-                          FlSpot(3, 90),
-                          FlSpot(4, 40),
-                          FlSpot(5, 80),
-                          FlSpot(6, 35),
-                          FlSpot(7, 60),
-                        ],
-                      ),
-                    ],
-                    showingTooltipOnSpots: state.showingTooltipOnSpots,
-                    rightTitles: SideTitles(
-                      getTitlesWidget: (value, meta) {
-                        const textMap = {
-                          0: '0%',
-                          20: '20%',
-                          40: '40%',
-                          60: '60%',
-                          80: '80%',
-                          100: '100%',
-                        };
-                        final text = textMap[value.toInt()] ?? '';
-                        return Text(
-                          text,
-                          style: TextStyle(color: TColor.gray, fontSize: 12),
-                          textAlign: TextAlign.center,
-                        );
-                      },
-                      showTitles: true,
-                      interval: 20,
-                      reservedSize: 40,
-                    ),
-                    bottomTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 32,
-                      interval: 1,
-                      getTitlesWidget: (value, meta) {
-                        const days = [
-                          '',
-                          'Sun',
-                          'Mon',
-                          'Tue',
-                          'Wed',
-                          'Thu',
-                          'Fri',
-                          'Sat',
-                        ];
-                        final text = value.toInt() < days.length
-                            ? days[value.toInt()]
-                            : '';
-                        return SideTitleWidget(
-                          meta: meta,
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
-                            child: Text(
+                        showingTooltipOnSpots: homeState.showingTooltipOnSpots,
+                        rightTitles: SideTitles(
+                          getTitlesWidget: (value, meta) {
+                            const textMap = {
+                              0: '0%',
+                              20: '20%',
+                              40: '40%',
+                              60: '60%',
+                              80: '80%',
+                              100: '100%',
+                            };
+                            final text = textMap[value.toInt()] ?? '';
+                            return Text(
                               text,
                               style: TextStyle(
                                 color: TColor.gray,
                                 fontSize: 12,
                               ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+                              textAlign: TextAlign.center,
+                            );
+                          },
+                          showTitles: true,
+                          interval: 20,
+                          reservedSize: 40,
+                        ),
+                        bottomTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 32,
+                          interval: 1,
+                          getTitlesWidget: (value, meta) {
+                            const days = [
+                              '',
+                              'Sun',
+                              'Mon',
+                              'Tue',
+                              'Wed',
+                              'Thu',
+                              'Fri',
+                              'Sat',
+                            ];
+                            final text = value.toInt() < days.length
+                                ? days[value.toInt()]
+                                : '';
+                            return SideTitleWidget(
+                              meta: meta,
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: Text(
+                                  text,
+                                  style: TextStyle(
+                                    color: TColor.gray,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+
+                      SizedBox(height: media.width * 0.05),
+
+                      // === Latest Workout ===
+                      LatestWorkoutView(
+                        lastWorkoutArr: homeState.lastWorkoutArr,
+                        onSeeMorePressed: () {},
+                      ),
+
+                      SizedBox(height: media.width * 0.1),
+                    ],
                   ),
-
-                  SizedBox(height: media.width * 0.05),
-
-                  // === Latest Workout ===
-                  LatestWorkoutView(
-                    lastWorkoutArr: state.lastWorkoutArr,
-                    onSeeMorePressed: () {},
-                  ),
-
-                  SizedBox(height: media.width * 0.1),
-                ],
+                ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );
