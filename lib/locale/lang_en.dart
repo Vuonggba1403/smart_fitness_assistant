@@ -76,6 +76,14 @@ Map<String, String> enUs = {
   LocaleKey.check: "Check",
   //BMI
   LocaleKey.bmi: "BMI (Body Mass Index)",
+  LocaleKey.classificationBMI1: "Underweight Class III",
+  LocaleKey.classificationBMI2: "Underweight Class II",
+  LocaleKey.classificationBMI3: "Underweight Class I",
+  LocaleKey.classificationBMI4: "Normal",
+  LocaleKey.classificationBMI5: "Overweight",
+  LocaleKey.classificationBMI6: "Obesity Class I",
+  LocaleKey.classificationBMI7: "Obesity Class II",
+  LocaleKey.classificationBMI8: "Obesity Class III",
 
   //Profile View
   LocaleKey.profile: "Profile",

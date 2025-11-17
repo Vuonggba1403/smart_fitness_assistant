@@ -71,7 +71,14 @@ Map<String, String> viVN = {
   LocaleKey.check: "Kiểm tra",
   //BMI
   LocaleKey.bmi: "BMI (Chỉ số khối cơ thể)",
-  LocaleKey.classificationBMI1: "",
+  LocaleKey.classificationBMI1: "Gầy độ III",
+  LocaleKey.classificationBMI2: "Gầy độ II",
+  LocaleKey.classificationBMI3: "Gầy độ I",
+  LocaleKey.classificationBMI4: "Bình thường",
+  LocaleKey.classificationBMI5: "Thừa cân",
+  LocaleKey.classificationBMI6: "Béo phì độ I",
+  LocaleKey.classificationBMI7: "Béo phì độ II",
+  LocaleKey.classificationBMI8: "Béo phì độ III",
 
   //Select view
   LocaleKey.workoutTracker: 'Theo dõi Tập Luyện',

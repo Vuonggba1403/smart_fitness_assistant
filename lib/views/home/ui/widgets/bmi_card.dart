@@ -10,14 +10,12 @@ import 'package:smart_fitness_assistant/views/auth/cubit/authentication_cubit.da
 class BMICard extends StatelessWidget {
   const BMICard({super.key});
 
-  /// Tính toán chỉ số BMI dựa trên cân nặng và chiều cao
   double calculateBMI(double weight, double height) {
     if (weight <= 0 || height <= 0) return 0;
     final heightInMeters = height / 100;
     return weight / (heightInMeters * heightInMeters);
   }
 
-  /// Chuyển đổi giá trị động sang kiểu double
   double _parseToDouble(dynamic value) {
     if (value == null) return 0;
     if (value is num) return value.toDouble();
@@ -25,9 +23,6 @@ class BMICard extends StatelessWidget {
     return 0;
   }
 
-  /// Xác định phân loại BMI theo tiêu chuẩn châu Á
-  /// Returns: Chuỗi mô tả phân loại BMI (Gầy độ I/II/III, Bình thường,
-  /// Thừa cân, Béo phì độ I/II/III)
   String getBMICategory(double bmi) {
     if (bmi < 16) return 'Gầy độ III';
     if (bmi < 17) return 'Gầy độ II';
@@ -39,14 +34,12 @@ class BMICard extends StatelessWidget {
     return 'Béo phì độ III';
   }
 
-  /// Tính phần trăm BMI để hiển thị trên biểu đồ
   double getBMIPercentage(double bmi) {
     if (bmi < 10) return 0;
     if (bmi > 40) return 100;
     return ((bmi - 10) / 30) * 100;
   }
 
-  /// Xác định màu sắc tương ứng với phân loại BMI
   Color getBMIColor(double bmi) {
     if (bmi < 18.5) return Colors.blue;
     if (bmi < 25) return Colors.green;
@@ -155,13 +148,6 @@ class BMICard extends StatelessWidget {
     );
   }
 
-  /// Tạo danh sách các phần của biểu đồ tròn BMI
-  ///
-  /// [bmi] - Chỉ số BMI hiện tại
-  /// [percentage] - Phần trăm để hiển thị trên biểu đồ
-  /// [bmiColor] - Màu sắc của phần biểu đồ thể hiện BMI
-  ///
-  /// Returns: Danh sách các section data cho PieChart
   List<PieChartSectionData> showingSections(
     double bmi,
     double percentage,

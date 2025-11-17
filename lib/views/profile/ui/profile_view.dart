@@ -66,148 +66,148 @@ class ProfileView extends StatelessWidget {
               showBackButton: false,
             ),
             backgroundColor: theme.scaffoldBackgroundColor,
-            body: state is LogoutLoading || state is GetUserDataLoading
-                ? const CustomCircleProgIndicator()
-                : SafeArea(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 15,
-                        horizontal: 25,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          // ----- Header -----
-                          Row(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(30),
-                                child: Image.asset(
-                                  "assets/img/u2.png",
-                                  width: 50,
-                                  height: 50,
-                                  fit: BoxFit.cover,
-                                ),
+            body:
+                //state is LogoutLoading || state is GetUserDataLoading
+                //     ? const CustomCircleProgIndicator()
+                //     :
+                SafeArea(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 15,
+                      horizontal: 25,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // ----- Header -----
+                        Row(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(30),
+                              child: Image.asset(
+                                "assets/img/u2.png",
+                                width: 50,
+                                height: 50,
+                                fit: BoxFit.cover,
                               ),
-                              const SizedBox(width: 15),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      user?.username ?? "UserName",
-                                      style: TextStyle(
-                                        color: textColor,
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 14,
-                                      ),
+                            ),
+                            const SizedBox(width: 15),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    user?.username ?? "",
+                                    style: TextStyle(
+                                      color: textColor,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 14,
                                     ),
-                                    Text(
-                                      "Lose a Fat Program",
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: theme.textTheme.bodySmall?.color,
-                                      ),
+                                  ),
+                                  Text(
+                                    "Lose a Fat Program",
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: theme.textTheme.bodySmall?.color,
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
-                              SizedBox(
-                                width: 100,
-                                height: 25,
-                                child: RoundButton(
-                                  title: LocaleKey.editProfile.tr,
-                                  type: RoundButtonType.bgGradient,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w400,
-                                  onPressed: () {},
-                                ),
+                            ),
+                            SizedBox(
+                              width: 100,
+                              height: 25,
+                              child: RoundButton(
+                                title: LocaleKey.editProfile.tr,
+                                type: RoundButtonType.bgGradient,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
+                                onPressed: () {},
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
+                        ),
 
-                          const SizedBox(height: 15),
+                        const SizedBox(height: 15),
 
-                          // ---- Height / Weight / Goal ----
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TitleSubtitleCell(
-                                  title: "${user?.height ?? "--"} cm",
-                                  subtitle: LocaleKey.textHeight.tr,
-                                ),
+                        // ---- Height / Weight / Goal ----
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TitleSubtitleCell(
+                                title: "${user?.height ?? "--"} cm",
+                                subtitle: LocaleKey.textHeight.tr,
                               ),
-                              const SizedBox(width: 15),
-                              Expanded(
-                                child: TitleSubtitleCell(
-                                  title: "${user?.weight ?? "--"} kg",
-                                  subtitle: LocaleKey.textWeight.tr,
-                                ),
+                            ),
+                            const SizedBox(width: 15),
+                            Expanded(
+                              child: TitleSubtitleCell(
+                                title: "${user?.weight ?? "--"} kg",
+                                subtitle: LocaleKey.textWeight.tr,
                               ),
-                              const SizedBox(width: 15),
-                              Expanded(
-                                child: TitleSubtitleCell(
-                                  title: "${user?.weight_goal ?? "--"} kg",
-                                  subtitle: LocaleKey.textWeightGoal.tr,
-                                ),
+                            ),
+                            const SizedBox(width: 15),
+                            Expanded(
+                              child: TitleSubtitleCell(
+                                title: "${user?.weight_goal ?? "--"} kg",
+                                subtitle: LocaleKey.textWeightGoal.tr,
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
+                        ),
 
-                          const SizedBox(height: 25),
+                        const SizedBox(height: 25),
 
-                          // ----- ACCOUNT SECTION -----
-                          _buildSection(
-                            theme,
-                            title: LocaleKey.account.tr,
-                            items: accountArr,
-                          ),
+                        // ----- ACCOUNT SECTION -----
+                        _buildSection(
+                          theme,
+                          title: LocaleKey.account.tr,
+                          items: accountArr,
+                        ),
 
-                          const SizedBox(height: 25),
+                        const SizedBox(height: 25),
 
-                          // ----- DARK MODE -----
-                          BlocBuilder<ThemeCubit, ThemeState>(
-                            builder: (context, themeState) {
-                              final themeCubit = context.read<ThemeCubit>();
-                              return _buildDarkModeRow(
-                                theme,
-                                textColor,
-                                isDark: themeState.isDarkMode,
-                                onChanged: (value) {
-                                  themeCubit.toggleTheme(value);
-                                  CustomDialog.show(
-                                    context,
-                                    message: LocaleKey.changeDarkMode.tr,
-                                  );
-                                },
-                              );
-                            },
-                          ),
+                        // ----- DARK MODE -----
+                        BlocBuilder<ThemeCubit, ThemeState>(
+                          builder: (context, themeState) {
+                            final themeCubit = context.read<ThemeCubit>();
+                            return _buildDarkModeRow(
+                              theme,
+                              textColor,
+                              isDark: themeState.isDarkMode,
+                              onChanged: (value) {
+                                themeCubit.toggleTheme(value);
+                                CustomDialog.show(
+                                  context,
+                                  message: LocaleKey.changeDarkMode.tr,
+                                );
+                              },
+                            );
+                          },
+                        ),
 
-                          const SizedBox(height: 25),
+                        const SizedBox(height: 25),
 
-                          // ----- OTHER SECTION -----
-                          _buildSection(
-                            theme,
-                            title: LocaleKey.other.tr,
-                            items: otherArr,
-                          ),
+                        // ----- OTHER SECTION -----
+                        _buildSection(
+                          theme,
+                          title: LocaleKey.other.tr,
+                          items: otherArr,
+                        ),
 
-                          const SizedBox(height: 25),
+                        const SizedBox(height: 25),
 
-                          // ----- Logout -----
-                          RoundButton(
-                            title: LocaleKey.logout.tr,
-                            onPressed: () async {
-                              await context
-                                  .read<AuthenticationCubit>()
-                                  .signOut();
-                            },
-                          ),
-                        ],
-                      ),
+                        // ----- Logout -----
+                        RoundButton(
+                          title: LocaleKey.logout.tr,
+                          onPressed: () async {
+                            await context.read<AuthenticationCubit>().signOut();
+                          },
+                        ),
+                      ],
                     ),
                   ),
+                ),
           );
         },
       ),
