@@ -46,17 +46,18 @@ class _SignUpFormState extends State<_SignUpForm> {
     return BlocConsumer<AuthenticationCubit, AuthenticationState>(
       listener: (context, state) {
         if (state is SignUpSuccess) {
-          // ✅ Kiểm tra mounted
           if (!mounted) return;
 
           log('✅ SignUp Success - Navigating to LoginView');
 
-          // ✅ Navigate ngay mà không show toast để tránh conflict
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!mounted) return;
 
+            // ✅ Navigate và truyền flag để show success message
             Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (_) => const LoginView()),
+              MaterialPageRoute(
+                builder: (_) => const LoginView(showSignUpSuccess: true),
+              ),
               (route) => false,
             );
           });
@@ -67,11 +68,15 @@ class _SignUpFormState extends State<_SignUpForm> {
 
           log('❌ SignUp Error: ${state.message}');
 
-          showCustomDelightToastBar(
-            context,
-            state.message,
-            Icon(Icons.error, color: Colors.red),
-          );
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+
+            showCustomDelightToastBar(
+              context,
+              state.message,
+              Icon(Icons.error, color: Colors.red),
+            );
+          });
         }
       },
       builder: (context, state) {

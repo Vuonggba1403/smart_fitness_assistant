@@ -16,7 +16,9 @@ import 'package:smart_fitness_assistant/views/auth/signup/ui/signup_view.dart';
 import '../../../../core/widgets/round_button.dart';
 
 class LoginView extends StatefulWidget {
-  const LoginView({super.key});
+  final bool showSignUpSuccess;
+
+  const LoginView({super.key, this.showSignUpSuccess = false});
 
   @override
   State<LoginView> createState() => _LoginViewState();
@@ -26,6 +28,24 @@ class _LoginViewState extends State<LoginView> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    // ✅ Hiển thị success message sau khi widget đã build xong
+    if (widget.showSignUpSuccess) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+
+        showCustomDelightToastBar(
+          context,
+          'Registration successful! Please login.',
+          Icon(Icons.check_circle, color: Colors.green),
+        );
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,27 +61,27 @@ class _LoginViewState extends State<LoginView> {
         if (state is LoginError) {
           log('❌ Error: ${state.message}');
 
-          // ✅ Kiểm tra mounted trước khi show toast
           if (!mounted) return;
 
-          showCustomDelightToastBar(
-            context,
-            state.message,
-            Icon(Icons.error, color: Colors.red),
-          );
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+
+            showCustomDelightToastBar(
+              context,
+              state.message,
+              Icon(Icons.error, color: Colors.red),
+            );
+          });
         }
 
         if (state is LoginSuccess) {
           log('✅ Login Success - Navigating to MainTabView');
 
-          // ✅ Kiểm tra mounted trước khi navigate
           if (!mounted) return;
 
-          // ✅ Navigate sau khi frame build hoàn thành
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!mounted) return;
 
-            // ✅ Không show toast trước khi navigate để tránh conflict
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (_) => const MainTabView()),
               (route) => false,

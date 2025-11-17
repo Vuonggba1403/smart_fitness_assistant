@@ -71,7 +71,7 @@ Map<String, String> viVN = {
   LocaleKey.check: "Kiểm tra",
   //BMI
   LocaleKey.bmi: "BMI (Chỉ số khối cơ thể)",
-  LocaleKey.textBMI: "Bạn có cân nặng bình thường",
+  LocaleKey.classificationBMI1: "",
 
   //Select view
   LocaleKey.workoutTracker: 'Theo dõi Tập Luyện',

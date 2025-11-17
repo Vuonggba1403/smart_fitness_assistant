@@ -16,14 +16,9 @@ import 'package:smart_fitness_assistant/views/auth/login/ui/login_view.dart';
 import 'widgets/setting_row.dart';
 import 'widgets/title_subtitle_cell.dart';
 
-class ProfileView extends StatefulWidget {
+class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
 
-  @override
-  State<ProfileView> createState() => _ProfileViewState();
-}
-
-class _ProfileViewState extends State<ProfileView> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -63,180 +58,121 @@ class _ProfileViewState extends State<ProfileView> {
           }
         },
         builder: (context, state) {
-          UserDataModel? user = context
-              .read<AuthenticationCubit>()
-              .userDataModel;
+          final user = context.read<AuthenticationCubit>().userDataModel;
+
           return Scaffold(
             appBar: CustomAppBar(
               title: LocaleKey.profile.tr,
               showBackButton: false,
             ),
             backgroundColor: theme.scaffoldBackgroundColor,
-            body: SafeArea(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 15,
-                  horizontal: 25,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    /// --- Header: Avatar + Name + Edit ---
-                    Row(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(30),
-                          child: Image.asset(
-                            "assets/img/u2.png",
-                            width: 50,
-                            height: 50,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        const SizedBox(width: 15),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                user?.username ?? "UserName",
-                                style: TextStyle(
-                                  color: textColor,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 14,
-                                ),
-                              ),
-                              Text(
-                                "Lose a Fat Program",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: theme.textTheme.bodySmall?.color,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          width: 100,
-                          height: 25,
-                          child: RoundButton(
-                            title: LocaleKey.editProfile.tr,
-                            type: RoundButtonType.bgGradient,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w400,
-                            onPressed: () {},
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 15),
-
-                    /// --- Height / Weight / Age ---
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TitleSubtitleCell(
-                            title: "${user?.height ?? ""} cm",
-                            subtitle: LocaleKey.textHeight.tr,
-                          ),
-                        ),
-                        SizedBox(width: 15),
-                        Expanded(
-                          child: TitleSubtitleCell(
-                            title: "${user?.weight ?? ""} kg",
-                            subtitle: LocaleKey.textWeight.tr,
-                          ),
-                        ),
-                        SizedBox(width: 15),
-                        Expanded(
-                          child: TitleSubtitleCell(
-                            title: "${user?.weight_goal ?? ""} kg",
-                            subtitle: LocaleKey.textWeightGoal.tr,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 25),
-
-                    /// --- Account section ---
-                    Container(
+            body: state is LogoutLoading || state is GetUserDataLoading
+                ? const CustomCircleProgIndicator()
+                : SafeArea(
+                    child: SingleChildScrollView(
                       padding: const EdgeInsets.symmetric(
-                        vertical: 10,
-                        horizontal: 15,
-                      ),
-                      decoration: BoxDecoration(
-                        color: theme.cardColor,
-                        borderRadius: BorderRadius.circular(15),
-                        boxShadow: const [
-                          BoxShadow(color: Colors.black12, blurRadius: 2),
-                        ],
+                        vertical: 15,
+                        horizontal: 25,
                       ),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Text(
-                            LocaleKey.account.tr,
-                            style: TextStyle(
-                              color: textColor,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Column(
-                            children: List.generate(accountArr.length, (index) {
-                              final item = accountArr[index];
-                              return SettingRow(
-                                icon: item["image"].toString(),
-                                title: item["name"].toString(),
-                                onPressed: () {},
-                              );
-                            }),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 25),
-
-                    /// --- Dark mode toggle ---
-                    BlocBuilder<ThemeCubit, ThemeState>(
-                      builder: (context, themeState) {
-                        final themeCubit = context.read<ThemeCubit>();
-                        return Container(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 10,
-                            horizontal: 15,
-                          ),
-                          decoration: BoxDecoration(
-                            color: theme.cardColor,
-                            borderRadius: BorderRadius.circular(15),
-                            boxShadow: const [
-                              BoxShadow(color: Colors.black12, blurRadius: 2),
-                            ],
-                          ),
-                          child: Row(
+                          // ----- Header -----
+                          Row(
                             children: [
-                              Image.asset(
-                                "assets/img/darkmode.png",
-                                height: 15,
-                                width: 15,
-                                color: textColor,
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(30),
+                                child: Image.asset(
+                                  "assets/img/u2.png",
+                                  width: 50,
+                                  height: 50,
+                                  fit: BoxFit.cover,
+                                ),
                               ),
                               const SizedBox(width: 15),
                               Expanded(
-                                child: Text(
-                                  LocaleKey.darkMode.tr,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: textColor,
-                                  ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      user?.username ?? "UserName",
+                                      style: TextStyle(
+                                        color: textColor,
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                    Text(
+                                      "Lose a Fat Program",
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: theme.textTheme.bodySmall?.color,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              CustomToggleSwitch(
-                                value: themeState.isDarkMode,
+                              SizedBox(
+                                width: 100,
+                                height: 25,
+                                child: RoundButton(
+                                  title: LocaleKey.editProfile.tr,
+                                  type: RoundButtonType.bgGradient,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w400,
+                                  onPressed: () {},
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 15),
+
+                          // ---- Height / Weight / Goal ----
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TitleSubtitleCell(
+                                  title: "${user?.height ?? "--"} cm",
+                                  subtitle: LocaleKey.textHeight.tr,
+                                ),
+                              ),
+                              const SizedBox(width: 15),
+                              Expanded(
+                                child: TitleSubtitleCell(
+                                  title: "${user?.weight ?? "--"} kg",
+                                  subtitle: LocaleKey.textWeight.tr,
+                                ),
+                              ),
+                              const SizedBox(width: 15),
+                              Expanded(
+                                child: TitleSubtitleCell(
+                                  title: "${user?.weight_goal ?? "--"} kg",
+                                  subtitle: LocaleKey.textWeightGoal.tr,
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 25),
+
+                          // ----- ACCOUNT SECTION -----
+                          _buildSection(
+                            theme,
+                            title: LocaleKey.account.tr,
+                            items: accountArr,
+                          ),
+
+                          const SizedBox(height: 25),
+
+                          // ----- DARK MODE -----
+                          BlocBuilder<ThemeCubit, ThemeState>(
+                            builder: (context, themeState) {
+                              final themeCubit = context.read<ThemeCubit>();
+                              return _buildDarkModeRow(
+                                theme,
+                                textColor,
+                                isDark: themeState.isDarkMode,
                                 onChanged: (value) {
                                   themeCubit.toggleTheme(value);
                                   CustomDialog.show(
@@ -244,70 +180,111 @@ class _ProfileViewState extends State<ProfileView> {
                                     message: LocaleKey.changeDarkMode.tr,
                                   );
                                 },
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-
-                    const SizedBox(height: 25),
-
-                    /// --- Other section ---
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 10,
-                        horizontal: 15,
-                      ),
-                      decoration: BoxDecoration(
-                        color: theme.cardColor,
-                        borderRadius: BorderRadius.circular(15),
-                        boxShadow: const [
-                          BoxShadow(color: Colors.black12, blurRadius: 2),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            LocaleKey.other.tr,
-                            style: TextStyle(
-                              color: textColor,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Column(
-                            children: List.generate(otherArr.length, (index) {
-                              final item = otherArr[index];
-                              return SettingRow(
-                                icon: item["image"].toString(),
-                                title: item["name"].toString(),
-                                onPressed: () {},
                               );
-                            }),
+                            },
+                          ),
+
+                          const SizedBox(height: 25),
+
+                          // ----- OTHER SECTION -----
+                          _buildSection(
+                            theme,
+                            title: LocaleKey.other.tr,
+                            items: otherArr,
+                          ),
+
+                          const SizedBox(height: 25),
+
+                          // ----- Logout -----
+                          RoundButton(
+                            title: LocaleKey.logout.tr,
+                            onPressed: () async {
+                              await context
+                                  .read<AuthenticationCubit>()
+                                  .signOut();
+                            },
                           ),
                         ],
                       ),
                     ),
-
-                    const SizedBox(height: 25),
-
-                    /// --- Logout ---
-                    RoundButton(
-                      title: LocaleKey.logout.tr,
-                      onPressed: () async {
-                        await context.read<AuthenticationCubit>().signOut();
-                        // CustomDialog.show(context, message: LocaleKey.logoutSuccess.tr);
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
+                  ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildSection(
+    ThemeData theme, {
+    required String title,
+    required List<Map<String, dynamic>> items,
+  }) {
+    final textColor = theme.textTheme.bodyMedium?.color;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 2)],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              color: textColor,
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Column(
+            children: List.generate(
+              items.length,
+              (index) => SettingRow(
+                icon: items[index]["image"],
+                title: items[index]["name"],
+                onPressed: () {},
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDarkModeRow(
+    ThemeData theme,
+    Color? textColor, {
+    required bool isDark,
+    required Function(bool) onChanged,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 2)],
+      ),
+      child: Row(
+        children: [
+          Image.asset(
+            "assets/img/darkmode.png",
+            height: 15,
+            width: 15,
+            color: textColor,
+          ),
+          const SizedBox(width: 15),
+          Expanded(
+            child: Text(
+              LocaleKey.darkMode.tr,
+              style: TextStyle(fontSize: 12, color: textColor),
+            ),
+          ),
+          CustomToggleSwitch(value: isDark, onChanged: onChanged),
+        ],
       ),
     );
   }

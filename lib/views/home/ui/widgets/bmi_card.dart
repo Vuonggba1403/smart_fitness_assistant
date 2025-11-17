@@ -1,125 +1,193 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
+import 'package:smart_fitness_assistant/views/auth/cubit/authentication_cubit.dart';
 
 class BMICard extends StatelessWidget {
   const BMICard({super.key});
 
+  /// Tính toán chỉ số BMI dựa trên cân nặng và chiều cao
+  double calculateBMI(double weight, double height) {
+    if (weight <= 0 || height <= 0) return 0;
+    final heightInMeters = height / 100;
+    return weight / (heightInMeters * heightInMeters);
+  }
+
+  /// Chuyển đổi giá trị động sang kiểu double
+  double _parseToDouble(dynamic value) {
+    if (value == null) return 0;
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0;
+    return 0;
+  }
+
+  /// Xác định phân loại BMI theo tiêu chuẩn châu Á
+  /// Returns: Chuỗi mô tả phân loại BMI (Gầy độ I/II/III, Bình thường,
+  /// Thừa cân, Béo phì độ I/II/III)
+  String getBMICategory(double bmi) {
+    if (bmi < 16) return 'Gầy độ III';
+    if (bmi < 17) return 'Gầy độ II';
+    if (bmi < 18.5) return 'Gầy độ I';
+    if (bmi < 25) return 'Bình thường';
+    if (bmi < 30) return 'Thừa cân';
+    if (bmi < 35) return 'Béo phì độ I';
+    if (bmi < 40) return 'Béo phì độ II';
+    return 'Béo phì độ III';
+  }
+
+  /// Tính phần trăm BMI để hiển thị trên biểu đồ
+  double getBMIPercentage(double bmi) {
+    if (bmi < 10) return 0;
+    if (bmi > 40) return 100;
+    return ((bmi - 10) / 30) * 100;
+  }
+
+  /// Xác định màu sắc tương ứng với phân loại BMI
+  Color getBMIColor(double bmi) {
+    if (bmi < 18.5) return Colors.blue;
+    if (bmi < 25) return Colors.green;
+    if (bmi < 30) return Colors.orange;
+    return Colors.red;
+  }
+
   @override
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context).size;
-    final theme = Theme.of(context); // 🌙 Lấy theme động
-    final textColor = theme.textTheme.bodyMedium?.color; // Màu text chính
-    return Container(
-      height: media.width * 0.4,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(colors: TColor.primaryG),
-        borderRadius: BorderRadius.circular(media.width * 0.075),
-      ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Image.asset(
-            "assets/img/bg_dots.png",
-            height: media.width * 0.4,
-            width: double.maxFinite,
-            fit: BoxFit.fitHeight,
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color;
+
+    return BlocBuilder<AuthenticationCubit, AuthenticationState>(
+      builder: (context, state) {
+        final user = context.watch<AuthenticationCubit>().userDataModel;
+
+        final weight = _parseToDouble(user?.weight);
+        final height = _parseToDouble(user?.height);
+        final bmi = calculateBMI(weight, height);
+        final bmiCategory = getBMICategory(bmi);
+        final bmiPercentage = getBMIPercentage(bmi);
+        final bmiColor = getBMIColor(bmi);
+
+        return Container(
+          height: media.width * 0.4,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(colors: TColor.primaryG),
+            borderRadius: BorderRadius.circular(media.width * 0.075),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 25, horizontal: 25),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Image.asset(
+                "assets/img/bg_dots.png",
+                height: media.width * 0.4,
+                width: double.maxFinite,
+                fit: BoxFit.fitHeight,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 25,
+                  horizontal: 25,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      LocaleKey.bmi.tr,
-                      style: TextStyle(
-                        color: textColor,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                      ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          LocaleKey.bmi.tr,
+                          style: TextStyle(
+                            color: textColor,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        Text(
+                          bmi > 0 ? bmiCategory : "",
+                          style: TextStyle(
+                            color: textColor?.withOpacity(0.7),
+                            fontSize: 12,
+                          ),
+                        ),
+                        SizedBox(height: media.width * 0.05),
+                        SizedBox(
+                          width: 120,
+                          height: 35,
+                          child: RoundButton(
+                            title: LocaleKey.seeMore.tr,
+                            onPressed: () {},
+                          ),
+                        ),
+                      ],
                     ),
-                    Text(
-                      LocaleKey.textBMI.tr,
-                      style: TextStyle(
-                        color: textColor?.withOpacity(0.7),
-                        fontSize: 12,
-                      ),
-                    ),
-                    SizedBox(height: media.width * 0.05),
-                    SizedBox(
-                      width: 120,
-                      height: 35,
-                      child: RoundButton(
-                        title: LocaleKey.seeMore.tr,
-                        onPressed: () {},
+
+                    AspectRatio(
+                      aspectRatio: 1,
+                      child: PieChart(
+                        PieChartData(
+                          pieTouchData: PieTouchData(
+                            touchCallback:
+                                (FlTouchEvent event, pieTouchResponse) {},
+                          ),
+                          startDegreeOffset: 250,
+                          borderData: FlBorderData(show: false),
+                          sectionsSpace: 1,
+                          centerSpaceRadius: 0,
+                          sections: showingSections(
+                            bmi,
+                            bmiPercentage,
+                            bmiColor,
+                          ),
+                        ),
                       ),
                     ),
                   ],
                 ),
-                AspectRatio(
-                  aspectRatio: 1,
-                  child: PieChart(
-                    PieChartData(
-                      pieTouchData: PieTouchData(
-                        touchCallback:
-                            (FlTouchEvent event, pieTouchResponse) {},
-                      ),
-                      startDegreeOffset: 250,
-                      borderData: FlBorderData(show: false),
-                      sectionsSpace: 1,
-                      centerSpaceRadius: 0,
-                      sections: showingSections(),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  List<PieChartSectionData> showingSections() {
-    return List.generate(2, (i) {
-      var color0 = TColor.secondaryColor1;
-
-      switch (i) {
-        case 0:
-          return PieChartSectionData(
-            color: color0,
-            value: 33,
-            title: '',
-            radius: 55,
-            titlePositionPercentageOffset: 0.55,
-            badgeWidget: const Text(
-              "20,1",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          );
-        case 1:
-          return PieChartSectionData(
+  /// Tạo danh sách các phần của biểu đồ tròn BMI
+  ///
+  /// [bmi] - Chỉ số BMI hiện tại
+  /// [percentage] - Phần trăm để hiển thị trên biểu đồ
+  /// [bmiColor] - Màu sắc của phần biểu đồ thể hiện BMI
+  ///
+  /// Returns: Danh sách các section data cho PieChart
+  List<PieChartSectionData> showingSections(
+    double bmi,
+    double percentage,
+    Color bmiColor,
+  ) {
+    return [
+      PieChartSectionData(
+        color: bmiColor,
+        value: percentage,
+        title: '',
+        radius: 55,
+        badgeWidget: Text(
+          bmi > 0 ? bmi.toStringAsFixed(1) : "0.0",
+          style: const TextStyle(
             color: Colors.white,
-            value: 75,
-            title: '',
-            radius: 45,
-            titlePositionPercentageOffset: 0.55,
-          );
-
-        default:
-          throw Error();
-      }
-    });
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+      PieChartSectionData(
+        color: Colors.white,
+        value: 100 - percentage,
+        title: '',
+        radius: 45,
+      ),
+    ];
   }
 }

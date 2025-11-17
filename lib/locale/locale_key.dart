@@ -69,7 +69,15 @@ class LocaleKey {
   static const String check = "check";
   //BMI
   static const String bmi = "bmi";
-  static const String textBMI = "text_bmi";
+
+  static const String classificationBMI1 = "classification_bmi1";
+  static const String classificationBMI2 = "classification_bmi2";
+  static const String classificationBMI3 = "classification_bmi3";
+  static const String classificationBMI4 = "classification_bmi4";
+  static const String classificationBMI5 = "classification_bmi5";
+  static const String classificationBMI6 = "classification_bmi6";
+  static const String classificationBMI7 = "classification_bmi7";
+  static const String classificationBMI8 = "classification_bmi8";
 
   //Profile View
   static const String profile = "profile";

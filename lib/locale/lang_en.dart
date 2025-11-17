@@ -76,7 +76,6 @@ Map<String, String> enUs = {
   LocaleKey.check: "Check",
   //BMI
   LocaleKey.bmi: "BMI (Body Mass Index)",
-  LocaleKey.textBMI: "You have a normal weight",
 
   //Profile View
   LocaleKey.profile: "Profile",
