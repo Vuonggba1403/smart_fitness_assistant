@@ -5,11 +5,9 @@ import 'package:smart_fitness_assistant/core/sensitive_data.dart';
 import 'package:smart_fitness_assistant/core/theme/logic/cubit/theme_cubit.dart';
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
 import 'package:smart_fitness_assistant/views/auth/cubit/authentication_cubit.dart';
-import 'package:smart_fitness_assistant/views/auth/login/ui/login_view.dart';
-import 'package:smart_fitness_assistant/views/auth/main_tab/ui/main_tab_view.dart';
+
 import 'package:smart_fitness_assistant/views/home/logic/cubit/home_cubit.dart';
 import 'package:smart_fitness_assistant/views/onboarding/ui/started_view.dart';
-import 'package:smart_fitness_assistant/views/onboarding/ui/widgets/on_boarding_page.dart';
 import 'core/functions/app_shared.dart';
 import 'locale/translation_manager.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';

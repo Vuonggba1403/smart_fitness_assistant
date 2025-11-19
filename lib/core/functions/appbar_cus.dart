@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   const CustomAppBar({

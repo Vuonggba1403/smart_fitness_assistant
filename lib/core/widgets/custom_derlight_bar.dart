@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:delightful_toast/delight_toast.dart';
-import 'package:delightful_toast/toast/components/raw_delight_toast.dart';
 import 'package:delightful_toast/toast/components/toast_card.dart';
 import 'package:delightful_toast/toast/utils/enums.dart';
-import 'package:delightful_toast/toast/utils/mock.dart';
-import 'package:delightful_toast/toast/utils/utils.dart';
-import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 
 // Flag toàn cục để tránh toast chồng
 bool _isShowingToast = false;

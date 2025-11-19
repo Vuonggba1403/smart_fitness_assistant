@@ -12,7 +12,6 @@ import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/views/auth/cubit/authentication_cubit.dart';
 import 'package:smart_fitness_assistant/views/auth/login/ui/login_view.dart';
 import 'package:smart_fitness_assistant/views/auth/signup/ui/widgets/dialog_complete.dart';
-import 'package:smart_fitness_assistant/views/auth/signup/ui/widgets/what_your_goal_view.dart';
 
 class SignUpView extends StatelessWidget {
   const SignUpView({super.key});

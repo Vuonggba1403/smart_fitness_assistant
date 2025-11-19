@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:smart_fitness_assistant/core/functions/app_shared.dart';
@@ -78,8 +80,10 @@ class HomeCubit extends Cubit<HomeState> {
   void updateLanguage(String language) {
     if (state is HomeLoaded) {
       final currentState = state as HomeLoaded;
+
       AppShared.setLanguageCode(language); // Lưu ngôn ngữ
       emit(currentState.copyWith(currentLanguage: language));
+      log('Updating language to: $language');
     }
   }
 }

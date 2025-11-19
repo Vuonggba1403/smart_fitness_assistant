@@ -16,7 +16,6 @@ import 'package:smart_fitness_assistant/views/home/logic/cubit/home_cubit.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/activity_tracker_view.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/bmi_card.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/health_summary_section.dart';
-import 'package:smart_fitness_assistant/views/home/ui/widgets/heart_rate_view.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/lastest_workout_view.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/workout_progress_view.dart';
 import '../../notifications/ui/notification_view.dart';
@@ -217,11 +216,6 @@ class HomeView extends StatelessWidget {
                                       ),
                                     ),
                                     SizedBox(height: media.width * 0.02),
-                                    HeartRateView(
-                                      allSpots: HomeView.allSpots,
-                                      showingTooltipOnSpots:
-                                          loadedState.showingTooltipOnSpots,
-                                    ),
                                   ],
                                 ),
 

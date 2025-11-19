@@ -24,14 +24,14 @@ class BMICard extends StatelessWidget {
   }
 
   String getBMICategory(double bmi) {
-    if (bmi < 16) return 'Gầy độ III';
-    if (bmi < 17) return 'Gầy độ II';
-    if (bmi < 18.5) return 'Gầy độ I';
-    if (bmi < 25) return 'Bình thường';
-    if (bmi < 30) return 'Thừa cân';
-    if (bmi < 35) return 'Béo phì độ I';
-    if (bmi < 40) return 'Béo phì độ II';
-    return 'Béo phì độ III';
+    if (bmi < 16) return LocaleKey.classificationBMI1.tr;
+    if (bmi < 17) return LocaleKey.classificationBMI2.tr;
+    if (bmi < 18.5) return LocaleKey.classificationBMI3.tr;
+    if (bmi < 25) return LocaleKey.classificationBMI4.tr;
+    if (bmi < 30) return LocaleKey.classificationBMI5.tr;
+    if (bmi < 35) return LocaleKey.classificationBMI6.tr;
+    if (bmi < 40) return LocaleKey.classificationBMI7.tr;
+    return LocaleKey.classificationBMI8.tr;
   }
 
   double getBMIPercentage(double bmi) {

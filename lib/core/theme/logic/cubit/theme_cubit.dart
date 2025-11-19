@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
@@ -28,6 +30,7 @@ class ThemeCubit extends Cubit<ThemeState> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isDarkMode', isDark);
     emit(state.copyWith(isDarkMode: isDark));
+    log("Theme changed → ${isDark ? "Dark Mode" : "Light Mode"}");
   }
 
   /// Trả về ThemeData hiện tại (tiện nếu cần lấy trực tiếp)

@@ -8,6 +8,8 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -21,25 +23,22 @@ class ExamplePage extends StatefulWidget {
   const ExamplePage({Key? key}) : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _ExamplePageState createState() => _ExamplePageState();
 }
 
 class _ExamplePageState extends State<ExamplePage> {
-  CalendarAgendaController _calendarAgendaControllerAppBar =
-      CalendarAgendaController();
-  CalendarAgendaController _calendarAgendaControllerNotAppBar =
+  final CalendarAgendaController _calendarAgendaControllerAppBar =
       CalendarAgendaController();
 
   late DateTime _selectedDateAppBBar;
-  late DateTime _selectedDateNotAppBBar;
 
-  Random random = new Random();
+  Random random = Random();
 
   @override
   void initState() {
     super.initState();
     _selectedDateAppBBar = DateTime.now();
-    _selectedDateNotAppBBar = DateTime.now();
   }
 
   @override
@@ -59,6 +58,7 @@ class _ExamplePageState extends State<ExamplePage> {
         weekDay: WeekDay.long,
         dayNameFontSize: 12,
         dayNumberFontSize: 16,
+        // ignore: deprecated_member_use
         dayBGColor: Colors.grey.withOpacity(0.15),
         titleSpaceBetween: 15,
         backgroundColor: Colors.white,
@@ -84,9 +84,9 @@ class _ExamplePageState extends State<ExamplePage> {
           width: double.maxFinite,
           height: double.maxFinite,
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-                colors: [ const Color(0xff9DCEFF), const Color(0xff92A3FD),
-                
+            gradient: LinearGradient(colors: [
+              const Color(0xff9DCEFF),
+              const Color(0xff92A3FD),
             ], begin: Alignment.topCenter, end: Alignment.bottomCenter),
             borderRadius: BorderRadius.circular(10.0),
           ),
