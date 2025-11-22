@@ -81,9 +81,13 @@ class HomeCubit extends Cubit<HomeState> {
     if (state is HomeLoaded) {
       final currentState = state as HomeLoaded;
 
-      AppShared.setLanguageCode(language); // Lưu ngôn ngữ
-      emit(currentState.copyWith(currentLanguage: language));
-      log('Updating language to: $language');
+      if (currentState.currentLanguage != language) {
+        AppShared.setLanguageCode(language);
+        final newState = currentState.copyWith(currentLanguage: language);
+        emit(LanguageChanged(language)); // Emit event để trigger dialog
+        emit(newState); // Emit lại HomeLoaded để giữ UI
+        log('Updating language to: $language');
+      }
     }
   }
 }

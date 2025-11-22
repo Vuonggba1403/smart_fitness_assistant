@@ -4,11 +4,11 @@ import 'package:simple_animation_progress_bar/simple_animation_progress_bar.dart
 import 'package:simple_circular_progress_bar/simple_circular_progress_bar.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 
-class HealthSummarySection extends StatelessWidget {
+class DailyActivitySection extends StatelessWidget {
   final List<Map<String, dynamic>> waterArr;
   final double mediaWidth;
 
-  const HealthSummarySection({
+  const DailyActivitySection({
     super.key,
     required this.waterArr,
     required this.mediaWidth,

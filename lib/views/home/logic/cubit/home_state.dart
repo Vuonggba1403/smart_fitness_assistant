@@ -33,3 +33,8 @@ final class HomeLoaded extends HomeState {
     );
   }
 }
+
+final class LanguageChanged extends HomeState {
+  final String newLanguage;
+  LanguageChanged(this.newLanguage);
+}

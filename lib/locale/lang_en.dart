@@ -7,7 +7,7 @@ Map<String, String> enUs = {
   //Select view
   LocaleKey.workoutTracker: 'Workout Tracker',
   LocaleKey.mealPlanner: 'Meal Planner',
-  LocaleKey.sleepTracker: 'Sleep Tracker',
+  LocaleKey.drinkwater: 'Drink Water',
 
   //Onboarding view
   LocaleKey.textOnboarding: 'Everybody Can Train',
@@ -68,7 +68,7 @@ Map<String, String> enUs = {
 
   //Home View
   LocaleKey.welcomeBack: 'Welcome Back',
-  LocaleKey.activityStatus: 'Activity Status',
+  LocaleKey.dailyActivity: 'Daily Activity',
   LocaleKey.workoutProgress: 'Workout Progress',
   LocaleKey.latestWorkout: 'Latest Workout',
   LocaleKey.seeMore: 'See More',

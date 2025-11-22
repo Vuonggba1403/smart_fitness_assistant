@@ -4,7 +4,6 @@ import 'package:smart_fitness_assistant/views/meal_planner/ui/meal_planner_view.
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/workout_tracker_view.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../sleep_tracker/ui/sleep_tracker_view.dart';
 import '../../../../../locale/locale_key.dart';
 import 'package:get/get.dart';
 
@@ -38,9 +37,9 @@ class SelectView extends StatelessWidget {
             const SizedBox(height: 15),
 
             RoundButton(
-              title: LocaleKey.sleepTracker.tr,
+              title: LocaleKey.drinkwater.tr,
               onPressed: () {
-                navigateTo(context, SleepTrackerView());
+                // navigateTo(context, DrinkWaterView());
               },
             ),
           ],

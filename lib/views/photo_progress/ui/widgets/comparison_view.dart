@@ -17,7 +17,7 @@ class _ComparisonViewState extends State<ComparisonView> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final textColor = theme.textTheme.bodyMedium?.color;
+
     return Scaffold(
       appBar: CustomAppBar(title: "Comparison"),
       backgroundColor: theme.scaffoldBackgroundColor,

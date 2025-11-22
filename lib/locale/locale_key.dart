@@ -5,7 +5,7 @@ class LocaleKey {
   //Select view
   static const String workoutTracker = 'workout_tracker';
   static const String mealPlanner = 'meal_planner';
-  static const String sleepTracker = 'sleep_tracker';
+  static const String drinkwater = 'drinkwater';
   static const String changeLanguage = 'change_language';
 
   //Onboarding view
@@ -61,7 +61,7 @@ class LocaleKey {
 
   //Home view
   static const String welcomeBack = "welcome_back";
-  static const String activityStatus = "activity_status";
+  static const String dailyActivity = "daily_activity";
   static const String workoutProgress = "workout_progress";
   static const String latestWorkout = "latest_workout";
   static const String seeMore = "see_more";

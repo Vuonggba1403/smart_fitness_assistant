@@ -63,7 +63,7 @@ Map<String, String> viVN = {
 
   //Home View
   LocaleKey.welcomeBack: 'Chào mừng trở lại',
-  LocaleKey.activityStatus: 'Trạng thái hoạt động',
+  LocaleKey.dailyActivity: 'Hoạt động hàng ngày',
   LocaleKey.workoutProgress: 'Tiến độ tập luyện',
   LocaleKey.latestWorkout: 'Buổi tập gần đây',
   LocaleKey.seeMore: 'Xem thêm',
@@ -83,7 +83,7 @@ Map<String, String> viVN = {
   //Select view
   LocaleKey.workoutTracker: 'Theo dõi Tập Luyện',
   LocaleKey.mealPlanner: 'Kế Hoạch Ăn Uống',
-  LocaleKey.sleepTracker: 'Theo dõi Giấc Ngủ',
+  LocaleKey.drinkwater: 'Theo dõi Uống Nước',
   LocaleKey.changeLanguage: 'Thay đổi Ngôn ngữ',
 
   //Profile View
