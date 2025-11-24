@@ -1,6 +1,6 @@
 import 'package:calendar_agenda/calendar_agenda.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
@@ -16,8 +16,9 @@ class WorkoutScheduleView extends StatefulWidget {
 }
 
 class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
-  CalendarAgendaController _calendarAgendaControllerAppBar =
+  final CalendarAgendaController _calendarAgendaControllerAppBar =
       CalendarAgendaController();
+
   late DateTime _selectedDateAppBBar;
 
   List eventArr = [
@@ -59,9 +60,7 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
         })
         .toList();
 
-    if (mounted) {
-      setState(() {});
-    }
+    if (mounted) setState(() {});
   }
 
   @override
@@ -69,6 +68,7 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
     var media = MediaQuery.of(context).size;
     final theme = Theme.of(context);
     final textColor = theme.textTheme.bodyMedium?.color;
+
     return Scaffold(
       appBar: CustomAppBar(title: "Workout Schedule"),
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -79,39 +79,21 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
             controller: _calendarAgendaControllerAppBar,
             appbar: false,
             selectedDayPosition: SelectedDayPosition.center,
-            leading: IconButton(
-              onPressed: () {},
-              icon: Image.asset(
-                "assets/img/ArrowLeft.png",
-                width: 15,
-                height: 15,
-              ),
-            ),
-            trailing: IconButton(
-              onPressed: () {},
-              icon: Image.asset(
-                "assets/img/ArrowRight.png",
-                width: 15,
-                height: 15,
-              ),
-            ),
             weekDay: WeekDay.short,
             dayNameFontSize: 12,
             dayNumberFontSize: 16,
             backgroundColor: Colors.transparent,
             fullCalendarScroll: FullCalendarScroll.horizontal,
             fullCalendarDay: WeekDay.short,
-            selectedDateColor: Colors.white,
+            selectedDateColor: Colors.white, // Màu chữ khi được chọn
             dateColor: Colors.black,
             locale: 'en',
             initialDate: DateTime.now(),
             calendarEventColor: TColor.primaryColor2,
             firstDate: DateTime.now().subtract(const Duration(days: 140)),
             lastDate: DateTime.now().add(const Duration(days: 60)),
-            onDateSelected: (date) {
-              _selectedDateAppBBar = date;
-              setDayEventWorkoutList();
-            },
+
+            // ĐÃ SỬA ĐẸP HOÀN HẢO TẠI ĐÂY
             selectedDayLogoWidget: Container(
               width: double.maxFinite,
               height: double.maxFinite,
@@ -123,8 +105,41 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                 ),
                 borderRadius: BorderRadius.circular(10.0),
               ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Số ngày - to, đậm, trắng
+                  Text(
+                    "${_selectedDateAppBBar.day}",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  // Thứ trong tuần (Mon, Tue...)
+                  Text(
+                    DateFormat('EEE').format(_selectedDateAppBBar),
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
             ),
+
+            onDateSelected: (date) {
+              setState(() {
+                _selectedDateAppBBar = date;
+              });
+              setDayEventWorkoutList();
+            },
           ),
+
+          // Phần danh sách giờ tập (giữ nguyên)
           Expanded(
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -132,8 +147,8 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                 width: media.width * 1.5,
                 child: ListView.separated(
                   shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
                   itemBuilder: (context, index) {
-                    var timelineDataWidth = (media.width * 1.5) - (80 + 40);
                     var availWidth = (media.width * 1.2) - (80 + 40);
                     var slotArr = selectDayEventArr.where((wObj) {
                       return (wObj["date"] as DateTime).hour == index;
@@ -161,9 +176,7 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                                 alignment: Alignment.centerLeft,
                                 children: slotArr.map((sObj) {
                                   var min = (sObj["date"] as DateTime).minute;
-                                  //(0 to 2)
                                   var pos = (min / 60) * 2 - 1;
-
                                   return Align(
                                     alignment: Alignment(pos, 0),
                                     child: InkWell(
@@ -192,17 +205,17 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                                                   crossAxisAlignment:
                                                       CrossAxisAlignment.start,
                                                   children: [
+                                                    // Header dialog
                                                     Row(
                                                       mainAxisAlignment:
                                                           MainAxisAlignment
                                                               .spaceBetween,
                                                       children: [
                                                         InkWell(
-                                                          onTap: () {
-                                                            Navigator.pop(
-                                                              context,
-                                                            );
-                                                          },
+                                                          onTap: () =>
+                                                              Navigator.pop(
+                                                                context,
+                                                              ),
                                                           child: Container(
                                                             margin:
                                                                 const EdgeInsets.all(
@@ -292,7 +305,7 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                                                           width: 8,
                                                         ),
                                                         Text(
-                                                          "${getDayTitle(sObj["start_time"].toString())}|${getStringDateToOtherFormate(sObj["start_time"].toString(), outFormatStr: "h:mm aa")}",
+                                                          "${getDayTitle(sObj["start_time"].toString())} | ${getStringDateToOtherFormate(sObj["start_time"].toString(), outFormatStr: "h:mm aa")}",
                                                           style: TextStyle(
                                                             color: textColor
                                                                 ?.withOpacity(
@@ -303,9 +316,7 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                                                         ),
                                                       ],
                                                     ),
-
                                                     const SizedBox(height: 15),
-
                                                     RoundButton(
                                                       title: "Mark Done",
                                                       onPressed: () {},
@@ -333,7 +344,7 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                                           ),
                                         ),
                                         child: Text(
-                                          "${sObj["name"].toString()}, ${getStringDateToOtherFormate(sObj["start_time"].toString(), outFormatStr: "h:mm aa")}",
+                                          "${sObj["name"]}, ${getStringDateToOtherFormate(sObj["start_time"].toString(), outFormatStr: "h:mm aa")}",
                                           maxLines: 1,
                                           style: TextStyle(
                                             color: TColor.white,
@@ -350,12 +361,8 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                       ),
                     );
                   },
-                  separatorBuilder: (context, index) {
-                    return Divider(
-                      color: TColor.gray.withOpacity(0.2),
-                      height: 1,
-                    );
-                  },
+                  separatorBuilder: (context, index) =>
+                      Divider(color: TColor.gray.withOpacity(0.2), height: 1),
                   itemCount: 24,
                 ),
               ),
@@ -363,6 +370,7 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
           ),
         ],
       ),
+
       floatingActionButton: InkWell(
         onTap: () {
           navigateTo(context, AddScheduleView(date: _selectedDateAppBBar));

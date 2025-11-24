@@ -1,3 +1,10 @@
+// import 'package:calendar_agenda/calendar_agenda.dart'
+//     show
+//         CalendarAgenda,
+//         SelectedDayPosition,
+//         CalendarAgendaController,
+//         WeekDay,
+//         FullCalendarScroll;
 // import 'package:flutter/material.dart';
 // import 'package:simple_animation_progress_bar/simple_animation_progress_bar.dart';
 // import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
@@ -109,7 +116,7 @@
 //                 height: 15,
 //               ),
 //             ),
-//             training: IconButton(
+//             trailing: IconButton(
 //               onPressed: () {},
 //               icon: Image.asset(
 //                 "assets/img/ArrowRight.png",
@@ -120,7 +127,7 @@
 //             weekDay: WeekDay.short,
 //             dayNameFontSize: 12,
 //             dayNumberFontSize: 16,
-//             dayBGColor: Colors.grey.withOpacity(0.15),
+//             dateColor: Colors.grey.withOpacity(0.15),
 //             titleSpaceBetween: 15,
 //             backgroundColor: Colors.transparent,
 //             // fullCalendar: false,

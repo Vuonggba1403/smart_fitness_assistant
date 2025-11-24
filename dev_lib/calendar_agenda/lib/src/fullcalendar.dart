@@ -36,6 +36,7 @@ class FullCalendar extends StatefulWidget {
     this.calendarScroll,
   }) : super(key: key);
   @override
+  // ignore: library_private_types_in_public_api
   _FullCalendarState createState() => _FullCalendarState();
 }
 
@@ -49,6 +50,7 @@ class _FullCalendarState extends State<FullCalendar> {
 
   late PageController _horizontalScroll;
 
+  @override
   void initState() {
     setState(() {
       startDate = DateTime.parse(
@@ -325,7 +327,8 @@ class _FullCalendarState extends State<FullCalendar> {
           ),
           Padding(
             padding: const EdgeInsets.only(top: 30.0),
-            child: daysOfWeek(width - 30, widget.locale, widget.fullCalendarDay),
+            child:
+                daysOfWeek(width - 30, widget.locale, widget.fullCalendarDay),
           ),
           Container(
             padding: const EdgeInsets.only(top: 10.0),

@@ -30,7 +30,8 @@ environment:
 dependencies:
   animated_toggle_switch: ^0.8.5
   bloc: ^9.1.0
-  calendar_agenda: ^0.0.2+3
+  calendar_agenda:
+    path: ./dev_lib/calendar_agenda
   carousel_slider: ^5.1.1
   cupertino_icons: ^1.0.8
   delightful_toast: ^1.1.0
@@ -69,6 +70,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/img/
+    - assets/
   #   - images/a_dot_ham.jpeg
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
