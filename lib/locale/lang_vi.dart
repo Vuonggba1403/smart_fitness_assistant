@@ -103,4 +103,7 @@ Map<String, String> viVN = {
   LocaleKey.otherArr2: "Chính sách quyền riêng tư",
   LocaleKey.otherArr3: "Cài đặt",
   LocaleKey.logout: "Đăng xuất",
+
+  //Work Tracker View
+  LocaleKey.titleEx: "Bạn muốn tập gì ? ",
 };

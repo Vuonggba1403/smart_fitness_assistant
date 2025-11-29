@@ -7,6 +7,8 @@ import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/exercises_stpe_details.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/workout_schedule_view.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:smart_fitness_assistant/views/workout_tracker/logic/cubit/workout_tracker_cubit.dart';
 
 import 'exercises_set_section.dart';
 
@@ -86,6 +88,12 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
       ],
     },
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<WorkoutTrackerCubit>().fetchExerciseCategories();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -212,60 +220,144 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                               fontWeight: FontWeight.w700,
                             ),
                           ),
-                          TextButton(
-                            onPressed: () {},
-                            child: Text(
-                              "${youArr.length} Items",
-                              style: TextStyle(
-                                color: textColor?.withOpacity(0.6),
-                                fontSize: 12,
-                              ),
-                            ),
+                          BlocBuilder<WorkoutTrackerCubit, WorkoutTrackerState>(
+                            builder: (context, state) {
+                              if (state is ExerciseCategoriesLoaded) {
+                                return TextButton(
+                                  onPressed: () {},
+                                  child: Text(
+                                    "${state.categories.length} Items",
+                                    style: TextStyle(
+                                      color: textColor?.withOpacity(0.6),
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                );
+                              }
+                              return TextButton(
+                                onPressed: () {},
+                                child: Text(
+                                  "0 Items",
+                                  style: TextStyle(
+                                    color: textColor?.withOpacity(0.6),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),
                       SizedBox(
                         height: media.width * 0.5,
-                        child: ListView.builder(
-                          padding: EdgeInsets.zero,
-                          scrollDirection: Axis.horizontal,
-                          shrinkWrap: true,
-                          itemCount: youArr.length,
-                          itemBuilder: (context, index) {
-                            var yObj = youArr[index] as Map? ?? {};
-                            return Container(
-                              margin: const EdgeInsets.all(8),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    height: media.width * 0.35,
-                                    width: media.width * 0.35,
-                                    decoration: BoxDecoration(
-                                      color: cardColor,
-                                      borderRadius: BorderRadius.circular(15),
+                        child: BlocBuilder<WorkoutTrackerCubit, WorkoutTrackerState>(
+                          builder: (context, state) {
+                            if (state is ExerciseCategoriesLoading) {
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  color: TColor.primaryColor1,
+                                ),
+                              );
+                            } else if (state is ExerciseCategoriesError) {
+                              return Center(
+                                child: Text(
+                                  "Error: ${state.message}",
+                                  style: TextStyle(color: textColor),
+                                ),
+                              );
+                            } else if (state is ExerciseCategoriesLoaded) {
+                              return ListView.builder(
+                                padding: EdgeInsets.zero,
+                                scrollDirection: Axis.horizontal,
+                                shrinkWrap: true,
+                                itemCount: state.categories.length,
+                                itemBuilder: (context, index) {
+                                  var yObj = state.categories[index];
+                                  return Container(
+                                    margin: const EdgeInsets.all(8),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          height: media.width * 0.35,
+                                          width: media.width * 0.35,
+                                          decoration: BoxDecoration(
+                                            color: cardColor,
+                                            borderRadius: BorderRadius.circular(
+                                              15,
+                                            ),
+                                          ),
+                                          alignment: Alignment.center,
+                                          child: yObj["img_url"] != null
+                                              ? Image.network(
+                                                  yObj["img_url"].toString(),
+                                                  width: media.width * 0.2,
+                                                  height: media.width * 0.2,
+                                                  fit: BoxFit.contain,
+                                                  errorBuilder:
+                                                      (
+                                                        context,
+                                                        error,
+                                                        stackTrace,
+                                                      ) {
+                                                        return Icon(
+                                                          Icons
+                                                              .image_not_supported,
+                                                          color: textColor
+                                                              ?.withOpacity(
+                                                                0.3,
+                                                              ),
+                                                          size:
+                                                              media.width * 0.2,
+                                                        );
+                                                      },
+                                                  loadingBuilder: (context, child, loadingProgress) {
+                                                    if (loadingProgress == null)
+                                                      return child;
+                                                    return Center(
+                                                      child: CircularProgressIndicator(
+                                                        color: TColor
+                                                            .primaryColor1,
+                                                        value:
+                                                            loadingProgress
+                                                                    .expectedTotalBytes !=
+                                                                null
+                                                            ? loadingProgress
+                                                                      .cumulativeBytesLoaded /
+                                                                  loadingProgress
+                                                                      .expectedTotalBytes!
+                                                            : null,
+                                                      ),
+                                                    );
+                                                  },
+                                                )
+                                              : Icon(
+                                                  Icons.fitness_center,
+                                                  color: textColor?.withOpacity(
+                                                    0.3,
+                                                  ),
+                                                  size: media.width * 0.2,
+                                                ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Text(
+                                            yObj["title_ex"]?.toString() ??
+                                                "Unknown",
+                                            style: TextStyle(
+                                              color: textColor,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    alignment: Alignment.center,
-                                    child: Image.asset(
-                                      yObj["image"].toString(),
-                                      width: media.width * 0.2,
-                                      height: media.width * 0.2,
-                                      fit: BoxFit.contain,
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(
-                                      yObj["title"].toString(),
-                                      style: TextStyle(
-                                        color: textColor,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
+                                  );
+                                },
+                              );
+                            }
+                            return const SizedBox.shrink();
                           },
                         ),
                       ),

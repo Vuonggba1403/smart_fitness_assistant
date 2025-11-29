@@ -96,4 +96,7 @@ class LocaleKey {
   static const String otherArr2 = "other_arr2";
   static const String otherArr3 = "other_arr3";
   static const String logout = "logout";
+
+  //Work Tracker View
+  static const String titleEx = "title_ex";
 }

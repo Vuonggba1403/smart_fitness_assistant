@@ -91,6 +91,14 @@ class _ExamplePageState extends State<ExamplePage> {
             borderRadius: BorderRadius.circular(10.0),
           ),
         ),
+        selectedDayLogoWidget: Container(
+          margin: EdgeInsets.only(top: 8.0),
+          child: Icon(
+            Icons.check,
+            color: Colors.white,
+            size: 20.0,
+          ),
+        ),
       ),
       body: Center(
         child: Column(

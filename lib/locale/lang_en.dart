@@ -102,4 +102,7 @@ Map<String, String> enUs = {
   LocaleKey.otherArr2: "Privacy Policy",
   LocaleKey.otherArr3: "Setting",
   LocaleKey.logout: "Log Out",
+
+  //Work Tracker View
+  LocaleKey.titleEx: "What Do You Want To Train",
 };

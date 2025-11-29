@@ -71,6 +71,7 @@ class CalendarAgenda extends StatefulWidget implements PreferredSizeWidget {
     this.fullCalendarDay = WeekDay.short,
     this.weekDay = WeekDay.short,
     this.selectedDayPosition = SelectedDayPosition.left,
+    required Container selectedDayLogoWidget,
   })  : assert(
           initialDate.difference(firstDate).inDays >= 0,
           'initialDate must be on or after firstDate',

@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
@@ -9,11 +10,13 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/logic/cubit/workout_tracker_cubit.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/workout_schedule_view.dart';
+import '../../../locale/locale_key.dart';
 import 'widgets/common/upcoming_workout_row.dart';
 import 'widgets/common/what_train_row.dart';
 
 class WorkoutTrackerView extends StatefulWidget {
-  const WorkoutTrackerView({super.key});
+  const WorkoutTrackerView({super.key, required this.title});
+  final String title;
 
   @override
   State<WorkoutTrackerView> createState() => _WorkoutTrackerViewState();
@@ -33,34 +36,18 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
     },
   ];
 
-  List whatArr = [
-    {
-      "image": "assets/img/what_1.png",
-      "title": "Fullbody Workout",
-      "exercises": "11 Exercises",
-      "time": "32mins",
-    },
-    {
-      "image": "assets/img/what_2.png",
-      "title": "Lowebody Workout",
-      "exercises": "12 Exercises",
-      "time": "40mins",
-    },
-    {
-      "image": "assets/img/what_3.png",
-      "title": "AB Workout",
-      "exercises": "14 Exercises",
-      "time": "20mins",
-    },
-  ];
-
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
     final theme = Theme.of(context);
     final textColor = theme.textTheme.bodyMedium?.color;
+
+    /// Thay đổi chính:
+    /// - Bọc toàn bộ widget tree với BlocProvider
+    /// - Khởi tạo WorkoutTrackerCubit và gọi fetchExerciseCategories() ngay lập tức
+    /// - Sử dụng cascade operator (..) để gọi method ngay sau khi khởi tạo
     return BlocProvider(
-      create: (context) => WorkoutTrackerCubit(),
+      create: (context) => WorkoutTrackerCubit()..fetchExerciseCategories(),
       child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(colors: TColor.primaryG),
@@ -68,7 +55,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
         child: NestedScrollView(
           headerSliverBuilder: (context, innerBoxIsScrolled) {
             return [
-              CustomSliverAppBar(text: "Workout Tracker"),
+              CustomSliverAppBar(text: widget.title),
               SliverAppBar(
                 backgroundColor: Colors.transparent,
                 centerTitle: true,
@@ -244,11 +231,12 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                       },
                     ),
                     SizedBox(height: media.width * 0.05),
+                    // Exercise Section
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "What Do You Want to Train",
+                          LocaleKey.titleEx.tr,
                           style: TextStyle(
                             color: textColor,
                             fontSize: 16,
@@ -257,19 +245,63 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                         ),
                       ],
                     ),
-                    ListView.builder(
-                      padding: EdgeInsets.zero,
-                      physics: const NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      itemCount: whatArr.length,
-                      itemBuilder: (context, index) {
-                        var wObj = whatArr[index] as Map? ?? {};
-                        return InkWell(
-                          onTap: () {
-                            navigateTo(context, WorkoutDetailView(dObj: wObj));
-                          },
-                          child: WhatTrainRow(wObj: wObj),
-                        );
+
+                    /// Sử dụng BlocBuilder để lắng nghe thay đổi state
+                    /// Hiển thị:
+                    /// - Loading spinner khi đang tải
+                    /// - Error message khi có lỗi
+                    /// - ListView với dữ liệu từ Supabase khi load thành công
+                    BlocBuilder<WorkoutTrackerCubit, WorkoutTrackerState>(
+                      builder: (context, state) {
+                        // Hiển thị loading indicator
+                        if (state is ExerciseCategoriesLoading) {
+                          return const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(20.0),
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                        }
+                        // Hiển thị thông báo lỗi
+                        else if (state is ExerciseCategoriesError) {
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(20.0),
+                              child: Text(
+                                'Error: ${state.message}',
+                                style: TextStyle(color: textColor),
+                              ),
+                            ),
+                          );
+                        }
+                        // Hiển thị danh sách exercise categories
+                        else if (state is ExerciseCategoriesLoaded) {
+                          return ListView.builder(
+                            padding: EdgeInsets.zero,
+                            physics: const NeverScrollableScrollPhysics(),
+                            shrinkWrap: true,
+                            itemCount: state.categories.length,
+                            itemBuilder: (context, index) {
+                              var wObj = state.categories[index];
+                              return InkWell(
+                                onTap: () {
+                                  // Navigate với BlocProvider.value để giữ cubit instance
+                                  navigateTo(
+                                    context,
+                                    BlocProvider.value(
+                                      value: context
+                                          .read<WorkoutTrackerCubit>(),
+                                      child: WorkoutDetailView(dObj: wObj),
+                                    ),
+                                  );
+                                },
+                                child: WhatTrainRow(wObj: wObj),
+                              );
+                            },
+                          );
+                        }
+                        // Trường hợp mặc định (initial state)
+                        return const SizedBox.shrink();
                       },
                     ),
                     SizedBox(height: media.width * 0.1),

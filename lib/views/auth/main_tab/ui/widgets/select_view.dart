@@ -21,7 +21,10 @@ class SelectView extends StatelessWidget {
             RoundButton(
               title: LocaleKey.workoutTracker.tr,
               onPressed: () {
-                navigateTo(context, WorkoutTrackerView());
+                navigateTo(
+                  context,
+                  WorkoutTrackerView(title: LocaleKey.workoutTracker.tr),
+                );
               },
             ),
 
