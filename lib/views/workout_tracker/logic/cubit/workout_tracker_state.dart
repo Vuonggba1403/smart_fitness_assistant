@@ -12,37 +12,46 @@ final class WorkoutToggleChanged extends WorkoutTrackerState {
   WorkoutToggleChanged(this.toggleStates);
 }
 
-/// Trạng thái đang tải danh sách exercise categories
+// ============ Các State cho Exercise Categories ============
+
+/// Đang tải danh sách exercise categories
 final class ExerciseCategoriesLoading extends WorkoutTrackerState {}
 
-/// Trạng thái đã tải thành công danh sách exercise categories
+/// Đã tải thành công danh sách exercise categories
 final class ExerciseCategoriesLoaded extends WorkoutTrackerState {
   final List<ExerciseCategory> categories;
   ExerciseCategoriesLoaded(this.categories);
 }
 
-/// Trạng thái có lỗi khi tải dữ liệu
+/// Có lỗi khi tải categories
 final class ExerciseCategoriesError extends WorkoutTrackerState {
   final String message;
   ExerciseCategoriesError(this.message);
 }
 
-/// Trạng thái đang tải exercise items
-final class ExerciseItemsLoading extends WorkoutTrackerState {}
+// ============ Các State cho Workout Detail ============
 
-/// Trạng thái đã tải thành công exercise items
-final class ExerciseItemsLoaded extends WorkoutTrackerState {
+/// Đang tải exercise items cho màn hình detail
+final class WorkoutDetailLoading extends WorkoutTrackerState {}
+
+/// Đã tải thành công exercise items
+final class WorkoutDetailLoaded extends WorkoutTrackerState {
   final List<ExerciseItem> exercises;
 
-  /// Lấy danh sách devices unique (không trùng lặp, case-insensitive)
-  List<ExerciseItem> get devicesWithEquipment =>
-      exercises.where((e) => e.hasEquipment).toList();
+  WorkoutDetailLoaded(this.exercises);
 
-  ExerciseItemsLoaded(this.exercises);
+  /// Số lượng exercises
+  int get exerciseCount => exercises.length;
+
+  /// Kiểm tra có exercises không
+  bool get hasExercises => exercises.isNotEmpty;
 }
 
-/// Trạng thái có lỗi khi tải exercise items
-final class ExerciseItemsError extends WorkoutTrackerState {
+/// Không có exercises nào
+final class WorkoutDetailEmpty extends WorkoutTrackerState {}
+
+/// Có lỗi khi tải detail
+final class WorkoutDetailError extends WorkoutTrackerState {
   final String message;
-  ExerciseItemsError(this.message);
+  WorkoutDetailError(this.message);
 }

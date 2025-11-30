@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/models/exercise_category.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
 import '../../../../../core/functions/colo_extension.dart';
@@ -50,12 +51,7 @@ class WhatTrainRow extends StatelessWidget {
                     imageUrl: category.imageUrl,
                     fit: BoxFit.cover,
                     // Hiển thị loading progress khi đang tải ảnh
-                    placeholder: (context, url) => Center(
-                      child: CircularProgressIndicator(
-                        color: TColor.primaryColor2,
-                        strokeWidth: 2,
-                      ),
-                    ),
+                    placeholder: (context, url) => CustomCircleProgIndicator(),
                     // Hiển thị icon khi có lỗi load ảnh
                     errorWidget: (context, url, error) => Icon(
                       Icons.fitness_center,

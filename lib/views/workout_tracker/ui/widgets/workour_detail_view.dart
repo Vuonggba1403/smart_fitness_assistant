@@ -1,45 +1,18 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:get/get.dart';
-import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
-import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
-import 'package:smart_fitness_assistant/core/widgets/custom_sliverbar.dart';
-import 'package:smart_fitness_assistant/core/widgets/icon_title_next_row.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/core/models/exercise_item.dart';
-import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/exercises_stpe_details.dart';
-import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/workout_schedule_view.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/logic/cubit/workout_tracker_cubit.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/common/bottom_sheet_details.dart';
 
-import 'exercises_set_section.dart';
-
-class WorkoutDetailView extends StatefulWidget {
+class WorkoutDetailView extends StatelessWidget {
   final Map dObj;
   const WorkoutDetailView({super.key, required this.dObj});
-
-  @override
-  State<WorkoutDetailView> createState() => _WorkoutDetailViewState();
-}
-
-class _WorkoutDetailViewState extends State<WorkoutDetailView> {
-  late Stream<List<ExerciseItem>> _exerciseItemsStream;
-
-  @override
-  void initState() {
-    super.initState();
-    // Khởi tạo stream cho exercise items
-    final categoryId = widget.dObj['id'] ?? widget.dObj['for_cate'];
-    if (categoryId != null) {
-      _exerciseItemsStream = context
-          .read<WorkoutTrackerCubit>()
-          .streamExerciseItems(categoryId.toString());
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +21,14 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
     final textColor = theme.textTheme.bodyMedium?.color;
     final cardColor = theme.cardColor;
 
+    // Tải danh sách exercise items khi view được tạo
+    final categoryId = dObj['id'] ?? dObj['for_cate'];
+    if (categoryId != null) {
+      context.read<WorkoutTrackerCubit>().loadExerciseItems(
+        categoryId.toString(),
+      );
+    }
+
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(colors: TColor.primaryG),
@@ -55,8 +36,6 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
       child: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
-            // Comment lại CustomSliverAppBar
-            // CustomSliverAppBar(),
             SliverAppBar(
               backgroundColor: Colors.transparent,
               centerTitle: true,
@@ -70,11 +49,10 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
               flexibleSpace: FlexibleSpaceBar(
                 background: Stack(
                   children: [
-                    // Hero animation với ảnh
                     Hero(
-                      tag: 'workout_${widget.dObj["img_url"]}',
+                      tag: 'workout_${dObj["img_url"]}',
                       child: CachedNetworkImage(
-                        imageUrl: widget.dObj["img_url"]?.toString() ?? '',
+                        imageUrl: dObj["img_url"]?.toString() ?? '',
                         width: double.infinity,
                         height: double.infinity,
                         fit: BoxFit.cover,
@@ -94,15 +72,11 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                         ),
                       ),
                     ),
-
-                    // Back button và More button overlay
                     SafeArea(
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Row(
-                          // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            // Back button
                             InkWell(
                               onTap: () => Navigator.pop(context),
                               child: Container(
@@ -141,7 +115,6 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
           padding: const EdgeInsets.symmetric(horizontal: 15),
           decoration: BoxDecoration(
             color: cardColor,
-            boxShadow: [],
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(25),
               topRight: Radius.circular(25),
@@ -164,359 +137,11 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                         ),
                       ),
                       SizedBox(height: media.width * 0.05),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  widget.dObj["title_ex"]?.toString() ??
-                                      widget.dObj["title"]?.toString() ??
-                                      "Workout",
-                                  style: TextStyle(
-                                    color: textColor,
-                                    fontSize: 25,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                Text(
-                                  "${widget.dObj["exercise_count"]?.toString() ?? '0'} ${LocaleKey.exercises.tr} | ${widget.dObj["duration_mins"]?.toString() ?? '0'} ${LocaleKey.mins.tr} | 320 ${LocaleKey.kcal.tr}",
-                                  style: TextStyle(
-                                    // ignore: deprecated_member_use
-                                    color: textColor?.withOpacity(0.6),
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                      _buildHeader(textColor),
                       SizedBox(height: media.width * 0.05),
-
-                      // You'll Need Section - Hiển thị devices
-                      StreamBuilder<List<ExerciseItem>>(
-                        stream: _exerciseItemsStream,
-                        builder: (context, snapshot) {
-                          // Tính số lượng thiết bị unique
-                          int deviceCount = 0;
-                          if (snapshot.hasData) {
-                            final exercises = snapshot.data ?? [];
-                            final uniqueDevices = context
-                                .read<WorkoutTrackerCubit>()
-                                .getUniqueDevices(exercises);
-                            deviceCount = uniqueDevices.length;
-                          }
-
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                LocaleKey.youNeed.tr,
-                                style: TextStyle(
-                                  color: textColor,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              TextButton(
-                                onPressed: () {},
-                                child: Text(
-                                  "$deviceCount ${LocaleKey.item.tr}",
-                                  style: TextStyle(
-                                    color: textColor?.withOpacity(0.6),
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-
-                      // Danh sách thiết bị với StreamBuilder
-                      SizedBox(
-                        height: media.width * 0.5,
-                        child: StreamBuilder<List<ExerciseItem>>(
-                          stream: _exerciseItemsStream,
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return Center(
-                                child: CircularProgressIndicator(
-                                  color: TColor.primaryColor1,
-                                ),
-                              );
-                            }
-
-                            if (snapshot.hasError) {
-                              return Center(
-                                child: Text(
-                                  "Error: ${snapshot.error}",
-                                  style: TextStyle(color: textColor),
-                                ),
-                              );
-                            }
-
-                            final exercises = snapshot.data ?? [];
-
-                            // Lấy devices unique
-                            final uniqueDevices = context
-                                .read<WorkoutTrackerCubit>()
-                                .getUniqueDevices(exercises);
-
-                            if (uniqueDevices.isEmpty) {
-                              return Center(
-                                child: Text(
-                                  "No equipment needed",
-                                  style: TextStyle(
-                                    color: textColor?.withOpacity(0.6),
-                                  ),
-                                ),
-                              );
-                            }
-
-                            // Lấy ảnh từ exercise đầu tiên có device
-                            final exerciseWithDevice = exercises.firstWhere(
-                              (e) => e.hasEquipment,
-                              orElse: () => exercises.first,
-                            );
-
-                            return ListView.builder(
-                              padding: EdgeInsets.zero,
-                              scrollDirection: Axis.horizontal,
-                              shrinkWrap: true,
-                              itemCount: uniqueDevices.length,
-                              itemBuilder: (context, index) {
-                                final deviceName = uniqueDevices[index];
-                                return Container(
-                                  margin: const EdgeInsets.all(8),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Container(
-                                        height: media.width * 0.35,
-                                        width: media.width * 0.35,
-                                        decoration: BoxDecoration(
-                                          color: cardColor,
-                                          borderRadius: BorderRadius.circular(
-                                            15,
-                                          ),
-                                        ),
-                                        alignment: Alignment.center,
-                                        child: CachedNetworkImage(
-                                          imageUrl: exerciseWithDevice.imageUrl,
-                                          width: media.width * 0.2,
-                                          height: media.width * 0.2,
-                                          fit: BoxFit.contain,
-                                          placeholder: (context, url) => Center(
-                                            child: CircularProgressIndicator(
-                                              color: TColor.primaryColor1,
-                                              strokeWidth: 2,
-                                            ),
-                                          ),
-                                          errorWidget: (context, url, error) =>
-                                              Icon(
-                                                Icons.fitness_center,
-                                                color: textColor?.withOpacity(
-                                                  0.3,
-                                                ),
-                                                size: media.width * 0.2,
-                                              ),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: SizedBox(
-                                          width: media.width * 0.35,
-                                          child: Text(
-                                            deviceName,
-                                            style: TextStyle(
-                                              color: textColor,
-                                              fontSize: 12,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                        ),
-                      ),
-
+                      _buildDevicesSection(media, textColor, cardColor),
                       SizedBox(height: media.width * 0.05),
-
-                      // Exercises Section với StreamBuilder
-                      StreamBuilder<List<ExerciseItem>>(
-                        stream: _exerciseItemsStream,
-                        builder: (context, snapshot) {
-                          final exerciseCount = snapshot.data?.length ?? 0;
-
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                LocaleKey.exercises.tr,
-                                style: TextStyle(
-                                  color: textColor,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              TextButton(
-                                onPressed: () {},
-                                child: Text(
-                                  "$exerciseCount ${LocaleKey.exercises.tr}",
-                                  style: TextStyle(
-                                    color: textColor?.withOpacity(0.6),
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-
-                      // Danh sách bài tập - Tap để hiển thị bottom sheet
-                      StreamBuilder<List<ExerciseItem>>(
-                        stream: _exerciseItemsStream,
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(20.0),
-                                child: CircularProgressIndicator(
-                                  color: TColor.primaryColor1,
-                                ),
-                              ),
-                            );
-                          }
-
-                          if (snapshot.hasError) {
-                            return Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(20.0),
-                                child: Text(
-                                  "Error: ${snapshot.error}",
-                                  style: TextStyle(color: textColor),
-                                ),
-                              ),
-                            );
-                          }
-
-                          final exercises = snapshot.data ?? [];
-
-                          if (exercises.isEmpty) {
-                            return Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(20.0),
-                                child: Text(
-                                  "No exercises found",
-                                  style: TextStyle(
-                                    color: textColor?.withOpacity(0.6),
-                                  ),
-                                ),
-                              ),
-                            );
-                          }
-
-                          return ListView.builder(
-                            padding: EdgeInsets.zero,
-                            physics: const NeverScrollableScrollPhysics(),
-                            shrinkWrap: true,
-                            itemCount: exercises.length,
-                            itemBuilder: (context, index) {
-                              final exercise = exercises[index];
-                              return InkWell(
-                                /// Tap để hiển thị bottom sheet chi tiết
-                                onTap: () => ExerciseDetailBottomSheet.show(
-                                  context,
-                                  exercise,
-                                ),
-                                child: Container(
-                                  margin: const EdgeInsets.symmetric(
-                                    vertical: 8,
-                                  ),
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: cardColor,
-                                    borderRadius: BorderRadius.circular(15),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(10),
-                                        child: CachedNetworkImage(
-                                          imageUrl: exercise.imageUrl,
-                                          width: 60,
-                                          height: 60,
-                                          fit: BoxFit.cover,
-                                          placeholder: (context, url) => Center(
-                                            child: CircularProgressIndicator(
-                                              color: TColor.primaryColor1,
-                                              strokeWidth: 2,
-                                            ),
-                                          ),
-                                          errorWidget: (context, url, error) =>
-                                              Icon(
-                                                Icons.fitness_center,
-                                                size: 30,
-                                                color: TColor.gray,
-                                              ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              exercise.title,
-                                              style: TextStyle(
-                                                color: textColor,
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              exercise.muscleGroupsString,
-                                              style: TextStyle(
-                                                color: textColor?.withOpacity(
-                                                  0.6,
-                                                ),
-                                                fontSize: 12,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Icon(
-                                        Icons.arrow_forward_ios,
-                                        size: 16,
-                                        color: textColor?.withOpacity(0.5),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          );
-                        },
-                      ),
-
+                      _buildExercisesSection(textColor, cardColor),
                       SizedBox(height: media.width * 0.1),
                     ],
                   ),
@@ -535,6 +160,385 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Xây dựng phần header với tiêu đề và thông tin
+  Widget _buildHeader(Color? textColor) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                dObj["title_ex"]?.toString() ??
+                    dObj["title"]?.toString() ??
+                    "Workout",
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 25,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              Text(
+                "${dObj["exercise_count"]?.toString() ?? '0'} ${LocaleKey.exercises.tr} | ${dObj["duration_mins"]?.toString() ?? '0'} ${LocaleKey.mins.tr} | 320 ${LocaleKey.kcal.tr}",
+                style: TextStyle(
+                  color: textColor?.withOpacity(0.6),
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Xây dựng phần danh sách thiết bị với BlocBuilder
+  Widget _buildDevicesSection(Size media, Color? textColor, Color cardColor) {
+    return BlocBuilder<WorkoutTrackerCubit, WorkoutTrackerState>(
+      builder: (context, state) {
+        return Column(
+          children: [
+            _buildDevicesHeader(context, state, textColor),
+            SizedBox(
+              height: media.width * 0.5,
+              child: _buildDevicesList(
+                context,
+                state,
+                media,
+                textColor,
+                cardColor,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Xây dựng header của phần thiết bị
+  Widget _buildDevicesHeader(
+    BuildContext context,
+    WorkoutTrackerState state,
+    Color? textColor,
+  ) {
+    int deviceCount = 0;
+    if (state is WorkoutDetailLoaded) {
+      final uniqueDevices = context
+          .read<WorkoutTrackerCubit>()
+          .getUniqueDevices(state.exercises);
+      deviceCount = uniqueDevices.length;
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          LocaleKey.youNeed.tr,
+          style: TextStyle(
+            color: textColor,
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        TextButton(
+          onPressed: () {},
+          child: Text(
+            "$deviceCount ${LocaleKey.item.tr}",
+            style: TextStyle(color: textColor?.withOpacity(0.6), fontSize: 12),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Xây dựng danh sách thiết bị dựa trên state
+  Widget _buildDevicesList(
+    BuildContext context,
+    WorkoutTrackerState state,
+    Size media,
+    Color? textColor,
+    Color cardColor,
+  ) {
+    // Đang tải dữ liệu
+    if (state is WorkoutDetailLoading) {
+      return CustomCircleProgIndicator();
+    }
+
+    // Có lỗi xảy ra
+    if (state is WorkoutDetailError) {
+      return Center(
+        child: Text(
+          "Error: ${state.message}",
+          style: TextStyle(color: textColor),
+        ),
+      );
+    }
+
+    // Không có dữ liệu hoặc trạng thái khởi tạo
+    if (state is WorkoutDetailEmpty || state is WorkoutTrackerInitial) {
+      return Center(
+        child: Text(
+          LocaleKey.noEquipment.tr,
+          style: TextStyle(color: textColor?.withOpacity(0.6)),
+        ),
+      );
+    }
+
+    // Đã tải dữ liệu thành công
+    if (state is WorkoutDetailLoaded) {
+      final cubit = context.read<WorkoutTrackerCubit>();
+      final uniqueDevices = cubit.getUniqueDevices(state.exercises);
+
+      if (uniqueDevices.isEmpty) {
+        return Center(
+          child: Text(
+            LocaleKey.noEquipment.tr,
+            style: TextStyle(color: textColor?.withOpacity(0.6)),
+          ),
+        );
+      }
+
+      final exerciseWithDevice = cubit.getExerciseWithDevice(state.exercises);
+
+      return ListView.builder(
+        padding: EdgeInsets.zero,
+        scrollDirection: Axis.horizontal,
+        shrinkWrap: true,
+        itemCount: uniqueDevices.length,
+        itemBuilder: (context, index) {
+          final deviceName = uniqueDevices[index];
+          return _buildDeviceCard(
+            deviceName,
+            exerciseWithDevice?.imageUrl ?? '',
+            media,
+            textColor,
+            cardColor,
+          );
+        },
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
+
+  /// Xây dựng card hiển thị thiết bị
+  Widget _buildDeviceCard(
+    String deviceName,
+    String imageUrl,
+    Size media,
+    Color? textColor,
+    Color cardColor,
+  ) {
+    return Container(
+      margin: const EdgeInsets.all(8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            height: media.width * 0.35,
+            width: media.width * 0.35,
+            decoration: BoxDecoration(
+              border: Border.all(color: TColor.primaryColor1, width: 1),
+              color: cardColor,
+              borderRadius: BorderRadius.circular(15),
+            ),
+            alignment: Alignment.center,
+            child: CachedNetworkImage(
+              imageUrl: imageUrl,
+              width: media.width * 0.2,
+              height: media.width * 0.2,
+              fit: BoxFit.contain,
+              placeholder: (context, url) => CustomCircleProgIndicator(),
+              errorWidget: (context, url, error) => Icon(
+                Icons.fitness_center,
+                color: textColor?.withOpacity(0.3),
+                size: media.width * 0.2,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: SizedBox(
+              width: media.width * 0.35,
+              child: Text(
+                deviceName,
+                style: TextStyle(color: textColor, fontSize: 12),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Xây dựng phần danh sách exercises
+  Widget _buildExercisesSection(Color? textColor, Color cardColor) {
+    return BlocBuilder<WorkoutTrackerCubit, WorkoutTrackerState>(
+      builder: (context, state) {
+        return Column(
+          children: [
+            _buildExercisesHeader(state, textColor),
+            _buildExercisesList(state, textColor, cardColor),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Xây dựng header của phần exercises
+  Widget _buildExercisesHeader(WorkoutTrackerState state, Color? textColor) {
+    int exerciseCount = 0;
+    if (state is WorkoutDetailLoaded) {
+      exerciseCount = state.exerciseCount;
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          LocaleKey.exercises.tr,
+          style: TextStyle(
+            color: textColor,
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        TextButton(
+          onPressed: () {},
+          child: Text(
+            "$exerciseCount ${LocaleKey.exercises.tr}",
+            style: TextStyle(color: textColor?.withOpacity(0.6), fontSize: 12),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Xây dựng danh sách exercises dựa trên state
+  Widget _buildExercisesList(
+    WorkoutTrackerState state,
+    Color? textColor,
+    Color cardColor,
+  ) {
+    // Đang tải dữ liệu
+    if (state is WorkoutDetailLoading) {
+      return CustomCircleProgIndicator();
+    }
+
+    // Có lỗi xảy ra
+    if (state is WorkoutDetailError) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Text(
+            "Error: ${state.message}",
+            style: TextStyle(color: textColor),
+          ),
+        ),
+      );
+    }
+
+    // Không có dữ liệu hoặc trạng thái khởi tạo
+    if (state is WorkoutDetailEmpty || state is WorkoutTrackerInitial) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Text(
+            "No exercises found",
+            style: TextStyle(color: textColor?.withOpacity(0.6)),
+          ),
+        ),
+      );
+    }
+
+    // Đã tải dữ liệu thành công
+    if (state is WorkoutDetailLoaded) {
+      return ListView.builder(
+        padding: EdgeInsets.zero,
+        physics: const NeverScrollableScrollPhysics(),
+        shrinkWrap: true,
+        itemCount: state.exercises.length,
+        itemBuilder: (context, index) {
+          final exercise = state.exercises[index];
+          return _buildExerciseCard(exercise, textColor, cardColor);
+        },
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
+
+  /// Xây dựng card hiển thị exercise
+  Widget _buildExerciseCard(
+    ExerciseItem exercise,
+    Color? textColor,
+    Color cardColor,
+  ) {
+    return Builder(
+      builder: (context) => InkWell(
+        onTap: () => ExerciseDetailBottomSheet.show(context, exercise),
+        child: Container(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: cardColor,
+            border: Border.all(color: TColor.primaryColor1, width: 1),
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: CachedNetworkImage(
+                  imageUrl: exercise.imageUrl,
+                  width: 60,
+                  height: 60,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => CustomCircleProgIndicator(),
+                  errorWidget: (context, url, error) =>
+                      Icon(Icons.fitness_center, size: 30, color: TColor.gray),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      exercise.title,
+                      style: TextStyle(
+                        color: textColor,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      exercise.muscleGroupsString,
+                      style: TextStyle(
+                        color: textColor?.withOpacity(0.6),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: textColor?.withOpacity(0.5),
+              ),
+            ],
           ),
         ),
       ),

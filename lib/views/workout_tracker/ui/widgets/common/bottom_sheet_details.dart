@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/models/exercise_item.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 
@@ -162,9 +163,7 @@ class ExerciseDetailBottomSheet extends StatelessWidget {
               width: double.infinity,
               height: double.infinity,
               fit: BoxFit.cover,
-              placeholder: (context, url) => Center(
-                child: CircularProgressIndicator(color: TColor.primaryColor1),
-              ),
+              placeholder: (context, url) => CustomCircleProgIndicator(),
               errorWidget: (context, url, error) =>
                   Icon(Icons.fitness_center, size: 60, color: TColor.gray),
             ),

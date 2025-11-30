@@ -50,7 +50,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
       create: (context) => WorkoutTrackerCubit(),
       child: Builder(
         builder: (context) {
-          // Sử dụng method mới để stream với exercise count thực tế
+          // Khởi tạo stream để lấy danh sách categories với số lượng exercises thực tế
           _categoriesStream = context
               .read<WorkoutTrackerCubit>()
               .streamExerciseCategoriesWithCount();
@@ -64,7 +64,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                 return [
                   CustomSliverAppBar(text: widget.title),
 
-                  /// Chart Section
+                  /// Phần biểu đồ (Chart Section)
                   SliverAppBar(
                     backgroundColor: Colors.transparent,
                     centerTitle: true,
@@ -126,7 +126,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                       children: [
                         const SizedBox(height: 10),
 
-                        /// Slider icon
+                        /// Icon thanh kéo (Slider icon)
                         Container(
                           width: 50,
                           height: 4,
@@ -137,7 +137,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                         ),
                         SizedBox(height: media.width * 0.05),
 
-                        /// Daily workout
+                        /// Lịch tập hàng ngày (Daily workout)
                         CustomContainerCheck(
                           name: LocaleKey.dailyWorkoutSchedule.tr,
                           title: LocaleKey.check.tr,
@@ -172,7 +172,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                           ],
                         ),
 
-                        /// Upcoming list
+                        /// Danh sách bài tập sắp tới (Upcoming list)
                         ListView.builder(
                           padding: EdgeInsets.zero,
                           physics: const NeverScrollableScrollPhysics(),
@@ -186,7 +186,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
 
                         SizedBox(height: media.width * 0.05),
 
-                        /// Title
+                        /// Tiêu đề phần bài tập
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -201,15 +201,17 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                           ],
                         ),
 
-                        /// Categories list
+                        /// Danh sách categories với StreamBuilder
                         StreamBuilder<List<ExerciseCategory>>(
                           stream: _categoriesStream,
                           builder: (context, snapshot) {
+                            // Đang chờ dữ liệu
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting) {
                               return CustomCircleProgIndicator();
                             }
 
+                            // Có lỗi xảy ra
                             if (snapshot.hasError) {
                               return Padding(
                                 padding: const EdgeInsets.all(20),
@@ -222,6 +224,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
 
                             final categories = snapshot.data ?? [];
 
+                            // Không có dữ liệu
                             if (categories.isEmpty) {
                               return Padding(
                                 padding: const EdgeInsets.all(20),
@@ -232,6 +235,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                               );
                             }
 
+                            // Hiển thị danh sách categories
                             return ListView.builder(
                               padding: EdgeInsets.zero,
                               physics: const NeverScrollableScrollPhysics(),
@@ -241,6 +245,8 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                                 final category = categories[index];
                                 return InkWell(
                                   onTap: () {
+                                    // Điều hướng đến màn hình chi tiết workout
+                                    // Giữ nguyên BlocProvider instance để share state
                                     navigateTo(
                                       context,
                                       BlocProvider.value(
@@ -272,7 +278,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
     );
   }
 
-  /// Line chart settings
+  /// Cấu hình touch data cho line chart
   LineTouchData get lineTouchData1 => LineTouchData(handleBuiltInTouches: true);
 
   List<LineChartBarData> get lineBarsData1 => [
