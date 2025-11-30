@@ -112,4 +112,5 @@ class LocaleKey {
   static const String des = "des";
   static const String completeEx = "complete_ex";
   static const String startWorkout = "start_workout";
+  static const String noEquipment = "no_equipment";
 }

@@ -1,7 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/models/exercise_item.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 
 /// Bottom sheet hiển thị chi tiết exercise
 ///
@@ -12,18 +15,27 @@ import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 /// - Muscle diagram (front/back view)
 /// - Hướng dẫn thực hiện (description)
 class ExerciseDetailBottomSheet extends StatelessWidget {
-  final Map<String, dynamic> exercise;
+  final ExerciseItem exercise;
 
   const ExerciseDetailBottomSheet({super.key, required this.exercise});
 
-  /// Hiển thị bottom sheet
-  static void show(BuildContext context, Map<String, dynamic> exercise) {
+  /// Hiển thị bottom sheet từ ExerciseItem model
+  static void show(BuildContext context, ExerciseItem exercise) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => ExerciseDetailBottomSheet(exercise: exercise),
     );
+  }
+
+  /// Hiển thị bottom sheet từ Map (backward compatibility)
+  static void showFromMap(
+    BuildContext context,
+    Map<String, dynamic> exerciseMap,
+  ) {
+    final exercise = ExerciseItem.fromJson(exerciseMap);
+    show(context, exercise);
   }
 
   @override
@@ -65,7 +77,7 @@ class ExerciseDetailBottomSheet extends StatelessWidget {
 
                   // Title
                   Text(
-                    exercise['title']?.toString() ?? 'Exercise',
+                    exercise.title,
                     style: TextStyle(
                       color: textColor,
                       fontSize: 20,
@@ -85,8 +97,13 @@ class ExerciseDetailBottomSheet extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Hướng dẫn thực hiện - Di chuyển lên đầu
+                    _buildInstructions(textColor),
+
+                    const SizedBox(height: 24),
+
                     // Video/Image thumbnail với play button
-                    _buildVideoThumbnail(media, cardColor, textColor),
+                    _buildVideoThumbnail(media, cardColor),
 
                     const SizedBox(height: 24),
 
@@ -103,11 +120,6 @@ class ExerciseDetailBottomSheet extends StatelessWidget {
                     // Muscle diagram
                     _buildMuscleDiagram(media, cardColor),
 
-                    const SizedBox(height: 24),
-
-                    // Hướng dẫn thực hiện
-                    _buildInstructions(textColor),
-
                     const SizedBox(height: 20),
                   ],
                 ),
@@ -119,7 +131,7 @@ class ExerciseDetailBottomSheet extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: RoundButton(
-                  title: "Hoàn tất",
+                  title: LocaleKey.completeEx.tr,
                   onPressed: () => Navigator.pop(context),
                 ),
               ),
@@ -131,7 +143,7 @@ class ExerciseDetailBottomSheet extends StatelessWidget {
   }
 
   /// Build video thumbnail với play button overlay
-  Widget _buildVideoThumbnail(Size media, Color cardColor, Color? textColor) {
+  Widget _buildVideoThumbnail(Size media, Color cardColor) {
     return Container(
       height: media.height * 0.25,
       decoration: BoxDecoration(
@@ -146,7 +158,7 @@ class ExerciseDetailBottomSheet extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(15),
             child: CachedNetworkImage(
-              imageUrl: exercise['img_url']?.toString() ?? '',
+              imageUrl: exercise.imageUrl,
               width: double.infinity,
               height: double.infinity,
               fit: BoxFit.cover,
@@ -176,49 +188,11 @@ class ExerciseDetailBottomSheet extends StatelessWidget {
   /// Build equipment section (Có/Không có thiết bị)
   /// Tách chuỗi device theo dấu phẩy và hiển thị từng chip riêng
   Widget _buildEquipmentSection(Color? textColor) {
-    // Lấy device string và kiểm tra
-    final deviceStr = exercise['device']?.toString() ?? '';
-    final hasEquipment = deviceStr.trim().isNotEmpty;
-
-    // Nếu không có thiết bị, hiển thị chip "Không có"
-    if (!hasEquipment) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Thiết bị',
-            style: TextStyle(
-              color: textColor,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              _buildChip(
-                label: 'Không có',
-                isSelected: false,
-                textColor: textColor,
-              ),
-            ],
-          ),
-        ],
-      );
-    }
-
-    // Tách chuỗi device theo dấu phẩy
-    final devices = deviceStr
-        .split(',')
-        .map((e) => e.trim())
-        .where((e) => e.isNotEmpty)
-        .toList();
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Thiết bị',
+          LocaleKey.device.tr,
           style: TextStyle(
             color: textColor,
             fontSize: 16,
@@ -229,13 +203,23 @@ class ExerciseDetailBottomSheet extends StatelessWidget {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: devices.map((device) {
-            return _buildChip(
-              label: device,
-              isSelected: true,
-              textColor: textColor,
-            );
-          }).toList(),
+          children: exercise.hasEquipment
+              ? exercise.devices
+                    .map(
+                      (device) => _buildChip(
+                        label: device,
+                        isSelected: true,
+                        textColor: textColor,
+                      ),
+                    )
+                    .toList()
+              : [
+                  _buildChip(
+                    label: LocaleKey.noEquipment.tr,
+                    isSelected: false,
+                    textColor: textColor,
+                  ),
+                ],
         ),
       ],
     );
@@ -244,21 +228,11 @@ class ExerciseDetailBottomSheet extends StatelessWidget {
   /// Build muscle group section
   /// Tách chuỗi muscle_group theo dấu phẩy và hiển thị từng chip riêng
   Widget _buildMuscleGroupSection(Color? textColor) {
-    // Lấy muscle_group string và tách theo dấu phẩy
-    final muscleGroupStr = exercise['muscle_group']?.toString() ?? 'Toàn thân';
-
-    // Tách chuỗi theo dấu phẩy và trim khoảng trắng
-    final muscleGroups = muscleGroupStr
-        .split(',')
-        .map((e) => e.trim())
-        .where((e) => e.isNotEmpty)
-        .toList();
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Khu vực tập trung',
+          LocaleKey.muscleGroup.tr,
           style: TextStyle(
             color: textColor,
             fontSize: 16,
@@ -269,13 +243,15 @@ class ExerciseDetailBottomSheet extends StatelessWidget {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: muscleGroups.map((muscleGroup) {
-            return _buildChip(
-              label: muscleGroup,
-              isSelected: true,
-              textColor: textColor,
-            );
-          }).toList(),
+          children: exercise.muscleGroups
+              .map(
+                (group) => _buildChip(
+                  label: group,
+                  isSelected: true,
+                  textColor: textColor,
+                ),
+              )
+              .toList(),
         ),
       ],
     );
@@ -321,9 +297,7 @@ class ExerciseDetailBottomSheet extends StatelessWidget {
 
   /// Build instructions section
   Widget _buildInstructions(Color? textColor) {
-    final description = exercise['des']?.toString() ?? '';
-
-    if (description.isEmpty) {
+    if (exercise.description.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -331,7 +305,7 @@ class ExerciseDetailBottomSheet extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Cách thực hiện',
+          LocaleKey.des.tr,
           style: TextStyle(
             color: textColor,
             fontSize: 16,
@@ -340,7 +314,7 @@ class ExerciseDetailBottomSheet extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Text(
-          description,
+          exercise.description,
           style: TextStyle(
             color: textColor?.withOpacity(0.8),
             fontSize: 14,

@@ -2,12 +2,14 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_sliverbar.dart';
 import 'package:smart_fitness_assistant/core/widgets/icon_title_next_row.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
+import 'package:smart_fitness_assistant/core/models/exercise_item.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/exercises_stpe_details.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/workout_schedule_view.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -25,7 +27,7 @@ class WorkoutDetailView extends StatefulWidget {
 }
 
 class _WorkoutDetailViewState extends State<WorkoutDetailView> {
-  late Stream<Map<String, List<Map<String, dynamic>>>> _exerciseItemsStream;
+  late Stream<List<ExerciseItem>> _exerciseItemsStream;
 
   @override
   void initState() {
@@ -78,12 +80,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                         fit: BoxFit.cover,
                         placeholder: (context, url) => Container(
                           color: Colors.transparent,
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              color: TColor.white,
-                              strokeWidth: 3,
-                            ),
-                          ),
+                          child: CustomCircleProgIndicator(),
                         ),
                         errorWidget: (context, url, error) => Container(
                           color: Colors.transparent,
@@ -143,7 +140,8 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
         body: Container(
           padding: const EdgeInsets.symmetric(horizontal: 15),
           decoration: BoxDecoration(
-            color: theme.scaffoldBackgroundColor,
+            color: cardColor,
+            boxShadow: [],
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(25),
               topRight: Radius.circular(25),
@@ -179,13 +177,14 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                                       "Workout",
                                   style: TextStyle(
                                     color: textColor,
-                                    fontSize: 16,
+                                    fontSize: 25,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
                                 Text(
                                   "${widget.dObj["exercise_count"]?.toString() ?? '0'} ${LocaleKey.exercises.tr} | ${widget.dObj["duration_mins"]?.toString() ?? '0'} ${LocaleKey.mins.tr} | 320 ${LocaleKey.kcal.tr}",
                                   style: TextStyle(
+                                    // ignore: deprecated_member_use
                                     color: textColor?.withOpacity(0.6),
                                     fontSize: 12,
                                   ),
@@ -193,43 +192,21 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                               ],
                             ),
                           ),
-                          TextButton(
-                            onPressed: () {},
-                            child: Image.asset(
-                              "assets/img/fav.png",
-                              width: 15,
-                              height: 15,
-                              fit: BoxFit.contain,
-                            ),
-                          ),
                         ],
                       ),
                       SizedBox(height: media.width * 0.05),
 
                       // You'll Need Section - Hiển thị devices
-                      StreamBuilder<Map<String, List<Map<String, dynamic>>>>(
+                      StreamBuilder<List<ExerciseItem>>(
                         stream: _exerciseItemsStream,
                         builder: (context, snapshot) {
-                          // Tính số lượng thiết bị sau khi tách và loại bỏ duplicate (không phân biệt hoa/thường)
+                          // Tính số lượng thiết bị unique
                           int deviceCount = 0;
                           if (snapshot.hasData) {
-                            final devices = snapshot.data!['devices'] ?? [];
-                            final Set<String> uniqueDevices = {};
-
-                            for (var device in devices) {
-                              final deviceStr =
-                                  device['device']?.toString() ?? '';
-                              final deviceNames = deviceStr
-                                  .split(',')
-                                  .map((e) => e.trim())
-                                  .where((e) => e.isNotEmpty);
-
-                              // Chuẩn hóa về lowercase để so sánh
-                              uniqueDevices.addAll(
-                                deviceNames.map((e) => e.toLowerCase()),
-                              );
-                            }
-
+                            final exercises = snapshot.data ?? [];
+                            final uniqueDevices = context
+                                .read<WorkoutTrackerCubit>()
+                                .getUniqueDevices(exercises);
                             deviceCount = uniqueDevices.length;
                           }
 
@@ -262,7 +239,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                       // Danh sách thiết bị với StreamBuilder
                       SizedBox(
                         height: media.width * 0.5,
-                        child: StreamBuilder<Map<String, List<Map<String, dynamic>>>>(
+                        child: StreamBuilder<List<ExerciseItem>>(
                           stream: _exerciseItemsStream,
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==
@@ -283,9 +260,14 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                               );
                             }
 
-                            final devices = snapshot.data?['devices'] ?? [];
+                            final exercises = snapshot.data ?? [];
 
-                            if (devices.isEmpty) {
+                            // Lấy devices unique
+                            final uniqueDevices = context
+                                .read<WorkoutTrackerCubit>()
+                                .getUniqueDevices(exercises);
+
+                            if (uniqueDevices.isEmpty) {
                               return Center(
                                 child: Text(
                                   "No equipment needed",
@@ -296,49 +278,19 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                               );
                             }
 
-                            // Tách các thiết bị từ tất cả exercises và loại bỏ duplicate
-                            // Sử dụng Map với key lowercase để so sánh, value là tên gốc
-                            final Map<String, Map<String, String>>
-                            uniqueDevicesMap = {};
-
-                            for (var device in devices) {
-                              final deviceStr =
-                                  device['device']?.toString() ?? '';
-                              final imgUrl =
-                                  device['img_url']?.toString() ?? '';
-
-                              // Tách chuỗi thiết bị theo dấu phẩy
-                              final deviceNames = deviceStr
-                                  .split(',')
-                                  .map((e) => e.trim())
-                                  .where((e) => e.isNotEmpty);
-
-                              // Thêm vào map với key là lowercase
-                              for (var deviceName in deviceNames) {
-                                final keyLower = deviceName.toLowerCase();
-
-                                // Chỉ thêm nếu chưa tồn tại (so sánh lowercase)
-                                if (!uniqueDevicesMap.containsKey(keyLower)) {
-                                  uniqueDevicesMap[keyLower] = {
-                                    'device':
-                                        deviceName, // Giữ tên gốc để hiển thị
-                                    'img_url': imgUrl,
-                                  };
-                                }
-                              }
-                            }
-
-                            // Convert Map thành List để hiển thị
-                            final deviceItems = uniqueDevicesMap.values
-                                .toList();
+                            // Lấy ảnh từ exercise đầu tiên có device
+                            final exerciseWithDevice = exercises.firstWhere(
+                              (e) => e.hasEquipment,
+                              orElse: () => exercises.first,
+                            );
 
                             return ListView.builder(
                               padding: EdgeInsets.zero,
                               scrollDirection: Axis.horizontal,
                               shrinkWrap: true,
-                              itemCount: deviceItems.length,
+                              itemCount: uniqueDevices.length,
                               itemBuilder: (context, index) {
-                                var deviceItem = deviceItems[index];
+                                final deviceName = uniqueDevices[index];
                                 return Container(
                                   margin: const EdgeInsets.all(8),
                                   child: Column(
@@ -356,10 +308,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                                         ),
                                         alignment: Alignment.center,
                                         child: CachedNetworkImage(
-                                          imageUrl:
-                                              deviceItem["img_url"]
-                                                  ?.toString() ??
-                                              '',
+                                          imageUrl: exerciseWithDevice.imageUrl,
                                           width: media.width * 0.2,
                                           height: media.width * 0.2,
                                           fit: BoxFit.contain,
@@ -384,8 +333,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                                         child: SizedBox(
                                           width: media.width * 0.35,
                                           child: Text(
-                                            deviceItem["device"]?.toString() ??
-                                                "Equipment",
+                                            deviceName,
                                             style: TextStyle(
                                               color: textColor,
                                               fontSize: 12,
@@ -408,12 +356,10 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                       SizedBox(height: media.width * 0.05),
 
                       // Exercises Section với StreamBuilder
-                      StreamBuilder<Map<String, List<Map<String, dynamic>>>>(
+                      StreamBuilder<List<ExerciseItem>>(
                         stream: _exerciseItemsStream,
                         builder: (context, snapshot) {
-                          final exerciseCount = snapshot.hasData
-                              ? snapshot.data!['exercises']?.length ?? 0
-                              : 0;
+                          final exerciseCount = snapshot.data?.length ?? 0;
 
                           return Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -442,7 +388,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                       ),
 
                       // Danh sách bài tập - Tap để hiển thị bottom sheet
-                      StreamBuilder<Map<String, List<Map<String, dynamic>>>>(
+                      StreamBuilder<List<ExerciseItem>>(
                         stream: _exerciseItemsStream,
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
@@ -469,7 +415,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                             );
                           }
 
-                          final exercises = snapshot.data?['exercises'] ?? [];
+                          final exercises = snapshot.data ?? [];
 
                           if (exercises.isEmpty) {
                             return Center(
@@ -491,7 +437,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                             shrinkWrap: true,
                             itemCount: exercises.length,
                             itemBuilder: (context, index) {
-                              var exercise = exercises[index];
+                              final exercise = exercises[index];
                               return InkWell(
                                 /// Tap để hiển thị bottom sheet chi tiết
                                 onTap: () => ExerciseDetailBottomSheet.show(
@@ -512,9 +458,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                                       ClipRRect(
                                         borderRadius: BorderRadius.circular(10),
                                         child: CachedNetworkImage(
-                                          imageUrl:
-                                              exercise["img_url"]?.toString() ??
-                                              '',
+                                          imageUrl: exercise.imageUrl,
                                           width: 60,
                                           height: 60,
                                           fit: BoxFit.cover,
@@ -539,8 +483,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                                               CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              exercise["title"]?.toString() ??
-                                                  "Exercise",
+                                              exercise.title,
                                               style: TextStyle(
                                                 color: textColor,
                                                 fontSize: 14,
@@ -549,9 +492,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                                             ),
                                             const SizedBox(height: 4),
                                             Text(
-                                              exercise["muscle_group"]
-                                                      ?.toString() ??
-                                                  "",
+                                              exercise.muscleGroupsString,
                                               style: TextStyle(
                                                 color: textColor?.withOpacity(
                                                   0.6,

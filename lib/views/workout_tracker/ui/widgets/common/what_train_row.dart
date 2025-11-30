@@ -1,35 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:get/get.dart';
-import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
-import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
+import 'package:smart_fitness_assistant/core/models/exercise_category.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
-import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/workour_detail_view.dart';
+import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
 import '../../../../../core/functions/colo_extension.dart';
 import '../../../../../core/widgets/round_button.dart';
 
 /// Widget hiển thị một row của workout/exercise
-///
-/// Thay đổi chính:
-/// - Sử dụng CachedNetworkImage thay vì Image.network để cache ảnh
-/// - Sử dụng wObj["img_url"] từ Supabase
-/// - Sử dụng wObj["title_ex"] từ database
-/// - Hiển thị exercise_count và duration_mins (hardcoded)
+/// Sử dụng ExerciseCategory model thay vì Map
 class WhatTrainRow extends StatelessWidget {
-  /// Đối tượng chứa thông tin workout
-  /// Các key cần có:
-  /// - img_url: URL hình ảnh từ Supabase
-  /// - title_ex: Tên bài tập
-  /// - exercise_count: Số lượng bài tập (hardcoded)
-  /// - duration_mins: Thời gian tính bằng phút (hardcoded)
-  final Map wObj;
+  final ExerciseCategory category;
 
-  const WhatTrainRow({super.key, required this.wObj});
+  const WhatTrainRow({super.key, required this.category});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cardColor = theme.cardColor;
+    final completionPercent = 0.65;
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
@@ -47,7 +36,7 @@ class WhatTrainRow extends StatelessWidget {
           children: [
             // Hero animation cho hình ảnh
             Hero(
-              tag: 'workout_${wObj["img_url"]}',
+              tag: 'workout_${category.imageUrl}',
               child: Container(
                 width: 80,
                 height: 80,
@@ -58,7 +47,7 @@ class WhatTrainRow extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(40),
                   child: CachedNetworkImage(
-                    imageUrl: wObj["img_url"]?.toString() ?? '',
+                    imageUrl: category.imageUrl,
                     fit: BoxFit.cover,
                     // Hiển thị loading progress khi đang tải ảnh
                     placeholder: (context, url) => Center(
@@ -77,14 +66,14 @@ class WhatTrainRow extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 15),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Tên bài tập từ database
                   Text(
-                    wObj["title_ex"]?.toString() ?? 'Workout',
+                    category.title,
                     style: TextStyle(
                       color: TColor.black,
                       fontSize: 14,
@@ -94,10 +83,39 @@ class WhatTrainRow extends StatelessWidget {
                   const SizedBox(height: 4),
                   // Thông tin số lượng bài tập và thời gian (từ stream)
                   Text(
-                    "${wObj["exercise_count"]?.toString() ?? '0'} ${LocaleKey.exercises.tr} | ${wObj["duration_mins"]?.toString() ?? '0'} ${LocaleKey.mins.tr}",
+                    "${category.exerciseCount} ${LocaleKey.exercises.tr} | ${category.durationMins} ${LocaleKey.mins.tr}",
                     style: TextStyle(color: TColor.gray, fontSize: 12),
                   ),
-                  const SizedBox(height: 15),
+                  const SizedBox(height: 10),
+
+                  // Progress bar
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: LinearProgressIndicator(
+                            value: completionPercent,
+                            minHeight: 6,
+                            backgroundColor: TColor.gray.withOpacity(0.3),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              TColor.primaryColor1,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      // % completion
+                      Text(
+                        "${(completionPercent * 100).toInt()}%",
+                        style: TextStyle(
+                          color: TColor.black,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),

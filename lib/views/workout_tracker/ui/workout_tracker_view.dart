@@ -3,8 +3,10 @@ import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_container_check.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_sliverbar.dart';
+import 'package:smart_fitness_assistant/core/models/exercise_category.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/workour_detail_view.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +25,7 @@ class WorkoutTrackerView extends StatefulWidget {
 }
 
 class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
-  late Stream<List<Map<String, dynamic>>> _categoriesStream;
+  late Stream<List<ExerciseCategory>> _categoriesStream;
 
   List latestArr = [
     {
@@ -200,17 +202,12 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                         ),
 
                         /// Categories list
-                        StreamBuilder<List<Map<String, dynamic>>>(
+                        StreamBuilder<List<ExerciseCategory>>(
                           stream: _categoriesStream,
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting) {
-                              return const Center(
-                                child: Padding(
-                                  padding: EdgeInsets.all(20),
-                                  child: CircularProgressIndicator(),
-                                ),
-                              );
+                              return CustomCircleProgIndicator();
                             }
 
                             if (snapshot.hasError) {
@@ -241,7 +238,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                               shrinkWrap: true,
                               itemCount: categories.length,
                               itemBuilder: (context, index) {
-                                final wObj = categories[index];
+                                final category = categories[index];
                                 return InkWell(
                                   onTap: () {
                                     navigateTo(
@@ -249,11 +246,13 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                                       BlocProvider.value(
                                         value: context
                                             .read<WorkoutTrackerCubit>(),
-                                        child: WorkoutDetailView(dObj: wObj),
+                                        child: WorkoutDetailView(
+                                          dObj: category.toJson(),
+                                        ),
                                       ),
                                     );
                                   },
-                                  child: WhatTrainRow(wObj: wObj),
+                                  child: WhatTrainRow(category: category),
                                 );
                               },
                             );

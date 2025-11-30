@@ -7,7 +7,6 @@ sealed class WorkoutTrackerState {}
 final class WorkoutTrackerInitial extends WorkoutTrackerState {}
 
 /// Trạng thái khi có thay đổi toggle workout
-/// [toggleStates] - Map chứa trạng thái toggle của các workout
 final class WorkoutToggleChanged extends WorkoutTrackerState {
   final Map<int, bool> toggleStates;
   WorkoutToggleChanged(this.toggleStates);
@@ -17,14 +16,12 @@ final class WorkoutToggleChanged extends WorkoutTrackerState {
 final class ExerciseCategoriesLoading extends WorkoutTrackerState {}
 
 /// Trạng thái đã tải thành công danh sách exercise categories
-/// [categories] - Danh sách các category từ Supabase
 final class ExerciseCategoriesLoaded extends WorkoutTrackerState {
-  final List<Map<String, dynamic>> categories;
+  final List<ExerciseCategory> categories;
   ExerciseCategoriesLoaded(this.categories);
 }
 
 /// Trạng thái có lỗi khi tải dữ liệu
-/// [message] - Thông báo lỗi chi tiết
 final class ExerciseCategoriesError extends WorkoutTrackerState {
   final String message;
   ExerciseCategoriesError(this.message);
@@ -34,12 +31,14 @@ final class ExerciseCategoriesError extends WorkoutTrackerState {
 final class ExerciseItemsLoading extends WorkoutTrackerState {}
 
 /// Trạng thái đã tải thành công exercise items
-/// [devices] - Danh sách thiết bị cần thiết
-/// [exercises] - Danh sách bài tập
 final class ExerciseItemsLoaded extends WorkoutTrackerState {
-  final List<Map<String, dynamic>> devices;
-  final List<Map<String, dynamic>> exercises;
-  ExerciseItemsLoaded(this.devices, this.exercises);
+  final List<ExerciseItem> exercises;
+
+  /// Lấy danh sách devices unique (không trùng lặp, case-insensitive)
+  List<ExerciseItem> get devicesWithEquipment =>
+      exercises.where((e) => e.hasEquipment).toList();
+
+  ExerciseItemsLoaded(this.exercises);
 }
 
 /// Trạng thái có lỗi khi tải exercise items
