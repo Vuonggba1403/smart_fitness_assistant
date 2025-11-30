@@ -137,8 +137,8 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
 
                         /// Daily workout
                         CustomContainerCheck(
-                          name: "Daily Workout Schedule",
-                          title: "Check",
+                          name: LocaleKey.dailyWorkoutSchedule.tr,
+                          title: LocaleKey.check.tr,
                           onPressed: () =>
                               navigateTo(context, const WorkoutScheduleView()),
                         ),
@@ -149,7 +149,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "Upcoming Workout",
+                              LocaleKey.upCommingWork.tr,
                               style: TextStyle(
                                 color: textColor,
                                 fontSize: 16,
@@ -159,7 +159,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                             TextButton(
                               onPressed: () {},
                               child: Text(
-                                "See More",
+                                LocaleKey.seeMore.tr,
                                 style: TextStyle(
                                   color: textColor?.withOpacity(0.6),
                                   fontSize: 14,

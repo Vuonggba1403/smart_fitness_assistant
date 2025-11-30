@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/workour_detail_view.dart';
 import '../../../../../core/functions/colo_extension.dart';
 import '../../../../../core/widgets/round_button.dart';
@@ -92,7 +94,7 @@ class WhatTrainRow extends StatelessWidget {
                   const SizedBox(height: 4),
                   // Thông tin số lượng bài tập và thời gian (từ stream)
                   Text(
-                    "${wObj["exercise_count"]?.toString() ?? '0'} Exercises | ${wObj["duration_mins"]?.toString() ?? '0'}mins",
+                    "${wObj["exercise_count"]?.toString() ?? '0'} ${LocaleKey.exercises.tr} | ${wObj["duration_mins"]?.toString() ?? '0'} ${LocaleKey.mins.tr}",
                     style: TextStyle(color: TColor.gray, fontSize: 12),
                   ),
                   const SizedBox(height: 15),

@@ -106,4 +106,16 @@ Map<String, String> viVN = {
 
   //Work Tracker View
   LocaleKey.titleEx: "Bạn muốn tập gì ? ",
+  LocaleKey.dailyWorkoutSchedule: "Lịch tập hàng ngày",
+  LocaleKey.upCommingWork: "Buổi tập sắp tới",
+  LocaleKey.exercises: "Bài tập",
+  LocaleKey.mins: "Phút",
+  LocaleKey.kcal: "Kcal",
+  LocaleKey.startWorkout: "Bắt đầu tập luyện",
+  LocaleKey.item: "Mục",
+  LocaleKey.youNeed: "Bạn cần",
+  LocaleKey.device: "Thiết bị",
+  LocaleKey.muscleGroup: "Khu vực tập trung",
+  LocaleKey.des: "Cách thực hiện",
+  LocaleKey.completeEx: "Hoàn thành bài tập",
 };

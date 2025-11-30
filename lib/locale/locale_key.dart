@@ -1,3 +1,4 @@
+// ignore: unused_field
 class LocaleKey {
   static const String language = 'language';
   static const String appName = 'appName';
@@ -99,4 +100,16 @@ class LocaleKey {
 
   //Work Tracker View
   static const String titleEx = "title_ex";
+  static const String dailyWorkoutSchedule = "daily_workout_schedule";
+  static const String upCommingWork = "upcoming_workout";
+  static const String exercises = "exercises";
+  static const String mins = "mins";
+  static const String kcal = "kcal";
+  static const String item = "item";
+  static const String youNeed = "youNeed";
+  static const String device = "device";
+  static const String muscleGroup = "muscle_group";
+  static const String des = "des";
+  static const String completeEx = "complete_ex";
+  static const String startWorkout = "start_workout";
 }

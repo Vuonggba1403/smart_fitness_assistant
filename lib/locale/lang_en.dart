@@ -105,4 +105,16 @@ Map<String, String> enUs = {
 
   //Work Tracker View
   LocaleKey.titleEx: "What Do You Want To Train",
+  LocaleKey.dailyWorkoutSchedule: "Daily Workout Schedule",
+  LocaleKey.upCommingWork: "Upcoming Workout",
+  LocaleKey.exercises: "Exercises",
+  LocaleKey.mins: "Minutes",
+  LocaleKey.kcal: "Calories",
+  LocaleKey.startWorkout: "Start Workout",
+  LocaleKey.item: "Item",
+  LocaleKey.youNeed: "You Need",
+  LocaleKey.device: "Device",
+  LocaleKey.muscleGroup: "Concentration Area",
+  LocaleKey.des: "How To Do It",
+  LocaleKey.completeEx: "Complete Exercise",
 };

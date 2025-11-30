@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_sliverbar.dart';
@@ -6,6 +7,7 @@ import 'package:smart_fitness_assistant/core/widgets/icon_title_next_row.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/exercises_stpe_details.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/workout_schedule_view.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -182,7 +184,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                                   ),
                                 ),
                                 Text(
-                                  "${widget.dObj["exercise_count"]?.toString() ?? '0'} Exercises | ${widget.dObj["duration_mins"]?.toString() ?? '0'}mins | 320 Calories Burn",
+                                  "${widget.dObj["exercise_count"]?.toString() ?? '0'} ${LocaleKey.exercises.tr} | ${widget.dObj["duration_mins"]?.toString() ?? '0'} ${LocaleKey.mins.tr} | 320 ${LocaleKey.kcal.tr}",
                                   style: TextStyle(
                                     color: textColor?.withOpacity(0.6),
                                     fontSize: 12,
@@ -235,7 +237,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                "You'll Need",
+                                LocaleKey.youNeed.tr,
                                 style: TextStyle(
                                   color: textColor,
                                   fontSize: 16,
@@ -245,7 +247,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                               TextButton(
                                 onPressed: () {},
                                 child: Text(
-                                  "$deviceCount Items",
+                                  "$deviceCount ${LocaleKey.item.tr}",
                                   style: TextStyle(
                                     color: textColor?.withOpacity(0.6),
                                     fontSize: 12,
@@ -417,7 +419,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                "Exercises",
+                                LocaleKey.exercises.tr,
                                 style: TextStyle(
                                   color: textColor,
                                   fontSize: 16,
@@ -427,7 +429,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                               TextButton(
                                 onPressed: () {},
                                 child: Text(
-                                  "$exerciseCount Exercises",
+                                  "$exerciseCount ${LocaleKey.exercises.tr}",
                                   style: TextStyle(
                                     color: textColor?.withOpacity(0.6),
                                     fontSize: 12,
@@ -583,7 +585,10 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      RoundButton(title: "Start Workout", onPressed: () {}),
+                      RoundButton(
+                        title: LocaleKey.startWorkout.tr,
+                        onPressed: () {},
+                      ),
                     ],
                   ),
                 ),
