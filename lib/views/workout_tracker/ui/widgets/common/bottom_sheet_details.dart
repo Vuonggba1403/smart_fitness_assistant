@@ -174,8 +174,45 @@ class ExerciseDetailBottomSheet extends StatelessWidget {
   }
 
   /// Build equipment section (Có/Không có thiết bị)
+  /// Tách chuỗi device theo dấu phẩy và hiển thị từng chip riêng
   Widget _buildEquipmentSection(Color? textColor) {
-    final hasEquipment = exercise['device']?.toString().isNotEmpty == true;
+    // Lấy device string và kiểm tra
+    final deviceStr = exercise['device']?.toString() ?? '';
+    final hasEquipment = deviceStr.trim().isNotEmpty;
+
+    // Nếu không có thiết bị, hiển thị chip "Không có"
+    if (!hasEquipment) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Thiết bị',
+            style: TextStyle(
+              color: textColor,
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              _buildChip(
+                label: 'Không có',
+                isSelected: false,
+                textColor: textColor,
+              ),
+            ],
+          ),
+        ],
+      );
+    }
+
+    // Tách chuỗi device theo dấu phẩy
+    final devices = deviceStr
+        .split(',')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -189,23 +226,34 @@ class ExerciseDetailBottomSheet extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        Row(
-          children: [
-            _buildChip(
-              label: hasEquipment
-                  ? exercise['device']?.toString() ?? 'Có'
-                  : 'Không có',
-              isSelected: hasEquipment,
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: devices.map((device) {
+            return _buildChip(
+              label: device,
+              isSelected: true,
               textColor: textColor,
-            ),
-          ],
+            );
+          }).toList(),
         ),
       ],
     );
   }
 
   /// Build muscle group section
+  /// Tách chuỗi muscle_group theo dấu phẩy và hiển thị từng chip riêng
   Widget _buildMuscleGroupSection(Color? textColor) {
+    // Lấy muscle_group string và tách theo dấu phẩy
+    final muscleGroupStr = exercise['muscle_group']?.toString() ?? 'Toàn thân';
+
+    // Tách chuỗi theo dấu phẩy và trim khoảng trắng
+    final muscleGroups = muscleGroupStr
+        .split(',')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -221,13 +269,13 @@ class ExerciseDetailBottomSheet extends StatelessWidget {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: [
-            _buildChip(
-              label: exercise['muscle_group']?.toString() ?? 'Toàn thân',
+          children: muscleGroups.map((muscleGroup) {
+            return _buildChip(
+              label: muscleGroup,
               isSelected: true,
               textColor: textColor,
-            ),
-          ],
+            );
+          }).toList(),
         ),
       ],
     );

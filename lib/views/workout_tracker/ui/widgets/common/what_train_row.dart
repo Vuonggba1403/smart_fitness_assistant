@@ -90,7 +90,7 @@ class WhatTrainRow extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  // Thông tin số lượng bài tập và thời gian (hardcoded từ cubit)
+                  // Thông tin số lượng bài tập và thời gian (từ stream)
                   Text(
                     "${wObj["exercise_count"]?.toString() ?? '0'} Exercises | ${wObj["duration_mins"]?.toString() ?? '0'}mins",
                     style: TextStyle(color: TColor.gray, fontSize: 12),

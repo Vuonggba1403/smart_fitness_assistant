@@ -48,9 +48,10 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
       create: (context) => WorkoutTrackerCubit(),
       child: Builder(
         builder: (context) {
+          // Sử dụng method mới để stream với exercise count thực tế
           _categoriesStream = context
               .read<WorkoutTrackerCubit>()
-              .streamExerciseCategories();
+              .streamExerciseCategoriesWithCount();
 
           return Container(
             decoration: BoxDecoration(

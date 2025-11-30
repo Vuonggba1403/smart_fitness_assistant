@@ -208,9 +208,28 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                       StreamBuilder<Map<String, List<Map<String, dynamic>>>>(
                         stream: _exerciseItemsStream,
                         builder: (context, snapshot) {
-                          final deviceCount = snapshot.hasData
-                              ? snapshot.data!['devices']?.length ?? 0
-                              : 0;
+                          // Tính số lượng thiết bị sau khi tách và loại bỏ duplicate (không phân biệt hoa/thường)
+                          int deviceCount = 0;
+                          if (snapshot.hasData) {
+                            final devices = snapshot.data!['devices'] ?? [];
+                            final Set<String> uniqueDevices = {};
+
+                            for (var device in devices) {
+                              final deviceStr =
+                                  device['device']?.toString() ?? '';
+                              final deviceNames = deviceStr
+                                  .split(',')
+                                  .map((e) => e.trim())
+                                  .where((e) => e.isNotEmpty);
+
+                              // Chuẩn hóa về lowercase để so sánh
+                              uniqueDevices.addAll(
+                                deviceNames.map((e) => e.toLowerCase()),
+                              );
+                            }
+
+                            deviceCount = uniqueDevices.length;
+                          }
 
                           return Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -241,109 +260,147 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                       // Danh sách thiết bị với StreamBuilder
                       SizedBox(
                         height: media.width * 0.5,
-                        child:
-                            StreamBuilder<
-                              Map<String, List<Map<String, dynamic>>>
-                            >(
-                              stream: _exerciseItemsStream,
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return Center(
-                                    child: CircularProgressIndicator(
-                                      color: TColor.primaryColor1,
-                                    ),
-                                  );
+                        child: StreamBuilder<Map<String, List<Map<String, dynamic>>>>(
+                          stream: _exerciseItemsStream,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  color: TColor.primaryColor1,
+                                ),
+                              );
+                            }
+
+                            if (snapshot.hasError) {
+                              return Center(
+                                child: Text(
+                                  "Error: ${snapshot.error}",
+                                  style: TextStyle(color: textColor),
+                                ),
+                              );
+                            }
+
+                            final devices = snapshot.data?['devices'] ?? [];
+
+                            if (devices.isEmpty) {
+                              return Center(
+                                child: Text(
+                                  "No equipment needed",
+                                  style: TextStyle(
+                                    color: textColor?.withOpacity(0.6),
+                                  ),
+                                ),
+                              );
+                            }
+
+                            // Tách các thiết bị từ tất cả exercises và loại bỏ duplicate
+                            // Sử dụng Map với key lowercase để so sánh, value là tên gốc
+                            final Map<String, Map<String, String>>
+                            uniqueDevicesMap = {};
+
+                            for (var device in devices) {
+                              final deviceStr =
+                                  device['device']?.toString() ?? '';
+                              final imgUrl =
+                                  device['img_url']?.toString() ?? '';
+
+                              // Tách chuỗi thiết bị theo dấu phẩy
+                              final deviceNames = deviceStr
+                                  .split(',')
+                                  .map((e) => e.trim())
+                                  .where((e) => e.isNotEmpty);
+
+                              // Thêm vào map với key là lowercase
+                              for (var deviceName in deviceNames) {
+                                final keyLower = deviceName.toLowerCase();
+
+                                // Chỉ thêm nếu chưa tồn tại (so sánh lowercase)
+                                if (!uniqueDevicesMap.containsKey(keyLower)) {
+                                  uniqueDevicesMap[keyLower] = {
+                                    'device':
+                                        deviceName, // Giữ tên gốc để hiển thị
+                                    'img_url': imgUrl,
+                                  };
                                 }
+                              }
+                            }
 
-                                if (snapshot.hasError) {
-                                  return Center(
-                                    child: Text(
-                                      "Error: ${snapshot.error}",
-                                      style: TextStyle(color: textColor),
-                                    ),
-                                  );
-                                }
+                            // Convert Map thành List để hiển thị
+                            final deviceItems = uniqueDevicesMap.values
+                                .toList();
 
-                                final devices = snapshot.data?['devices'] ?? [];
-
-                                if (devices.isEmpty) {
-                                  return Center(
-                                    child: Text(
-                                      "No equipment needed",
-                                      style: TextStyle(
-                                        color: textColor?.withOpacity(0.6),
-                                      ),
-                                    ),
-                                  );
-                                }
-
-                                return ListView.builder(
-                                  padding: EdgeInsets.zero,
-                                  scrollDirection: Axis.horizontal,
-                                  shrinkWrap: true,
-                                  itemCount: devices.length,
-                                  itemBuilder: (context, index) {
-                                    var device = devices[index];
-                                    return Container(
-                                      margin: const EdgeInsets.all(8),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Container(
-                                            height: media.width * 0.35,
-                                            width: media.width * 0.35,
-                                            decoration: BoxDecoration(
-                                              color: cardColor,
-                                              borderRadius:
-                                                  BorderRadius.circular(15),
-                                            ),
-                                            alignment: Alignment.center,
-                                            child: CachedNetworkImage(
-                                              imageUrl:
-                                                  device["img_url"]
-                                                      ?.toString() ??
-                                                  '',
-                                              width: media.width * 0.2,
-                                              height: media.width * 0.2,
-                                              fit: BoxFit.contain,
-                                              placeholder: (context, url) =>
-                                                  Center(
-                                                    child:
-                                                        CircularProgressIndicator(
-                                                          color: TColor
-                                                              .primaryColor1,
-                                                          strokeWidth: 2,
-                                                        ),
-                                                  ),
-                                              errorWidget:
-                                                  (context, url, error) => Icon(
-                                                    Icons.fitness_center,
-                                                    color: textColor
-                                                        ?.withOpacity(0.3),
-                                                    size: media.width * 0.2,
-                                                  ),
+                            return ListView.builder(
+                              padding: EdgeInsets.zero,
+                              scrollDirection: Axis.horizontal,
+                              shrinkWrap: true,
+                              itemCount: deviceItems.length,
+                              itemBuilder: (context, index) {
+                                var deviceItem = deviceItems[index];
+                                return Container(
+                                  margin: const EdgeInsets.all(8),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        height: media.width * 0.35,
+                                        width: media.width * 0.35,
+                                        decoration: BoxDecoration(
+                                          color: cardColor,
+                                          borderRadius: BorderRadius.circular(
+                                            15,
+                                          ),
+                                        ),
+                                        alignment: Alignment.center,
+                                        child: CachedNetworkImage(
+                                          imageUrl:
+                                              deviceItem["img_url"]
+                                                  ?.toString() ??
+                                              '',
+                                          width: media.width * 0.2,
+                                          height: media.width * 0.2,
+                                          fit: BoxFit.contain,
+                                          placeholder: (context, url) => Center(
+                                            child: CircularProgressIndicator(
+                                              color: TColor.primaryColor1,
+                                              strokeWidth: 2,
                                             ),
                                           ),
-                                          Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Text(
-                                              device["device"]?.toString() ??
-                                                  "Equipment",
-                                              style: TextStyle(
-                                                color: textColor,
-                                                fontSize: 12,
+                                          errorWidget: (context, url, error) =>
+                                              Icon(
+                                                Icons.fitness_center,
+                                                color: textColor?.withOpacity(
+                                                  0.3,
+                                                ),
+                                                size: media.width * 0.2,
                                               ),
-                                            ),
-                                          ),
-                                        ],
+                                        ),
                                       ),
-                                    );
-                                  },
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: SizedBox(
+                                          width: media.width * 0.35,
+                                          child: Text(
+                                            deviceItem["device"]?.toString() ??
+                                                "Equipment",
+                                            style: TextStyle(
+                                              color: textColor,
+                                              fontSize: 12,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 );
                               },
-                            ),
+                            );
+                          },
+                        ),
                       ),
 
                       SizedBox(height: media.width * 0.05),

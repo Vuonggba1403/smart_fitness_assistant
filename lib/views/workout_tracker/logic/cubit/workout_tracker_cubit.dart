@@ -171,4 +171,37 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
           }).toList();
         });
   }
+
+  /// Stream exercise categories với exercise count thực tế
+  /// Đếm số exercises từ bảng exercise_items
+  Stream<List<Map<String, dynamic>>> streamExerciseCategoriesWithCount() {
+    return _supabase
+        .from('exercise_categories')
+        .stream(primaryKey: ['id'])
+        .order('created_at')
+        .asyncMap((categories) async {
+          final List<Map<String, dynamic>> result = [];
+
+          for (var category in categories) {
+            final categoryId = category['id'];
+
+            // Đếm số lượng exercises thực tế từ exercise_items
+            final exercisesResponse = await _supabase
+                .from('exercise_items')
+                .select('id')
+                .eq('for_cate', categoryId);
+
+            final exerciseCount = exercisesResponse.length;
+
+            // Thêm exercise_count và duration_mins vào category
+            result.add({
+              ...category,
+              'exercise_count': exerciseCount,
+              'duration_mins': exerciseCount * 3, // 3 phút cho mỗi exercise
+            });
+          }
+
+          return result;
+        });
+  }
 }
