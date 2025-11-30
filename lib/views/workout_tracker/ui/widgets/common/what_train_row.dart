@@ -43,29 +43,35 @@ class WhatTrainRow extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Hình ảnh được bọc trong Container tròn
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: cardColor.withOpacity(0.54),
-                borderRadius: BorderRadius.circular(40),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(40),
-                child: CachedNetworkImage(
-                  imageUrl: wObj["img_url"]?.toString() ?? '',
-                  fit: BoxFit.cover,
-                  // Hiển thị loading progress khi đang tải ảnh
-                  placeholder: (context, url) => Center(
-                    child: CircularProgressIndicator(
-                      color: TColor.primaryColor2,
-                      strokeWidth: 2,
+            // Hero animation cho hình ảnh
+            Hero(
+              tag: 'workout_${wObj["img_url"]}',
+              child: Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: cardColor.withOpacity(0.54),
+                  borderRadius: BorderRadius.circular(40),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(40),
+                  child: CachedNetworkImage(
+                    imageUrl: wObj["img_url"]?.toString() ?? '',
+                    fit: BoxFit.cover,
+                    // Hiển thị loading progress khi đang tải ảnh
+                    placeholder: (context, url) => Center(
+                      child: CircularProgressIndicator(
+                        color: TColor.primaryColor2,
+                        strokeWidth: 2,
+                      ),
+                    ),
+                    // Hiển thị icon khi có lỗi load ảnh
+                    errorWidget: (context, url, error) => Icon(
+                      Icons.fitness_center,
+                      size: 40,
+                      color: TColor.gray,
                     ),
                   ),
-                  // Hiển thị icon khi có lỗi load ảnh
-                  errorWidget: (context, url, error) =>
-                      Icon(Icons.fitness_center, size: 40, color: TColor.gray),
                 ),
               ),
             ),

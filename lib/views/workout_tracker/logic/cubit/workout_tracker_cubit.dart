@@ -76,4 +76,99 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
       emit(ExerciseCategoriesError(e.toString()));
     }
   }
+
+  /// Lấy exercise items theo category ID
+  ///
+  /// [categoryId] - ID của category để lọc
+  /// Fetch 2 loại dữ liệu:
+  /// 1. Devices - Items có device field (thiết bị cần thiết) - hiển thị ở "You'll Need"
+  /// 2. Exercises - Tất cả items (bài tập) - hiển thị ở "Exercises"
+  Future<void> fetchExerciseItems(String categoryId) async {
+    try {
+      emit(ExerciseItemsLoading());
+
+      // Lấy tất cả items theo category từ bảng exercise_items
+      final response = await _supabase
+          .from('exercise_items')
+          .select('id, title, img_url, des, muscle_group, device')
+          .eq('for_cate', categoryId);
+
+      final items = List<Map<String, dynamic>>.from(response);
+
+      // Tách devices: Chỉ lấy items có device không null và không rỗng
+      // Đây là thiết bị cần thiết cho workout
+      final devices = items
+          .where(
+            (item) =>
+                item['device'] != null &&
+                item['device'].toString().trim().isNotEmpty,
+          )
+          .toList();
+
+      // Exercises: Tất cả items đều là bài tập
+      final exercises = items;
+
+      emit(ExerciseItemsLoaded(devices, exercises));
+    } catch (e) {
+      emit(ExerciseItemsError(e.toString()));
+    }
+  }
+
+  /// Stream exercise items theo category ID với realtime updates
+  ///
+  /// [categoryId] - ID của category để lọc
+  /// Returns Stream với devices và exercises được update realtime
+  Stream<Map<String, List<Map<String, dynamic>>>> streamExerciseItems(
+    String categoryId,
+  ) {
+    return _supabase
+        .from('exercise_items')
+        .stream(primaryKey: ['id'])
+        .eq('for_cate', categoryId)
+        .map((data) {
+          final items = List<Map<String, dynamic>>.from(data);
+
+          // Tách devices: items có device không null và không rỗng
+          final devices = items
+              .where(
+                (item) =>
+                    item['device'] != null &&
+                    item['device'].toString().trim().isNotEmpty,
+              )
+              .toList();
+
+          // Exercises: tất cả items
+          final exercises = items;
+
+          return {'devices': devices, 'exercises': exercises};
+        });
+  }
+
+  /// Stream exercise categories với exercise_items nested
+  /// Returns Stream realtime cho toàn bộ categories và items
+  Stream<List<Map<String, dynamic>>> streamExerciseCategories() {
+    return _supabase
+        .from('exercise_categories')
+        .stream(primaryKey: ['id'])
+        .order('created_at')
+        .map((categories) {
+          final hardcodedData = [
+            {'exercise_count': 11, 'duration_mins': 32},
+            {'exercise_count': 12, 'duration_mins': 40},
+            {'exercise_count': 14, 'duration_mins': 20},
+          ];
+
+          return List<Map<String, dynamic>>.from(
+            categories,
+          ).asMap().entries.map((entry) {
+            final index = entry.key;
+            final item = entry.value;
+            final hardcoded = index < hardcodedData.length
+                ? hardcodedData[index]
+                : {'exercise_count': 10, 'duration_mins': 30};
+
+            return {...item, ...hardcoded};
+          }).toList();
+        });
+  }
 }

@@ -29,3 +29,21 @@ final class ExerciseCategoriesError extends WorkoutTrackerState {
   final String message;
   ExerciseCategoriesError(this.message);
 }
+
+/// Trạng thái đang tải exercise items
+final class ExerciseItemsLoading extends WorkoutTrackerState {}
+
+/// Trạng thái đã tải thành công exercise items
+/// [devices] - Danh sách thiết bị cần thiết
+/// [exercises] - Danh sách bài tập
+final class ExerciseItemsLoaded extends WorkoutTrackerState {
+  final List<Map<String, dynamic>> devices;
+  final List<Map<String, dynamic>> exercises;
+  ExerciseItemsLoaded(this.devices, this.exercises);
+}
+
+/// Trạng thái có lỗi khi tải exercise items
+final class ExerciseItemsError extends WorkoutTrackerState {
+  final String message;
+  ExerciseItemsError(this.message);
+}

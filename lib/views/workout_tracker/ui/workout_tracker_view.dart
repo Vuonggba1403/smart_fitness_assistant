@@ -23,6 +23,8 @@ class WorkoutTrackerView extends StatefulWidget {
 }
 
 class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
+  late Stream<List<Map<String, dynamic>>> _categoriesStream;
+
   List latestArr = [
     {
       "image": "assets/img/Workout1.png",
@@ -42,285 +44,236 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
     final theme = Theme.of(context);
     final textColor = theme.textTheme.bodyMedium?.color;
 
-    /// Thay đổi chính:
-    /// - Bọc toàn bộ widget tree với BlocProvider
-    /// - Khởi tạo WorkoutTrackerCubit và gọi fetchExerciseCategories() ngay lập tức
-    /// - Sử dụng cascade operator (..) để gọi method ngay sau khi khởi tạo
     return BlocProvider(
-      create: (context) => WorkoutTrackerCubit()..fetchExerciseCategories(),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(colors: TColor.primaryG),
-        ),
-        child: NestedScrollView(
-          headerSliverBuilder: (context, innerBoxIsScrolled) {
-            return [
-              CustomSliverAppBar(text: widget.title),
-              SliverAppBar(
-                backgroundColor: Colors.transparent,
-                centerTitle: true,
-                elevation: 0,
-                leadingWidth: 0,
-                leading: const SizedBox(),
-                expandedHeight: media.width * 0.5,
-                flexibleSpace: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  height: media.width * 0.5,
-                  width: double.maxFinite,
-                  child: LineChart(
-                    LineChartData(
-                      lineTouchData: LineTouchData(
-                        enabled: true,
-                        handleBuiltInTouches: false,
-                        touchCallback:
-                            (FlTouchEvent event, LineTouchResponse? response) {
-                              if (response == null ||
-                                  response.lineBarSpots == null) {
-                                return;
-                              }
-                              // if (event is FlTapUpEvent) {
-                              //   final spotIndex =
-                              //       response.lineBarSpots!.first.spotIndex;
-                              //   showingTooltipOnSpots.clear();
-                              //   setState(() {
-                              //     showingTooltipOnSpots.add(spotIndex);
-                              //   });
-                              // }
-                            },
-                        mouseCursorResolver:
-                            (FlTouchEvent event, LineTouchResponse? response) {
-                              if (response == null ||
-                                  response.lineBarSpots == null) {
-                                return SystemMouseCursors.basic;
-                              }
-                              return SystemMouseCursors.click;
-                            },
-                        getTouchedSpotIndicator:
-                            (LineChartBarData barData, List<int> spotIndexes) {
-                              return spotIndexes.map((index) {
-                                return TouchedSpotIndicatorData(
-                                  FlLine(color: Colors.transparent),
-                                  FlDotData(
-                                    show: true,
-                                    getDotPainter:
-                                        (spot, percent, barData, index) =>
-                                            FlDotCirclePainter(
-                                              radius: 3,
-                                              color: Colors.white,
-                                              strokeWidth: 3,
-                                              strokeColor:
-                                                  TColor.secondaryColor1,
-                                            ),
-                                  ),
-                                );
-                              }).toList();
-                            },
-                        touchTooltipData: LineTouchTooltipData(
-                          // tooltipBgColor: TColor.secondaryColor1,
-                          // tooltipRoundedRadius: 20,
-                          tooltipBorderRadius: BorderRadius.circular(20),
-                          getTooltipItems: (List<LineBarSpot> lineBarsSpot) {
-                            return lineBarsSpot.map((lineBarSpot) {
-                              return LineTooltipItem(
-                                "${lineBarSpot.x.toInt()} mins ago",
-                                const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                ),
+      create: (context) => WorkoutTrackerCubit(),
+      child: Builder(
+        builder: (context) {
+          _categoriesStream = context
+              .read<WorkoutTrackerCubit>()
+              .streamExerciseCategories();
+
+          return Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(colors: TColor.primaryG),
+            ),
+            child: NestedScrollView(
+              headerSliverBuilder: (context, innerBoxIsScrolled) {
+                return [
+                  CustomSliverAppBar(text: widget.title),
+
+                  /// Chart Section
+                  SliverAppBar(
+                    backgroundColor: Colors.transparent,
+                    centerTitle: true,
+                    elevation: 0,
+                    leadingWidth: 0,
+                    leading: const SizedBox(),
+                    expandedHeight: media.width * 0.5,
+                    flexibleSpace: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      height: media.width * 0.5,
+                      width: double.infinity,
+                      child: LineChart(
+                        LineChartData(
+                          lineTouchData: lineTouchData1,
+                          lineBarsData: lineBarsData1,
+                          minY: -0.5,
+                          maxY: 110,
+                          titlesData: FlTitlesData(
+                            show: true,
+                            leftTitles: const AxisTitles(),
+                            topTitles: const AxisTitles(),
+                            bottomTitles: AxisTitles(sideTitles: bottomTitles),
+                            rightTitles: AxisTitles(sideTitles: rightTitles),
+                          ),
+                          gridData: FlGridData(
+                            show: true,
+                            drawHorizontalLine: true,
+                            horizontalInterval: 25,
+                            drawVerticalLine: false,
+                            getDrawingHorizontalLine: (value) {
+                              return FlLine(
+                                color: TColor.white.withOpacity(0.15),
+                                strokeWidth: 2,
                               );
-                            }).toList();
-                          },
+                            },
+                          ),
+                          borderData: FlBorderData(show: false),
                         ),
                       ),
-                      lineBarsData: lineBarsData1,
-                      minY: -0.5,
-                      maxY: 110,
-                      titlesData: FlTitlesData(
-                        show: true,
-                        leftTitles: AxisTitles(),
-                        topTitles: AxisTitles(),
-                        bottomTitles: AxisTitles(sideTitles: bottomTitles),
-                        rightTitles: AxisTitles(sideTitles: rightTitles),
-                      ),
-                      gridData: FlGridData(
-                        show: true,
-                        drawHorizontalLine: true,
-                        horizontalInterval: 25,
-                        drawVerticalLine: false,
-                        getDrawingHorizontalLine: (value) {
-                          return FlLine(
-                            color: TColor.white.withOpacity(0.15),
-                            strokeWidth: 2,
-                          );
-                        },
-                      ),
-                      borderData: FlBorderData(
-                        show: true,
-                        border: Border.all(color: Colors.transparent),
-                      ),
+                    ),
+                  ),
+                ];
+              },
+
+              body: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                decoration: BoxDecoration(
+                  color: theme.scaffoldBackgroundColor,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(25),
+                    topRight: Radius.circular(25),
+                  ),
+                ),
+
+                child: Scaffold(
+                  backgroundColor: Colors.transparent,
+                  body: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 10),
+
+                        /// Slider icon
+                        Container(
+                          width: 50,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: TColor.gray.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                        ),
+                        SizedBox(height: media.width * 0.05),
+
+                        /// Daily workout
+                        CustomContainerCheck(
+                          name: "Daily Workout Schedule",
+                          title: "Check",
+                          onPressed: () =>
+                              navigateTo(context, const WorkoutScheduleView()),
+                        ),
+
+                        SizedBox(height: media.width * 0.05),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Upcoming Workout",
+                              style: TextStyle(
+                                color: textColor,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () {},
+                              child: Text(
+                                "See More",
+                                style: TextStyle(
+                                  color: textColor?.withOpacity(0.6),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        /// Upcoming list
+                        ListView.builder(
+                          padding: EdgeInsets.zero,
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          itemCount: latestArr.length,
+                          itemBuilder: (context, index) {
+                            var wObj = latestArr[index];
+                            return UpcomingWorkoutRow(wObj: wObj, index: index);
+                          },
+                        ),
+
+                        SizedBox(height: media.width * 0.05),
+
+                        /// Title
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              LocaleKey.titleEx.tr,
+                              style: TextStyle(
+                                color: textColor,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        /// Categories list
+                        StreamBuilder<List<Map<String, dynamic>>>(
+                          stream: _categoriesStream,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Center(
+                                child: Padding(
+                                  padding: EdgeInsets.all(20),
+                                  child: CircularProgressIndicator(),
+                                ),
+                              );
+                            }
+
+                            if (snapshot.hasError) {
+                              return Padding(
+                                padding: const EdgeInsets.all(20),
+                                child: Text(
+                                  "Error: ${snapshot.error}",
+                                  style: TextStyle(color: textColor),
+                                ),
+                              );
+                            }
+
+                            final categories = snapshot.data ?? [];
+
+                            if (categories.isEmpty) {
+                              return Padding(
+                                padding: const EdgeInsets.all(20),
+                                child: Text(
+                                  "No exercises found",
+                                  style: TextStyle(color: textColor),
+                                ),
+                              );
+                            }
+
+                            return ListView.builder(
+                              padding: EdgeInsets.zero,
+                              physics: const NeverScrollableScrollPhysics(),
+                              shrinkWrap: true,
+                              itemCount: categories.length,
+                              itemBuilder: (context, index) {
+                                final wObj = categories[index];
+                                return InkWell(
+                                  onTap: () {
+                                    navigateTo(
+                                      context,
+                                      BlocProvider.value(
+                                        value: context
+                                            .read<WorkoutTrackerCubit>(),
+                                        child: WorkoutDetailView(dObj: wObj),
+                                      ),
+                                    );
+                                  },
+                                  child: WhatTrainRow(wObj: wObj),
+                                );
+                              },
+                            );
+                          },
+                        ),
+
+                        SizedBox(height: media.width * 0.1),
+                      ],
                     ),
                   ),
                 ),
               ),
-            ];
-          },
-          body: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            decoration: BoxDecoration(
-              color: theme.scaffoldBackgroundColor,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(25),
-                topRight: Radius.circular(25),
-              ),
             ),
-            child: Scaffold(
-              backgroundColor: Colors.transparent,
-              body: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    const SizedBox(height: 10),
-                    Container(
-                      width: 50,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: TColor.gray.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(3),
-                      ),
-                    ),
-                    SizedBox(height: media.width * 0.05),
-                    CustomContainerCheck(
-                      name: "Daily Workout Schedule",
-                      title: "Check",
-                      onPressed: () =>
-                          navigateTo(context, WorkoutScheduleView()),
-                    ),
-                    SizedBox(height: media.width * 0.05),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Upcoming Workout",
-                          style: TextStyle(
-                            color: textColor,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () {},
-                          child: Text(
-                            "See More",
-                            style: TextStyle(
-                              color: textColor?.withOpacity(0.6),
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    ListView.builder(
-                      padding: EdgeInsets.zero,
-                      physics: const NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      itemCount: latestArr.length,
-                      itemBuilder: (context, index) {
-                        var wObj = latestArr[index] as Map? ?? {};
-                        return UpcomingWorkoutRow(wObj: wObj, index: index);
-                      },
-                    ),
-                    SizedBox(height: media.width * 0.05),
-                    // Exercise Section
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          LocaleKey.titleEx.tr,
-                          style: TextStyle(
-                            color: textColor,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    /// Sử dụng BlocBuilder để lắng nghe thay đổi state
-                    /// Hiển thị:
-                    /// - Loading spinner khi đang tải
-                    /// - Error message khi có lỗi
-                    /// - ListView với dữ liệu từ Supabase khi load thành công
-                    BlocBuilder<WorkoutTrackerCubit, WorkoutTrackerState>(
-                      builder: (context, state) {
-                        // Hiển thị loading indicator
-                        if (state is ExerciseCategoriesLoading) {
-                          return const Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(20.0),
-                              child: CircularProgressIndicator(),
-                            ),
-                          );
-                        }
-                        // Hiển thị thông báo lỗi
-                        else if (state is ExerciseCategoriesError) {
-                          return Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(20.0),
-                              child: Text(
-                                'Error: ${state.message}',
-                                style: TextStyle(color: textColor),
-                              ),
-                            ),
-                          );
-                        }
-                        // Hiển thị danh sách exercise categories
-                        else if (state is ExerciseCategoriesLoaded) {
-                          return ListView.builder(
-                            padding: EdgeInsets.zero,
-                            physics: const NeverScrollableScrollPhysics(),
-                            shrinkWrap: true,
-                            itemCount: state.categories.length,
-                            itemBuilder: (context, index) {
-                              var wObj = state.categories[index];
-                              return InkWell(
-                                onTap: () {
-                                  // Navigate với BlocProvider.value để giữ cubit instance
-                                  navigateTo(
-                                    context,
-                                    BlocProvider.value(
-                                      value: context
-                                          .read<WorkoutTrackerCubit>(),
-                                      child: WorkoutDetailView(dObj: wObj),
-                                    ),
-                                  );
-                                },
-                                child: WhatTrainRow(wObj: wObj),
-                              );
-                            },
-                          );
-                        }
-                        // Trường hợp mặc định (initial state)
-                        return const SizedBox.shrink();
-                      },
-                    ),
-                    SizedBox(height: media.width * 0.1),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
 
-  LineTouchData get lineTouchData1 => LineTouchData(
-    handleBuiltInTouches: true,
-    touchTooltipData: LineTouchTooltipData(
-      // tooltipBgColor: Colors.blueGrey.withOpacity(0.8),
-    ),
-  );
+  /// Line chart settings
+  LineTouchData get lineTouchData1 => LineTouchData(handleBuiltInTouches: true);
 
   List<LineChartBarData> get lineBarsData1 => [
     lineChartBarData1_1,
@@ -332,7 +285,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
     color: TColor.white,
     barWidth: 4,
     isStrokeCapRound: true,
-    dotData: FlDotData(show: false),
+    dotData: const FlDotData(show: false),
     belowBarData: BarAreaData(show: false),
     spots: const [
       FlSpot(1, 35),
@@ -350,7 +303,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
     color: TColor.white.withOpacity(0.5),
     barWidth: 2,
     isStrokeCapRound: true,
-    dotData: FlDotData(show: false),
+    dotData: const FlDotData(show: false),
     belowBarData: BarAreaData(show: false),
     spots: const [
       FlSpot(1, 80),
@@ -371,34 +324,20 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
   );
 
   Widget rightTitleWidgets(double value, TitleMeta meta) {
-    String text;
-    switch (value.toInt()) {
-      case 0:
-        text = '0%';
-        break;
-      case 20:
-        text = '20%';
-        break;
-      case 40:
-        text = '40%';
-        break;
-      case 60:
-        text = '60%';
-        break;
-      case 80:
-        text = '80%';
-        break;
-      case 100:
-        text = '100%';
-        break;
-      default:
-        return Container();
-    }
+    const labels = {
+      0: '0%',
+      20: '20%',
+      40: '40%',
+      60: '60%',
+      80: '80%',
+      100: '100%',
+    };
+
+    if (!labels.containsKey(value.toInt())) return Container();
 
     return Text(
-      text,
+      labels[value.toInt()]!,
       style: TextStyle(color: TColor.white, fontSize: 12),
-      textAlign: TextAlign.center,
     );
   }
 
@@ -410,38 +349,25 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
   );
 
   Widget bottomTitleWidgets(double value, TitleMeta meta) {
-    var style = TextStyle(color: TColor.white, fontSize: 12);
-    Widget text;
-    switch (value.toInt()) {
-      case 1:
-        text = Text('Sun', style: style);
-        break;
-      case 2:
-        text = Text('Mon', style: style);
-        break;
-      case 3:
-        text = Text('Tue', style: style);
-        break;
-      case 4:
-        text = Text('Wed', style: style);
-        break;
-      case 5:
-        text = Text('Thu', style: style);
-        break;
-      case 6:
-        text = Text('Fri', style: style);
-        break;
-      case 7:
-        text = Text('Sat', style: style);
-        break;
-      default:
-        text = const Text('');
-        break;
-    }
+    const days = {
+      1: 'Sun',
+      2: 'Mon',
+      3: 'Tue',
+      4: 'Wed',
+      5: 'Thu',
+      6: 'Fri',
+      7: 'Sat',
+    };
 
     return SideTitleWidget(
       meta: meta,
-      child: Padding(padding: const EdgeInsets.only(top: 8.0), child: text),
+      child: Padding(
+        padding: const EdgeInsets.only(top: 8.0),
+        child: Text(
+          days[value.toInt()] ?? "",
+          style: TextStyle(color: TColor.white, fontSize: 12),
+        ),
+      ),
     );
   }
 }
