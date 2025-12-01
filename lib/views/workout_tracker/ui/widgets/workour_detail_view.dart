@@ -10,6 +10,7 @@ import 'package:smart_fitness_assistant/core/models/exercise_item.dart'; // ✅ 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/logic/cubit/workout_tracker_cubit.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/common/bottom_sheet_details.dart';
+import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/exercise_session_view.dart';
 
 class WorkoutDetailView extends StatelessWidget {
   final Map dObj;
@@ -31,9 +32,10 @@ class WorkoutDetailView extends StatelessWidget {
     }
 
     return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(colors: TColor.primaryG),
-      ),
+      color: Colors.transparent,
+      // decoration: BoxDecoration(
+      //   gradient: LinearGradient(colors: TColor.primaryG),
+      // ),
       child: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
@@ -152,9 +154,37 @@ class WorkoutDetailView extends StatelessWidget {
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      RoundButton(
-                        title: LocaleKey.startWorkout.tr,
-                        onPressed: () {},
+                      BlocBuilder<WorkoutTrackerCubit, WorkoutTrackerState>(
+                        builder: (context, state) {
+                          return RoundButton(
+                            title: LocaleKey.startWorkout.tr,
+                            onPressed: () {
+                              if (state is WorkoutDetailLoaded) {
+                                final categoryId = dObj['id']?.toString() ?? '';
+                                final categoryName =
+                                    dObj['title_ex']?.toString() ?? 'Workout';
+
+                                context
+                                    .read<WorkoutTrackerCubit>()
+                                    .startWorkoutSession(
+                                      state.exercises,
+                                      categoryId,
+                                      categoryName,
+                                    );
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => BlocProvider.value(
+                                      value: context
+                                          .read<WorkoutTrackerCubit>(),
+                                      child: const ExerciseSessionView(),
+                                    ),
+                                  ),
+                                );
+                              }
+                            },
+                          );
+                        },
                       ),
                     ],
                   ),

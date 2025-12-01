@@ -117,6 +117,6 @@ Map<String, String> viVN = {
   LocaleKey.device: "Thiết bị",
   LocaleKey.muscleGroup: "Khu vực tập trung",
   LocaleKey.des: "Cách thực hiện",
-  LocaleKey.completeEx: "Hoàn thành bài tập",
+  LocaleKey.completeEx: "Hoàn tất",
   LocaleKey.noEquipment: "Không cần thiết bị",
 };

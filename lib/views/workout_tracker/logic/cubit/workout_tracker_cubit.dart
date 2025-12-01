@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:smart_fitness_assistant/core/models/exercise_category.dart'; // ✅ Bỏ _models
 import 'package:smart_fitness_assistant/core/models/exercise_item.dart'; // ✅ Bỏ _models
 import 'package:smart_fitness_assistant/core/models/device.dart'; // ✅ Bỏ _models
+import 'package:smart_fitness_assistant/core/models/workout_set.dart';
+import 'package:smart_fitness_assistant/core/models/workout_session.dart';
 
 part 'workout_tracker_state.dart';
 
@@ -17,6 +20,14 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
 
   /// Instance của Supabase client để gọi API
   final _supabase = Supabase.instance.client;
+
+  Timer? _sessionTimer;
+
+  @override
+  Future<void> close() {
+    _sessionTimer?.cancel();
+    return super.close();
+  }
 
   // ============ Các Method cho Toggle ============
 
@@ -80,13 +91,10 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
   // ============ Các Method cho Workout Detail ============
 
   /// Tải danh sách exercise items với devices (JOIN version)
-  /// - Query exercise_items
-  /// - JOIN với exercise_devices và devices để lấy đầy đủ thông tin
   void loadExerciseItems(String categoryId) async {
     emit(WorkoutDetailLoading());
 
     try {
-      // ✅ Stream exercises với JOIN
       final exercisesStream = _supabase
           .from('exercise_items')
           .stream(primaryKey: ['id'])
@@ -98,13 +106,11 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
           continue;
         }
 
-        // ✅ Với mỗi exercise, fetch devices với JOIN
         final List<ExerciseItem> exercises = [];
 
         for (var exerciseJson in exercisesData) {
           final exerciseId = exerciseJson['id'];
 
-          // ✅ Query devices với JOIN để lấy img_url
           final devicesData = await _supabase
               .from('exercise_devices')
               .select('''
@@ -117,18 +123,24 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
               ''')
               .eq('exercise_id', exerciseId);
 
-          // ✅ Extract devices array từ nested data
           final devices = devicesData
               .map((ed) => ed['devices'])
               .where((d) => d != null)
               .toList();
 
-          // ✅ Thêm devices vào exerciseJson
           exerciseJson['devices'] = devices;
-
-          // Parse thành ExerciseItem
           exercises.add(ExerciseItem.fromJson(exerciseJson));
         }
+
+        // ✅ Sắp xếp theo cột number (tăng dần)
+        exercises.sort((a, b) {
+          // Nếu một trong hai không có number, đẩy xuống cuối
+          if (a.number == null && b.number == null) return 0;
+          if (a.number == null) return 1;
+          if (b.number == null) return -1;
+
+          return a.number!.compareTo(b.number!);
+        });
 
         emit(WorkoutDetailLoaded(exercises));
       }
@@ -149,7 +161,206 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
         });
   }
 
-  // ============ Các Helper Methods ============
+  // ============ Các Method cho Exercise Session ============
+
+  /// Bắt đầu session tập luyện
+  void startWorkoutSession(
+    List<ExerciseItem> exercises,
+    String categoryId,
+    String categoryName,
+  ) {
+    if (exercises.isEmpty) return;
+
+    final initialSets = List.generate(
+      4,
+      (index) => WorkoutSet(setNumber: index + 1, weight: 8.0, reps: 8),
+    );
+
+    emit(
+      ExerciseSessionActive(
+        exercises: exercises,
+        currentExerciseIndex: 0,
+        sets: initialSets,
+        elapsedSeconds: 0,
+        categoryId: categoryId,
+        categoryName: categoryName,
+      ),
+    );
+
+    _startTimer();
+  }
+
+  /// Bắt đầu đếm thời gian
+  void _startTimer() {
+    _sessionTimer?.cancel();
+    _sessionTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      final currentState = state;
+      if (currentState is ExerciseSessionActive) {
+        emit(
+          currentState.copyWith(
+            elapsedSeconds: currentState.elapsedSeconds + 1,
+          ),
+        );
+      }
+    });
+  }
+
+  /// Dừng session
+  void stopWorkoutSession() {
+    _sessionTimer?.cancel();
+    emit(WorkoutTrackerInitial());
+  }
+
+  /// Thêm một set mới
+  void addSet() {
+    final currentState = state;
+    if (currentState is! ExerciseSessionActive) return;
+
+    final newSet = WorkoutSet(
+      setNumber: currentState.sets.length + 1,
+      weight: 8.0,
+      reps: 8,
+    );
+
+    emit(currentState.copyWith(sets: [...currentState.sets, newSet]));
+  }
+
+  /// Toggle trạng thái hoàn thành của set
+  void toggleSetCompletion(int setIndex) {
+    final currentState = state;
+    if (currentState is! ExerciseSessionActive) return;
+
+    final updatedSets = List<WorkoutSet>.from(currentState.sets);
+    updatedSets[setIndex] = updatedSets[setIndex].copyWith(
+      isCompleted: !updatedSets[setIndex].isCompleted,
+    );
+
+    emit(currentState.copyWith(sets: updatedSets));
+  }
+
+  /// Cập nhật weight của set
+  void updateSetWeight(int setIndex, double weight) {
+    final currentState = state;
+    if (currentState is! ExerciseSessionActive) return;
+
+    final updatedSets = List<WorkoutSet>.from(currentState.sets);
+    updatedSets[setIndex] = updatedSets[setIndex].copyWith(weight: weight);
+
+    emit(currentState.copyWith(sets: updatedSets));
+  }
+
+  /// Cập nhật reps của set
+  void updateSetReps(int setIndex, int reps) {
+    final currentState = state;
+    if (currentState is! ExerciseSessionActive) return;
+
+    final updatedSets = List<WorkoutSet>.from(currentState.sets);
+    updatedSets[setIndex] = updatedSets[setIndex].copyWith(reps: reps);
+
+    emit(currentState.copyWith(sets: updatedSets));
+  }
+
+  /// Chuyển sang exercise tiếp theo
+  void nextExercise() {
+    final currentState = state;
+    if (currentState is! ExerciseSessionActive) return;
+    if (!currentState.hasNextExercise) return;
+
+    // Reset sets cho exercise mới
+    final newSets = List.generate(
+      4,
+      (index) => WorkoutSet(setNumber: index + 1, weight: 8.0, reps: 8),
+    );
+
+    emit(
+      currentState.copyWith(
+        currentExerciseIndex: currentState.currentExerciseIndex + 1,
+        sets: newSets,
+      ),
+    );
+  }
+
+  /// Toggle expand/collapse exercise card
+  void toggleExpanded() {
+    final currentState = state;
+    if (currentState is! ExerciseSessionActive) return;
+
+    emit(currentState.copyWith(isExpanded: !currentState.isExpanded));
+  }
+
+  /// Bật chế độ kết thúc
+  void enableFinishMode() {
+    final currentState = state;
+    if (currentState is! ExerciseSessionActive) return;
+
+    emit(currentState.copyWith(isFinishMode: true));
+  }
+
+  /// Tắt chế độ kết thúc
+  void disableFinishMode() {
+    final currentState = state;
+    if (currentState is! ExerciseSessionActive) return;
+
+    emit(currentState.copyWith(isFinishMode: false));
+  }
+
+  /// Lưu workout session vào Supabase
+  Future<bool> saveWorkoutSession() async {
+    final currentState = state;
+    if (currentState is! ExerciseSessionActive) return false;
+
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) return false;
+
+      // Tính toán thống kê
+      int totalSets = 0;
+      int completedSets = 0;
+      final exerciseDetails = <ExerciseSessionDetail>[];
+
+      for (var exercise in currentState.exercises) {
+        final sets = currentState.sets
+            .map(
+              (set) => SetDetail(
+                setNumber: set.setNumber,
+                weight: set.weight,
+                reps: set.reps,
+                isCompleted: set.isCompleted,
+              ),
+            )
+            .toList();
+
+        totalSets += sets.length;
+        completedSets += sets.where((s) => s.isCompleted).length;
+
+        exerciseDetails.add(
+          ExerciseSessionDetail(
+            exerciseId: exercise.id,
+            exerciseName: exercise.title,
+            sets: sets,
+          ),
+        );
+      }
+
+      final session = WorkoutSession(
+        forUser: userId,
+        categoryId: currentState.categoryId,
+        categoryName: currentState.categoryName,
+        totalExercises: currentState.exercises.length,
+        completedExercises: currentState.currentExerciseIndex + 1,
+        totalSets: totalSets,
+        completedSets: completedSets,
+        durationSeconds: currentState.elapsedSeconds,
+        exerciseDetails: exerciseDetails,
+      );
+
+      await _supabase.from('workout_sessions').insert(session.toJson());
+
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
 
   /// Lấy danh sách thiết bị unique từ danh sách exercises
   /// - So sánh không phân biệt hoa/thường (case-insensitive)

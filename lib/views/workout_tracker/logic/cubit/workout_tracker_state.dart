@@ -55,3 +55,55 @@ final class WorkoutDetailError extends WorkoutTrackerState {
   final String message;
   WorkoutDetailError(this.message);
 }
+
+// ============ Các State cho Exercise Session ============
+
+/// Đang trong phiên tập luyện
+final class ExerciseSessionActive extends WorkoutTrackerState {
+  final List<ExerciseItem> exercises;
+  final int currentExerciseIndex;
+  final List<WorkoutSet> sets;
+  final int elapsedSeconds;
+  final bool isExpanded;
+  final bool isFinishMode;
+  final String categoryId;
+  final String categoryName;
+
+  ExerciseSessionActive({
+    required this.exercises,
+    required this.currentExerciseIndex,
+    required this.sets,
+    this.elapsedSeconds = 0,
+    this.isExpanded = true,
+    this.isFinishMode = false,
+    required this.categoryId,
+    required this.categoryName,
+  });
+
+  ExerciseItem get currentExercise => exercises[currentExerciseIndex];
+  bool get hasNextExercise => currentExerciseIndex < exercises.length - 1;
+  bool get hasPreviousExercise => currentExerciseIndex > 0;
+  int get completedSetsCount => sets.where((s) => s.isCompleted).length;
+
+  ExerciseSessionActive copyWith({
+    List<ExerciseItem>? exercises,
+    int? currentExerciseIndex,
+    List<WorkoutSet>? sets,
+    int? elapsedSeconds,
+    bool? isExpanded,
+    bool? isFinishMode,
+    String? categoryId,
+    String? categoryName,
+  }) {
+    return ExerciseSessionActive(
+      exercises: exercises ?? this.exercises,
+      currentExerciseIndex: currentExerciseIndex ?? this.currentExerciseIndex,
+      sets: sets ?? this.sets,
+      elapsedSeconds: elapsedSeconds ?? this.elapsedSeconds,
+      isExpanded: isExpanded ?? this.isExpanded,
+      isFinishMode: isFinishMode ?? this.isFinishMode,
+      categoryId: categoryId ?? this.categoryId,
+      categoryName: categoryName ?? this.categoryName,
+    );
+  }
+}

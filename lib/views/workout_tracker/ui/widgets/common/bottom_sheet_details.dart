@@ -2,20 +2,13 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
-import 'package:smart_fitness_assistant/core/models/exercise_item.dart'; // ✅ Bỏ _models
-import 'package:smart_fitness_assistant/core/models/device.dart'; // ✅ Bỏ _models
+import 'package:smart_fitness_assistant/core/models/exercise_item.dart';
+import 'package:smart_fitness_assistant/core/models/device.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 
 /// Bottom sheet hiển thị chi tiết exercise
-///
-/// Hiển thị:
-/// - Video/Image thumbnail với play button
-/// - Thông tin thiết bị (Có/Không có)
-/// - Khu vực tập trung (muscle group)
-/// - Muscle diagram (front/back view)
-/// - Hướng dẫn thực hiện (description)
 class ExerciseDetailBottomSheet extends StatelessWidget {
   final ExerciseItem exercise;
 
@@ -44,7 +37,6 @@ class ExerciseDetailBottomSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textColor = theme.textTheme.bodyMedium?.color;
-    final cardColor = theme.cardColor;
     final media = MediaQuery.of(context).size;
 
     return DraggableScrollableSheet(
@@ -61,7 +53,7 @@ class ExerciseDetailBottomSheet extends StatelessWidget {
         ),
         child: Column(
           children: [
-            // Header
+            // Header với drag indicator và title
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -99,28 +91,154 @@ class ExerciseDetailBottomSheet extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Hướng dẫn thực hiện - Di chuyển lên đầu
-                    _buildInstructions(textColor),
+                    // Description
+                    if (exercise.description.isNotEmpty) ...[
+                      Text(
+                        LocaleKey.des.tr,
+                        style: TextStyle(
+                          color: textColor,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        exercise.description,
+                        style: TextStyle(
+                          color: textColor?.withOpacity(0.8),
+                          fontSize: 14,
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+
+                    // Exercise Image
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(15),
+                      child: CachedNetworkImage(
+                        imageUrl: exercise.imageUrl,
+                        width: double.infinity,
+                        height: media.height * 0.25,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) =>
+                            CustomCircleProgIndicator(),
+                        errorWidget: (context, url, error) => Icon(
+                          Icons.fitness_center,
+                          size: 60,
+                          color: TColor.gray,
+                        ),
+                      ),
+                    ),
 
                     const SizedBox(height: 24),
 
-                    // Video/Image thumbnail với play button
-                    _buildVideoThumbnail(media, cardColor),
+                    // Devices
+                    Text(
+                      LocaleKey.device.tr,
+                      style: TextStyle(
+                        color: textColor,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    exercise.hasEquipment
+                        ? Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: exercise.devices.map((device) {
+                              return _buildChip(
+                                label: device.name,
+                                isSelected: true,
+                                textColor: textColor,
+                              );
+                            }).toList(),
+                          )
+                        : _buildChip(
+                            label: LocaleKey.noEquipment.tr,
+                            isSelected: false,
+                            textColor: textColor,
+                          ),
 
                     const SizedBox(height: 24),
 
-                    // Cơ section (Có/Không có thiết bị)
-                    _buildEquipmentSection(textColor),
+                    // Muscle Groups - Chỉ hiển thị chips
+                    Text(
+                      LocaleKey.muscleGroup.tr,
+                      style: TextStyle(
+                        color: textColor,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: exercise.muscleGroups.map((group) {
+                        return _buildChip(
+                          label: group,
+                          isSelected: true,
+                          textColor: textColor,
+                        );
+                      }).toList(),
+                    ),
 
                     const SizedBox(height: 24),
 
-                    // Khu vực tập trung section
-                    _buildMuscleGroupSection(textColor),
-
-                    const SizedBox(height: 24),
-
-                    // Muscle diagram
-                    _buildMuscleDiagram(media, cardColor),
+                    // ✅ Muscle Groups Image với fallback đẹp hơn
+                    if (exercise.imgMuscleGroups != null &&
+                        exercise.imgMuscleGroups!.isNotEmpty) ...[
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(15),
+                        child: CachedNetworkImage(
+                          imageUrl: exercise.imgMuscleGroups!,
+                          width: double.infinity,
+                          height: media.height * 0.3,
+                          fit: BoxFit.contain,
+                          placeholder: (context, url) => Container(
+                            height: media.height * 0.3,
+                            decoration: BoxDecoration(
+                              color: textColor?.withOpacity(0.05),
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: Center(child: CustomCircleProgIndicator()),
+                          ),
+                          errorWidget: (context, url, error) => Container(
+                            height: media.height * 0.3,
+                            decoration: BoxDecoration(
+                              color: textColor?.withOpacity(0.05),
+                              borderRadius: BorderRadius.circular(15),
+                              border: Border.all(
+                                color: TColor.gray.withOpacity(0.2),
+                              ),
+                            ),
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.broken_image,
+                                    size: 60,
+                                    color: TColor.gray,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Không tìm thấy ảnh',
+                                    style: TextStyle(
+                                      color: TColor.gray,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
 
                     const SizedBox(height: 20),
                   ],
@@ -141,188 +259,6 @@ class ExerciseDetailBottomSheet extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-
-  /// Build video thumbnail với play button overlay
-  Widget _buildVideoThumbnail(Size media, Color cardColor) {
-    return Container(
-      height: media.height * 0.25,
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: TColor.gray.withOpacity(0.2)),
-      ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Image
-          ClipRRect(
-            borderRadius: BorderRadius.circular(15),
-            child: CachedNetworkImage(
-              imageUrl: exercise.imageUrl,
-              width: double.infinity,
-              height: double.infinity,
-              fit: BoxFit.cover,
-              placeholder: (context, url) => CustomCircleProgIndicator(),
-              errorWidget: (context, url, error) =>
-                  Icon(Icons.fitness_center, size: 60, color: TColor.gray),
-            ),
-          ),
-
-          // Play button overlay
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.black.withOpacity(0.6),
-            ),
-            child: const Icon(Icons.play_arrow, color: Colors.white, size: 40),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Build equipment section - Hiển thị devices dạng chips đơn giản
-  Widget _buildEquipmentSection(Color? textColor) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          LocaleKey.device.tr,
-          style: TextStyle(
-            color: textColor,
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 12),
-
-        // ✅ Hiển thị devices dạng chips giống muscle groups
-        exercise.hasEquipment
-            ? Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: exercise.devices.map((device) {
-                  return _buildChip(
-                    label: device.name,
-                    isSelected: true,
-                    textColor: textColor,
-                  );
-                }).toList(),
-              )
-            : Wrap(
-                children: [
-                  _buildChip(
-                    label: LocaleKey.noEquipment.tr,
-                    isSelected: false,
-                    textColor: textColor,
-                  ),
-                ],
-              ),
-      ],
-    );
-  }
-
-  /// Build muscle group section
-  /// Tách chuỗi muscle_group theo dấu phẩy và hiển thị từng chip riêng
-  Widget _buildMuscleGroupSection(Color? textColor) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          LocaleKey.muscleGroup.tr,
-          style: TextStyle(
-            color: textColor,
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: exercise.muscleGroups
-              .map(
-                (group) => _buildChip(
-                  label: group,
-                  isSelected: true,
-                  textColor: textColor,
-                ),
-              )
-              .toList(),
-        ),
-      ],
-    );
-  }
-
-  /// Build muscle diagram (front/back view)
-  Widget _buildMuscleDiagram(Size media, Color cardColor) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        // Front view
-        _buildMusclePlaceholder(media, cardColor, 'Front'),
-
-        // Back view
-        _buildMusclePlaceholder(media, cardColor, 'Back'),
-      ],
-    );
-  }
-
-  /// Build muscle diagram placeholder
-  Widget _buildMusclePlaceholder(Size media, Color cardColor, String label) {
-    return Column(
-      children: [
-        Container(
-          height: media.height * 0.25,
-          width: media.width * 0.35,
-          decoration: BoxDecoration(
-            color: cardColor,
-            borderRadius: BorderRadius.circular(15),
-            border: Border.all(color: TColor.gray.withOpacity(0.2)),
-          ),
-          child: Icon(
-            Icons.accessibility_new,
-            size: 80,
-            color: TColor.gray.withOpacity(0.3),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(label, style: TextStyle(color: TColor.gray, fontSize: 12)),
-      ],
-    );
-  }
-
-  /// Build instructions section
-  Widget _buildInstructions(Color? textColor) {
-    if (exercise.description.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          LocaleKey.des.tr,
-          style: TextStyle(
-            color: textColor,
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          exercise.description,
-          style: TextStyle(
-            color: textColor?.withOpacity(0.8),
-            fontSize: 14,
-            height: 1.5,
-          ),
-        ),
-      ],
     );
   }
 

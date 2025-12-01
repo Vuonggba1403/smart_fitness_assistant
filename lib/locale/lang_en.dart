@@ -116,6 +116,6 @@ Map<String, String> enUs = {
   LocaleKey.device: "Device",
   LocaleKey.muscleGroup: "Concentration Area",
   LocaleKey.des: "How To Do It",
-  LocaleKey.completeEx: "Complete Exercise",
+  LocaleKey.completeEx: "Complete",
   LocaleKey.noEquipment: "No Equipment Needed",
 };
