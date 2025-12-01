@@ -34,6 +34,7 @@ class ExerciseItem extends Equatable {
   });
 
   /// Tạo ExerciseItem từ JSON với devices từ JOIN query
+  /// ✅ Fallback: Nếu không có devices từ JOIN, parse từ cột 'device' (string)
   factory ExerciseItem.fromJson(Map<String, dynamic> json) {
     // Parse muscle groups
     final muscleGroupStr = json['muscle_group']?.toString() ?? '';
@@ -43,15 +44,51 @@ class ExerciseItem extends Equatable {
         .where((e) => e.isNotEmpty)
         .toList();
 
-    // ✅ Parse devices từ nested array (JOIN với bảng exercise_devices)
+    // ✅ Parse devices - Ưu tiên JOIN, fallback về string
     List<Device> devices = [];
-    if (json['devices'] is List) {
+
+    // Cách 1: Từ nested array (JOIN với bảng exercise_devices)
+    if (json['devices'] is List && (json['devices'] as List).isNotEmpty) {
       final devicesJson = json['devices'] as List<dynamic>;
-      devices = devicesJson
-          .map(
-            (deviceJson) => Device.fromJson(deviceJson as Map<String, dynamic>),
-          )
-          .toList();
+
+      // Lọc unique theo tên (case-insensitive)
+      final Map<String, Device> uniqueDevicesMap = {};
+
+      for (var deviceJson in devicesJson) {
+        final device = Device.fromJson(deviceJson as Map<String, dynamic>);
+        final keyLower = device.name.toLowerCase();
+
+        if (!uniqueDevicesMap.containsKey(keyLower)) {
+          uniqueDevicesMap[keyLower] = device;
+        }
+      }
+
+      devices = uniqueDevicesMap.values.toList();
+    }
+    // Cách 2: FALLBACK - Parse từ cột 'device' (string) nếu không có JOIN data
+    else if (json['device'] != null &&
+        json['device'].toString().trim().isNotEmpty) {
+      final deviceStr = json['device']?.toString() ?? '';
+      final deviceNames = deviceStr
+          .split(',')
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty);
+
+      // Lọc unique và tạo Device objects (không có ảnh)
+      final Map<String, Device> uniqueDevicesMap = {};
+
+      for (var name in deviceNames) {
+        final keyLower = name.toLowerCase();
+        if (!uniqueDevicesMap.containsKey(keyLower)) {
+          uniqueDevicesMap[keyLower] = Device(
+            id: keyLower.replaceAll(' ', '_'), // Tạo id tạm từ tên
+            name: name,
+            imgUrl: null, // Không có ảnh khi parse từ string
+          );
+        }
+      }
+
+      devices = uniqueDevicesMap.values.toList();
     }
 
     return ExerciseItem(
@@ -60,7 +97,7 @@ class ExerciseItem extends Equatable {
       imageUrl: json['img_url']?.toString() ?? '',
       description: json['des']?.toString() ?? '',
       muscleGroups: muscleGroups,
-      devices: devices,
+      devices: devices, // ✅ Đã unique và có fallback
       categoryId: json['for_cate']?.toString() ?? '',
     );
   }

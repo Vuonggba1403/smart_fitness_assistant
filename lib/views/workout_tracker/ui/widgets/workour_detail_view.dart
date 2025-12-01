@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:get/get.dart';
+import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
@@ -323,7 +324,7 @@ class WorkoutDetailView extends StatelessWidget {
         );
       }
 
-      final exerciseWithDevice = cubit.getExerciseWithDevice(exercises);
+      cubit.getExerciseWithDevice(exercises);
 
       return ListView.builder(
         padding: EdgeInsets.zero,
@@ -365,7 +366,10 @@ class WorkoutDetailView extends StatelessWidget {
             width: media.width * 0.35,
             decoration: BoxDecoration(
               border: Border.all(color: TColor.primaryColor1, width: 1),
-              color: cardColor,
+              // color: TColor.primaryColor1,
+              gradient: LinearGradient(
+                colors: AppTheme.gradientColors1(Get.context!),
+              ),
               borderRadius: BorderRadius.circular(15),
             ),
             alignment: Alignment.center,
@@ -516,7 +520,10 @@ class WorkoutDetailView extends StatelessWidget {
           margin: const EdgeInsets.symmetric(vertical: 8),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: cardColor,
+            // color: cardColor,
+            gradient: LinearGradient(
+              colors: AppTheme.gradientColors2(Get.context!),
+            ),
             border: Border.all(color: TColor.primaryColor1, width: 1),
             borderRadius: BorderRadius.circular(15),
           ),

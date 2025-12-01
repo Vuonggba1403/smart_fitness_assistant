@@ -79,14 +79,14 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
 
   // ============ Các Method cho Workout Detail ============
 
-  /// Tải danh sách exercise items với devices (No RPC version)
+  /// Tải danh sách exercise items với devices (JOIN version)
   /// - Query exercise_items
-  /// - Với mỗi exercise, query devices qua exercise_devices
+  /// - JOIN với exercise_devices và devices để lấy đầy đủ thông tin
   void loadExerciseItems(String categoryId) async {
     emit(WorkoutDetailLoading());
 
     try {
-      // Stream exercises
+      // ✅ Stream exercises với JOIN
       final exercisesStream = _supabase
           .from('exercise_items')
           .stream(primaryKey: ['id'])
@@ -98,25 +98,32 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
           continue;
         }
 
-        // Với mỗi exercise, fetch devices
+        // ✅ Với mỗi exercise, fetch devices với JOIN
         final List<ExerciseItem> exercises = [];
 
         for (var exerciseJson in exercisesData) {
           final exerciseId = exerciseJson['id'];
 
-          // Query devices cho exercise này
+          // ✅ Query devices với JOIN để lấy img_url
           final devicesData = await _supabase
               .from('exercise_devices')
-              .select('devices(*)')
+              .select('''
+                device_id,
+                devices!inner(
+                  id,
+                  name,
+                  img_url
+                )
+              ''')
               .eq('exercise_id', exerciseId);
 
-          // Extract devices array
+          // ✅ Extract devices array từ nested data
           final devices = devicesData
               .map((ed) => ed['devices'])
               .where((d) => d != null)
               .toList();
 
-          // Thêm devices vào exerciseJson
+          // ✅ Thêm devices vào exerciseJson
           exerciseJson['devices'] = devices;
 
           // Parse thành ExerciseItem

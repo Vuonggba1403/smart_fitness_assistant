@@ -185,7 +185,7 @@ class ExerciseDetailBottomSheet extends StatelessWidget {
     );
   }
 
-  /// Build equipment section với ảnh từ Device model
+  /// Build equipment section - Hiển thị devices dạng chips đơn giản
   Widget _buildEquipmentSection(Color? textColor) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -200,16 +200,17 @@ class ExerciseDetailBottomSheet extends StatelessWidget {
         ),
         const SizedBox(height: 12),
 
-        // ✅ Nếu có devices, hiển thị grid với ảnh
+        // ✅ Hiển thị devices dạng chips giống muscle groups
         exercise.hasEquipment
             ? Wrap(
-                spacing: 12,
-                runSpacing: 12,
+                spacing: 8,
+                runSpacing: 8,
                 children: exercise.devices.map((device) {
-                  return _buildDeviceChipWithImage(
-                    device,
-                    textColor,
-                  ); // ✅ Pass Device object
+                  return _buildChip(
+                    label: device.name,
+                    isSelected: true,
+                    textColor: textColor,
+                  );
                 }).toList(),
               )
             : Wrap(
@@ -222,47 +223,6 @@ class ExerciseDetailBottomSheet extends StatelessWidget {
                 ],
               ),
       ],
-    );
-  }
-
-  /// ✅ Build chip với ảnh device
-  Widget _buildDeviceChipWithImage(Device device, Color? textColor) {
-    // ✅ Parameter type Device
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: TColor.primaryColor1.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: TColor.primaryColor1),
-      ),
-      child: Column(
-        children: [
-          // Ảnh device
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: CachedNetworkImage(
-              imageUrl: device.imgUrl ?? '',
-              width: 60,
-              height: 60,
-              fit: BoxFit.cover,
-              placeholder: (context, url) => CustomCircleProgIndicator(),
-              errorWidget: (context, url, error) =>
-                  Icon(Icons.fitness_center, size: 30, color: TColor.gray),
-            ),
-          ),
-          const SizedBox(height: 8),
-          // Tên device
-          Text(
-            device.name, // ✅ Sử dụng device.name
-            style: TextStyle(
-              color: TColor.primaryColor1,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
     );
   }
 

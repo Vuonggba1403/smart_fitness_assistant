@@ -58,6 +58,19 @@ class AppTheme {
             TColor.primaryColor1.withOpacity(0.3),
           ];
   }
+
+  static List<Color> gradientColors2(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark
+        ? [
+            Color(0xFF30CFD0).withOpacity(0.2),
+            Color(0xFF330867).withOpacity(0.2),
+          ]
+        : [
+            Color(0xFFE9DEFA).withOpacity(0.2),
+            Color(0xFFFBFCDB).withOpacity(0.2),
+          ];
+  }
 }
 
 extension CustomDecorations on ThemeData {
