@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
-import 'package:smart_fitness_assistant/core/models/exercise_item.dart';
+import 'package:smart_fitness_assistant/core/models/exercise_item.dart'; // ✅ Fix import
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/logic/cubit/workout_tracker_cubit.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/common/bottom_sheet_details.dart';
@@ -167,35 +167,49 @@ class WorkoutDetailView extends StatelessWidget {
   }
 
   /// Xây dựng phần header với tiêu đề và thông tin
+  /// Sử dụng BlocBuilder để tính exerciseCount từ state
   Widget _buildHeader(Color? textColor) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                dObj["title_ex"]?.toString() ??
-                    dObj["title"]?.toString() ??
-                    "Workout",
-                style: TextStyle(
-                  color: textColor,
-                  fontSize: 25,
-                  fontWeight: FontWeight.w700,
-                ),
+    return BlocBuilder<WorkoutTrackerCubit, WorkoutTrackerState>(
+      builder: (context, state) {
+        int exerciseCount = 0;
+        int duration = 0;
+
+        // Nếu đã load xong exercises, tính số lượng và thời gian
+        if (state is WorkoutDetailLoaded) {
+          exerciseCount = state.exerciseCount; // ✅ Dùng getter từ state
+          duration = context.read<WorkoutTrackerCubit>().calculateDuration(
+            exerciseCount,
+          );
+        }
+
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    dObj["title_ex"]?.toString() ?? "Workout",
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 25,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Text(
+                    "$exerciseCount ${LocaleKey.exercises.tr} | $duration ${LocaleKey.mins.tr} | 320 ${LocaleKey.kcal.tr}",
+                    style: TextStyle(
+                      color: textColor?.withOpacity(0.6),
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
               ),
-              Text(
-                "${dObj["exercise_count"]?.toString() ?? '0'} ${LocaleKey.exercises.tr} | ${dObj["duration_mins"]?.toString() ?? '0'} ${LocaleKey.mins.tr} | 320 ${LocaleKey.kcal.tr}",
-                style: TextStyle(
-                  color: textColor?.withOpacity(0.6),
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -223,6 +237,7 @@ class WorkoutDetailView extends StatelessWidget {
   }
 
   /// Xây dựng header của phần thiết bị
+  /// Tính số lượng thiết bị unique từ exercises
   Widget _buildDevicesHeader(
     BuildContext context,
     WorkoutTrackerState state,
@@ -232,7 +247,7 @@ class WorkoutDetailView extends StatelessWidget {
     if (state is WorkoutDetailLoaded) {
       final uniqueDevices = context
           .read<WorkoutTrackerCubit>()
-          .getUniqueDevices(state.exercises);
+          .getUniqueDevices(state.exercises); // ✅ Pass List<ExerciseItem>
       deviceCount = uniqueDevices.length;
     }
 
@@ -258,7 +273,7 @@ class WorkoutDetailView extends StatelessWidget {
     );
   }
 
-  /// Xây dựng danh sách thiết bị dựa trên state
+  /// Xây dựng danh sách thiết bị với ảnh riêng
   Widget _buildDevicesList(
     BuildContext context,
     WorkoutTrackerState state,
@@ -294,7 +309,10 @@ class WorkoutDetailView extends StatelessWidget {
     // Đã tải dữ liệu thành công
     if (state is WorkoutDetailLoaded) {
       final cubit = context.read<WorkoutTrackerCubit>();
-      final uniqueDevices = cubit.getUniqueDevices(state.exercises);
+      final exercises = state.exercises;
+
+      // ✅ Giờ là List<Device> thay vì List<String>
+      final uniqueDevices = cubit.getUniqueDevices(exercises);
 
       if (uniqueDevices.isEmpty) {
         return Center(
@@ -305,7 +323,7 @@ class WorkoutDetailView extends StatelessWidget {
         );
       }
 
-      final exerciseWithDevice = cubit.getExerciseWithDevice(state.exercises);
+      final exerciseWithDevice = cubit.getExerciseWithDevice(exercises);
 
       return ListView.builder(
         padding: EdgeInsets.zero,
@@ -313,10 +331,11 @@ class WorkoutDetailView extends StatelessWidget {
         shrinkWrap: true,
         itemCount: uniqueDevices.length,
         itemBuilder: (context, index) {
-          final deviceName = uniqueDevices[index];
+          final device = uniqueDevices[index]; // ✅ Device object
+
           return _buildDeviceCard(
-            deviceName,
-            exerciseWithDevice?.imageUrl ?? '',
+            device.name, // ✅ Tên device
+            device.imgUrl ?? '', // ✅ Ảnh từ Device model
             media,
             textColor,
             cardColor,
@@ -399,7 +418,7 @@ class WorkoutDetailView extends StatelessWidget {
   Widget _buildExercisesHeader(WorkoutTrackerState state, Color? textColor) {
     int exerciseCount = 0;
     if (state is WorkoutDetailLoaded) {
-      exerciseCount = state.exerciseCount;
+      exerciseCount = state.exerciseCount; // ✅ Dùng getter từ state
     }
 
     return Row(
@@ -463,13 +482,15 @@ class WorkoutDetailView extends StatelessWidget {
 
     // Đã tải dữ liệu thành công
     if (state is WorkoutDetailLoaded) {
+      final exercises = state.exercises; // ✅ List<ExerciseItem>
+
       return ListView.builder(
         padding: EdgeInsets.zero,
         physics: const NeverScrollableScrollPhysics(),
         shrinkWrap: true,
-        itemCount: state.exercises.length,
+        itemCount: exercises.length,
         itemBuilder: (context, index) {
-          final exercise = state.exercises[index];
+          final exercise = exercises[index]; // ✅ ExerciseItem
           return _buildExerciseCard(exercise, textColor, cardColor);
         },
       );
@@ -479,14 +500,18 @@ class WorkoutDetailView extends StatelessWidget {
   }
 
   /// Xây dựng card hiển thị exercise
+  /// Sử dụng ExerciseItem model với type-safe properties
   Widget _buildExerciseCard(
-    ExerciseItem exercise,
+    ExerciseItem exercise, // ✅ Type-safe parameter
     Color? textColor,
     Color cardColor,
   ) {
     return Builder(
       builder: (context) => InkWell(
-        onTap: () => ExerciseDetailBottomSheet.show(context, exercise),
+        onTap: () => ExerciseDetailBottomSheet.show(
+          context,
+          exercise, // ✅ Pass ExerciseItem object
+        ),
         child: Container(
           margin: const EdgeInsets.symmetric(vertical: 8),
           padding: const EdgeInsets.all(12),
@@ -500,7 +525,7 @@ class WorkoutDetailView extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: CachedNetworkImage(
-                  imageUrl: exercise.imageUrl,
+                  imageUrl: exercise.imageUrl, // ✅ Type-safe property
                   width: 60,
                   height: 60,
                   fit: BoxFit.cover,
@@ -515,7 +540,7 @@ class WorkoutDetailView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      exercise.title,
+                      exercise.title, // ✅ Type-safe property
                       style: TextStyle(
                         color: textColor,
                         fontSize: 14,
@@ -524,7 +549,7 @@ class WorkoutDetailView extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      exercise.muscleGroupsString,
+                      exercise.muscleGroupsString, // ✅ Getter from model
                       style: TextStyle(
                         color: textColor?.withOpacity(0.6),
                         fontSize: 12,

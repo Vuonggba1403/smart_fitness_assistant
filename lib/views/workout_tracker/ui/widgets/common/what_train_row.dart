@@ -1,25 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:get/get.dart';
-import 'package:smart_fitness_assistant/core/models/exercise_category.dart';
+import 'package:smart_fitness_assistant/core/models/exercise_category.dart'; // ✅ Bỏ _models
 import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
 import '../../../../../core/functions/colo_extension.dart';
-import '../../../../../core/widgets/round_button.dart';
 
 /// Widget hiển thị một row của workout/exercise
-/// Sử dụng ExerciseCategory model thay vì Map
+/// Sử dụng ExerciseCategory model từ Supabase
 class WhatTrainRow extends StatelessWidget {
   final ExerciseCategory category;
+  final int? exerciseCount; // Optional: số lượng exercises (nếu đã tính)
+  final int? durationMins; // Optional: thời gian (nếu đã tính)
 
-  const WhatTrainRow({super.key, required this.category});
+  const WhatTrainRow({
+    super.key,
+    required this.category,
+    this.exerciseCount,
+    this.durationMins,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cardColor = theme.cardColor;
     final completionPercent = 0.65;
+
+    // Sử dụng giá trị được truyền vào hoặc giá trị mặc định
+    final displayExerciseCount = exerciseCount ?? 0;
+    final displayDuration = durationMins ?? 0;
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
@@ -37,7 +47,7 @@ class WhatTrainRow extends StatelessWidget {
           children: [
             // Hero animation cho hình ảnh
             Hero(
-              tag: 'workout_${category.imageUrl}',
+              tag: 'workout_${category.imgUrl}',
               child: Container(
                 width: 80,
                 height: 80,
@@ -48,7 +58,7 @@ class WhatTrainRow extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(40),
                   child: CachedNetworkImage(
-                    imageUrl: category.imageUrl,
+                    imageUrl: category.imgUrl ?? '',
                     fit: BoxFit.cover,
                     // Hiển thị loading progress khi đang tải ảnh
                     placeholder: (context, url) => CustomCircleProgIndicator(),
@@ -69,7 +79,7 @@ class WhatTrainRow extends StatelessWidget {
                 children: [
                   // Tên bài tập từ database
                   Text(
-                    category.title,
+                    category.titleEx ?? 'Workout',
                     style: TextStyle(
                       color: TColor.black,
                       fontSize: 14,
@@ -77,9 +87,9 @@ class WhatTrainRow extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  // Thông tin số lượng bài tập và thời gian (từ stream)
+                  // Hiển thị số lượng exercises và thời gian
                   Text(
-                    "${category.exerciseCount} ${LocaleKey.exercises.tr} | ${category.durationMins} ${LocaleKey.mins.tr}",
+                    "$displayExerciseCount ${LocaleKey.exercises.tr} | $displayDuration ${LocaleKey.mins.tr}",
                     style: TextStyle(color: TColor.gray, fontSize: 12),
                   ),
                   const SizedBox(height: 10),

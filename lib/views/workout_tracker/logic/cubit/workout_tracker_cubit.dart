@@ -1,8 +1,9 @@
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:smart_fitness_assistant/core/models/exercise_category.dart';
-import 'package:smart_fitness_assistant/core/models/exercise_item.dart';
+import 'package:smart_fitness_assistant/core/models/exercise_category.dart'; // ✅ Bỏ _models
+import 'package:smart_fitness_assistant/core/models/exercise_item.dart'; // ✅ Bỏ _models
+import 'package:smart_fitness_assistant/core/models/device.dart'; // ✅ Bỏ _models
 
 part 'workout_tracker_state.dart';
 
@@ -33,68 +34,96 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
 
   // ============ Các Method cho Categories ============
 
-  /// Stream danh sách exercise categories với số lượng exercises thực tế
-  /// - Đếm số exercises từ bảng exercise_items
+  /// Stream danh sách exercise categories
   /// - Sắp xếp theo created_at từ cũ đến mới
   /// - Tự động cập nhật khi có thay đổi trong database
+  /// - Số lượng exercises sẽ được tính riêng khi cần hiển thị
   Stream<List<ExerciseCategory>> streamExerciseCategoriesWithCount() {
-    return _supabase
-        .from('exercise_categories')
-        .stream(primaryKey: ['id'])
-        .asyncMap((categories) async {
-          final List<ExerciseCategory> result = [];
+    return _supabase.from('exercise_categories').stream(primaryKey: ['id']).map(
+      (categories) {
+        // Parse thành list ExerciseCategory
+        final result = categories
+            .map((json) => ExerciseCategory.fromJson(json))
+            .toList();
 
-          for (var categoryJson in categories) {
-            final categoryId = categoryJson['id'];
-
-            // Đếm số lượng exercises thực tế từ bảng exercise_items
-            final exercisesResponse = await _supabase
-                .from('exercise_items')
-                .select('id')
-                .eq('for_cate', categoryId);
-
-            final exerciseCount = exercisesResponse.length;
-
-            // Tạo ExerciseCategory với số lượng exercises thực tế
-            final category = ExerciseCategory.fromJson({
-              ...categoryJson,
-              'exercise_count': exerciseCount,
-              'duration_mins': exerciseCount * 3, // Ước tính 3 phút/exercise
-            });
-
-            result.add(category);
-          }
-
-          // Sắp xếp theo thời gian tạo tăng dần (cũ → mới)
-          result.sort((a, b) => a.createdAt.compareTo(b.createdAt));
-
-          return result;
+        // Sắp xếp theo thời gian tạo tăng dần (cũ → mới)
+        result.sort((a, b) {
+          if (a.createdAt == null || b.createdAt == null) return 0;
+          return a.createdAt!.compareTo(b.createdAt!);
         });
+
+        return result;
+      },
+    );
+  }
+
+  /// Đếm số lượng exercises của một category
+  /// Dùng khi cần hiển thị số lượng exercises
+  Future<int> getExerciseCount(String categoryId) async {
+    try {
+      final response = await _supabase
+          .from('exercise_items')
+          .select('id')
+          .eq('for_cate', categoryId);
+
+      return response.length;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  /// Tính duration ước tính (3 phút/exercise)
+  int calculateDuration(int exerciseCount) {
+    return exerciseCount * 3;
   }
 
   // ============ Các Method cho Workout Detail ============
 
-  /// Tải danh sách exercise items cho màn hình workout detail
-  /// - Emit các state tương ứng: Loading → Loaded/Error/Empty
-  /// - Tự động cập nhật realtime khi có thay đổi
+  /// Tải danh sách exercise items với devices (No RPC version)
+  /// - Query exercise_items
+  /// - Với mỗi exercise, query devices qua exercise_devices
   void loadExerciseItems(String categoryId) async {
     emit(WorkoutDetailLoading());
 
     try {
-      final stream = _supabase
+      // Stream exercises
+      final exercisesStream = _supabase
           .from('exercise_items')
           .stream(primaryKey: ['id'])
-          .eq('for_cate', categoryId)
-          .map((data) {
-            return data.map((json) => ExerciseItem.fromJson(json)).toList();
-          });
+          .eq('for_cate', categoryId);
 
-      await for (final exercises in stream) {
-        if (exercises.isEmpty) {
+      await for (final exercisesData in exercisesStream) {
+        if (exercisesData.isEmpty) {
           emit(WorkoutDetailEmpty());
-        } else {
-          emit(WorkoutDetailLoaded(exercises));
+          continue;
         }
+
+        // Với mỗi exercise, fetch devices
+        final List<ExerciseItem> exercises = [];
+
+        for (var exerciseJson in exercisesData) {
+          final exerciseId = exerciseJson['id'];
+
+          // Query devices cho exercise này
+          final devicesData = await _supabase
+              .from('exercise_devices')
+              .select('devices(*)')
+              .eq('exercise_id', exerciseId);
+
+          // Extract devices array
+          final devices = devicesData
+              .map((ed) => ed['devices'])
+              .where((d) => d != null)
+              .toList();
+
+          // Thêm devices vào exerciseJson
+          exerciseJson['devices'] = devices;
+
+          // Parse thành ExerciseItem
+          exercises.add(ExerciseItem.fromJson(exerciseJson));
+        }
+
+        emit(WorkoutDetailLoaded(exercises));
       }
     } catch (e) {
       emit(WorkoutDetailError(e.toString()));
@@ -118,15 +147,16 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
   /// Lấy danh sách thiết bị unique từ danh sách exercises
   /// - So sánh không phân biệt hoa/thường (case-insensitive)
   /// - Loại bỏ các thiết bị trùng lặp
-  /// - Giữ nguyên tên gốc (không convert về lowercase)
-  List<String> getUniqueDevices(List<ExerciseItem> exercises) {
-    final Map<String, String> uniqueDevicesMap = {};
+  /// - Giữ nguyên Device object gốc
+  List<Device> getUniqueDevices(List<ExerciseItem> exercises) {
+    final Map<String, Device> uniqueDevicesMap = {};
 
     for (var exercise in exercises) {
       for (var device in exercise.devices) {
-        final keyLower = device.toLowerCase();
+        final keyLower = device.name
+            .toLowerCase(); // ✅ Fix: device.name thay vì device
         if (!uniqueDevicesMap.containsKey(keyLower)) {
-          uniqueDevicesMap[keyLower] = device; // Giữ tên gốc
+          uniqueDevicesMap[keyLower] = device; // ✅ Lưu Device object
         }
       }
     }

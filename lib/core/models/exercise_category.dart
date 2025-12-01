@@ -1,71 +1,68 @@
+import 'package:equatable/equatable.dart';
+
 /// Model đại diện cho một danh mục bài tập (Exercise Category)
+/// Map trực tiếp từ bảng exercise_categories trong Supabase
 ///
 /// Chứa thông tin:
 /// - id: ID unique của category
-/// - title: Tên danh mục
-/// - imageUrl: URL hình ảnh
-/// - exerciseCount: Số lượng bài tập trong category
-/// - durationMins: Thời gian ước tính (phút)
 /// - createdAt: Thời gian tạo
-class ExerciseCategory {
-  final String id;
-  final String title;
-  final String imageUrl;
-  final int exerciseCount;
-  final int durationMins;
-  final DateTime createdAt;
+/// - imgUrl: URL hình ảnh
+/// - titleEx: Tên danh mục
+/// - exerciseItems: Danh sách các bài tập (nếu có join)
+class ExerciseCategory extends Equatable {
+  final String? id;
+  final DateTime? createdAt;
+  final String? imgUrl;
+  final String? titleEx;
+  final List<dynamic>? exerciseItems;
 
-  ExerciseCategory({
-    required this.id,
-    required this.title,
-    required this.imageUrl,
-    required this.exerciseCount,
-    required this.durationMins,
-    required this.createdAt,
+  const ExerciseCategory({
+    this.id,
+    this.createdAt,
+    this.imgUrl,
+    this.titleEx,
+    this.exerciseItems,
   });
 
   /// Tạo ExerciseCategory từ JSON/Map
   factory ExerciseCategory.fromJson(Map<String, dynamic> json) {
     return ExerciseCategory(
-      id: json['id']?.toString() ?? '',
-      title: json['title_ex']?.toString() ?? 'Workout',
-      imageUrl: json['img_url']?.toString() ?? '',
-      exerciseCount: json['exercise_count'] as int? ?? 0,
-      durationMins: json['duration_mins'] as int? ?? 0,
-      createdAt: DateTime.parse(
-        json['created_at']?.toString() ?? DateTime.now().toIso8601String(),
-      ),
+      id: json['id'] as String?,
+      createdAt: json['created_at'] == null
+          ? null
+          : DateTime.parse(json['created_at'] as String),
+      imgUrl: json['img_url'] as String?,
+      titleEx: json['title_ex'] as String?,
+      exerciseItems: json['exercise_items'] as List<dynamic>?,
     );
   }
 
-  /// Convert ExerciseCategory sang JSON/Map
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'title_ex': title,
-      'img_url': imageUrl,
-      'exercise_count': exerciseCount,
-      'duration_mins': durationMins,
-      'created_at': createdAt.toIso8601String(),
-    };
-  }
+  /// Convert sang JSON/Map
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'created_at': createdAt?.toIso8601String(),
+    'img_url': imgUrl,
+    'title_ex': titleEx,
+    'exercise_items': exerciseItems,
+  };
 
   /// Copy với một số field thay đổi
   ExerciseCategory copyWith({
     String? id,
-    String? title,
-    String? imageUrl,
-    int? exerciseCount,
-    int? durationMins,
     DateTime? createdAt,
+    String? imgUrl,
+    String? titleEx,
+    List<dynamic>? exerciseItems,
   }) {
     return ExerciseCategory(
       id: id ?? this.id,
-      title: title ?? this.title,
-      imageUrl: imageUrl ?? this.imageUrl,
-      exerciseCount: exerciseCount ?? this.exerciseCount,
-      durationMins: durationMins ?? this.durationMins,
       createdAt: createdAt ?? this.createdAt,
+      imgUrl: imgUrl ?? this.imgUrl,
+      titleEx: titleEx ?? this.titleEx,
+      exerciseItems: exerciseItems ?? this.exerciseItems,
     );
   }
+
+  @override
+  List<Object?> get props => [id, createdAt, imgUrl, titleEx, exerciseItems];
 }

@@ -3,12 +3,15 @@ import 'package:intl/intl.dart';
 String getTime(int value, {String formatStr = "hh:mm a"}) {
   var format = DateFormat(formatStr);
   return format.format(
-      DateTime.fromMillisecondsSinceEpoch(value * 60 * 1000, isUtc: true));
+    DateTime.fromMillisecondsSinceEpoch(value * 60 * 1000, isUtc: true),
+  );
 }
 
-String getStringDateToOtherFormate(String dateStr,
-    {String inputFormatStr = "dd/MM/yyyy hh:mm aa",
-    String outFormatStr = "hh:mm a"}) {
+String getStringDateToOtherFormate(
+  String dateStr, {
+  String inputFormatStr = "dd/MM/yyyy hh:mm aa",
+  String outFormatStr = "hh:mm a",
+}) {
   var format = DateFormat(outFormatStr);
   return format.format(stringToDate(dateStr, formatStr: inputFormatStr));
 }
@@ -27,7 +30,7 @@ String dateToString(DateTime date, {String formatStr = "dd/MM/yyyy hh:mm a"}) {
   return format.format(date);
 }
 
-String getDayTitle(String dateStr, {String formatStr = "dd/MM/yyyy hh:mm a"} ) {
+String getDayTitle(String dateStr, {String formatStr = "dd/MM/yyyy hh:mm a"}) {
   var date = stringToDate(dateStr, formatStr: formatStr);
 
   if (date.isToday) {
@@ -38,7 +41,7 @@ String getDayTitle(String dateStr, {String formatStr = "dd/MM/yyyy hh:mm a"} ) {
     return "Yesterday";
   } else {
     var outFormat = DateFormat("E");
-    return outFormat.format(date) ;
+    return outFormat.format(date);
   }
 }
 

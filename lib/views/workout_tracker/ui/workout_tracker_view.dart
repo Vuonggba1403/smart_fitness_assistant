@@ -243,22 +243,41 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                               itemCount: categories.length,
                               itemBuilder: (context, index) {
                                 final category = categories[index];
+                                final cubit = context
+                                    .read<WorkoutTrackerCubit>();
+
                                 return InkWell(
                                   onTap: () {
                                     // Điều hướng đến màn hình chi tiết workout
-                                    // Giữ nguyên BlocProvider instance để share state
                                     navigateTo(
                                       context,
                                       BlocProvider.value(
-                                        value: context
-                                            .read<WorkoutTrackerCubit>(),
+                                        value: cubit,
                                         child: WorkoutDetailView(
                                           dObj: category.toJson(),
                                         ),
                                       ),
                                     );
                                   },
-                                  child: WhatTrainRow(category: category),
+                                  // Sử dụng FutureBuilder để tính exerciseCount
+                                  child: FutureBuilder<int>(
+                                    future: cubit.getExerciseCount(
+                                      category.id ?? '',
+                                    ),
+                                    builder: (context, countSnapshot) {
+                                      final exerciseCount =
+                                          countSnapshot.data ?? 0;
+                                      final duration = cubit.calculateDuration(
+                                        exerciseCount,
+                                      );
+
+                                      return WhatTrainRow(
+                                        category: category,
+                                        exerciseCount: exerciseCount,
+                                        durationMins: duration,
+                                      );
+                                    },
+                                  ),
                                 );
                               },
                             );
