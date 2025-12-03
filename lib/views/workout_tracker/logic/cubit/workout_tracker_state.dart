@@ -74,7 +74,7 @@ final class ExerciseSessionActive extends WorkoutTrackerState {
     required this.currentExerciseIndex,
     required this.sets,
     this.elapsedSeconds = 0,
-    this.isExpanded = true,
+    this.isExpanded = true, // ✅ MẶC ĐỊNH TRUE (mở rộng)
     this.isFinishMode = false,
     required this.categoryId,
     required this.categoryName,

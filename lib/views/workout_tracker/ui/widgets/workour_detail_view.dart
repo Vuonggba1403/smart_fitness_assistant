@@ -232,14 +232,10 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
     return BlocBuilder<WorkoutTrackerCubit, WorkoutTrackerState>(
       builder: (context, state) {
         int exerciseCount = 0;
-        int duration = 0;
 
-        // Nếu đã load xong exercises, tính số lượng và thời gian
+        // Nếu đã load xong exercises, tính số lượng
         if (state is WorkoutDetailLoaded) {
-          exerciseCount = state.exerciseCount; // ✅ Dùng getter từ state
-          duration = context.read<WorkoutTrackerCubit>().calculateDuration(
-            exerciseCount,
-          );
+          exerciseCount = state.exerciseCount;
         }
 
         return Row(
@@ -258,7 +254,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
                     ),
                   ),
                   Text(
-                    "$exerciseCount ${LocaleKey.exercises.tr} | $duration ${LocaleKey.mins.tr} | 320 ${LocaleKey.kcal.tr}",
+                    "$exerciseCount ${LocaleKey.exercises.tr} | 320 ${LocaleKey.kcal.tr}",
                     style: TextStyle(
                       color: textColor?.withOpacity(0.6),
                       fontSize: 12,

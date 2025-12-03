@@ -7,6 +7,7 @@ import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.
 import 'package:smart_fitness_assistant/core/widgets/custom_container_check.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_sliverbar.dart';
 import 'package:smart_fitness_assistant/core/models/exercise_category.dart';
+import 'package:smart_fitness_assistant/core/models/workout_progress.dart'; // ✅ Thêm import
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/workour_detail_view.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -248,7 +249,6 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
 
                                 return InkWell(
                                   onTap: () {
-                                    // Điều hướng đến màn hình chi tiết workout
                                     navigateTo(
                                       context,
                                       BlocProvider.value(
@@ -259,22 +259,25 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                                       ),
                                     );
                                   },
-                                  // Sử dụng FutureBuilder để tính exerciseCount
-                                  child: FutureBuilder<int>(
-                                    future: cubit.getExerciseCount(
-                                      category.id ?? '',
-                                    ),
-                                    builder: (context, countSnapshot) {
-                                      final exerciseCount =
-                                          countSnapshot.data ?? 0;
-                                      final duration = cubit.calculateDuration(
-                                        exerciseCount,
-                                      );
+                                  child: FutureBuilder<List<dynamic>>(
+                                    future: Future.wait([
+                                      cubit.getExerciseCount(category.id ?? ''),
+                                      cubit.loadProgress(category.id ?? ''),
+                                    ]),
+                                    builder: (context, snapshot) {
+                                      final exerciseCount = snapshot.hasData
+                                          ? snapshot.data![0] as int
+                                          : 0;
+                                      final progressMap = snapshot.hasData
+                                          ? snapshot.data![1]
+                                                as Map<String, WorkoutProgress>
+                                          : <String, WorkoutProgress>{};
 
                                       return WhatTrainRow(
                                         category: category,
                                         exerciseCount: exerciseCount,
-                                        durationMins: duration,
+                                        progressMap:
+                                            progressMap, // ✅ Truyền progress
                                       );
                                     },
                                   ),

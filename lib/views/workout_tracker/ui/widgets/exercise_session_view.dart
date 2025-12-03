@@ -406,6 +406,10 @@ class ExerciseSessionView extends StatelessWidget {
           final exercise = state.exercises[index];
           final isCurrent = index == state.currentExerciseIndex;
 
+          // ✅ Tính số sets hoàn thành cho TỪNG exercise
+          final completedSets = _getCompletedSetsForExercise(state, index);
+          final totalSets = 4; // Mặc định 4 sets/exercise
+
           return BlocProvider(
             create: (_) => ExerciseItemCubit(),
             child: BlocBuilder<ExerciseItemCubit, ExerciseItemState>(
@@ -418,7 +422,11 @@ class ExerciseSessionView extends StatelessWidget {
                 return GestureDetector(
                   onTap: () {
                     if (isCurrent) {
-                      itemContext.read<ExerciseItemCubit>().toggle();
+                      if (isExpanded) {
+                        itemContext.read<ExerciseItemCubit>().toggle();
+                      } else {
+                        context.read<WorkoutTrackerCubit>().nextSet();
+                      }
                     }
                   },
                   child: Container(
@@ -473,8 +481,9 @@ class ExerciseSessionView extends StatelessWidget {
                                     ),
                                   ),
                                   const SizedBox(height: 4),
+                                  // ✅ FIX: Hiển thị đúng số sets cho TỪNG exercise
                                   Text(
-                                    '${state.completedSetsCount}/${state.sets.length} Hoàn tất',
+                                    '$completedSets/$totalSets Hoàn tất',
                                     style: TextStyle(
                                       color: textColor?.withOpacity(0.6),
                                       fontSize: 12,
@@ -484,11 +493,21 @@ class ExerciseSessionView extends StatelessWidget {
                               ),
                             ),
                             if (isCurrent)
-                              Icon(
-                                isExpanded
-                                    ? Icons.keyboard_arrow_up
-                                    : Icons.keyboard_arrow_down,
-                                color: textColor,
+                              InkWell(
+                                onTap: () {
+                                  itemContext
+                                      .read<ExerciseItemCubit>()
+                                      .toggle();
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Icon(
+                                    isExpanded
+                                        ? Icons.keyboard_arrow_up
+                                        : Icons.keyboard_arrow_down,
+                                    color: textColor,
+                                  ),
+                                ),
                               ),
                           ],
                         ),
@@ -595,6 +614,23 @@ class ExerciseSessionView extends StatelessWidget {
         },
       ),
     );
+  }
+
+  /// ✅ Method helper: Tính số sets đã hoàn thành cho TỪNG exercise
+  int _getCompletedSetsForExercise(
+    ExerciseSessionActive state,
+    int exerciseIndex,
+  ) {
+    if (exerciseIndex < state.currentExerciseIndex) {
+      // Bài đã hoàn thành → 4/4
+      return 4;
+    } else if (exerciseIndex == state.currentExerciseIndex) {
+      // Bài đang làm → Đếm số sets thực tế
+      return state.completedSetsCount;
+    } else {
+      // Bài chưa làm → 0/4
+      return 0;
+    }
   }
 
   Widget _buildSetRow(BuildContext context, set, int index, Color? textColor) {

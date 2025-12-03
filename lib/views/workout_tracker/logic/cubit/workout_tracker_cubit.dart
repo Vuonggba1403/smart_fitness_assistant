@@ -7,6 +7,7 @@ import 'package:smart_fitness_assistant/core/models/exercise_item.dart'; // ✅ 
 import 'package:smart_fitness_assistant/core/models/device.dart'; // ✅ Bỏ _models
 import 'package:smart_fitness_assistant/core/models/workout_set.dart';
 import 'package:smart_fitness_assistant/core/models/workout_session.dart';
+import 'package:smart_fitness_assistant/core/models/workout_progress.dart';
 
 part 'workout_tracker_state.dart';
 
@@ -81,11 +82,6 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
     } catch (e) {
       return 0;
     }
-  }
-
-  /// Tính duration ước tính (3 phút/exercise)
-  int calculateDuration(int exerciseCount) {
-    return exerciseCount * 3;
   }
 
   // ============ Các Method cho Workout Detail ============
@@ -185,6 +181,7 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
         elapsedSeconds: 0,
         categoryId: categoryId,
         categoryName: categoryName,
+        isExpanded: true, // ✅ MẶC ĐỊNH MỞ RỘNG (expanded)
       ),
     );
 
@@ -236,7 +233,15 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
       isCompleted: !updatedSets[setIndex].isCompleted,
     );
 
-    emit(currentState.copyWith(sets: updatedSets));
+    // ✅ Bật finish mode nếu có ít nhất 1 set được hoàn thành
+    final hasCompletedSet = updatedSets.any((set) => set.isCompleted);
+
+    emit(
+      currentState.copyWith(
+        sets: updatedSets,
+        isFinishMode: hasCompletedSet, // ✅ Tự động bật finish mode
+      ),
+    );
   }
 
   /// Cập nhật weight của set
@@ -359,6 +364,7 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
   }
 
   /// Lưu workout session vào Supabase (public để gọi từ UI)
+  /// ✅ Lưu progress khi kết thúc workout
   Future<bool> saveWorkoutSession() async {
     final currentState = state;
     if (currentState is! ExerciseSessionActive) {
@@ -375,6 +381,9 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
 
       print('✅ User ID: $userId');
 
+      // ✅ Lưu progress cho TỪNG exercise
+      await _saveWorkoutProgress(currentState, userId);
+
       // Tính toán thống kê cho TẤT CẢ exercises
       int totalSets = 0;
       int completedSets = 0;
@@ -384,7 +393,6 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
       for (int i = 0; i < currentState.exercises.length; i++) {
         final exercise = currentState.exercises[i];
 
-        // Lấy sets của exercise hiện tại hoặc tạo sets mặc định
         List<WorkoutSet> sets;
         if (i == currentState.currentExerciseIndex) {
           sets = currentState.sets;
@@ -452,11 +460,10 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
       print('📦 Session data to save:');
       print(session.toJson());
 
-      // ✅ Insert vào bảng history_workout
       final response = await _supabase
           .from('history_workout')
           .insert(session.toJson())
-          .select(); // ✅ Thêm .select() để nhận response
+          .select();
 
       print('✅ Insert successful: $response');
       return true;
@@ -465,6 +472,96 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
       print('Error: $e');
       print('StackTrace: $stackTrace');
       return false;
+    }
+  }
+
+  /// ✅ Lưu progress cho từng exercise
+  Future<void> _saveWorkoutProgress(
+    ExerciseSessionActive state,
+    String userId,
+  ) async {
+    try {
+      for (int i = 0; i < state.exercises.length; i++) {
+        final exercise = state.exercises[i];
+
+        int completedSets;
+        if (i < state.currentExerciseIndex) {
+          completedSets = 4; // Đã hoàn thành
+        } else if (i == state.currentExerciseIndex) {
+          completedSets = state.completedSetsCount; // Đang làm
+        } else {
+          completedSets = 0; // Chưa làm
+        }
+
+        final progress = WorkoutProgress(
+          forUser: userId,
+          categoryId: state.categoryId,
+          exerciseId: exercise.id,
+          completedSets: completedSets,
+          totalSets: 4,
+          isFullyCompleted: completedSets == 4,
+        );
+
+        // ✅ FIX: Upsert với onConflict đúng tên cột
+        await _supabase
+            .from('workout_progress')
+            .upsert(
+              progress.toJson(),
+              onConflict:
+                  'for_user,for_category,for_exercise', // ✅ Đổi từ 'category_id,exercise_id'
+            );
+      }
+    } catch (e) {
+      print('❌ Error saving progress: $e');
+    }
+  }
+
+  /// ✅ Load progress cho category
+  Future<Map<String, WorkoutProgress>> loadProgress(String categoryId) async {
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) return {};
+
+      // ✅ FIX: Dùng 'for_category' thay vì 'category_id'
+      final response = await _supabase
+          .from('workout_progress')
+          .select()
+          .eq('for_user', userId)
+          .eq(
+            'for_category',
+            categoryId,
+          ); // ✅ Đổi từ 'category_id' → 'for_category'
+
+      final Map<String, WorkoutProgress> progressMap = {};
+      for (var json in response) {
+        final progress = WorkoutProgress.fromJson(json);
+        progressMap[progress.exerciseId] = progress;
+      }
+
+      return progressMap;
+    } catch (e) {
+      print('❌ Error loading progress: $e');
+      return {};
+    }
+  }
+
+  /// ✅ Reset progress cho category
+  Future<void> resetProgress(String categoryId) async {
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) return;
+
+      // ✅ FIX: Dùng 'for_category' thay vì 'category_id'
+      await _supabase
+          .from('workout_progress')
+          .delete()
+          .eq('for_user', userId)
+          .eq(
+            'for_category',
+            categoryId,
+          ); // ✅ Đổi từ 'category_id' → 'for_category'
+    } catch (e) {
+      print('❌ Error resetting progress: $e');
     }
   }
 
