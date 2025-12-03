@@ -118,4 +118,8 @@ Map<String, String> enUs = {
   LocaleKey.des: "How To Do It",
   LocaleKey.completeEx: "Complete",
   LocaleKey.noEquipment: "No Equipment Needed",
+  LocaleKey.sets: "Sets",
+  LocaleKey.reps: "Reps",
+  LocaleKey.titleDialog: "Stop Workout",
+  LocaleKey.contentDialog: "Are you sure you want to stop this workout?",
 };

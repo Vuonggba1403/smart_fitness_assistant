@@ -113,4 +113,9 @@ class LocaleKey {
   static const String completeEx = "complete_ex";
   static const String startWorkout = "start_workout";
   static const String noEquipment = "no_equipment";
+  static const String sets = "sets";
+  static const String reps = "reps";
+  static const String titleDialog = "title_dialog";
+  static const String contentDialog = "content_dialog";
+  static const String buttonStart = "button_start";
 }

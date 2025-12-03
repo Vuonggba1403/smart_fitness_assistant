@@ -11,6 +11,7 @@ import 'package:smart_fitness_assistant/views/onboarding/ui/started_view.dart';
 import 'core/functions/app_shared.dart';
 import 'locale/translation_manager.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:smart_fitness_assistant/views/workout_tracker/logic/cubit/workout_tracker_cubit.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,6 +32,7 @@ void main() async {
         BlocProvider(create: (_) => ThemeCubit()),
         BlocProvider(create: (_) => HomeCubit()),
         BlocProvider(create: (_) => AuthenticationCubit()),
+        BlocProvider(create: (_) => WorkoutTrackerCubit()),
       ],
       child: const MyApp(),
     ),

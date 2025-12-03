@@ -119,4 +119,8 @@ Map<String, String> viVN = {
   LocaleKey.des: "Cách thực hiện",
   LocaleKey.completeEx: "Hoàn tất",
   LocaleKey.noEquipment: "Không cần thiết bị",
+  LocaleKey.sets: "Sets",
+  LocaleKey.reps: "Reps",
+  LocaleKey.titleDialog: "Ngừng Tập",
+  LocaleKey.contentDialog: "Bạn có chắc chắn muốn ngừng tập không?",
 };

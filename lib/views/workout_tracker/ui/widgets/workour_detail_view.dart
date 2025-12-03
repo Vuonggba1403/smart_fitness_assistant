@@ -12,9 +12,44 @@ import 'package:smart_fitness_assistant/views/workout_tracker/logic/cubit/workou
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/common/bottom_sheet_details.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/exercise_session_view.dart';
 
-class WorkoutDetailView extends StatelessWidget {
+class WorkoutDetailView extends StatefulWidget {
   final Map dObj;
   const WorkoutDetailView({super.key, required this.dObj});
+
+  @override
+  State<WorkoutDetailView> createState() => _WorkoutDetailViewState();
+}
+
+class _WorkoutDetailViewState extends State<WorkoutDetailView>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _loadData();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _loadData();
+    }
+  }
+
+  void _loadData() {
+    final categoryId = widget.dObj['id'] ?? widget.dObj['for_cate'];
+    if (categoryId != null) {
+      context.read<WorkoutTrackerCubit>().loadExerciseItems(
+        categoryId.toString(),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,19 +58,8 @@ class WorkoutDetailView extends StatelessWidget {
     final textColor = theme.textTheme.bodyMedium?.color;
     final cardColor = theme.cardColor;
 
-    // Tải danh sách exercise items khi view được tạo
-    final categoryId = dObj['id'] ?? dObj['for_cate'];
-    if (categoryId != null) {
-      context.read<WorkoutTrackerCubit>().loadExerciseItems(
-        categoryId.toString(),
-      );
-    }
-
     return Container(
       color: Colors.transparent,
-      // decoration: BoxDecoration(
-      //   gradient: LinearGradient(colors: TColor.primaryG),
-      // ),
       child: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
@@ -53,9 +77,9 @@ class WorkoutDetailView extends StatelessWidget {
                 background: Stack(
                   children: [
                     Hero(
-                      tag: 'workout_${dObj["img_url"]}',
+                      tag: 'workout_${widget.dObj["img_url"]}',
                       child: CachedNetworkImage(
-                        imageUrl: dObj["img_url"]?.toString() ?? '',
+                        imageUrl: widget.dObj["img_url"]?.toString() ?? '',
                         width: double.infinity,
                         height: double.infinity,
                         fit: BoxFit.cover,
@@ -145,7 +169,7 @@ class WorkoutDetailView extends StatelessWidget {
                       _buildDevicesSection(media, textColor, cardColor),
                       SizedBox(height: media.width * 0.05),
                       _buildExercisesSection(textColor, cardColor),
-                      SizedBox(height: media.width * 0.1),
+                      SizedBox(height: media.width * 0.3),
                     ],
                   ),
                 ),
@@ -160,9 +184,11 @@ class WorkoutDetailView extends StatelessWidget {
                             title: LocaleKey.startWorkout.tr,
                             onPressed: () {
                               if (state is WorkoutDetailLoaded) {
-                                final categoryId = dObj['id']?.toString() ?? '';
+                                final categoryId =
+                                    widget.dObj['id']?.toString() ?? '';
                                 final categoryName =
-                                    dObj['title_ex']?.toString() ?? 'Workout';
+                                    widget.dObj['title_ex']?.toString() ??
+                                    'Workout';
 
                                 context
                                     .read<WorkoutTrackerCubit>()
@@ -180,7 +206,10 @@ class WorkoutDetailView extends StatelessWidget {
                                       child: const ExerciseSessionView(),
                                     ),
                                   ),
-                                );
+                                ).then((_) {
+                                  // ✅ Reload data khi quay lại
+                                  _loadData();
+                                });
                               }
                             },
                           );
@@ -221,7 +250,7 @@ class WorkoutDetailView extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    dObj["title_ex"]?.toString() ?? "Workout",
+                    widget.dObj["title_ex"]?.toString() ?? "Workout",
                     style: TextStyle(
                       color: textColor,
                       fontSize: 25,
@@ -536,21 +565,17 @@ class WorkoutDetailView extends StatelessWidget {
   /// Xây dựng card hiển thị exercise
   /// Sử dụng ExerciseItem model với type-safe properties
   Widget _buildExerciseCard(
-    ExerciseItem exercise, // ✅ Type-safe parameter
+    ExerciseItem exercise,
     Color? textColor,
     Color cardColor,
   ) {
     return Builder(
       builder: (context) => InkWell(
-        onTap: () => ExerciseDetailBottomSheet.show(
-          context,
-          exercise, // ✅ Pass ExerciseItem object
-        ),
+        onTap: () => ExerciseDetailBottomSheet.show(context, exercise),
         child: Container(
           margin: const EdgeInsets.symmetric(vertical: 8),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            // color: cardColor,
             gradient: LinearGradient(
               colors: AppTheme.gradientColors2(Get.context!),
             ),
@@ -562,7 +587,7 @@ class WorkoutDetailView extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: CachedNetworkImage(
-                  imageUrl: exercise.imageUrl, // ✅ Type-safe property
+                  imageUrl: exercise.imageUrl,
                   width: 60,
                   height: 60,
                   fit: BoxFit.cover,
@@ -577,7 +602,7 @@ class WorkoutDetailView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      exercise.title, // ✅ Type-safe property
+                      exercise.title,
                       style: TextStyle(
                         color: textColor,
                         fontSize: 14,
@@ -586,7 +611,7 @@ class WorkoutDetailView extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      exercise.muscleGroupsString, // ✅ Getter from model
+                      "4 ${LocaleKey.sets.tr} x 8 ${LocaleKey.reps.tr}",
                       style: TextStyle(
                         color: textColor?.withOpacity(0.6),
                         fontSize: 12,

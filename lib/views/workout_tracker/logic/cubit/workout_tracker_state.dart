@@ -85,6 +85,29 @@ final class ExerciseSessionActive extends WorkoutTrackerState {
   bool get hasPreviousExercise => currentExerciseIndex > 0;
   int get completedSetsCount => sets.where((s) => s.isCompleted).length;
 
+  /// ✅ Tổng số sets của TẤT CẢ bài tập (mặc định 4 sets/bài)
+  int get totalSetsOfAllExercises => exercises.length * 4;
+
+  /// ✅ Tổng số sets đã hoàn thành (bao gồm các bài tập trước + bài hiện tại)
+  int get totalCompletedSets {
+    // Số bài tập đã hoàn thành trước bài hiện tại
+    final completedExercisesBefore = currentExerciseIndex;
+
+    // Mỗi bài đã hoàn thành = 4 sets
+    final completedSetsFromPreviousExercises = completedExercisesBefore * 4;
+
+    // Cộng thêm số sets đã hoàn thành của bài hiện tại
+    return completedSetsFromPreviousExercises + completedSetsCount;
+  }
+
+  /// Kiểm tra xem exercise hiện tại đã hoàn thành tất cả sets chưa
+  bool get isCurrentExerciseCompleted => sets.every((s) => s.isCompleted);
+
+  /// Kiểm tra xem đã hoàn thành toàn bộ workout chưa
+  bool get isWorkoutCompleted =>
+      currentExerciseIndex == exercises.length - 1 &&
+      isCurrentExerciseCompleted;
+
   ExerciseSessionActive copyWith({
     List<ExerciseItem>? exercises,
     int? currentExerciseIndex,

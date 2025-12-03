@@ -7,7 +7,11 @@ import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/logic/cubit/workout_tracker_cubit.dart';
+import 'package:smart_fitness_assistant/views/workout_tracker/logic/cubit/exercise_item_cubit.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/common/bottom_sheet_details.dart';
+import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/common/show_dialog.dart';
+import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/common/workout_completion_bottom_sheet.dart';
+import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/common/workout_congratulations_screen.dart'; // ✅ Import màn hình mới
 
 class ExerciseSessionView extends StatelessWidget {
   const ExerciseSessionView({super.key});
@@ -21,142 +25,42 @@ class ExerciseSessionView extends StatelessWidget {
   Future<bool> _showExitDialog(BuildContext context) async {
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) => _buildExitDialog(context),
+      builder: (dialogContext) => CustomDialog(
+        title: LocaleKey.titleDialog.tr,
+        content: LocaleKey.contentDialog.tr,
+        okText: 'OK',
+        okColor: TColor.primaryColor1,
+      ),
     );
     return result ?? false;
   }
 
-  Widget _buildExitDialog(BuildContext context) {
-    final theme = Theme.of(context);
-    final textColor = theme.textTheme.bodyMedium?.color;
+  Future<void> _showCompletionBottomSheet(BuildContext context) async {
+    final state = context.read<WorkoutTrackerCubit>().state;
+    if (state is! ExerciseSessionActive) return;
 
-    return BlocBuilder<WorkoutTrackerCubit, WorkoutTrackerState>(
-      builder: (context, state) {
-        if (state is! ExerciseSessionActive) return const SizedBox();
-
-        final completedSets = state.completedSetsCount;
-        final totalSets = state.sets.length * state.exercises.length;
-        final incompleteSets = totalSets - completedSets;
-
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Ngừng Tập',
-                      style: TextStyle(
-                        color: textColor,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.close, color: textColor),
-                      onPressed: () => Navigator.pop(context, false),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Bạn có chắc chắn muốn ngừng tập không?',
-                  style: TextStyle(color: textColor, fontSize: 16),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Chỉ những set hoàn thành mới được ghi lại trong lịch sử của bạn',
-                  style: TextStyle(
-                    color: textColor?.withOpacity(0.6),
-                    fontSize: 14,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildStatCard(
-                        completedSets.toString(),
-                        'Các set đã hoàn thành',
-                        textColor,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildStatCard(
-                        incompleteSets.toString(),
-                        'Các set chưa hoàn thành',
-                        textColor,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                RoundButton(
-                  title: 'HOÀN THÀNH',
-                  onPressed: () async {
-                    final saved = await context
-                        .read<WorkoutTrackerCubit>()
-                        .saveWorkoutSession();
-                    if (saved && context.mounted) {
-                      Navigator.pop(context, true);
-                    }
-                  },
-                ),
-                const SizedBox(height: 12),
-                TextButton(
-                  onPressed: () => Navigator.pop(context, false),
-                  child: Text(
-                    'HỦY',
-                    style: TextStyle(
-                      color: textColor,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+    final shouldFinish = await WorkoutCompletionBottomSheet.show(
+      context,
+      completedSets: state.totalCompletedSets,
+      totalSets: state.totalSetsOfAllExercises,
     );
-  }
 
-  Widget _buildStatCard(String value, String label, Color? textColor) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: TColor.gray.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          Text(
-            value,
-            style: TextStyle(
-              color: textColor,
-              fontSize: 24,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(color: textColor?.withOpacity(0.6), fontSize: 12),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
+    if (shouldFinish == true && context.mounted) {
+      final saved = await context
+          .read<WorkoutTrackerCubit>()
+          .saveWorkoutSession();
+
+      if (saved && context.mounted) {
+        context.read<WorkoutTrackerCubit>().stopWorkoutSession();
+
+        // ✅ Gọi màn hình congratulations từ file riêng
+        await WorkoutCongratulationsScreen.show(context, state);
+
+        if (context.mounted) {
+          Navigator.pop(context);
+        }
+      }
+    }
   }
 
   @override
@@ -165,13 +69,16 @@ class ExerciseSessionView extends StatelessWidget {
     final textColor = theme.textTheme.bodyMedium?.color;
     final cardColor = theme.cardColor;
 
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) async {
+        if (didPop) return;
+
         final shouldExit = await _showExitDialog(context);
         if (shouldExit && context.mounted) {
           context.read<WorkoutTrackerCubit>().stopWorkoutSession();
+          Navigator.of(context).pop();
         }
-        return shouldExit;
       },
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
@@ -188,9 +95,16 @@ class ExerciseSessionView extends StatelessWidget {
               }
             },
           ),
-          title: Text(
-            'Bài tập ngực',
-            style: TextStyle(color: textColor, fontWeight: FontWeight.w700),
+          title: BlocBuilder<WorkoutTrackerCubit, WorkoutTrackerState>(
+            builder: (context, state) {
+              final title = state is ExerciseSessionActive
+                  ? state.categoryName
+                  : 'Workout';
+              return Text(
+                title,
+                style: TextStyle(color: textColor, fontWeight: FontWeight.w700),
+              );
+            },
           ),
         ),
         body: BlocBuilder<WorkoutTrackerCubit, WorkoutTrackerState>(
@@ -202,63 +116,7 @@ class ExerciseSessionView extends StatelessWidget {
             return Column(
               children: [
                 // Timer với nút kết thúc
-                Container(
-                  margin: const EdgeInsets.all(20),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 15,
-                  ),
-                  decoration: BoxDecoration(
-                    color: cardColor,
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: TColor.black.withOpacity(0.8),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(Icons.access_time, color: TColor.white),
-                      ),
-                      const SizedBox(width: 15),
-                      Expanded(
-                        child: Text(
-                          _formatTime(state.elapsedSeconds),
-                          style: TextStyle(
-                            color: TColor.primaryColor1,
-                            fontSize: 32,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                      if (state.isFinishMode)
-                        ElevatedButton(
-                          onPressed: () async {
-                            final shouldExit = await _showExitDialog(context);
-                            if (shouldExit && context.mounted) {
-                              context
-                                  .read<WorkoutTrackerCubit>()
-                                  .stopWorkoutSession();
-                              Navigator.pop(context);
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: TColor.black,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25),
-                            ),
-                          ),
-                          child: Text(
-                            'Kết thúc',
-                            style: TextStyle(color: TColor.white),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
+                _buildTimerSection(context, state, cardColor, textColor),
 
                 // Exercise List (collapsed view)
                 if (!state.isExpanded)
@@ -279,49 +137,141 @@ class ExerciseSessionView extends StatelessWidget {
                   ),
 
                 // Bottom Button
-                SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Row(
-                      children: [
-                        if (!state.isFinishMode)
-                          InkWell(
-                            onTap: () {
-                              context
-                                  .read<WorkoutTrackerCubit>()
-                                  .enableFinishMode();
-                            },
-                            child: Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: TColor.gray.withOpacity(0.3),
-                                  width: 2,
-                                ),
-                              ),
-                              child: Icon(Icons.check, color: textColor),
-                            ),
-                          ),
-                        if (!state.isFinishMode) const SizedBox(width: 12),
-                        Expanded(
-                          child: RoundButton(
-                            title: 'GHI LẠI SET TIẾP THEO',
-                            onPressed: () {
-                              context
-                                  .read<WorkoutTrackerCubit>()
-                                  .nextExercise();
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                _buildBottomButtons(context, state, textColor),
               ],
             );
           },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTimerSection(
+    BuildContext context,
+    ExerciseSessionActive state,
+    Color cardColor,
+    Color? textColor,
+  ) {
+    return Container(
+      margin: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: TColor.black.withOpacity(0.8),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.access_time, color: TColor.white),
+          ),
+          const SizedBox(width: 15),
+          Expanded(
+            child: Text(
+              _formatTime(state.elapsedSeconds),
+              style: TextStyle(
+                color: TColor.primaryColor1,
+                fontSize: 32,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          if (state.isFinishMode)
+            ElevatedButton(
+              onPressed: () => _showCompletionBottomSheet(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: TColor.black,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25),
+                ),
+              ),
+              child: Text('Kết thúc', style: TextStyle(color: TColor.white)),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomButtons(
+    BuildContext context,
+    ExerciseSessionActive state,
+    Color? textColor,
+  ) {
+    String buttonText;
+    if (state.isCurrentExerciseCompleted && state.hasNextExercise) {
+      buttonText = 'BÀI TẬP TIẾP THEO';
+    } else if (state.isWorkoutCompleted) {
+      buttonText = 'HOÀN THÀNH';
+    } else {
+      buttonText = 'GHI LẠI SET ${state.completedSetsCount + 1}';
+    }
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Row(
+          children: [
+            InkWell(
+              onTap: () {
+                if (state.isFinishMode) {
+                  context.read<WorkoutTrackerCubit>().disableFinishMode();
+                } else {
+                  context.read<WorkoutTrackerCubit>().enableFinishMode();
+                }
+              },
+              child: Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: state.isFinishMode
+                        ? TColor.primaryColor1
+                        : textColor!,
+                    width: 2,
+                  ),
+                  color: state.isFinishMode
+                      ? TColor.primaryColor1.withOpacity(0.2)
+                      : Colors.transparent,
+                ),
+                child: Icon(
+                  Icons.check,
+                  color: state.isFinishMode ? TColor.primaryColor1 : textColor,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: RoundButton(
+                title: buttonText,
+                onPressed: () async {
+                  if (state.isWorkoutCompleted) {
+                    final saved = await context
+                        .read<WorkoutTrackerCubit>()
+                        .saveWorkoutSession();
+
+                    if (saved && context.mounted) {
+                      context.read<WorkoutTrackerCubit>().stopWorkoutSession();
+
+                      // ✅ Gọi màn hình congratulations từ file riêng
+                      await WorkoutCongratulationsScreen.show(context, state);
+
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                      }
+                    }
+                  } else {
+                    context.read<WorkoutTrackerCubit>().nextSet();
+                  }
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -456,61 +406,190 @@ class ExerciseSessionView extends StatelessWidget {
           final exercise = state.exercises[index];
           final isCurrent = index == state.currentExerciseIndex;
 
-          return Container(
-            margin: const EdgeInsets.only(bottom: 12),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: isCurrent ? cardColor : cardColor.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(15),
-              border: isCurrent
-                  ? Border.all(color: TColor.primaryColor1, width: 2)
-                  : null,
-            ),
-            child: Row(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: CachedNetworkImage(
-                    imageUrl: exercise.imageUrl,
-                    width: 60,
-                    height: 60,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => CustomCircleProgIndicator(),
-                    errorWidget: (context, url, error) =>
-                        Icon(Icons.fitness_center),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        exercise.title,
-                        style: TextStyle(
-                          color: textColor,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
+          return BlocProvider(
+            create: (_) => ExerciseItemCubit(),
+            child: BlocBuilder<ExerciseItemCubit, ExerciseItemState>(
+              builder: (itemContext, itemState) {
+                bool isExpanded = false;
+                if (itemState is ExerciseItemExpandedState) {
+                  isExpanded = itemState.isExpanded;
+                }
+
+                return GestureDetector(
+                  onTap: () {
+                    if (isCurrent) {
+                      itemContext.read<ExerciseItemCubit>().toggle();
+                    }
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: isCurrent ? cardColor : cardColor.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(15),
+                      border: isCurrent
+                          ? Border.all(color: TColor.primaryColor1, width: 2)
+                          : null,
+                      boxShadow: isCurrent
+                          ? [
+                              BoxShadow(
+                                color: TColor.primaryColor1.withOpacity(0.2),
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ]
+                          : null,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // HEADER
+                        Row(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: CachedNetworkImage(
+                                imageUrl: exercise.imageUrl,
+                                width: 60,
+                                height: 60,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) =>
+                                    CustomCircleProgIndicator(),
+                                errorWidget: (context, url, error) =>
+                                    Icon(Icons.fitness_center),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    exercise.title,
+                                    style: TextStyle(
+                                      color: textColor,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '${state.completedSetsCount}/${state.sets.length} Hoàn tất',
+                                    style: TextStyle(
+                                      color: textColor?.withOpacity(0.6),
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (isCurrent)
+                              Icon(
+                                isExpanded
+                                    ? Icons.keyboard_arrow_up
+                                    : Icons.keyboard_arrow_down,
+                                color: textColor,
+                              ),
+                          ],
                         ),
-                      ),
-                      Text(
-                        '0/${state.sets.length} Hoàn tất',
-                        style: TextStyle(
-                          color: textColor?.withOpacity(0.6),
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
+
+                        // EXPANDED CONTENT - Full sets with editing
+                        if (isCurrent)
+                          AnimatedCrossFade(
+                            firstChild: const SizedBox.shrink(),
+                            secondChild: Padding(
+                              padding: const EdgeInsets.only(top: 16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // All sets with full editing capability
+                                  ...state.sets.asMap().entries.map((entry) {
+                                    final setIndex = entry.key;
+                                    final set = entry.value;
+                                    return Padding(
+                                      padding: const EdgeInsets.only(bottom: 8),
+                                      child: _buildSetRow(
+                                        context,
+                                        set,
+                                        setIndex,
+                                        textColor,
+                                      ),
+                                    );
+                                  }).toList(),
+
+                                  const SizedBox(height: 12),
+
+                                  // Action buttons
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: OutlinedButton(
+                                          onPressed: () {
+                                            ExerciseDetailBottomSheet.show(
+                                              context,
+                                              state.currentExercise,
+                                            );
+                                          },
+                                          style: OutlinedButton.styleFrom(
+                                            padding: const EdgeInsets.symmetric(
+                                              vertical: 12,
+                                            ),
+                                            side: BorderSide(
+                                              color: TColor.gray,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            'Chi tiết',
+                                            style: TextStyle(
+                                              color: textColor,
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: ElevatedButton.icon(
+                                          onPressed: () {
+                                            context
+                                                .read<WorkoutTrackerCubit>()
+                                                .addSet();
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: TColor.black,
+                                            padding: const EdgeInsets.symmetric(
+                                              vertical: 12,
+                                            ),
+                                          ),
+                                          icon: Icon(
+                                            Icons.add,
+                                            color: TColor.white,
+                                            size: 18,
+                                          ),
+                                          label: Text(
+                                            'Thêm set',
+                                            style: TextStyle(
+                                              color: TColor.white,
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            crossFadeState: isExpanded
+                                ? CrossFadeState.showSecond
+                                : CrossFadeState.showFirst,
+                            duration: const Duration(milliseconds: 150),
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-                if (isCurrent)
-                  IconButton(
-                    icon: Icon(Icons.keyboard_arrow_down, color: textColor),
-                    onPressed: () {
-                      context.read<WorkoutTrackerCubit>().toggleExpanded();
-                    },
-                  ),
-              ],
+                );
+              },
             ),
           );
         },
@@ -519,19 +598,83 @@ class ExerciseSessionView extends StatelessWidget {
   }
 
   Widget _buildSetRow(BuildContext context, set, int index, Color? textColor) {
+    return _EditableSetRow(set: set, index: index, textColor: textColor);
+  }
+}
+
+/// Widget riêng cho mỗi set row để quản lý TextEditingController
+class _EditableSetRow extends StatefulWidget {
+  final dynamic set;
+  final int index;
+  final Color? textColor;
+
+  const _EditableSetRow({
+    required this.set,
+    required this.index,
+    required this.textColor,
+  });
+
+  @override
+  State<_EditableSetRow> createState() => _EditableSetRowState();
+}
+
+class _EditableSetRowState extends State<_EditableSetRow> {
+  late TextEditingController _weightController;
+  late TextEditingController _repsController;
+
+  @override
+  void initState() {
+    super.initState();
+    _weightController = TextEditingController(
+      text: '${widget.set.weight.toInt()}',
+    );
+    _repsController = TextEditingController(text: '${widget.set.reps}');
+  }
+
+  @override
+  void didUpdateWidget(_EditableSetRow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Cập nhật controller khi widget rebuild với giá trị mới
+    if (oldWidget.set.weight != widget.set.weight) {
+      _weightController.text = '${widget.set.weight.toInt()}';
+    }
+    if (oldWidget.set.reps != widget.set.reps) {
+      _repsController.text = '${widget.set.reps}';
+    }
+  }
+
+  @override
+  void dispose() {
+    _weightController.dispose();
+    _repsController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // ✅ Thêm màu xanh lá cây khi set hoàn thành
+    final backgroundColor = widget.set.isCompleted
+        ? Colors.green.withOpacity(0.15)
+        : TColor.gray.withOpacity(0.1);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
       decoration: BoxDecoration(
-        color: TColor.gray.withOpacity(0.1),
+        color: backgroundColor, // ✅ Đổi màu nền
         borderRadius: BorderRadius.circular(15),
+        border: widget.set.isCompleted
+            ? Border.all(color: Colors.green, width: 1.5)
+            : null,
       ),
       child: Row(
         children: [
           // Checkbox
           InkWell(
             onTap: () {
-              context.read<WorkoutTrackerCubit>().toggleSetCompletion(index);
+              context.read<WorkoutTrackerCubit>().toggleSetCompletion(
+                widget.index,
+              );
             },
             child: Container(
               width: 30,
@@ -539,16 +682,18 @@ class ExerciseSessionView extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: set.isCompleted
-                      ? TColor.primaryColor1
+                  color: widget.set.isCompleted
+                      ? Colors
+                            .green // ✅ Đổi màu checkbox thành xanh lá
                       : TColor.gray.withOpacity(0.3),
                   width: 2,
                 ),
-                color: set.isCompleted
-                    ? TColor.primaryColor1
+                color: widget.set.isCompleted
+                    ? Colors
+                          .green // ✅ Đổi màu checkbox thành xanh lá
                     : Colors.transparent,
               ),
-              child: set.isCompleted
+              child: widget.set.isCompleted
                   ? Icon(Icons.check, color: TColor.white, size: 18)
                   : null,
             ),
@@ -558,9 +703,9 @@ class ExerciseSessionView extends StatelessWidget {
 
           // Set number
           Text(
-            '${set.setNumber}',
+            '${widget.set.setNumber}',
             style: TextStyle(
-              color: textColor,
+              color: widget.textColor,
               fontSize: 16,
               fontWeight: FontWeight.w600,
             ),
@@ -568,49 +713,84 @@ class ExerciseSessionView extends StatelessWidget {
 
           const SizedBox(width: 20),
 
-          // Weight
+          // Weight (editable TextField)
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+            width: 50,
+            height: 36,
             decoration: BoxDecoration(
               color: TColor.white,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Text(
-              '${set.weight.toInt()}',
+            child: TextField(
+              controller: _weightController,
+              keyboardType: TextInputType.number,
+              textAlign: TextAlign.center,
               style: TextStyle(
                 color: TColor.black,
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.zero,
+              ),
+              onChanged: (value) {
+                final number = int.tryParse(value);
+                if (number != null && number > 0) {
+                  context.read<WorkoutTrackerCubit>().updateSetWeight(
+                    widget.index,
+                    number.toDouble(),
+                  );
+                }
+              },
             ),
           ),
 
           const SizedBox(width: 10),
 
-          Text('kg', style: TextStyle(color: textColor, fontSize: 14)),
+          Text('kg', style: TextStyle(color: widget.textColor, fontSize: 14)),
 
           const SizedBox(width: 20),
 
-          // Reps
+          // Reps (editable TextField)
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+            width: 50,
+            height: 36,
             decoration: BoxDecoration(
               color: TColor.white,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Text(
-              '${set.reps}',
+            child: TextField(
+              controller: _repsController,
+              keyboardType: TextInputType.number,
+              textAlign: TextAlign.center,
               style: TextStyle(
                 color: TColor.black,
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.zero,
+              ),
+              onChanged: (value) {
+                final number = int.tryParse(value);
+                if (number != null && number > 0) {
+                  context.read<WorkoutTrackerCubit>().updateSetReps(
+                    widget.index,
+                    number,
+                  );
+                }
+              },
             ),
           ),
 
           const SizedBox(width: 10),
 
-          Text('Số lần', style: TextStyle(color: textColor, fontSize: 14)),
+          Text(
+            'Số lần',
+            style: TextStyle(color: widget.textColor, fontSize: 14),
+          ),
         ],
       ),
     );

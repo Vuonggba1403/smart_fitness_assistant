@@ -171,6 +171,7 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
   ) {
     if (exercises.isEmpty) return;
 
+    // Mặc định 4 sets x 8 reps
     final initialSets = List.generate(
       4,
       (index) => WorkoutSet(setNumber: index + 1, weight: 8.0, reps: 8),
@@ -260,24 +261,59 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
     emit(currentState.copyWith(sets: updatedSets));
   }
 
-  /// Chuyển sang exercise tiếp theo
+  /// Chuyển sang set tiếp theo hoặc exercise tiếp theo
+  void nextSet() {
+    final currentState = state;
+    if (currentState is! ExerciseSessionActive) return;
+
+    final currentSetIndex = currentState.sets.indexWhere((s) => !s.isCompleted);
+
+    // Nếu còn set chưa hoàn thành, đánh dấu set đó
+    if (currentSetIndex != -1) {
+      final updatedSets = List<WorkoutSet>.from(currentState.sets);
+      updatedSets[currentSetIndex] = updatedSets[currentSetIndex].copyWith(
+        isCompleted: true,
+      );
+      emit(currentState.copyWith(sets: updatedSets));
+      return;
+    }
+
+    // Nếu đã hoàn thành tất cả sets của exercise hiện tại
+    if (currentState.hasNextExercise) {
+      // Chuyển sang exercise tiếp theo
+      final nextIndex = currentState.currentExerciseIndex + 1;
+      final newSets = List.generate(
+        4,
+        (index) => WorkoutSet(setNumber: index + 1, weight: 8.0, reps: 8),
+      );
+
+      // ✅ TẮT finish mode khi chuyển bài tập
+      emit(
+        currentState.copyWith(
+          currentExerciseIndex: nextIndex,
+          sets: newSets,
+          isFinishMode: false, // ✅ Ẩn nút "Kết thúc"
+        ),
+      );
+    } else {
+      // Đã hoàn thành tất cả exercises → Tự động lưu và kết thúc
+      _finishWorkout();
+    }
+  }
+
+  /// Chuyển sang exercise tiếp theo (giữ lại cho trường hợp cần skip)
   void nextExercise() {
     final currentState = state;
     if (currentState is! ExerciseSessionActive) return;
     if (!currentState.hasNextExercise) return;
 
-    // Reset sets cho exercise mới
+    final nextIndex = currentState.currentExerciseIndex + 1;
     final newSets = List.generate(
       4,
       (index) => WorkoutSet(setNumber: index + 1, weight: 8.0, reps: 8),
     );
 
-    emit(
-      currentState.copyWith(
-        currentExerciseIndex: currentState.currentExerciseIndex + 1,
-        sets: newSets,
-      ),
-    );
+    emit(currentState.copyWith(currentExerciseIndex: nextIndex, sets: newSets));
   }
 
   /// Toggle expand/collapse exercise card
@@ -288,38 +324,93 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
     emit(currentState.copyWith(isExpanded: !currentState.isExpanded));
   }
 
-  /// Bật chế độ kết thúc
+  /// Bật chế độ kết thúc - Đánh dấu tất cả các set là hoàn thành
   void enableFinishMode() {
     final currentState = state;
     if (currentState is! ExerciseSessionActive) return;
 
-    emit(currentState.copyWith(isFinishMode: true));
+    // ✅ Đánh dấu tất cả các set hiện tại là hoàn thành
+    final updatedSets = currentState.sets.map((set) {
+      return set.copyWith(isCompleted: true);
+    }).toList();
+
+    emit(currentState.copyWith(isFinishMode: true, sets: updatedSets));
   }
 
-  /// Tắt chế độ kết thúc
+  /// Tắt chế độ kết thúc - Bỏ đánh dấu tất cả các set
   void disableFinishMode() {
     final currentState = state;
     if (currentState is! ExerciseSessionActive) return;
 
-    emit(currentState.copyWith(isFinishMode: false));
+    // ✅ Bỏ đánh dấu tất cả các set
+    final updatedSets = currentState.sets.map((set) {
+      return set.copyWith(isCompleted: false);
+    }).toList();
+
+    emit(currentState.copyWith(isFinishMode: false, sets: updatedSets));
   }
 
-  /// Lưu workout session vào Supabase
+  /// Kết thúc workout và lưu vào history (private method)
+  Future<void> _finishWorkout() async {
+    final saved = await saveWorkoutSession();
+    if (saved) {
+      stopWorkoutSession();
+    }
+  }
+
+  /// Lưu workout session vào Supabase (public để gọi từ UI)
   Future<bool> saveWorkoutSession() async {
     final currentState = state;
-    if (currentState is! ExerciseSessionActive) return false;
+    if (currentState is! ExerciseSessionActive) {
+      print('❌ ERROR: State is not ExerciseSessionActive');
+      return false;
+    }
 
     try {
       final userId = _supabase.auth.currentUser?.id;
-      if (userId == null) return false;
+      if (userId == null) {
+        print('❌ ERROR: User is not authenticated');
+        return false;
+      }
 
-      // Tính toán thống kê
+      print('✅ User ID: $userId');
+
+      // Tính toán thống kê cho TẤT CẢ exercises
       int totalSets = 0;
       int completedSets = 0;
+      int completedExercises = 0;
       final exerciseDetails = <ExerciseSessionDetail>[];
 
-      for (var exercise in currentState.exercises) {
-        final sets = currentState.sets
+      for (int i = 0; i < currentState.exercises.length; i++) {
+        final exercise = currentState.exercises[i];
+
+        // Lấy sets của exercise hiện tại hoặc tạo sets mặc định
+        List<WorkoutSet> sets;
+        if (i == currentState.currentExerciseIndex) {
+          sets = currentState.sets;
+        } else if (i < currentState.currentExerciseIndex) {
+          sets = List.generate(
+            4,
+            (index) => WorkoutSet(
+              setNumber: index + 1,
+              weight: 8.0,
+              reps: 8,
+              isCompleted: true,
+            ),
+          );
+        } else {
+          sets = List.generate(
+            4,
+            (index) => WorkoutSet(
+              setNumber: index + 1,
+              weight: 8.0,
+              reps: 8,
+              isCompleted: false,
+            ),
+          );
+        }
+
+        final setDetails = sets
             .map(
               (set) => SetDetail(
                 setNumber: set.setNumber,
@@ -330,14 +421,18 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
             )
             .toList();
 
-        totalSets += sets.length;
-        completedSets += sets.where((s) => s.isCompleted).length;
+        totalSets += setDetails.length;
+        completedSets += setDetails.where((s) => s.isCompleted).length;
+
+        if (setDetails.every((s) => s.isCompleted)) {
+          completedExercises++;
+        }
 
         exerciseDetails.add(
           ExerciseSessionDetail(
             exerciseId: exercise.id,
             exerciseName: exercise.title,
-            sets: sets,
+            sets: setDetails,
           ),
         );
       }
@@ -347,17 +442,28 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
         categoryId: currentState.categoryId,
         categoryName: currentState.categoryName,
         totalExercises: currentState.exercises.length,
-        completedExercises: currentState.currentExerciseIndex + 1,
+        completedExercises: completedExercises,
         totalSets: totalSets,
         completedSets: completedSets,
         durationSeconds: currentState.elapsedSeconds,
         exerciseDetails: exerciseDetails,
       );
 
-      await _supabase.from('workout_sessions').insert(session.toJson());
+      print('📦 Session data to save:');
+      print(session.toJson());
 
+      // ✅ Insert vào bảng history_workout
+      final response = await _supabase
+          .from('history_workout')
+          .insert(session.toJson())
+          .select(); // ✅ Thêm .select() để nhận response
+
+      print('✅ Insert successful: $response');
       return true;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('❌ ERROR saving workout session:');
+      print('Error: $e');
+      print('StackTrace: $stackTrace');
       return false;
     }
   }
