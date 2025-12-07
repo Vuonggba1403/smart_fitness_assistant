@@ -5,6 +5,7 @@ import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_container_check.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_derlight_bar.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_sliverbar.dart';
 import 'package:smart_fitness_assistant/core/models/exercise_category.dart';
 import 'package:smart_fitness_assistant/core/models/workout_progress.dart'; // ✅ Thêm import
@@ -19,6 +20,7 @@ import 'widgets/common/upcoming_workout_row.dart';
 import 'widgets/common/what_train_row.dart';
 import 'package:smart_fitness_assistant/core/services/notification_service.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/common/time_picker_dialog.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_section_header.dart'; // ✅ THÊM import
 
 class WorkoutTrackerView extends StatefulWidget {
   const WorkoutTrackerView({super.key, required this.title});
@@ -190,11 +192,16 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
           );
         });
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Đã hủy nhắc nhở'),
-            backgroundColor: Colors.orange,
-          ),
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(
+        //     content: Text('Đã hủy nhắc nhở'),
+        //     backgroundColor: Colors.orange,
+        //   ),
+        // );
+        showCustomDelightToastBar(
+          context,
+          'Đã hủy nhắc nhở',
+          Icon(Icons.notifications_off, color: TColor.white),
         );
       }
     }
@@ -358,19 +365,10 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
 
                         SizedBox(height: media.width * 0.05),
 
-                        // ✅ BÀI TẬP TẠI PHÒNG GYM
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              LocaleKey.gymEx.tr,
-                              style: TextStyle(
-                                color: textColor,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ],
+                        // ✅ BÀI TẬP TẠI PHÒNG GYM - Dùng CustomSectionHeader
+                        CustomSectionHeader(
+                          title: LocaleKey.gymEx.tr,
+                          textColor: textColor,
                         ),
 
                         StreamBuilder<List<ExerciseCategory>>(
@@ -461,19 +459,10 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
 
                         SizedBox(height: media.width * 0.1),
 
-                        // ✅ BÀI TẬP TẠI NHÀ
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              LocaleKey.homeEx.tr,
-                              style: TextStyle(
-                                color: textColor,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ],
+                        // ✅ BÀI TẬP TẠI NHÀ - Dùng CustomSectionHeader
+                        CustomSectionHeader(
+                          title: LocaleKey.homeEx.tr,
+                          textColor: textColor,
                         ),
 
                         StreamBuilder<List<ExerciseCategory>>(

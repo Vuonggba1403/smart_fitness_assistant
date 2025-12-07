@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_section_header.dart'; // ✅ Import custom widget
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/components/workout_row.dart';
-import 'finished_workout_view.dart';
 
 class LatestWorkoutView extends StatelessWidget {
   final List<dynamic> lastWorkoutArr;
@@ -18,59 +17,48 @@ class LatestWorkoutView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildHeader(context),
-        _buildWorkoutList(context),
+        // ✅ Dùng CustomSectionHeader
+        CustomSectionHeader(
+          title: LocaleKey.latestWorkout.tr,
+          actionText: LocaleKey.seeMore.tr,
+          onActionPressed: onSeeMorePressed,
+          textColor: textColor,
+        ),
+
+        // ✅ Hiển thị danh sách workout
+        lastWorkoutArr.isEmpty
+            ? Padding(
+                padding: const EdgeInsets.all(20),
+                child: Text(
+                  "Chưa có bài tập nào 📋",
+                  style: TextStyle(
+                    color: textColor?.withOpacity(0.6),
+                    fontSize: 14,
+                  ),
+                ),
+              )
+            : ListView.builder(
+                padding: EdgeInsets.zero,
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: lastWorkoutArr.length,
+                itemBuilder: (context, index) {
+                  var wObj = lastWorkoutArr[index];
+                  return WorkoutRow(
+                    key: ValueKey('workout_$index'),
+                    wObj: wObj,
+                  );
+                },
+              ),
+
         SizedBox(height: media.width * 0.1),
       ],
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    final theme = Theme.of(context); // 🌙 Lấy theme động
-    final textColor = theme.textTheme.bodyMedium?.color; // Màu text chính
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          LocaleKey.latestWorkout.tr,
-          style: TextStyle(
-            color: textColor,
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        TextButton(
-          onPressed: onSeeMorePressed,
-          child: Text(
-            LocaleKey.seeMore.tr,
-            style: TextStyle(
-              color: textColor,
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildWorkoutList(BuildContext context) {
-    return ListView.builder(
-      padding: EdgeInsets.zero,
-      physics: const NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      itemCount: lastWorkoutArr.length,
-      itemBuilder: (context, index) {
-        var wObj = lastWorkoutArr[index];
-        return InkWell(
-          onTap: () => navigateTo(context, FinishedWorkoutView()),
-          child: WorkoutRow(wObj: wObj),
-        );
-      },
     );
   }
 }

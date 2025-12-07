@@ -20,42 +20,33 @@ import 'package:smart_fitness_assistant/views/home/ui/widgets/lastest_workout_vi
 import 'package:smart_fitness_assistant/views/home/ui/widgets/workout_progress_view.dart';
 import '../../notifications/ui/notification_view.dart';
 
-class HomeView extends StatelessWidget {
+class HomeView extends StatefulWidget {
   const HomeView({super.key});
 
-  static const List<FlSpot> allSpots = [
-    FlSpot(0, 20),
-    FlSpot(1, 25),
-    FlSpot(2, 40),
-    FlSpot(3, 50),
-    FlSpot(4, 35),
-    FlSpot(5, 40),
-    FlSpot(6, 30),
-    FlSpot(7, 20),
-    FlSpot(8, 25),
-    FlSpot(9, 40),
-    FlSpot(10, 50),
-    FlSpot(11, 35),
-    FlSpot(12, 50),
-    FlSpot(13, 60),
-    FlSpot(14, 40),
-    FlSpot(15, 50),
-    FlSpot(16, 20),
-    FlSpot(17, 25),
-    FlSpot(18, 40),
-    FlSpot(19, 50),
-    FlSpot(20, 35),
-    FlSpot(21, 80),
-    FlSpot(22, 30),
-    FlSpot(23, 20),
-    FlSpot(24, 25),
-    FlSpot(25, 40),
-    FlSpot(26, 50),
-    FlSpot(27, 35),
-    FlSpot(28, 50),
-    FlSpot(29, 60),
-    FlSpot(30, 40),
-  ];
+  @override
+  State<HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this); // ✅ Lắng nghe lifecycle
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // ✅ Khi app resume (quay lại từ background) → Refresh
+    if (state == AppLifecycleState.resumed && mounted) {
+      context.read<HomeCubit>().refreshWorkouts();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -119,4 +119,10 @@ class LocaleKey {
   static const String titleDialog = "title_dialog";
   static const String contentDialog = "content_dialog";
   static const String buttonStart = "button_start";
+
+  static const String justNow = "just_now";
+  static const String minutesAgo = "minutes_ago";
+  static const String hoursAgo = "hours_ago";
+  static const String daysAgo = "days_ago";
+  static const String weeksAgo = "weeks_ago";
 }

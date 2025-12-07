@@ -124,4 +124,11 @@ Map<String, String> viVN = {
   LocaleKey.reps: "Reps",
   LocaleKey.titleDialog: "Ngừng Tập",
   LocaleKey.contentDialog: "Bạn có chắc chắn muốn ngừng tập không?",
+
+  // Time ago
+  LocaleKey.justNow: "Vừa xong",
+  LocaleKey.minutesAgo: "phút trước",
+  LocaleKey.hoursAgo: "giờ trước",
+  LocaleKey.daysAgo: "ngày trước",
+  LocaleKey.weeksAgo: "tuần trước",
 };

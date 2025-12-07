@@ -123,4 +123,11 @@ Map<String, String> enUs = {
   LocaleKey.reps: "Reps",
   LocaleKey.titleDialog: "Stop Workout",
   LocaleKey.contentDialog: "Are you sure you want to stop this workout?",
+
+  // Time ago
+  LocaleKey.justNow: "Just now",
+  LocaleKey.minutesAgo: "minutes ago",
+  LocaleKey.hoursAgo: "hours ago",
+  LocaleKey.daysAgo: "days ago",
+  LocaleKey.weeksAgo: "weeks ago",
 };
