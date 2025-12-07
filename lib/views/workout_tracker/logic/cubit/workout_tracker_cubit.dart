@@ -687,7 +687,7 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
     }
   }
 
-  /// ✅ Load workout stats cho biểu đồ (7 ngày gần nhất) - FIX: Giới hạn 100%
+  /// ✅ Load workout stats cho biểu đồ (7 ngày gần nhất)
   Future<List<double>> loadWeeklyWorkoutStats({
     bool forceRefresh = false,
   }) async {
@@ -700,33 +700,54 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
       if (userId == null) return List.filled(7, 0.0);
 
       final now = DateTime.now();
-      final startOfWeek = now.subtract(Duration(days: now.weekday % 7));
+
+      // ✅ FIX: Lấy từ đầu tuần (Chủ nhật = 0)
+      final startOfWeek = DateTime(
+        now.year,
+        now.month,
+        now.day - now.weekday % 7,
+      );
+
+      print('📊 Loading stats from: $startOfWeek to $now');
 
       final response = await _supabase
           .from('history_workout')
           .select('created_at, completed_exercises, total_exercises')
           .eq('for_user', userId)
           .gte('created_at', startOfWeek.toIso8601String())
+          .lte('created_at', now.toIso8601String())
           .order('created_at');
+
+      print('📦 Found ${response.length} workout records');
 
       final stats = List<double>.filled(7, 0.0);
       final counts = List<int>.filled(7, 0);
 
       for (var record in response) {
         final createdAt = DateTime.parse(record['created_at']);
-        final dayIndex = createdAt.weekday % 7;
+        final dayIndex = createdAt.weekday % 7; // 0 = Sunday, 1 = Monday, ...
 
         final completed = (record['completed_exercises'] ?? 0) as int;
         final total = (record['total_exercises'] ?? 1) as int;
+
+        // ✅ FIX: Tính % chính xác
         final percent = total > 0 ? (completed / total) * 100 : 0.0;
+
+        print(
+          '   Day $dayIndex: $completed/$total = ${percent.toStringAsFixed(1)}%',
+        );
 
         stats[dayIndex] += percent;
         counts[dayIndex]++;
       }
 
+      // ✅ Tính trung bình nếu có nhiều workout trong 1 ngày
       for (int i = 0; i < 7; i++) {
         if (counts[i] > 0) {
           stats[i] = (stats[i] / counts[i]).clamp(0.0, 100.0);
+          print(
+            '✅ Day $i final: ${stats[i].toStringAsFixed(1)}% (${counts[i]} workouts)',
+          );
         }
       }
 

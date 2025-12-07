@@ -123,36 +123,39 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
         return;
       }
 
-      // Kiểm tra thời gian đã chọn phải sau hiện tại
-      if (scheduledTime.isBefore(DateTime.now())) {
+      final now = DateTime.now();
+
+      // ✅ Kiểm tra thời gian tập phải sau ít nhất 1 phút
+      final minScheduledTime = now.add(const Duration(minutes: 1));
+
+      if (scheduledTime.isBefore(minScheduledTime)) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Vui lòng chọn thời gian trong tương lai'),
+            SnackBar(
+              content: Text(
+                'Vui lòng chọn thời gian ít nhất sau ${_formatTime(minScheduledTime)}',
+              ),
               backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
             ),
           );
         }
         return;
       }
 
-      // ✅ Lên lịch notification trước 15 phút
-      final notificationTime = scheduledTime.subtract(
-        const Duration(minutes: 15),
-      );
-
+      // ✅ FIX: Báo ĐÚNG GIỜ user chọn (không trừ 15 phút)
       await _notificationService.scheduleWorkoutNotification(
         id: workout.categoryId.hashCode,
-        title: 'Nhắc nhở tập luyện 🏋️',
-        body: '${workout.categoryName} - 15 phút nữa sẽ bắt đầu!',
-        scheduledTime: notificationTime,
+        title: '⏰ Đã đến giờ tập luyện!',
+        body: '${workout.categoryName} - Bắt đầu ngay thôi! 💪',
+        scheduledTime: scheduledTime, // ✅ Đúng giờ user chọn
       );
 
       // ✅ Debug: Kiểm tra pending notifications
       final pending = await _notificationService.getPendingNotifications();
       print('📋 Pending notifications: ${pending.length}');
       for (final p in pending) {
-        print('   - ID: ${p.id}, Title: ${p.title}, Body: ${p.body}');
+        print('   - ID: ${p.id}, Title: ${p.title}');
       }
 
       if (mounted) {
@@ -160,18 +163,17 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
         setState(() {
           _upcomingWorkouts[index] = workout.copyWith(
             isNotificationEnabled: true,
-            scheduledTime: scheduledTime, // ✅ LƯU thời gian user chọn
+            scheduledTime: scheduledTime,
           );
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Nhắc nhở: ${_formatDateTime(notificationTime)}\n'
-              'Tập lúc: ${_formatDateTime(scheduledTime)}',
+              '✅ Đã đặt nhắc nhở lúc ${_formatTime(scheduledTime)}',
             ),
             backgroundColor: Colors.green,
-            duration: const Duration(seconds: 4),
+            duration: const Duration(seconds: 3),
           ),
         );
       }
@@ -196,6 +198,13 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
         );
       }
     }
+  }
+
+  /// ✅ Format time only (HH:mm)
+  String _formatTime(DateTime dateTime) {
+    final hour = dateTime.hour.toString().padLeft(2, '0');
+    final minute = dateTime.minute.toString().padLeft(2, '0');
+    return '$hour:$minute';
   }
 
   /// ✅ Format datetime cho thông báo
