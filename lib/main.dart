@@ -12,9 +12,19 @@ import 'core/functions/app_shared.dart';
 import 'locale/translation_manager.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/logic/cubit/workout_tracker_cubit.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:smart_fitness_assistant/core/services/notification_service.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // ✅ Khởi tạo timezone TRƯỚC khi chạy app
+  tz.initializeTimeZones();
+
+  // ✅ Khởi tạo notification service
+  final notificationService = NotificationService();
+  await notificationService.initialize();
+  await notificationService.requestPermissions();
 
   //Khoi tao SharedPreferences
   await AppShared.init();
@@ -26,6 +36,7 @@ void main() async {
     url: 'https://tlmvkajvubxejucfxibw.supabase.co',
     anonKey: anonKey,
   );
+
   runApp(
     MultiBlocProvider(
       providers: [

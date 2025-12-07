@@ -8,6 +8,7 @@ import 'package:smart_fitness_assistant/core/widgets/custom_container_check.dart
 import 'package:smart_fitness_assistant/core/widgets/custom_sliverbar.dart';
 import 'package:smart_fitness_assistant/core/models/exercise_category.dart';
 import 'package:smart_fitness_assistant/core/models/workout_progress.dart'; // ✅ Thêm import
+import 'package:smart_fitness_assistant/core/models/upcoming_workout.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/workour_detail_view.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +17,8 @@ import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/workout
 import '../../../locale/locale_key.dart';
 import 'widgets/common/upcoming_workout_row.dart';
 import 'widgets/common/what_train_row.dart';
+import 'package:smart_fitness_assistant/core/services/notification_service.dart';
+import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/common/time_picker_dialog.dart';
 
 class WorkoutTrackerView extends StatefulWidget {
   const WorkoutTrackerView({super.key, required this.title});
@@ -27,19 +30,182 @@ class WorkoutTrackerView extends StatefulWidget {
 
 class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
   late Stream<List<ExerciseCategory>> _categoriesStream;
+  late Stream<List<ExerciseCategory>> _gymCategoriesStream; // ✅ THÊM
+  late Stream<List<ExerciseCategory>> _homeCategoriesStream; // ✅ THÊM
+  final NotificationService _notificationService = NotificationService();
+  List<UpcomingWorkout> _upcomingWorkouts = [];
+  int _rebuildKey = 0;
+  List<double> _weeklyStats = List.filled(7, 0.0);
+  final GlobalKey _upcomingKey = GlobalKey();
+  final GlobalKey _gymCategoriesKey = GlobalKey(); // ✅ THÊM
+  final GlobalKey _homeCategoriesKey = GlobalKey(); // ✅ THÊM
 
-  List latestArr = [
-    {
-      "image": "assets/img/Workout1.png",
-      "title": "Fullbody Workout",
-      "time": "Today, 03:00pm",
-    },
-    {
-      "image": "assets/img/Workout2.png",
-      "title": "Upperbody Workout",
-      "time": "June 05, 02:00pm",
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _initializeNotifications();
+    _loadInitialData();
+    _forceRefreshStreams(); // ✅ THÊM force refresh
+  }
+
+  /// ✅ Force refresh streams
+  void _forceRefreshStreams() {
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        setState(() {
+          // Force rebuild tất cả streams
+        });
+      }
+    });
+  }
+
+  /// ✅ Load tất cả data khi khởi động app
+  Future<void> _loadInitialData() async {
+    final cubit = context.read<WorkoutTrackerCubit>();
+
+    // Load parallel để nhanh hơn
+    await Future.wait([
+      cubit.loadWeeklyWorkoutStats().then((stats) {
+        if (mounted) {
+          setState(() {
+            _weeklyStats = stats;
+          });
+        }
+      }),
+      cubit.loadUpcomingWorkouts().then((workouts) {
+        if (mounted) {
+          setState(() {
+            _upcomingWorkouts = workouts;
+          });
+        }
+      }),
+    ]);
+  }
+
+  /// ✅ Refresh data sau khi hoàn thành workout
+  Future<void> _refreshData() async {
+    final cubit = context.read<WorkoutTrackerCubit>();
+    cubit.clearCache(); // ✅ Clear cache trước khi load lại
+
+    await Future.wait([
+      cubit.loadWeeklyWorkoutStats(forceRefresh: true).then((stats) {
+        if (mounted) {
+          setState(() {
+            _weeklyStats = stats;
+          });
+        }
+      }),
+      cubit.loadUpcomingWorkouts(forceRefresh: true).then((workouts) {
+        if (mounted) {
+          setState(() {
+            _upcomingWorkouts = workouts;
+          });
+        }
+      }),
+    ]);
+  }
+
+  Future<void> _initializeNotifications() async {
+    await _notificationService.initialize();
+    await _notificationService.requestPermissions();
+  }
+
+  /// ✅ Toggle notification cho workout với chọn giờ
+  Future<void> _toggleNotification(int index, bool enabled) async {
+    final workout = _upcomingWorkouts[index];
+
+    if (enabled) {
+      // ✅ Hiển thị dialog chọn giờ
+      final scheduledTime = await WorkoutTimePicker.show(context);
+
+      if (scheduledTime == null) {
+        // ❌ User hủy → Không làm gì
+        return;
+      }
+
+      // Kiểm tra thời gian đã chọn phải sau hiện tại
+      if (scheduledTime.isBefore(DateTime.now())) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Vui lòng chọn thời gian trong tương lai'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
+      // ✅ Lên lịch notification trước 15 phút
+      final notificationTime = scheduledTime.subtract(
+        const Duration(minutes: 15),
+      );
+
+      await _notificationService.scheduleWorkoutNotification(
+        id: workout.categoryId.hashCode,
+        title: 'Nhắc nhở tập luyện 🏋️',
+        body: '${workout.categoryName} - 15 phút nữa sẽ bắt đầu!',
+        scheduledTime: notificationTime,
+      );
+
+      // ✅ Debug: Kiểm tra pending notifications
+      final pending = await _notificationService.getPendingNotifications();
+      print('📋 Pending notifications: ${pending.length}');
+      for (final p in pending) {
+        print('   - ID: ${p.id}, Title: ${p.title}, Body: ${p.body}');
+      }
+
+      if (mounted) {
+        // ✅ Cập nhật state với thời gian mới
+        setState(() {
+          _upcomingWorkouts[index] = workout.copyWith(
+            isNotificationEnabled: true,
+            scheduledTime: scheduledTime, // ✅ LƯU thời gian user chọn
+          );
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Nhắc nhở: ${_formatDateTime(notificationTime)}\n'
+              'Tập lúc: ${_formatDateTime(scheduledTime)}',
+            ),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    } else {
+      // ✅ TẮT notification
+      await _notificationService.cancelNotification(
+        workout.categoryId.hashCode,
+      );
+
+      if (mounted) {
+        setState(() {
+          _upcomingWorkouts[index] = workout.copyWith(
+            isNotificationEnabled: false,
+          );
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Đã hủy nhắc nhở'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    }
+  }
+
+  /// ✅ Format datetime cho thông báo
+  String _formatDateTime(DateTime dateTime) {
+    final hour = dateTime.hour.toString().padLeft(2, '0');
+    final minute = dateTime.minute.toString().padLeft(2, '0');
+    final day = dateTime.day.toString().padLeft(2, '0');
+    final month = dateTime.month.toString().padLeft(2, '0');
+    return '$hour:$minute - $day/$month';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,10 +217,12 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
       create: (context) => WorkoutTrackerCubit(),
       child: Builder(
         builder: (context) {
-          // Khởi tạo stream để lấy danh sách categories với số lượng exercises thực tế
-          _categoriesStream = context
-              .read<WorkoutTrackerCubit>()
-              .streamExerciseCategoriesWithCount();
+          final cubit = context.read<WorkoutTrackerCubit>();
+
+          // ✅ Tạo 3 streams riêng biệt
+          _categoriesStream = cubit.streamExerciseCategoriesWithCount();
+          _gymCategoriesStream = cubit.streamGymCategories();
+          _homeCategoriesStream = cubit.streamHomeCategories();
 
           return Container(
             decoration: BoxDecoration(
@@ -65,7 +233,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                 return [
                   CustomSliverAppBar(text: widget.title),
 
-                  /// Phần biểu đồ (Chart Section)
+                  /// Phần biểu đồ (Chart Section) - ✅ Hiển thị dữ liệu thực
                   SliverAppBar(
                     backgroundColor: Colors.transparent,
                     centerTitle: true,
@@ -80,7 +248,8 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                       child: LineChart(
                         LineChartData(
                           lineTouchData: lineTouchData1,
-                          lineBarsData: lineBarsData1,
+                          lineBarsData:
+                              _buildChartData(), // ✅ Dùng dữ liệu thực
                           minY: -0.5,
                           maxY: 110,
                           titlesData: FlTitlesData(
@@ -119,15 +288,12 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                     topRight: Radius.circular(25),
                   ),
                 ),
-
                 child: Scaffold(
                   backgroundColor: Colors.transparent,
                   body: SingleChildScrollView(
                     child: Column(
                       children: [
                         const SizedBox(height: 10),
-
-                        /// Icon thanh kéo (Slider icon)
                         Container(
                           width: 50,
                           height: 4,
@@ -148,51 +314,47 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
 
                         SizedBox(height: media.width * 0.05),
 
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              LocaleKey.upCommingWork.tr,
-                              style: TextStyle(
-                                color: textColor,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () {},
-                              child: Text(
-                                LocaleKey.seeMore.tr,
-                                style: TextStyle(
-                                  color: textColor?.withOpacity(0.6),
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
+                        /// ✅ Upcoming Workouts - Không dùng FutureBuilder
+                        _upcomingWorkouts.isEmpty
+                            ? Padding(
+                                padding: const EdgeInsets.all(20),
+                                child: Text(
+                                  "Tất cả bài tập đã hoàn thành! 🎉",
+                                  style: TextStyle(
+                                    color: Colors.green,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
-                              ),
-                            ),
-                          ],
-                        ),
+                              )
+                            : ListView.builder(
+                                padding: EdgeInsets.zero,
+                                physics: const NeverScrollableScrollPhysics(),
+                                shrinkWrap: true,
+                                itemCount: _upcomingWorkouts.length,
+                                itemBuilder: (context, index) {
+                                  final workout = _upcomingWorkouts[index];
 
-                        /// Danh sách bài tập sắp tới (Upcoming list)
-                        ListView.builder(
-                          padding: EdgeInsets.zero,
-                          physics: const NeverScrollableScrollPhysics(),
-                          shrinkWrap: true,
-                          itemCount: latestArr.length,
-                          itemBuilder: (context, index) {
-                            var wObj = latestArr[index];
-                            return UpcomingWorkoutRow(wObj: wObj, index: index);
-                          },
-                        ),
+                                  return UpcomingWorkoutRow(
+                                    key: ValueKey(
+                                      'upcoming_${workout.categoryId}_$index',
+                                    ),
+                                    workout: workout,
+                                    onNotificationToggle: (enabled) {
+                                      _toggleNotification(index, enabled);
+                                    },
+                                  );
+                                },
+                              ),
 
                         SizedBox(height: media.width * 0.05),
 
-                        /// Tiêu đề phần bài tập
+                        // ✅ BÀI TẬP TẠI PHÒNG GYM
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              LocaleKey.titleEx.tr,
+                              LocaleKey.gymEx.tr,
                               style: TextStyle(
                                 color: textColor,
                                 fontSize: 16,
@@ -202,17 +364,10 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                           ],
                         ),
 
-                        /// Danh sách categories với StreamBuilder
                         StreamBuilder<List<ExerciseCategory>>(
-                          stream: _categoriesStream,
+                          key: _gymCategoriesKey,
+                          stream: _gymCategoriesStream, // ✅ Dùng stream GYM
                           builder: (context, snapshot) {
-                            // Đang chờ dữ liệu
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return CustomCircleProgIndicator();
-                            }
-
-                            // Có lỗi xảy ra
                             if (snapshot.hasError) {
                               return Padding(
                                 padding: const EdgeInsets.all(20),
@@ -225,18 +380,16 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
 
                             final categories = snapshot.data ?? [];
 
-                            // Không có dữ liệu
                             if (categories.isEmpty) {
                               return Padding(
                                 padding: const EdgeInsets.all(20),
                                 child: Text(
-                                  "No exercises found",
+                                  "Không có bài tập tại phòng gym",
                                   style: TextStyle(color: textColor),
                                 ),
                               );
                             }
 
-                            // Hiển thị danh sách categories
                             return ListView.builder(
                               padding: EdgeInsets.zero,
                               physics: const NeverScrollableScrollPhysics(),
@@ -248,8 +401,11 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                                     .read<WorkoutTrackerCubit>();
 
                                 return InkWell(
-                                  onTap: () {
-                                    navigateTo(
+                                  key: ValueKey(
+                                    'gym_category_${category.id}_$index',
+                                  ),
+                                  onTap: () async {
+                                    await navigateTo(
                                       context,
                                       BlocProvider.value(
                                         value: cubit,
@@ -258,6 +414,11 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                                         ),
                                       ),
                                     );
+
+                                    await _refreshData();
+                                    setState(() {
+                                      _rebuildKey++;
+                                    });
                                   },
                                   child: FutureBuilder<List<dynamic>>(
                                     future: Future.wait([
@@ -274,10 +435,115 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                                           : <String, WorkoutProgress>{};
 
                                       return WhatTrainRow(
+                                        key: ValueKey(
+                                          'gym_row_${category.id}_$_rebuildKey',
+                                        ),
                                         category: category,
                                         exerciseCount: exerciseCount,
-                                        progressMap:
-                                            progressMap, // ✅ Truyền progress
+                                        progressMap: progressMap,
+                                      );
+                                    },
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
+
+                        SizedBox(height: media.width * 0.1),
+
+                        // ✅ BÀI TẬP TẠI NHÀ
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              LocaleKey.homeEx.tr,
+                              style: TextStyle(
+                                color: textColor,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        StreamBuilder<List<ExerciseCategory>>(
+                          key: _homeCategoriesKey,
+                          stream: _homeCategoriesStream, // ✅ Dùng stream HOME
+                          builder: (context, snapshot) {
+                            if (snapshot.hasError) {
+                              return Padding(
+                                padding: const EdgeInsets.all(20),
+                                child: Text(
+                                  "Error: ${snapshot.error}",
+                                  style: TextStyle(color: textColor),
+                                ),
+                              );
+                            }
+
+                            final categories = snapshot.data ?? [];
+
+                            if (categories.isEmpty) {
+                              return Padding(
+                                padding: const EdgeInsets.all(20),
+                                child: Text(
+                                  "Không có bài tập tại nhà",
+                                  style: TextStyle(color: textColor),
+                                ),
+                              );
+                            }
+
+                            return ListView.builder(
+                              padding: EdgeInsets.zero,
+                              physics: const NeverScrollableScrollPhysics(),
+                              shrinkWrap: true,
+                              itemCount: categories.length,
+                              itemBuilder: (context, index) {
+                                final category = categories[index];
+                                final cubit = context
+                                    .read<WorkoutTrackerCubit>();
+
+                                return InkWell(
+                                  key: ValueKey(
+                                    'home_category_${category.id}_$index',
+                                  ),
+                                  onTap: () async {
+                                    await navigateTo(
+                                      context,
+                                      BlocProvider.value(
+                                        value: cubit,
+                                        child: WorkoutDetailView(
+                                          dObj: category.toJson(),
+                                        ),
+                                      ),
+                                    );
+
+                                    await _refreshData();
+                                    setState(() {
+                                      _rebuildKey++;
+                                    });
+                                  },
+                                  child: FutureBuilder<List<dynamic>>(
+                                    future: Future.wait([
+                                      cubit.getExerciseCount(category.id ?? ''),
+                                      cubit.loadProgress(category.id ?? ''),
+                                    ]),
+                                    builder: (context, snapshot) {
+                                      final exerciseCount = snapshot.hasData
+                                          ? snapshot.data![0] as int
+                                          : 0;
+                                      final progressMap = snapshot.hasData
+                                          ? snapshot.data![1]
+                                                as Map<String, WorkoutProgress>
+                                          : <String, WorkoutProgress>{};
+
+                                      return WhatTrainRow(
+                                        key: ValueKey(
+                                          'home_row_${category.id}_$_rebuildKey',
+                                        ),
+                                        category: category,
+                                        exerciseCount: exerciseCount,
+                                        progressMap: progressMap,
                                       );
                                     },
                                   ),
@@ -300,49 +566,24 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
     );
   }
 
-  /// Cấu hình touch data cho line chart
+  // ✅ Build chart data từ weekly stats thực tế
+  List<LineChartBarData> _buildChartData() {
+    return [
+      LineChartBarData(
+        isCurved: true,
+        color: TColor.white,
+        barWidth: 4,
+        isStrokeCapRound: true,
+        dotData: const FlDotData(show: false),
+        belowBarData: BarAreaData(show: false),
+        spots: _weeklyStats.asMap().entries.map((entry) {
+          return FlSpot((entry.key + 1).toDouble(), entry.value);
+        }).toList(),
+      ),
+    ];
+  }
+
   LineTouchData get lineTouchData1 => LineTouchData(handleBuiltInTouches: true);
-
-  List<LineChartBarData> get lineBarsData1 => [
-    lineChartBarData1_1,
-    lineChartBarData1_2,
-  ];
-
-  LineChartBarData get lineChartBarData1_1 => LineChartBarData(
-    isCurved: true,
-    color: TColor.white,
-    barWidth: 4,
-    isStrokeCapRound: true,
-    dotData: const FlDotData(show: false),
-    belowBarData: BarAreaData(show: false),
-    spots: const [
-      FlSpot(1, 35),
-      FlSpot(2, 70),
-      FlSpot(3, 40),
-      FlSpot(4, 80),
-      FlSpot(5, 25),
-      FlSpot(6, 70),
-      FlSpot(7, 35),
-    ],
-  );
-
-  LineChartBarData get lineChartBarData1_2 => LineChartBarData(
-    isCurved: true,
-    color: TColor.white.withOpacity(0.5),
-    barWidth: 2,
-    isStrokeCapRound: true,
-    dotData: const FlDotData(show: false),
-    belowBarData: BarAreaData(show: false),
-    spots: const [
-      FlSpot(1, 80),
-      FlSpot(2, 50),
-      FlSpot(3, 90),
-      FlSpot(4, 40),
-      FlSpot(5, 80),
-      FlSpot(6, 35),
-      FlSpot(7, 60),
-    ],
-  );
 
   SideTitles get rightTitles => SideTitles(
     getTitlesWidget: rightTitleWidgets,

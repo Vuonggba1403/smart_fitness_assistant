@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
-import 'package:smart_fitness_assistant/core/models/exercise_item.dart'; // ✅ Fix import
+import 'package:smart_fitness_assistant/core/models/exercise_item.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/logic/cubit/workout_tracker_cubit.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/common/bottom_sheet_details.dart';
@@ -22,6 +22,8 @@ class WorkoutDetailView extends StatefulWidget {
 
 class _WorkoutDetailViewState extends State<WorkoutDetailView>
     with WidgetsBindingObserver {
+  bool _isImagesCached = false;
+
   @override
   void initState() {
     super.initState();
@@ -51,6 +53,41 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
     }
   }
 
+  Future<void> _preCacheExerciseImages(List<ExerciseItem> exercises) async {
+    if (_isImagesCached) return;
+
+    for (final exercise in exercises) {
+      try {
+        await precacheImage(
+          CachedNetworkImageProvider(exercise.imageUrl),
+          context,
+        );
+
+        if (exercise.imgMuscleGroups != null &&
+            exercise.imgMuscleGroups!.isNotEmpty) {
+          await precacheImage(
+            CachedNetworkImageProvider(exercise.imgMuscleGroups!),
+            context,
+          );
+        }
+
+        for (final device in exercise.devices) {
+          if (device.imgUrl != null && device.imgUrl!.isNotEmpty) {
+            await precacheImage(
+              CachedNetworkImageProvider(device.imgUrl!),
+              context,
+            );
+          }
+        }
+      } catch (e) {
+        print('⚠️ Failed to precache: ${exercise.title}');
+      }
+    }
+
+    _isImagesCached = true;
+    print('✅ All images pre-cached!');
+  }
+
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
@@ -76,25 +113,22 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
               flexibleSpace: FlexibleSpaceBar(
                 background: Stack(
                   children: [
-                    Hero(
-                      tag: 'workout_${widget.dObj["img_url"]}',
-                      child: CachedNetworkImage(
-                        imageUrl: widget.dObj["img_url"]?.toString() ?? '',
-                        width: double.infinity,
-                        height: double.infinity,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) => Container(
-                          color: Colors.transparent,
-                          child: CustomCircleProgIndicator(),
-                        ),
-                        errorWidget: (context, url, error) => Container(
-                          color: Colors.transparent,
-                          child: Center(
-                            child: Icon(
-                              Icons.fitness_center,
-                              size: media.width * 0.3,
-                              color: TColor.white.withOpacity(0.5),
-                            ),
+                    CachedNetworkImage(
+                      imageUrl: widget.dObj["img_url"]?.toString() ?? '',
+                      width: double.infinity,
+                      height: double.infinity,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(
+                        color: Colors.transparent,
+                        child: CustomCircleProgIndicator(),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        color: Colors.transparent,
+                        child: Center(
+                          child: Icon(
+                            Icons.fitness_center,
+                            size: media.width * 0.3,
+                            color: TColor.white.withOpacity(0.5),
                           ),
                         ),
                       ),
@@ -207,7 +241,6 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
                                     ),
                                   ),
                                 ).then((_) {
-                                  // ✅ Reload data khi quay lại
                                   _loadData();
                                 });
                               }
@@ -226,14 +259,11 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
     );
   }
 
-  /// Xây dựng phần header với tiêu đề và thông tin
-  /// Sử dụng BlocBuilder để tính exerciseCount từ state
   Widget _buildHeader(Color? textColor) {
     return BlocBuilder<WorkoutTrackerCubit, WorkoutTrackerState>(
       builder: (context, state) {
         int exerciseCount = 0;
 
-        // Nếu đã load xong exercises, tính số lượng
         if (state is WorkoutDetailLoaded) {
           exerciseCount = state.exerciseCount;
         }
@@ -254,7 +284,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
                     ),
                   ),
                   Text(
-                    "$exerciseCount ${LocaleKey.exercises.tr} | 320 ${LocaleKey.kcal.tr}",
+                    "$exerciseCount ${LocaleKey.exercises.tr}",
                     style: TextStyle(
                       color: textColor?.withOpacity(0.6),
                       fontSize: 12,
@@ -269,7 +299,6 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
     );
   }
 
-  /// Xây dựng phần danh sách thiết bị với BlocBuilder
   Widget _buildDevicesSection(Size media, Color? textColor, Color cardColor) {
     return BlocBuilder<WorkoutTrackerCubit, WorkoutTrackerState>(
       builder: (context, state) {
@@ -292,8 +321,6 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
     );
   }
 
-  /// Xây dựng header của phần thiết bị
-  /// Tính số lượng thiết bị unique từ exercises
   Widget _buildDevicesHeader(
     BuildContext context,
     WorkoutTrackerState state,
@@ -303,7 +330,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
     if (state is WorkoutDetailLoaded) {
       final uniqueDevices = context
           .read<WorkoutTrackerCubit>()
-          .getUniqueDevices(state.exercises); // ✅ Pass List<ExerciseItem>
+          .getUniqueDevices(state.exercises);
       deviceCount = uniqueDevices.length;
     }
 
@@ -329,7 +356,6 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
     );
   }
 
-  /// Xây dựng danh sách thiết bị với ảnh riêng
   Widget _buildDevicesList(
     BuildContext context,
     WorkoutTrackerState state,
@@ -337,12 +363,10 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
     Color? textColor,
     Color cardColor,
   ) {
-    // Đang tải dữ liệu
     if (state is WorkoutDetailLoading) {
       return CustomCircleProgIndicator();
     }
 
-    // Có lỗi xảy ra
     if (state is WorkoutDetailError) {
       return Center(
         child: Text(
@@ -352,7 +376,6 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
       );
     }
 
-    // Không có dữ liệu hoặc trạng thái khởi tạo
     if (state is WorkoutDetailEmpty || state is WorkoutTrackerInitial) {
       return Center(
         child: Text(
@@ -362,12 +385,9 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
       );
     }
 
-    // Đã tải dữ liệu thành công
     if (state is WorkoutDetailLoaded) {
       final cubit = context.read<WorkoutTrackerCubit>();
       final exercises = state.exercises;
-
-      // ✅ Giờ là List<Device> thay vì List<String>
       final uniqueDevices = cubit.getUniqueDevices(exercises);
 
       if (uniqueDevices.isEmpty) {
@@ -387,11 +407,11 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
         shrinkWrap: true,
         itemCount: uniqueDevices.length,
         itemBuilder: (context, index) {
-          final device = uniqueDevices[index]; // ✅ Device object
+          final device = uniqueDevices[index];
 
           return _buildDeviceCard(
-            device.name, // ✅ Tên device
-            device.imgUrl ?? '', // ✅ Ảnh từ Device model
+            device.name,
+            device.imgUrl ?? '',
             media,
             textColor,
             cardColor,
@@ -403,7 +423,6 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
     return const SizedBox.shrink();
   }
 
-  /// Xây dựng card hiển thị thiết bị
   Widget _buildDeviceCard(
     String deviceName,
     String imageUrl,
@@ -421,7 +440,6 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
             width: media.width * 0.35,
             decoration: BoxDecoration(
               border: Border.all(color: TColor.primaryColor1, width: 1),
-              // color: TColor.primaryColor1,
               gradient: LinearGradient(
                 colors: AppTheme.gradientColors1(Get.context!),
               ),
@@ -459,7 +477,6 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
     );
   }
 
-  /// Xây dựng phần danh sách exercises
   Widget _buildExercisesSection(Color? textColor, Color cardColor) {
     return BlocBuilder<WorkoutTrackerCubit, WorkoutTrackerState>(
       builder: (context, state) {
@@ -473,11 +490,10 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
     );
   }
 
-  /// Xây dựng header của phần exercises
   Widget _buildExercisesHeader(WorkoutTrackerState state, Color? textColor) {
     int exerciseCount = 0;
     if (state is WorkoutDetailLoaded) {
-      exerciseCount = state.exerciseCount; // ✅ Dùng getter từ state
+      exerciseCount = state.exerciseCount;
     }
 
     return Row(
@@ -502,18 +518,15 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
     );
   }
 
-  /// Xây dựng danh sách exercises dựa trên state
   Widget _buildExercisesList(
     WorkoutTrackerState state,
     Color? textColor,
     Color cardColor,
   ) {
-    // Đang tải dữ liệu
-    if (state is WorkoutDetailLoading) {
-      return CustomCircleProgIndicator();
-    }
+    // if (state is WorkoutDetailLoading) {
+    //   return CustomCircleProgIndicator();
+    // }
 
-    // Có lỗi xảy ra
     if (state is WorkoutDetailError) {
       return Center(
         child: Padding(
@@ -526,7 +539,6 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
       );
     }
 
-    // Không có dữ liệu hoặc trạng thái khởi tạo
     if (state is WorkoutDetailEmpty || state is WorkoutTrackerInitial) {
       return Center(
         child: Padding(
@@ -539,9 +551,12 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
       );
     }
 
-    // Đã tải dữ liệu thành công
     if (state is WorkoutDetailLoaded) {
-      final exercises = state.exercises; // ✅ List<ExerciseItem>
+      final exercises = state.exercises;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _preCacheExerciseImages(exercises);
+      });
 
       return ListView.builder(
         padding: EdgeInsets.zero,
@@ -549,8 +564,13 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
         shrinkWrap: true,
         itemCount: exercises.length,
         itemBuilder: (context, index) {
-          final exercise = exercises[index]; // ✅ ExerciseItem
-          return _buildExerciseCard(exercise, textColor, cardColor);
+          final exercise = exercises[index];
+          return _buildExerciseCard(
+            exercise,
+            textColor,
+            cardColor,
+            key: ValueKey('exercise_${exercise.id}'),
+          );
         },
       );
     }
@@ -558,14 +578,14 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
     return const SizedBox.shrink();
   }
 
-  /// Xây dựng card hiển thị exercise
-  /// Sử dụng ExerciseItem model với type-safe properties
   Widget _buildExerciseCard(
     ExerciseItem exercise,
     Color? textColor,
-    Color cardColor,
-  ) {
+    Color cardColor, {
+    Key? key,
+  }) {
     return Builder(
+      key: key,
       builder: (context) => InkWell(
         onTap: () => ExerciseDetailBottomSheet.show(context, exercise),
         child: Container(
@@ -580,16 +600,30 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
           ),
           child: Row(
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: CachedNetworkImage(
-                  imageUrl: exercise.imageUrl,
-                  width: 60,
-                  height: 60,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => CustomCircleProgIndicator(),
-                  errorWidget: (context, url, error) =>
-                      Icon(Icons.fitness_center, size: 30, color: TColor.gray),
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: TColor.primaryColor2, width: 1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: CachedNetworkImage(
+                    key: ValueKey('img_${exercise.id}'),
+                    imageUrl: exercise.imageUrl,
+                    width: 60,
+                    height: 60,
+                    fit: BoxFit.cover,
+                    memCacheWidth: 180,
+                    memCacheHeight: 180,
+                    maxWidthDiskCache: 300,
+                    maxHeightDiskCache: 300,
+                    placeholder: (context, url) => CustomCircleProgIndicator(),
+                    errorWidget: (context, url, error) => Icon(
+                      Icons.fitness_center,
+                      size: 30,
+                      color: TColor.gray,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 12),

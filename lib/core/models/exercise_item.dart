@@ -19,8 +19,7 @@ class ExerciseItem extends Equatable {
   final List<String> muscleGroups;
   final List<Device> devices;
   final String categoryId;
-  final String? imgMuscleGroups; // ✅ Thêm trường mới
-  final int? number; // ✅ Thêm trường number
+  final String? imgMuscleGroups;
 
   const ExerciseItem({
     required this.id,
@@ -30,8 +29,7 @@ class ExerciseItem extends Equatable {
     required this.muscleGroups,
     required this.devices,
     required this.categoryId,
-    this.imgMuscleGroups, // ✅ Thêm vào constructor
-    this.number, // ✅ Thêm vào constructor
+    this.imgMuscleGroups,
   });
 
   /// Tạo ExerciseItem từ JSON với devices từ JOIN query
@@ -102,7 +100,6 @@ class ExerciseItem extends Equatable {
       categoryId: json['for_cate']?.toString() ?? '',
       imgMuscleGroups: json['img_musclegroups']
           ?.toString(), // ✅ Sửa lại: img_musclegroups (KHÔNG có _ giữa muscle và groups)
-      number: json['number'] as int?, // ✅ Parse number từ DB
     );
   }
 
@@ -116,8 +113,7 @@ class ExerciseItem extends Equatable {
       'muscle_group': muscleGroups.join(', '),
       'devices': devices.map((d) => d.toJson()).toList(),
       'for_cate': categoryId,
-      'img_musclegroups': imgMuscleGroups, // ✅ Sửa lại: img_musclegroups
-      'number': number, // ✅ Thêm vào JSON
+      'img_musclegroups': imgMuscleGroups,
     };
   }
 
@@ -142,7 +138,6 @@ class ExerciseItem extends Equatable {
     muscleGroups,
     devices,
     categoryId,
-    imgMuscleGroups, // ✅ Thêm vào props
-    number, // ✅ Thêm vào props
+    imgMuscleGroups,
   ];
 }

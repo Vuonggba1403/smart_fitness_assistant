@@ -46,6 +46,7 @@ class ExerciseSessionView extends StatelessWidget {
     );
 
     if (shouldFinish == true && context.mounted) {
+      // ✅ Lưu workout
       final saved = await context
           .read<WorkoutTrackerCubit>()
           .saveWorkoutSession();
@@ -53,11 +54,18 @@ class ExerciseSessionView extends StatelessWidget {
       if (saved && context.mounted) {
         context.read<WorkoutTrackerCubit>().stopWorkoutSession();
 
-        // ✅ Gọi màn hình congratulations từ file riêng
+        // ✅ Hiển thị congratulations
         await WorkoutCongratulationsScreen.show(context, state);
 
         if (context.mounted) {
+          // ✅ Pop về màn hình trước (workout_detail_view)
           Navigator.pop(context);
+
+          // ✅ Sau 100ms, pop tiếp về workout_tracker_view để force refresh
+          await Future.delayed(const Duration(milliseconds: 100));
+          if (context.mounted) {
+            Navigator.pop(context);
+          }
         }
       }
     }
@@ -118,23 +126,8 @@ class ExerciseSessionView extends StatelessWidget {
                 // Timer với nút kết thúc
                 _buildTimerSection(context, state, cardColor, textColor),
 
-                // Exercise List (collapsed view)
-                if (!state.isExpanded)
-                  _buildCollapsedList(context, state, textColor, cardColor),
-
-                // Exercise Card (expanded view)
-                if (state.isExpanded)
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: _buildExpandedCard(
-                        context,
-                        state,
-                        textColor,
-                        cardColor,
-                      ),
-                    ),
-                  ),
+                // ✅ Luôn hiển thị collapsed list
+                _buildCollapsedList(context, state, textColor, cardColor),
 
                 // Bottom Button
                 _buildBottomButtons(context, state, textColor),
@@ -251,6 +244,7 @@ class ExerciseSessionView extends StatelessWidget {
                 title: buttonText,
                 onPressed: () async {
                   if (state.isWorkoutCompleted) {
+                    // ✅ Lưu workout
                     final saved = await context
                         .read<WorkoutTrackerCubit>()
                         .saveWorkoutSession();
@@ -258,11 +252,18 @@ class ExerciseSessionView extends StatelessWidget {
                     if (saved && context.mounted) {
                       context.read<WorkoutTrackerCubit>().stopWorkoutSession();
 
-                      // ✅ Gọi màn hình congratulations từ file riêng
+                      // ✅ Hiển thị congratulations
                       await WorkoutCongratulationsScreen.show(context, state);
 
                       if (context.mounted) {
+                        // ✅ Pop về workout_detail_view
                         Navigator.pop(context);
+
+                        // ✅ Sau 100ms, pop tiếp về workout_tracker_view
+                        await Future.delayed(const Duration(milliseconds: 100));
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                        }
                       }
                     }
                   } else {
@@ -277,6 +278,7 @@ class ExerciseSessionView extends StatelessWidget {
     );
   }
 
+  //Exercise
   Widget _buildExpandedCard(
     BuildContext context,
     ExerciseSessionActive state,
@@ -406,9 +408,8 @@ class ExerciseSessionView extends StatelessWidget {
           final exercise = state.exercises[index];
           final isCurrent = index == state.currentExerciseIndex;
 
-          // ✅ Tính số sets hoàn thành cho TỪNG exercise
           final completedSets = _getCompletedSetsForExercise(state, index);
-          final totalSets = 4; // Mặc định 4 sets/exercise
+          final totalSets = 4;
 
           return BlocProvider(
             create: (_) => ExerciseItemCubit(),
@@ -422,11 +423,7 @@ class ExerciseSessionView extends StatelessWidget {
                 return GestureDetector(
                   onTap: () {
                     if (isCurrent) {
-                      if (isExpanded) {
-                        itemContext.read<ExerciseItemCubit>().toggle();
-                      } else {
-                        context.read<WorkoutTrackerCubit>().nextSet();
-                      }
+                      itemContext.read<ExerciseItemCubit>().toggle();
                     }
                   },
                   child: Container(
@@ -481,7 +478,6 @@ class ExerciseSessionView extends StatelessWidget {
                                     ),
                                   ),
                                   const SizedBox(height: 4),
-                                  // ✅ FIX: Hiển thị đúng số sets cho TỪNG exercise
                                   Text(
                                     '$completedSets/$totalSets Hoàn tất',
                                     style: TextStyle(
@@ -493,26 +489,16 @@ class ExerciseSessionView extends StatelessWidget {
                               ),
                             ),
                             if (isCurrent)
-                              InkWell(
-                                onTap: () {
-                                  itemContext
-                                      .read<ExerciseItemCubit>()
-                                      .toggle();
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Icon(
-                                    isExpanded
-                                        ? Icons.keyboard_arrow_up
-                                        : Icons.keyboard_arrow_down,
-                                    color: textColor,
-                                  ),
-                                ),
+                              Icon(
+                                isExpanded
+                                    ? Icons.keyboard_arrow_up
+                                    : Icons.keyboard_arrow_down,
+                                color: textColor,
                               ),
                           ],
                         ),
 
-                        // EXPANDED CONTENT - Full sets with editing
+                        // ✅ ANIMATED CONTENT với AnimatedCrossFade
                         if (isCurrent)
                           AnimatedCrossFade(
                             firstChild: const SizedBox.shrink(),
@@ -553,9 +539,7 @@ class ExerciseSessionView extends StatelessWidget {
                                             padding: const EdgeInsets.symmetric(
                                               vertical: 12,
                                             ),
-                                            side: BorderSide(
-                                              color: TColor.gray,
-                                            ),
+                                            side: BorderSide(color: TColor.gray),
                                           ),
                                           child: Text(
                                             'Chi tiết',
@@ -602,7 +586,7 @@ class ExerciseSessionView extends StatelessWidget {
                             crossFadeState: isExpanded
                                 ? CrossFadeState.showSecond
                                 : CrossFadeState.showFirst,
-                            duration: const Duration(milliseconds: 150),
+                            duration: const Duration(milliseconds: 200), // ✅ Animation 200ms
                           ),
                       ],
                     ),

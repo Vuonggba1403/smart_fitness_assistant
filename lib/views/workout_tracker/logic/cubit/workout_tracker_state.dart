@@ -85,22 +85,34 @@ final class ExerciseSessionActive extends WorkoutTrackerState {
   bool get hasPreviousExercise => currentExerciseIndex > 0;
   int get completedSetsCount => sets.where((s) => s.isCompleted).length;
 
-  /// ✅ Tổng số sets của TẤT CẢ bài tập (mặc định 4 sets/bài)
-  int get totalSetsOfAllExercises => exercises.length * 4;
+  /// ✅ FIX: Tổng số sets của TẤT CẢ bài tập (tính động)
+  int get totalSetsOfAllExercises {
+    int total = 0;
 
-  /// ✅ Tổng số sets đã hoàn thành (bao gồm các bài tập trước + bài hiện tại)
+    for (int i = 0; i < exercises.length; i++) {
+      if (i == currentExerciseIndex) {
+        // Bài đang làm: Lấy số sets thực tế
+        total += sets.length;
+      } else {
+        // Bài khác: Mặc định 4 sets
+        total += 4;
+      }
+    }
+
+    return total;
+  }
+
+  /// ✅ FIX: Tổng số sets đã hoàn thành (tính chính xác)
   int get totalCompletedSets {
-    // Số bài tập đã hoàn thành trước bài hiện tại
+    // Số bài tập đã hoàn thành trước bài hiện tại (mỗi bài = 4 sets)
     final completedExercisesBefore = currentExerciseIndex;
-
-    // Mỗi bài đã hoàn thành = 4 sets
     final completedSetsFromPreviousExercises = completedExercisesBefore * 4;
 
     // Cộng thêm số sets đã hoàn thành của bài hiện tại
     return completedSetsFromPreviousExercises + completedSetsCount;
   }
 
-  /// Kiểm tra xem exercise hiện tại đã hoàn thành tất cả sets chưa
+  /// ✅ FIX: Kiểm tra exercise hiện tại đã hoàn thành TẤT CẢ sets chưa
   bool get isCurrentExerciseCompleted => sets.every((s) => s.isCompleted);
 
   /// Kiểm tra xem đã hoàn thành toàn bộ workout chưa

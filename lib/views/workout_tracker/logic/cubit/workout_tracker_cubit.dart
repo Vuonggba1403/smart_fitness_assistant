@@ -2,27 +2,27 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:smart_fitness_assistant/core/models/exercise_category.dart'; // ✅ Bỏ _models
-import 'package:smart_fitness_assistant/core/models/exercise_item.dart'; // ✅ Bỏ _models
-import 'package:smart_fitness_assistant/core/models/device.dart'; // ✅ Bỏ _models
+import 'package:smart_fitness_assistant/core/models/exercise_category.dart';
+import 'package:smart_fitness_assistant/core/models/exercise_item.dart';
+import 'package:smart_fitness_assistant/core/models/device.dart';
 import 'package:smart_fitness_assistant/core/models/workout_set.dart';
 import 'package:smart_fitness_assistant/core/models/workout_session.dart';
 import 'package:smart_fitness_assistant/core/models/workout_progress.dart';
+import 'package:smart_fitness_assistant/core/models/upcoming_workout.dart';
 
 part 'workout_tracker_state.dart';
 
-/// Cubit quản lý trạng thái của màn hình Workout Tracker
-/// Bao gồm cả logic cho màn hình workout detail
 class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
   WorkoutTrackerCubit() : super(WorkoutTrackerInitial());
 
-  /// Map lưu trữ trạng thái toggle của các workout
   final Map<int, bool> _toggleStates = {};
-
-  /// Instance của Supabase client để gọi API
   final _supabase = Supabase.instance.client;
-
   Timer? _sessionTimer;
+
+  // ✅ Cache data để không load lại
+  List<UpcomingWorkout>? _cachedUpcomingWorkouts;
+  List<double>? _cachedWeeklyStats;
+  Map<String, Map<String, WorkoutProgress>>? _cachedProgress = {};
 
   @override
   Future<void> close() {
@@ -30,7 +30,14 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
     return super.close();
   }
 
-  // ============ Các Method cho Toggle ============
+  // ✅ Clear cache khi cần refresh
+  void clearCache() {
+    _cachedUpcomingWorkouts = null;
+    _cachedWeeklyStats = null;
+    _cachedProgress = {};
+  }
+
+  // ============ Toggle Methods ============
 
   /// Lấy trạng thái toggle của workout tại index
   /// Trả về false nếu chưa có trạng thái
@@ -44,21 +51,16 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
     emit(WorkoutToggleChanged(Map.from(_toggleStates)));
   }
 
-  // ============ Các Method cho Categories ============
+  // ============ Categories Methods ============
 
   /// Stream danh sách exercise categories
-  /// - Sắp xếp theo created_at từ cũ đến mới
-  /// - Tự động cập nhật khi có thay đổi trong database
-  /// - Số lượng exercises sẽ được tính riêng khi cần hiển thị
   Stream<List<ExerciseCategory>> streamExerciseCategoriesWithCount() {
     return _supabase.from('exercise_categories').stream(primaryKey: ['id']).map(
       (categories) {
-        // Parse thành list ExerciseCategory
         final result = categories
             .map((json) => ExerciseCategory.fromJson(json))
             .toList();
 
-        // Sắp xếp theo thời gian tạo tăng dần (cũ → mới)
         result.sort((a, b) {
           if (a.createdAt == null || b.createdAt == null) return 0;
           return a.createdAt!.compareTo(b.createdAt!);
@@ -67,6 +69,20 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
         return result;
       },
     );
+  }
+
+  /// ✅ Stream GYM categories - BỎ DEBUG
+  Stream<List<ExerciseCategory>> streamGymCategories() {
+    return streamExerciseCategoriesWithCount().map((categories) {
+      return categories.where((c) => c.isGymCategory).toList();
+    });
+  }
+
+  /// ✅ Stream HOME categories - BỎ DEBUG
+  Stream<List<ExerciseCategory>> streamHomeCategories() {
+    return streamExerciseCategoriesWithCount().map((categories) {
+      return categories.where((c) => c.isHomeCategory).toList();
+    });
   }
 
   /// Đếm số lượng exercises của một category
@@ -84,7 +100,7 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
     }
   }
 
-  // ============ Các Method cho Workout Detail ============
+  // ============ Workout Detail Methods ============
 
   /// Tải danh sách exercise items với devices (JOIN version)
   void loadExerciseItems(String categoryId) async {
@@ -128,16 +144,7 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
           exercises.add(ExerciseItem.fromJson(exerciseJson));
         }
 
-        // ✅ Sắp xếp theo cột number (tăng dần)
-        exercises.sort((a, b) {
-          // Nếu một trong hai không có number, đẩy xuống cuối
-          if (a.number == null && b.number == null) return 0;
-          if (a.number == null) return 1;
-          if (b.number == null) return -1;
-
-          return a.number!.compareTo(b.number!);
-        });
-
+        // ❌ BỎ sắp xếp theo classify - Giữ nguyên thứ tự từ DB
         emit(WorkoutDetailLoaded(exercises));
       }
     } catch (e) {
@@ -157,7 +164,7 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
         });
   }
 
-  // ============ Các Method cho Exercise Session ============
+  // ============ Exercise Session Methods ============
 
   /// Bắt đầu session tập luyện
   void startWorkoutSession(
@@ -364,7 +371,6 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
   }
 
   /// Lưu workout session vào Supabase (public để gọi từ UI)
-  /// ✅ Lưu progress khi kết thúc workout
   Future<bool> saveWorkoutSession() async {
     final currentState = state;
     if (currentState is! ExerciseSessionActive) {
@@ -395,8 +401,10 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
 
         List<WorkoutSet> sets;
         if (i == currentState.currentExerciseIndex) {
+          // ✅ FIX: Lấy sets thực tế từ state
           sets = currentState.sets;
         } else if (i < currentState.currentExerciseIndex) {
+          // ✅ FIX: Bài đã hoàn thành → giả sử 4 sets
           sets = List.generate(
             4,
             (index) => WorkoutSet(
@@ -407,6 +415,7 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
             ),
           );
         } else {
+          // Bài chưa làm
           sets = List.generate(
             4,
             (index) => WorkoutSet(
@@ -432,7 +441,8 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
         totalSets += setDetails.length;
         completedSets += setDetails.where((s) => s.isCompleted).length;
 
-        if (setDetails.every((s) => s.isCompleted)) {
+        // ✅ FIX: Chỉ đếm exercise hoàn thành khi TẤT CẢ sets đều completed
+        if (setDetails.isNotEmpty && setDetails.every((s) => s.isCompleted)) {
           completedExercises++;
         }
 
@@ -485,12 +495,20 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
         final exercise = state.exercises[i];
 
         int completedSets;
+        int totalSets;
+
         if (i < state.currentExerciseIndex) {
-          completedSets = 4; // Đã hoàn thành
+          // ✅ Bài đã hoàn thành trước đó - LẤY từ history hoặc mặc định 4
+          completedSets = 4;
+          totalSets = 4;
         } else if (i == state.currentExerciseIndex) {
-          completedSets = state.completedSetsCount; // Đang làm
+          // ✅ Bài đang làm - LẤY số sets thực tế từ state
+          completedSets = state.completedSetsCount;
+          totalSets = state.sets.length; // ✅ FIX: Số sets THỰC TẾ user đã thêm
         } else {
-          completedSets = 0; // Chưa làm
+          // Bài chưa làm
+          completedSets = 0;
+          totalSets = 4;
         }
 
         final progress = WorkoutProgress(
@@ -498,17 +516,19 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
           categoryId: state.categoryId,
           exerciseId: exercise.id,
           completedSets: completedSets,
-          totalSets: 4,
-          isFullyCompleted: completedSets == 4,
+          totalSets: totalSets, // ✅ LƯU đúng số sets
+          isFullyCompleted: completedSets == totalSets,
         );
 
-        // ✅ FIX: Upsert với onConflict đúng tên cột
+        // ✅ Debug log
+        print('💾 Saving progress for ${exercise.title}:');
+        print('   Completed: $completedSets/$totalSets sets');
+
         await _supabase
             .from('workout_progress')
             .upsert(
               progress.toJson(),
-              onConflict:
-                  'for_user,for_category,for_exercise', // ✅ Đổi từ 'category_id,exercise_id'
+              onConflict: 'for_user,for_category,for_exercise',
             );
       }
     } catch (e) {
@@ -574,10 +594,9 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
 
     for (var exercise in exercises) {
       for (var device in exercise.devices) {
-        final keyLower = device.name
-            .toLowerCase(); // ✅ Fix: device.name thay vì device
+        final keyLower = device.name.toLowerCase();
         if (!uniqueDevicesMap.containsKey(keyLower)) {
-          uniqueDevicesMap[keyLower] = device; // ✅ Lưu Device object
+          uniqueDevicesMap[keyLower] = device;
         }
       }
     }
@@ -597,6 +616,126 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
       );
     } catch (_) {
       return null;
+    }
+  }
+
+  /// ✅ Load danh sách upcoming workouts - CHỈ category chưa hoàn thành
+  Future<List<UpcomingWorkout>> loadUpcomingWorkouts({
+    bool forceRefresh = false,
+  }) async {
+    // Trả về cache nếu đã load
+    if (!forceRefresh && _cachedUpcomingWorkouts != null) {
+      return _cachedUpcomingWorkouts!;
+    }
+
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) return [];
+
+      final categoriesResponse = await _supabase
+          .from('exercise_categories')
+          .select('id, title_ex, img_url')
+          .order('created_at');
+
+      final categories = categoriesResponse as List<dynamic>;
+      final List<UpcomingWorkout> upcomingList = [];
+
+      for (var category in categories) {
+        final categoryId = category['id'].toString();
+        final exercisesCount = await getExerciseCount(categoryId);
+        if (exercisesCount == 0) continue;
+
+        final progressMap = await loadProgress(categoryId);
+        final completedCount = progressMap.values
+            .where((p) => p.isFullyCompleted)
+            .length;
+
+        // ✅ CHỈ hiển thị category chưa hoàn thành 100%
+        if (completedCount >= exercisesCount) continue;
+
+        final now = DateTime.now();
+        final scheduledTime = upcomingList.isEmpty
+            ? DateTime(now.year, now.month, now.day, 15, 0)
+            : DateTime(
+                now.year,
+                now.month,
+                now.day + upcomingList.length,
+                14,
+                0,
+              );
+
+        upcomingList.add(
+          UpcomingWorkout(
+            categoryId: categoryId,
+            categoryName: category['title_ex'] ?? 'Workout',
+            imageUrl: category['img_url'] ?? '',
+            scheduledTime: scheduledTime,
+            totalExercises: exercisesCount,
+            completedExercises: completedCount,
+          ),
+        );
+
+        if (upcomingList.length >= 3) break;
+      }
+
+      // ✅ Lưu vào cache
+      _cachedUpcomingWorkouts = upcomingList;
+      return upcomingList;
+    } catch (e) {
+      print('❌ Error loading upcoming workouts: $e');
+      return [];
+    }
+  }
+
+  /// ✅ Load workout stats cho biểu đồ (7 ngày gần nhất) - FIX: Giới hạn 100%
+  Future<List<double>> loadWeeklyWorkoutStats({
+    bool forceRefresh = false,
+  }) async {
+    if (!forceRefresh && _cachedWeeklyStats != null) {
+      return _cachedWeeklyStats!;
+    }
+
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) return List.filled(7, 0.0);
+
+      final now = DateTime.now();
+      final startOfWeek = now.subtract(Duration(days: now.weekday % 7));
+
+      final response = await _supabase
+          .from('history_workout')
+          .select('created_at, completed_exercises, total_exercises')
+          .eq('for_user', userId)
+          .gte('created_at', startOfWeek.toIso8601String())
+          .order('created_at');
+
+      final stats = List<double>.filled(7, 0.0);
+      final counts = List<int>.filled(7, 0);
+
+      for (var record in response) {
+        final createdAt = DateTime.parse(record['created_at']);
+        final dayIndex = createdAt.weekday % 7;
+
+        final completed = (record['completed_exercises'] ?? 0) as int;
+        final total = (record['total_exercises'] ?? 1) as int;
+        final percent = total > 0 ? (completed / total) * 100 : 0.0;
+
+        stats[dayIndex] += percent;
+        counts[dayIndex]++;
+      }
+
+      for (int i = 0; i < 7; i++) {
+        if (counts[i] > 0) {
+          stats[i] = (stats[i] / counts[i]).clamp(0.0, 100.0);
+        }
+      }
+
+      // ✅ Lưu vào cache
+      _cachedWeeklyStats = stats;
+      return stats;
+    } catch (e) {
+      print('❌ Error loading weekly stats: $e');
+      return List.filled(7, 0.0);
     }
   }
 }

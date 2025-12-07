@@ -57,36 +57,31 @@ class WhatTrainRow extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // ✅ Thêm checkmark nếu hoàn thành 100%
+            // ✅ FIX: Bỏ Hero widget để tránh conflict
             Stack(
               children: [
-                Hero(
-                  tag: 'workout_${category.imgUrl}',
-                  child: Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: cardColor.withOpacity(0.54),
-                      borderRadius: BorderRadius.circular(40),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(40),
-                      child: CachedNetworkImage(
-                        imageUrl: category.imgUrl ?? '',
-                        fit: BoxFit.cover,
-                        // Hiển thị loading progress khi đang tải ảnh
-                        placeholder: (context, url) =>
-                            CustomCircleProgIndicator(),
-                        // Hiển thị icon khi có lỗi load ảnh
-                        errorWidget: (context, url, error) => Icon(
-                          Icons.fitness_center,
-                          size: 40,
-                          color: TColor.gray,
-                        ),
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: cardColor.withOpacity(0.54),
+                    borderRadius: BorderRadius.circular(40),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(40),
+                    child: CachedNetworkImage(
+                      imageUrl: category.imgUrl ?? '',
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) =>
+                          CustomCircleProgIndicator(),
+                      errorWidget: (context, url, error) => Icon(
+                        Icons.fitness_center,
+                        size: 40,
+                        color: TColor.gray,
                       ),
                     ),
                   ),
-                ), // ✅ Đóng Hero widget
+                ),
                 if (completionPercent == 1.0)
                   Positioned(
                     top: 0,

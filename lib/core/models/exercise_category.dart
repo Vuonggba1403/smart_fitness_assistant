@@ -9,12 +9,14 @@ import 'package:equatable/equatable.dart';
 /// - imgUrl: URL hình ảnh
 /// - titleEx: Tên danh mục
 /// - exerciseItems: Danh sách các bài tập (nếu có join)
+/// - classify: Phân loại 'gym' hoặc 'home'
 class ExerciseCategory extends Equatable {
   final String? id;
   final DateTime? createdAt;
   final String? imgUrl;
   final String? titleEx;
   final List<dynamic>? exerciseItems;
+  final String? classify;
 
   const ExerciseCategory({
     this.id,
@@ -22,6 +24,7 @@ class ExerciseCategory extends Equatable {
     this.imgUrl,
     this.titleEx,
     this.exerciseItems,
+    this.classify,
   });
 
   /// Tạo ExerciseCategory từ JSON/Map
@@ -34,6 +37,7 @@ class ExerciseCategory extends Equatable {
       imgUrl: json['img_url'] as String?,
       titleEx: json['title_ex'] as String?,
       exerciseItems: json['exercise_items'] as List<dynamic>?,
+      classify: json['classify'] as String?,
     );
   }
 
@@ -44,6 +48,7 @@ class ExerciseCategory extends Equatable {
     'img_url': imgUrl,
     'title_ex': titleEx,
     'exercise_items': exerciseItems,
+    'classify': classify,
   };
 
   /// Copy với một số field thay đổi
@@ -53,6 +58,7 @@ class ExerciseCategory extends Equatable {
     String? imgUrl,
     String? titleEx,
     List<dynamic>? exerciseItems,
+    String? classify,
   }) {
     return ExerciseCategory(
       id: id ?? this.id,
@@ -60,9 +66,30 @@ class ExerciseCategory extends Equatable {
       imgUrl: imgUrl ?? this.imgUrl,
       titleEx: titleEx ?? this.titleEx,
       exerciseItems: exerciseItems ?? this.exerciseItems,
+      classify: classify ?? this.classify,
     );
   }
 
+  // ✅ Helper methods - Support đúng giá trị tiếng Việt trong DB
+  bool get isGymCategory {
+    final classifyValue = classify?.toLowerCase().trim();
+    return classifyValue == 'gym' || classifyValue == 'bài tập tại phòng gym';
+  }
+
+  bool get isHomeCategory {
+    final classifyValue = classify?.toLowerCase().trim();
+    return classifyValue == 'home' || classifyValue == 'bài tập tại nhà';
+  }
+
+  // String get classifyLabel => isGymCategory ? '🏋️ Phòng Gym' : '🏠 Tại Nhà';
+
   @override
-  List<Object?> get props => [id, createdAt, imgUrl, titleEx, exerciseItems];
+  List<Object?> get props => [
+    id,
+    createdAt,
+    imgUrl,
+    titleEx,
+    exerciseItems,
+    classify,
+  ];
 }

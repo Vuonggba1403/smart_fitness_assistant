@@ -99,7 +99,8 @@ class LocaleKey {
   static const String logout = "logout";
 
   //Work Tracker View
-  static const String titleEx = "title_ex";
+  static const String gymEx = "gym_ex";
+  static const String homeEx = "home_ex"; // ✅ THÊM KEY MỚI
   static const String dailyWorkoutSchedule = "daily_workout_schedule";
   static const String upCommingWork = "upcoming_workout";
   static const String exercises = "exercises";

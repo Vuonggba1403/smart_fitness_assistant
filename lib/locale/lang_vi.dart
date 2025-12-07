@@ -105,7 +105,8 @@ Map<String, String> viVN = {
   LocaleKey.logout: "Đăng xuất",
 
   //Work Tracker View
-  LocaleKey.titleEx: "Bạn muốn tập gì ? ",
+  LocaleKey.gymEx: "Bài tập tại phòng gym",
+  LocaleKey.homeEx: "Bài tập tại nhà", // ✅ THÊM TRANSLATION
   LocaleKey.dailyWorkoutSchedule: "Lịch tập hàng ngày",
   LocaleKey.upCommingWork: "Buổi tập sắp tới",
   LocaleKey.exercises: "Bài tập",

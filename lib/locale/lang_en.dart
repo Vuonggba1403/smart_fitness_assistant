@@ -104,7 +104,8 @@ Map<String, String> enUs = {
   LocaleKey.logout: "Log Out",
 
   //Work Tracker View
-  LocaleKey.titleEx: "What Do You Want To Train",
+  LocaleKey.gymEx: "Gym Exercises",
+  LocaleKey.homeEx: "Home Exercises",
   LocaleKey.dailyWorkoutSchedule: "Daily Workout Schedule",
   LocaleKey.upCommingWork: "Upcoming Workout",
   LocaleKey.exercises: "Exercises",
