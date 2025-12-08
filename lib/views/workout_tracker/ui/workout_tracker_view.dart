@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:supabase_flutter/supabase_flutter.dart'; // ✅ THÊM import
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
@@ -31,6 +32,9 @@ class WorkoutTrackerView extends StatefulWidget {
 }
 
 class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
+  // ✅ THÊM Supabase instance
+  final _supabase = Supabase.instance.client;
+
   late Stream<List<ExerciseCategory>> _categoriesStream;
   late Stream<List<ExerciseCategory>> _gymCategoriesStream; // ✅ THÊM
   late Stream<List<ExerciseCategory>> _homeCategoriesStream; // ✅ THÊM
@@ -47,7 +51,19 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
     super.initState();
     _initializeNotifications();
     _loadInitialData();
-    _forceRefreshStreams(); // ✅ THÊM force refresh
+    _forceRefreshStreams();
+  }
+
+  // ✅ THÊM: Auto refresh khi quay lại màn hình
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // ✅ Reload data mỗi khi quay lại màn hình
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _refreshData();
+      }
+    });
   }
 
   /// ✅ Force refresh streams
@@ -223,6 +239,44 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
     return '$hour:$minute - $day/$month';
   }
 
+  /// ✅ Delete scheduled workout
+  Future<void> _deleteScheduledWorkout(String categoryId) async {
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) return;
+
+      // ✅ Xóa schedule từ DB
+      await _supabase
+          .from('scheduled_workouts')
+          .delete()
+          .eq('for_user', userId)
+          .eq('category_id', categoryId);
+
+      // ✅ Hủy notification
+      await _notificationService.cancelNotification(categoryId.hashCode);
+
+      // ✅ Reload data
+      final cubit = context.read<WorkoutTrackerCubit>();
+      final updatedWorkouts = await cubit.loadUpcomingWorkouts(
+        forceRefresh: true,
+      );
+
+      if (mounted) {
+        setState(() {
+          _upcomingWorkouts = updatedWorkouts;
+        });
+
+        showCustomDelightToastBar(
+          context,
+          'Đã xóa lịch tập',
+          Icon(Icons.delete, color: TColor.white),
+        );
+      }
+    } catch (e) {
+      print('❌ Error deleting schedule: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
@@ -324,8 +378,18 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                         CustomContainerCheck(
                           name: LocaleKey.dailyWorkoutSchedule.tr,
                           title: LocaleKey.check.tr,
-                          onPressed: () =>
-                              navigateTo(context, const WorkoutScheduleView()),
+                          onPressed: () async {
+                            // ✅ Chờ quay lại từ WorkoutScheduleView
+                            await navigateTo(
+                              context,
+                              const WorkoutScheduleView(),
+                            );
+
+                            // ✅ Refresh data sau khi quay lại
+                            if (mounted) {
+                              await _refreshData();
+                            }
+                          },
                         ),
 
                         SizedBox(height: media.width * 0.05),
@@ -335,11 +399,11 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                             ? Padding(
                                 padding: const EdgeInsets.all(20),
                                 child: Text(
-                                  "Tất cả bài tập đã hoàn thành! 🎉",
+                                  "Chưa có lịch tập nào! ✨\nThêm lịch tại Daily Workout Schedule",
+                                  textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    color: Colors.green,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
+                                    color: textColor?.withOpacity(0.6),
+                                    fontSize: 14,
                                   ),
                                 ),
                               )
@@ -358,6 +422,11 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                                     workout: workout,
                                     onNotificationToggle: (enabled) {
                                       _toggleNotification(index, enabled);
+                                    },
+                                    onDelete: () {
+                                      _deleteScheduledWorkout(
+                                        workout.categoryId,
+                                      ); // ✅ Delete
                                     },
                                   );
                                 },

@@ -619,11 +619,10 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
     }
   }
 
-  /// ✅ Load danh sách upcoming workouts - CHỈ category chưa hoàn thành
+  /// ✅ Load danh sách upcoming workouts từ scheduled_workouts table
   Future<List<UpcomingWorkout>> loadUpcomingWorkouts({
     bool forceRefresh = false,
   }) async {
-    // Trả về cache nếu đã load
     if (!forceRefresh && _cachedUpcomingWorkouts != null) {
       return _cachedUpcomingWorkouts!;
     }
@@ -632,16 +631,25 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) return [];
 
-      final categoriesResponse = await _supabase
-          .from('exercise_categories')
-          .select('id, title_ex, img_url')
-          .order('created_at');
+      final now = DateTime.now();
 
-      final categories = categoriesResponse as List<dynamic>;
+      // ✅ FIX: Lọc is_completed = false VÀ scheduled_time >= now
+      final response = await _supabase
+          .from('scheduled_workouts')
+          .select()
+          .eq('for_user', userId)
+          .eq('is_completed', false) // ✅ Chỉ lấy chưa hoàn thành
+          .gte('scheduled_time', now.toIso8601String()) // ✅ Trong tương lai
+          .order('scheduled_time')
+          .limit(3);
+
+      print('📅 Scheduled workouts: ${response.length} records');
+
       final List<UpcomingWorkout> upcomingList = [];
 
-      for (var category in categories) {
-        final categoryId = category['id'].toString();
+      for (var schedule in response) {
+        final categoryId = schedule['category_id'];
+
         final exercisesCount = await getExerciseCount(categoryId);
         if (exercisesCount == 0) continue;
 
@@ -650,35 +658,19 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
             .where((p) => p.isFullyCompleted)
             .length;
 
-        // ✅ CHỈ hiển thị category chưa hoàn thành 100%
-        if (completedCount >= exercisesCount) continue;
-
-        final now = DateTime.now();
-        final scheduledTime = upcomingList.isEmpty
-            ? DateTime(now.year, now.month, now.day, 15, 0)
-            : DateTime(
-                now.year,
-                now.month,
-                now.day + upcomingList.length,
-                14,
-                0,
-              );
-
         upcomingList.add(
           UpcomingWorkout(
             categoryId: categoryId,
-            categoryName: category['title_ex'] ?? 'Workout',
-            imageUrl: category['img_url'] ?? '',
-            scheduledTime: scheduledTime,
+            categoryName: schedule['category_name'],
+            imageUrl: schedule['image_url'] ?? '',
+            scheduledTime: DateTime.parse(schedule['scheduled_time']),
             totalExercises: exercisesCount,
             completedExercises: completedCount,
+            isNotificationEnabled: schedule['has_notification'] ?? false,
           ),
         );
-
-        if (upcomingList.length >= 3) break;
       }
 
-      // ✅ Lưu vào cache
       _cachedUpcomingWorkouts = upcomingList;
       return upcomingList;
     } catch (e) {

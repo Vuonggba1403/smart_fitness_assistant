@@ -1,11 +1,15 @@
 import 'package:calendar_agenda/calendar_agenda.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
-import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
-import '../../../../core/functions/common.dart';
+import 'package:smart_fitness_assistant/core/models/scheduled_workout.dart';
+import 'package:smart_fitness_assistant/core/services/notification_service.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
+import 'package:smart_fitness_assistant/core/widgets/round_button.dart'; // ✅ THÊM import
 import 'add_schedule_view.dart';
 
 class WorkoutScheduleView extends StatefulWidget {
@@ -18,49 +22,108 @@ class WorkoutScheduleView extends StatefulWidget {
 class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
   final CalendarAgendaController _calendarAgendaControllerAppBar =
       CalendarAgendaController();
+  final _supabase = Supabase.instance.client;
+  final _notificationService = NotificationService();
 
   late DateTime _selectedDateAppBBar;
-
-  List eventArr = [
-    {"name": "Ab Workout", "start_time": "25/05/2025 07:30 AM"},
-    {"name": "Upperbody Workout", "start_time": "25/05/2025 09:00 AM"},
-    {"name": "Lowerbody Workout", "start_time": "25/05/2025 03:00 PM"},
-    {"name": "Ab Workout", "start_time": "26/05/2025 07:30 AM"},
-    {"name": "Upperbody Workout", "start_time": "26/05/2025 09:00 AM"},
-    {"name": "Lowerbody Workout", "start_time": "26/05/2025 03:00 PM"},
-    {"name": "Ab Workout", "start_time": "27/05/2025 07:30 AM"},
-    {"name": "Upperbody Workout", "start_time": "27/05/2025 09:00 AM"},
-    {"name": "Lowerbody Workout", "start_time": "27/05/2025 03:00 PM"},
-  ];
-
-  List selectDayEventArr = [];
+  List<ScheduledWorkout> _scheduledWorkouts = []; // ✅ THÊM
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _selectedDateAppBBar = DateTime.now();
-    setDayEventWorkoutList();
+    _loadSchedules(); // ✅ Load từ DB
   }
 
-  void setDayEventWorkoutList() {
-    var date = dateToStartDate(_selectedDateAppBBar);
-    selectDayEventArr = eventArr
-        .map((wObj) {
-          return {
-            "name": wObj["name"],
-            "start_time": wObj["start_time"],
-            "date": stringToDate(
-              wObj["start_time"].toString(),
-              formatStr: "dd/MM/yyyy hh:mm aa",
-            ),
-          };
-        })
-        .where((wObj) {
-          return dateToStartDate(wObj["date"] as DateTime) == date;
-        })
-        .toList();
+  // ✅ Load schedules từ Supabase
+  Future<void> _loadSchedules() async {
+    setState(() => _isLoading = true);
 
-    if (mounted) setState(() {});
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) return;
+
+      final startOfDay = DateTime(
+        _selectedDateAppBBar.year,
+        _selectedDateAppBBar.month,
+        _selectedDateAppBBar.day,
+      );
+      final endOfDay = startOfDay.add(const Duration(days: 1));
+
+      final response = await _supabase
+          .from('scheduled_workouts')
+          .select()
+          .eq('for_user', userId)
+          .gte('scheduled_time', startOfDay.toIso8601String())
+          .lt('scheduled_time', endOfDay.toIso8601String())
+          .order('scheduled_time');
+
+      _scheduledWorkouts = response
+          .map((json) => ScheduledWorkout.fromJson(json))
+          .toList();
+    } catch (e) {
+      print('❌ Error loading schedules: $e');
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  // ✅ Delete schedule
+  Future<void> _deleteSchedule(ScheduledWorkout schedule) async {
+    try {
+      await _supabase
+          .from('scheduled_workouts')
+          .delete()
+          .eq('id', schedule.id!);
+      await _notificationService.cancelNotification(schedule.id.hashCode);
+      _loadSchedules();
+    } catch (e) {
+      print('❌ Error: $e');
+    }
+  }
+
+  // ✅ Mark schedule as completed
+  Future<void> _markAsCompleted(ScheduledWorkout schedule) async {
+    try {
+      await _supabase
+          .from('scheduled_workouts')
+          .update({'is_completed': true})
+          .eq('id', schedule.id!);
+
+      await _notificationService.cancelNotification(schedule.id.hashCode);
+
+      _loadSchedules(); // ✅ Reload local
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✅ Đã đánh dấu hoàn thành'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      print('❌ Error marking completed: $e');
+    }
+  }
+
+  // ✅ THÊM method getTime
+  String getTime(int minutes) {
+    final hours = minutes ~/ 60;
+    final mins = minutes % 60;
+
+    if (hours == 0) {
+      return '12:${mins.toString().padLeft(2, '0')} AM';
+    } else if (hours < 12) {
+      return '$hours:${mins.toString().padLeft(2, '0')} AM';
+    } else if (hours == 12) {
+      return '12:${mins.toString().padLeft(2, '0')} PM';
+    } else {
+      return '${hours - 12}:${mins.toString().padLeft(2, '0')} PM';
+    }
   }
 
   @override
@@ -75,6 +138,7 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ✅ Calendar (giữ nguyên)
           CalendarAgenda(
             controller: _calendarAgendaControllerAppBar,
             appbar: false,
@@ -85,15 +149,13 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
             backgroundColor: Colors.transparent,
             fullCalendarScroll: FullCalendarScroll.horizontal,
             fullCalendarDay: WeekDay.short,
-            selectedDateColor: Colors.white, // Màu chữ khi được chọn
-            dateColor: Colors.black,
+            selectedDateColor: TColor.white,
+            dateColor: textColor ?? Colors.black,
             locale: 'en',
             initialDate: DateTime.now(),
             calendarEventColor: TColor.primaryColor2,
             firstDate: DateTime.now().subtract(const Duration(days: 140)),
             lastDate: DateTime.now().add(const Duration(days: 60)),
-
-            // ĐÃ SỬA ĐẸP HOÀN HẢO TẠI ĐÂY
             selectedDayLogoWidget: Container(
               width: double.maxFinite,
               height: double.maxFinite,
@@ -108,7 +170,6 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Số ngày - to, đậm, trắng
                   Text(
                     "${_selectedDateAppBBar.day}",
                     style: const TextStyle(
@@ -118,7 +179,6 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  // Thứ trong tuần (Mon, Tue...)
                   Text(
                     DateFormat('EEE').format(_selectedDateAppBBar),
                     style: const TextStyle(
@@ -130,16 +190,15 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                 ],
               ),
             ),
-
             onDateSelected: (date) {
               setState(() {
                 _selectedDateAppBBar = date;
               });
-              setDayEventWorkoutList();
+              _loadSchedules(); // ✅ Reload khi đổi ngày
             },
           ),
 
-          // Phần danh sách giờ tập (giữ nguyên)
+          // ✅ Timeline với tags
           Expanded(
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -150,8 +209,10 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                   physics: const NeverScrollableScrollPhysics(),
                   itemBuilder: (context, index) {
                     var availWidth = (media.width * 1.2) - (80 + 40);
-                    var slotArr = selectDayEventArr.where((wObj) {
-                      return (wObj["date"] as DateTime).hour == index;
+
+                    // ✅ Lọc schedules theo giờ
+                    var slotsForHour = _scheduledWorkouts.where((s) {
+                      return s.scheduledTime.hour == index;
                     }).toList();
 
                     return Container(
@@ -160,6 +221,7 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
+                          // Giờ
                           SizedBox(
                             width: 80,
                             child: Text(
@@ -170,188 +232,22 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                               ),
                             ),
                           ),
-                          if (slotArr.isNotEmpty)
+
+                          // ✅ Tags cho schedules
+                          if (slotsForHour.isNotEmpty)
                             Expanded(
                               child: Stack(
                                 alignment: Alignment.centerLeft,
-                                children: slotArr.map((sObj) {
-                                  var min = (sObj["date"] as DateTime).minute;
+                                children: slotsForHour.map((schedule) {
+                                  var min = schedule.scheduledTime.minute;
                                   var pos = (min / 60) * 2 - 1;
+
                                   return Align(
                                     alignment: Alignment(pos, 0),
-                                    child: InkWell(
-                                      onTap: () {
-                                        showDialog(
-                                          context: context,
-                                          builder: (context) {
-                                            return AlertDialog(
-                                              backgroundColor:
-                                                  Colors.transparent,
-                                              contentPadding: EdgeInsets.zero,
-                                              content: Container(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      vertical: 15,
-                                                      horizontal: 20,
-                                                    ),
-                                                decoration: BoxDecoration(
-                                                  color: TColor.white,
-                                                  borderRadius:
-                                                      BorderRadius.circular(20),
-                                                ),
-                                                child: Column(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    // Header dialog
-                                                    Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceBetween,
-                                                      children: [
-                                                        InkWell(
-                                                          onTap: () =>
-                                                              Navigator.pop(
-                                                                context,
-                                                              ),
-                                                          child: Container(
-                                                            margin:
-                                                                const EdgeInsets.all(
-                                                                  8,
-                                                                ),
-                                                            height: 40,
-                                                            width: 40,
-                                                            alignment: Alignment
-                                                                .center,
-                                                            decoration:
-                                                                BoxDecoration(
-                                                                  color: TColor
-                                                                      .lightGray,
-                                                                  borderRadius:
-                                                                      BorderRadius.circular(
-                                                                        10,
-                                                                      ),
-                                                                ),
-                                                            child: Image.asset(
-                                                              "assets/img/closed_btn.png",
-                                                              width: 15,
-                                                              height: 15,
-                                                              fit: BoxFit
-                                                                  .contain,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        Text(
-                                                          "Workout Schedule",
-                                                          style: TextStyle(
-                                                            color: TColor.black,
-                                                            fontSize: 16,
-                                                            fontWeight:
-                                                                FontWeight.w700,
-                                                          ),
-                                                        ),
-                                                        InkWell(
-                                                          onTap: () {},
-                                                          child: Container(
-                                                            margin:
-                                                                const EdgeInsets.all(
-                                                                  8,
-                                                                ),
-                                                            height: 40,
-                                                            width: 40,
-                                                            alignment: Alignment
-                                                                .center,
-                                                            decoration:
-                                                                BoxDecoration(
-                                                                  color: TColor
-                                                                      .lightGray,
-                                                                  borderRadius:
-                                                                      BorderRadius.circular(
-                                                                        10,
-                                                                      ),
-                                                                ),
-                                                            child: Image.asset(
-                                                              "assets/img/more_btn.png",
-                                                              width: 15,
-                                                              height: 15,
-                                                              fit: BoxFit
-                                                                  .contain,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    const SizedBox(height: 15),
-                                                    Text(
-                                                      sObj["name"].toString(),
-                                                      style: TextStyle(
-                                                        color: textColor,
-                                                        fontSize: 14,
-                                                        fontWeight:
-                                                            FontWeight.w700,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(height: 4),
-                                                    Row(
-                                                      children: [
-                                                        Image.asset(
-                                                          "assets/img/time_workout.png",
-                                                          height: 20,
-                                                          width: 20,
-                                                        ),
-                                                        const SizedBox(
-                                                          width: 8,
-                                                        ),
-                                                        Text(
-                                                          "${getDayTitle(sObj["start_time"].toString())} | ${getStringDateToOtherFormate(sObj["start_time"].toString(), outFormatStr: "h:mm aa")}",
-                                                          style: TextStyle(
-                                                            color: textColor
-                                                                ?.withOpacity(
-                                                                  0.6,
-                                                                ),
-                                                            fontSize: 12,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    const SizedBox(height: 15),
-                                                    RoundButton(
-                                                      title: "Mark Done",
-                                                      onPressed: () {},
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                        );
-                                      },
-                                      child: Container(
-                                        height: 35,
-                                        width: availWidth * 0.5,
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                        ),
-                                        alignment: Alignment.centerLeft,
-                                        decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            colors: TColor.secondaryG,
-                                          ),
-                                          borderRadius: BorderRadius.circular(
-                                            17.5,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          "${sObj["name"]}, ${getStringDateToOtherFormate(sObj["start_time"].toString(), outFormatStr: "h:mm aa")}",
-                                          maxLines: 1,
-                                          style: TextStyle(
-                                            color: TColor.white,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                      ),
+                                    child: _buildScheduleTag(
+                                      schedule,
+                                      availWidth,
+                                      textColor,
                                     ),
                                   );
                                 }).toList(),
@@ -371,15 +267,34 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
         ],
       ),
 
+      // ✅ FAB thêm lịch - Listen result
       floatingActionButton: InkWell(
-        onTap: () {
-          navigateTo(context, AddScheduleView(date: _selectedDateAppBBar));
+        onTap: () async {
+          final result = await navigateTo(
+            context,
+            AddScheduleView(date: _selectedDateAppBBar),
+          );
+
+          // ✅ Refresh nếu có result = true
+          if (result == true && mounted) {
+            await _loadSchedules();
+
+            // ✅ Debug: Kiểm tra lại DB
+            print('🔄 Reloading schedules after add...');
+            final userId = _supabase.auth.currentUser?.id;
+            final count = await _supabase
+                .from('scheduled_workouts')
+                .select('id')
+                .eq('for_user', userId!)
+                .count();
+            print('📊 Total schedules in DB: $count');
+          }
         },
         child: Container(
           width: 55,
           height: 55,
           decoration: BoxDecoration(
-            gradient: LinearGradient(colors: TColor.secondaryG),
+            gradient: LinearGradient(colors: TColor.primaryG),
             borderRadius: BorderRadius.circular(27.5),
             boxShadow: const [
               BoxShadow(
@@ -391,6 +306,91 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
           ),
           alignment: Alignment.center,
           child: Icon(Icons.add, size: 20, color: TColor.white),
+        ),
+      ),
+    );
+  }
+
+  // ✅ Build schedule tag (giống ảnh gốc)
+  Widget _buildScheduleTag(
+    ScheduledWorkout schedule,
+    double availWidth,
+    Color? textColor,
+  ) {
+    final timeStr = DateFormat('h:mm a').format(schedule.scheduledTime);
+
+    return InkWell(
+      onTap: () => _showScheduleOptions(schedule),
+      child: Container(
+        height: 35,
+        width: availWidth * 0.5,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        alignment: Alignment.centerLeft,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(colors: TColor.secondaryG),
+          borderRadius: BorderRadius.circular(17.5),
+        ),
+        child: Text(
+          "${schedule.categoryName}, $timeStr",
+          maxLines: 1,
+          style: TextStyle(color: TColor.white, fontSize: 12),
+        ),
+      ),
+    );
+  }
+
+  // ✅ Dialog options (xóa, mark done)
+  void _showScheduleOptions(ScheduledWorkout schedule) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.transparent,
+        contentPadding: EdgeInsets.zero,
+        content: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: TColor.white,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                schedule.categoryName,
+                style: TextStyle(
+                  color: TColor.black,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                DateFormat('h:mm a').format(schedule.scheduledTime),
+                style: TextStyle(color: TColor.gray, fontSize: 14),
+              ),
+              const SizedBox(height: 20),
+
+              // Mark Done button
+              RoundButton(
+                title: "Hoàn thành",
+                onPressed: () {
+                  Navigator.pop(context);
+                  _markAsCompleted(schedule);
+                },
+              ),
+
+              const SizedBox(height: 10),
+
+              // Delete button
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _deleteSchedule(schedule);
+                },
+                child: Text('Xóa lịch', style: TextStyle(color: Colors.red)),
+              ),
+            ],
+          ),
         ),
       ),
     );

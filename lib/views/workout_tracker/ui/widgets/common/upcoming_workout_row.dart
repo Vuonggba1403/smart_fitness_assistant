@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/models/upcoming_workout.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
-import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 
 class UpcomingWorkoutRow extends StatelessWidget {
   final UpcomingWorkout workout;
   final Function(bool)? onNotificationToggle;
+  final VoidCallback? onDelete; // ✅ THÊM callback delete
 
   const UpcomingWorkoutRow({
     super.key,
     required this.workout,
     this.onNotificationToggle,
+    this.onDelete, // ✅ THÊM
   });
 
   @override
@@ -103,7 +106,7 @@ class UpcomingWorkoutRow extends StatelessWidget {
 
                 // ✅ Số bài đã tập / chưa tập
                 Text(
-                  '${workout.completedExercises}/${workout.totalExercises} bài tập',
+                  '${workout.completedExercises}/${workout.totalExercises} ${LocaleKey.exercises.tr}',
                   style: TextStyle(
                     color: textColor?.withOpacity(0.6),
                     fontSize: 12,
@@ -113,14 +116,63 @@ class UpcomingWorkoutRow extends StatelessWidget {
             ),
           ),
 
-          // ✅ Nút toggle notification
-          Switch(
-            value: workout.isNotificationEnabled,
-            onChanged: (enabled) async {
-              // ✅ GỌI callback NGAY LẬP TỨC để cập nhật UI
-              onNotificationToggle?.call(enabled);
-            },
-            activeColor: TColor.primaryColor1,
+          // ✅ 2 Icons như ảnh 2: Bell + Trash
+          Column(
+            children: [
+              // Bell icon - Toggle notification
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: workout.isNotificationEnabled
+                      ? Colors.green.withOpacity(0.2)
+                      : cardColor,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: workout.isNotificationEnabled
+                        ? Colors.green
+                        : TColor.gray.withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+                  icon: Icon(
+                    workout.isNotificationEnabled
+                        ? Icons.notifications_active
+                        : Icons.notifications_off_outlined,
+                    color: workout.isNotificationEnabled
+                        ? Colors.green
+                        : TColor.gray,
+                    size: 20,
+                  ),
+                  onPressed: () {
+                    onNotificationToggle?.call(!workout.isNotificationEnabled);
+                  },
+                ),
+              ),
+
+              const SizedBox(height: 8),
+
+              // Trash icon - Delete
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: cardColor,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.red.withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+                  icon: Icon(Icons.delete_outline, color: Colors.red, size: 20),
+                  onPressed: onDelete, // ✅ Gọi callback delete
+                ),
+              ),
+            ],
           ),
         ],
       ),

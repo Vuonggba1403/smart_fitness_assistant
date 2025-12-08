@@ -50,16 +50,21 @@ class UpcomingWorkout {
 
   // ✅ FIX: copyWith hỗ trợ cập nhật scheduledTime
   UpcomingWorkout copyWith({
-    bool? isNotificationEnabled,
+    String? categoryId,
+    String? categoryName,
+    String? imageUrl,
     DateTime? scheduledTime,
+    int? totalExercises,
+    int? completedExercises,
+    bool? isNotificationEnabled,
   }) {
     return UpcomingWorkout(
-      categoryId: categoryId,
-      categoryName: categoryName,
-      imageUrl: imageUrl,
+      categoryId: categoryId ?? this.categoryId,
+      categoryName: categoryName ?? this.categoryName,
+      imageUrl: imageUrl ?? this.imageUrl,
       scheduledTime: scheduledTime ?? this.scheduledTime,
-      totalExercises: totalExercises,
-      completedExercises: completedExercises,
+      totalExercises: totalExercises ?? this.totalExercises,
+      completedExercises: completedExercises ?? this.completedExercises,
       isNotificationEnabled:
           isNotificationEnabled ?? this.isNotificationEnabled,
     );

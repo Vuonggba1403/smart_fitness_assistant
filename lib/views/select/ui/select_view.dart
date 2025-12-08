@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/views/home/logic/cubit/home_cubit.dart';
-import 'package:smart_fitness_assistant/views/home/ui/widgets/components/workout_row.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/workout_tracker_view.dart';
 
 class SelectView extends StatelessWidget {
