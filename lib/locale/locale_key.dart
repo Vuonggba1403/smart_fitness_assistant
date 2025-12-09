@@ -125,4 +125,10 @@ class LocaleKey {
   static const String hoursAgo = "hours_ago";
   static const String daysAgo = "days_ago";
   static const String weeksAgo = "weeks_ago";
+
+  //Water Tracker
+  static const String dailyGoal = "daily_goal";
+  static const String nextReminder = "next_reminder";
+  static const String addWater = "add_water";
+  static const String waterIntake = "water_intake";
 }

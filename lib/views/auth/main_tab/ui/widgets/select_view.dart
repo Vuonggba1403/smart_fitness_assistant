@@ -1,3 +1,5 @@
+import 'package:smart_fitness_assistant/views/water_tracker/ui/water_tracker_view.dart';
+
 import '../../../../../core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/views/meal_planner/ui/meal_planner_view.dart';
@@ -42,7 +44,7 @@ class SelectView extends StatelessWidget {
             RoundButton(
               title: LocaleKey.drinkwater.tr,
               onPressed: () {
-                // navigateTo(context, DrinkWaterView());
+                navigateTo(context, WaterTrackerView());
               },
             ),
           ],

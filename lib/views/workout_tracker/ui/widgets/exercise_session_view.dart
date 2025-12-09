@@ -7,7 +7,7 @@ import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/logic/cubit/workout_tracker_cubit.dart';
-import 'package:smart_fitness_assistant/views/workout_tracker/logic/cubit/exercise_item_cubit.dart';
+// ❌ XÓA: import 'package:smart_fitness_assistant/views/workout_tracker/logic/cubit/exercise_item_cubit.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/common/bottom_sheet_details.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/common/show_dialog.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/common/workout_completion_bottom_sheet.dart';
@@ -407,192 +407,183 @@ class ExerciseSessionView extends StatelessWidget {
         itemBuilder: (context, index) {
           final exercise = state.exercises[index];
           final isCurrent = index == state.currentExerciseIndex;
-
           final completedSets = _getCompletedSetsForExercise(state, index);
           final totalSets = 4;
 
-          return BlocProvider(
-            create: (_) => ExerciseItemCubit(),
-            child: BlocBuilder<ExerciseItemCubit, ExerciseItemState>(
-              builder: (itemContext, itemState) {
-                bool isExpanded = false;
-                if (itemState is ExerciseItemExpandedState) {
-                  isExpanded = itemState.isExpanded;
-                }
+          // ✅ Dùng WorkoutTrackerCubit thay vì ExerciseItemCubit
+          final cubit = context.read<WorkoutTrackerCubit>();
+          final isExpanded = cubit.isExerciseItemExpanded(exercise.id);
 
-                return GestureDetector(
-                  onTap: () {
-                    if (isCurrent) {
-                      itemContext.read<ExerciseItemCubit>().toggle();
-                    }
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: isCurrent ? cardColor : cardColor.withOpacity(0.5),
-                      borderRadius: BorderRadius.circular(15),
-                      border: isCurrent
-                          ? Border.all(color: TColor.primaryColor1, width: 2)
-                          : null,
-                      boxShadow: isCurrent
-                          ? [
-                              BoxShadow(
-                                color: TColor.primaryColor1.withOpacity(0.2),
-                                blurRadius: 8,
-                                offset: const Offset(0, 4),
-                              ),
-                            ]
-                          : null,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // HEADER
-                        Row(
+          return GestureDetector(
+            onTap: () {
+              if (isCurrent) {
+                cubit.toggleExerciseItemExpansion(exercise.id);
+              }
+            },
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: isCurrent ? cardColor : cardColor.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(15),
+                border: isCurrent
+                    ? Border.all(color: TColor.primaryColor1, width: 2)
+                    : null,
+                boxShadow: isCurrent
+                    ? [
+                        BoxShadow(
+                          color: TColor.primaryColor1.withOpacity(0.2),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ]
+                    : null,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // HEADER
+                  Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: CachedNetworkImage(
+                          imageUrl: exercise.imageUrl,
+                          width: 60,
+                          height: 60,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) =>
+                              CustomCircleProgIndicator(),
+                          errorWidget: (context, url, error) =>
+                              Icon(Icons.fitness_center),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: CachedNetworkImage(
-                                imageUrl: exercise.imageUrl,
-                                width: 60,
-                                height: 60,
-                                fit: BoxFit.cover,
-                                placeholder: (context, url) =>
-                                    CustomCircleProgIndicator(),
-                                errorWidget: (context, url, error) =>
-                                    Icon(Icons.fitness_center),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    exercise.title,
-                                    style: TextStyle(
-                                      color: textColor,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '$completedSets/$totalSets Hoàn tất',
-                                    style: TextStyle(
-                                      color: textColor?.withOpacity(0.6),
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            if (isCurrent)
-                              Icon(
-                                isExpanded
-                                    ? Icons.keyboard_arrow_up
-                                    : Icons.keyboard_arrow_down,
+                            Text(
+                              exercise.title,
+                              style: TextStyle(
                                 color: textColor,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
                               ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '$completedSets/$totalSets Hoàn tất',
+                              style: TextStyle(
+                                color: textColor?.withOpacity(0.6),
+                                fontSize: 12,
+                              ),
+                            ),
                           ],
                         ),
-
-                        // ✅ ANIMATED CONTENT với AnimatedCrossFade
-                        if (isCurrent)
-                          AnimatedCrossFade(
-                            firstChild: const SizedBox.shrink(),
-                            secondChild: Padding(
-                              padding: const EdgeInsets.only(top: 16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // All sets with full editing capability
-                                  ...state.sets.asMap().entries.map((entry) {
-                                    final setIndex = entry.key;
-                                    final set = entry.value;
-                                    return Padding(
-                                      padding: const EdgeInsets.only(bottom: 8),
-                                      child: _buildSetRow(
-                                        context,
-                                        set,
-                                        setIndex,
-                                        textColor,
-                                      ),
-                                    );
-                                  }).toList(),
-
-                                  const SizedBox(height: 12),
-
-                                  // Action buttons
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: OutlinedButton(
-                                          onPressed: () {
-                                            ExerciseDetailBottomSheet.show(
-                                              context,
-                                              state.currentExercise,
-                                            );
-                                          },
-                                          style: OutlinedButton.styleFrom(
-                                            padding: const EdgeInsets.symmetric(
-                                              vertical: 12,
-                                            ),
-                                            side: BorderSide(color: TColor.gray),
-                                          ),
-                                          child: Text(
-                                            'Chi tiết',
-                                            style: TextStyle(
-                                              color: textColor,
-                                              fontSize: 13,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: ElevatedButton.icon(
-                                          onPressed: () {
-                                            context
-                                                .read<WorkoutTrackerCubit>()
-                                                .addSet();
-                                          },
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: TColor.black,
-                                            padding: const EdgeInsets.symmetric(
-                                              vertical: 12,
-                                            ),
-                                          ),
-                                          icon: Icon(
-                                            Icons.add,
-                                            color: TColor.white,
-                                            size: 18,
-                                          ),
-                                          label: Text(
-                                            'Thêm set',
-                                            style: TextStyle(
-                                              color: TColor.white,
-                                              fontSize: 13,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                            crossFadeState: isExpanded
-                                ? CrossFadeState.showSecond
-                                : CrossFadeState.showFirst,
-                            duration: const Duration(milliseconds: 200), // ✅ Animation 200ms
-                          ),
-                      ],
-                    ),
+                      ),
+                      if (isCurrent)
+                        Icon(
+                          isExpanded
+                              ? Icons.keyboard_arrow_up
+                              : Icons.keyboard_arrow_down,
+                          color: textColor,
+                        ),
+                    ],
                   ),
-                );
-              },
+
+                  // ✅ ANIMATED CONTENT
+                  if (isCurrent)
+                    AnimatedCrossFade(
+                      firstChild: const SizedBox.shrink(),
+                      secondChild: Padding(
+                        padding: const EdgeInsets.only(top: 16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // All sets
+                            ...state.sets.asMap().entries.map((entry) {
+                              final setIndex = entry.key;
+                              final set = entry.value;
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 8),
+                                child: _buildSetRow(
+                                  context,
+                                  set,
+                                  setIndex,
+                                  textColor,
+                                ),
+                              );
+                            }).toList(),
+
+                            const SizedBox(height: 12),
+
+                            // Action buttons
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: OutlinedButton(
+                                    onPressed: () {
+                                      ExerciseDetailBottomSheet.show(
+                                        context,
+                                        state.currentExercise,
+                                      );
+                                    },
+                                    style: OutlinedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 12,
+                                      ),
+                                      side: BorderSide(color: TColor.gray),
+                                    ),
+                                    child: Text(
+                                      'Chi tiết',
+                                      style: TextStyle(
+                                        color: textColor,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: ElevatedButton.icon(
+                                    onPressed: () {
+                                      context
+                                          .read<WorkoutTrackerCubit>()
+                                          .addSet();
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: TColor.black,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 12,
+                                      ),
+                                    ),
+                                    icon: Icon(
+                                      Icons.add,
+                                      color: TColor.white,
+                                      size: 18,
+                                    ),
+                                    label: Text(
+                                      'Thêm set',
+                                      style: TextStyle(
+                                        color: TColor.white,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      crossFadeState: isExpanded
+                          ? CrossFadeState.showSecond
+                          : CrossFadeState.showFirst,
+                      duration: const Duration(milliseconds: 200),
+                    ),
+                ],
+              ),
             ),
           );
         },

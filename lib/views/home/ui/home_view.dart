@@ -13,7 +13,6 @@ import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/locale/translation_manager.dart';
 import 'package:smart_fitness_assistant/views/auth/cubit/authentication_cubit.dart';
 import 'package:smart_fitness_assistant/views/home/logic/cubit/home_cubit.dart';
-import 'package:smart_fitness_assistant/views/home/ui/widgets/activity_tracker_view.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/bmi_card.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/daily_activity_section.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/lastest_workout_view.dart';
@@ -188,16 +187,6 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
                                   const BMICard(),
 
                                   SizedBox(height: media.width * 0.05),
-
-                                  // === Ô Today Target ===
-                                  CustomContainerCheck(
-                                    name: LocaleKey.todayTarget.tr,
-                                    title: LocaleKey.check.tr,
-                                    onPressed: () => navigateTo(
-                                      context,
-                                      const ActivityTrackerView(),
-                                    ),
-                                  ),
 
                                   SizedBox(height: media.width * 0.05),
 

@@ -1,60 +1,61 @@
 import 'package:flutter/material.dart';
-
-import '../../../../../core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 
 class TodayTargetCell extends StatelessWidget {
   final String icon;
   final String value;
   final String title;
+  final String? subtitle; // ✅ THÊM subtitle
+
   const TodayTargetCell({
     super.key,
     required this.icon,
     required this.value,
     required this.title,
+    this.subtitle, // ✅ THÊM
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textColor = theme.textTheme.bodyMedium?.color;
-    final cardColor = theme.cardColor;
+
     return Container(
       height: 70,
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: cardColor,
+        color: TColor.white,
         borderRadius: BorderRadius.circular(15),
       ),
       child: Row(
         children: [
-          Image.asset(icon, width: 40, height: 40, fit: BoxFit.contain),
+          Image.asset(icon, width: 40, height: 40),
           const SizedBox(width: 8),
           Expanded(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ShaderMask(
-                  blendMode: BlendMode.srcIn,
-                  shaderCallback: (bounds) {
-                    return LinearGradient(
-                      colors: TColor.primaryG,
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                    ).createShader(
-                      Rect.fromLTRB(0, 0, bounds.width, bounds.height),
-                    );
-                  },
-                  child: Text(
-                    value,
-                    style: TextStyle(
-                      color: textColor?.withOpacity(0.6),
-                      fontWeight: FontWeight.w700,
-                      fontSize: 14,
-                    ),
+                Text(
+                  value,
+                  style: TextStyle(
+                    color: TColor.primaryColor1,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                Text(title, style: TextStyle(color: textColor, fontSize: 12)),
+                Text(title, style: TextStyle(color: TColor.gray, fontSize: 10)),
+                // ✅ THÊM subtitle
+                if (subtitle != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle!,
+                    style: TextStyle(
+                      color: TColor.gray.withOpacity(0.6),
+                      fontSize: 8,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

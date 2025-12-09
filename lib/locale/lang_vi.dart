@@ -131,4 +131,10 @@ Map<String, String> viVN = {
   LocaleKey.hoursAgo: "giờ trước",
   LocaleKey.daysAgo: "ngày trước",
   LocaleKey.weeksAgo: "tuần trước",
+
+  //Water Tracker
+  LocaleKey.dailyGoal: "Mục tiêu hàng ngày",
+  LocaleKey.nextReminder: "Nhắc nhở tiếp theo",
+  LocaleKey.addWater: "Thêm nước",
+  LocaleKey.waterIntake: "Ghi nước một chạm",
 };

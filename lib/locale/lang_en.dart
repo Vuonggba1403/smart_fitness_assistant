@@ -130,4 +130,10 @@ Map<String, String> enUs = {
   LocaleKey.hoursAgo: "hours ago",
   LocaleKey.daysAgo: "days ago",
   LocaleKey.weeksAgo: "weeks ago",
+
+  //Water Tracker
+  LocaleKey.dailyGoal: "Daily goal",
+  LocaleKey.nextReminder: "Next reminder",
+  LocaleKey.addWater: "Add Water",
+  LocaleKey.waterIntake: "Track Water Intake",
 };

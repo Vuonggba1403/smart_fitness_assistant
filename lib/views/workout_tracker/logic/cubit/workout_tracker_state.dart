@@ -14,16 +14,13 @@ final class WorkoutToggleChanged extends WorkoutTrackerState {
 
 // ============ Các State cho Exercise Categories ============
 
-/// Đang tải danh sách exercise categories
 final class ExerciseCategoriesLoading extends WorkoutTrackerState {}
 
-/// Đã tải thành công danh sách exercise categories
 final class ExerciseCategoriesLoaded extends WorkoutTrackerState {
   final List<ExerciseCategory> categories;
   ExerciseCategoriesLoaded(this.categories);
 }
 
-/// Có lỗi khi tải categories
 final class ExerciseCategoriesError extends WorkoutTrackerState {
   final String message;
   ExerciseCategoriesError(this.message);
@@ -31,26 +28,19 @@ final class ExerciseCategoriesError extends WorkoutTrackerState {
 
 // ============ Các State cho Workout Detail ============
 
-/// Đang tải exercise items cho màn hình detail
 final class WorkoutDetailLoading extends WorkoutTrackerState {}
 
-/// Đã tải thành công exercise items
 final class WorkoutDetailLoaded extends WorkoutTrackerState {
   final List<ExerciseItem> exercises;
 
   WorkoutDetailLoaded(this.exercises);
 
-  /// Số lượng exercises
   int get exerciseCount => exercises.length;
-
-  /// Kiểm tra có exercises không
   bool get hasExercises => exercises.isNotEmpty;
 }
 
-/// Không có exercises nào
 final class WorkoutDetailEmpty extends WorkoutTrackerState {}
 
-/// Có lỗi khi tải detail
 final class WorkoutDetailError extends WorkoutTrackerState {
   final String message;
   WorkoutDetailError(this.message);
@@ -58,7 +48,6 @@ final class WorkoutDetailError extends WorkoutTrackerState {
 
 // ============ Các State cho Exercise Session ============
 
-/// Đang trong phiên tập luyện
 final class ExerciseSessionActive extends WorkoutTrackerState {
   final List<ExerciseItem> exercises;
   final int currentExerciseIndex;
@@ -74,7 +63,7 @@ final class ExerciseSessionActive extends WorkoutTrackerState {
     required this.currentExerciseIndex,
     required this.sets,
     this.elapsedSeconds = 0,
-    this.isExpanded = true, // ✅ MẶC ĐỊNH TRUE (mở rộng)
+    this.isExpanded = true,
     this.isFinishMode = false,
     required this.categoryId,
     required this.categoryName,
@@ -85,37 +74,26 @@ final class ExerciseSessionActive extends WorkoutTrackerState {
   bool get hasPreviousExercise => currentExerciseIndex > 0;
   int get completedSetsCount => sets.where((s) => s.isCompleted).length;
 
-  /// ✅ FIX: Tổng số sets của TẤT CẢ bài tập (tính động)
   int get totalSetsOfAllExercises {
     int total = 0;
-
     for (int i = 0; i < exercises.length; i++) {
       if (i == currentExerciseIndex) {
-        // Bài đang làm: Lấy số sets thực tế
         total += sets.length;
       } else {
-        // Bài khác: Mặc định 4 sets
         total += 4;
       }
     }
-
     return total;
   }
 
-  /// ✅ FIX: Tổng số sets đã hoàn thành (tính chính xác)
   int get totalCompletedSets {
-    // Số bài tập đã hoàn thành trước bài hiện tại (mỗi bài = 4 sets)
     final completedExercisesBefore = currentExerciseIndex;
     final completedSetsFromPreviousExercises = completedExercisesBefore * 4;
-
-    // Cộng thêm số sets đã hoàn thành của bài hiện tại
     return completedSetsFromPreviousExercises + completedSetsCount;
   }
 
-  /// ✅ FIX: Kiểm tra exercise hiện tại đã hoàn thành TẤT CẢ sets chưa
   bool get isCurrentExerciseCompleted => sets.every((s) => s.isCompleted);
 
-  /// Kiểm tra xem đã hoàn thành toàn bộ workout chưa
   bool get isWorkoutCompleted =>
       currentExerciseIndex == exercises.length - 1 &&
       isCurrentExerciseCompleted;
@@ -141,4 +119,29 @@ final class ExerciseSessionActive extends WorkoutTrackerState {
       categoryName: categoryName ?? this.categoryName,
     );
   }
+}
+
+// ============ ✅ State cho Schedule (từ schedule_cubit.dart) ============
+
+final class ScheduleLoading extends WorkoutTrackerState {}
+
+final class ScheduleLoaded extends WorkoutTrackerState {
+  final List<ScheduledWorkout> schedules;
+  final DateTime selectedDate;
+
+  ScheduleLoaded(this.schedules, this.selectedDate);
+}
+
+final class ScheduleError extends WorkoutTrackerState {
+  final String message;
+  ScheduleError(this.message);
+}
+
+// ============ ✅ State cho Exercise Item Expansion ============
+
+final class ExerciseItemExpanded extends WorkoutTrackerState {
+  final String exerciseId;
+  final bool isExpanded;
+
+  ExerciseItemExpanded(this.exerciseId, this.isExpanded);
 }

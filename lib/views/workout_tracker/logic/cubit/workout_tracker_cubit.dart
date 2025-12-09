@@ -9,6 +9,8 @@ import 'package:smart_fitness_assistant/core/models/workout_set.dart';
 import 'package:smart_fitness_assistant/core/models/workout_session.dart';
 import 'package:smart_fitness_assistant/core/models/workout_progress.dart';
 import 'package:smart_fitness_assistant/core/models/upcoming_workout.dart';
+import 'package:smart_fitness_assistant/core/models/scheduled_workout.dart';
+import 'package:smart_fitness_assistant/core/services/notification_service.dart';
 
 part 'workout_tracker_state.dart';
 
@@ -17,12 +19,16 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
 
   final Map<int, bool> _toggleStates = {};
   final _supabase = Supabase.instance.client;
+  final _notificationService = NotificationService();
   Timer? _sessionTimer;
 
-  // ✅ Cache data để không load lại
+  // Cache
   List<UpcomingWorkout>? _cachedUpcomingWorkouts;
   List<double>? _cachedWeeklyStats;
   Map<String, Map<String, WorkoutProgress>>? _cachedProgress = {};
+
+  // ✅ THÊM: Map lưu trạng thái expand của từng exercise item
+  final Map<String, bool> _exerciseItemExpandedStates = {};
 
   @override
   Future<void> close() {
@@ -30,11 +36,121 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
     return super.close();
   }
 
-  // ✅ Clear cache khi cần refresh
   void clearCache() {
     _cachedUpcomingWorkouts = null;
     _cachedWeeklyStats = null;
     _cachedProgress = {};
+  }
+
+  // ============ ✅ Schedule Methods (từ schedule_cubit.dart) ============
+
+  /// Load lịch tập theo ngày
+  Future<void> loadSchedulesByDate(DateTime date) async {
+    emit(ScheduleLoading());
+
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) {
+        emit(ScheduleError('User not authenticated'));
+        return;
+      }
+
+      final startOfDay = DateTime(date.year, date.month, date.day);
+      final endOfDay = startOfDay.add(const Duration(days: 1));
+
+      final response = await _supabase
+          .from('scheduled_workouts')
+          .select()
+          .eq('for_user', userId)
+          .gte('scheduled_time', startOfDay.toIso8601String())
+          .lt('scheduled_time', endOfDay.toIso8601String())
+          .order('scheduled_time');
+
+      final schedules = response
+          .map((json) => ScheduledWorkout.fromJson(json))
+          .toList();
+
+      emit(ScheduleLoaded(schedules, date));
+    } catch (e) {
+      emit(ScheduleError(e.toString()));
+    }
+  }
+
+  /// Thêm lịch tập mới
+  Future<bool> addSchedule(ScheduledWorkout schedule) async {
+    try {
+      final response = await _supabase
+          .from('scheduled_workouts')
+          .insert(schedule.toJson())
+          .select()
+          .single();
+
+      final newSchedule = ScheduledWorkout.fromJson(response);
+
+      if (schedule.hasNotification) {
+        await _scheduleNotification(newSchedule);
+      }
+
+      if (state is ScheduleLoaded) {
+        final currentState = state as ScheduleLoaded;
+        await loadSchedulesByDate(currentState.selectedDate);
+      }
+
+      return true;
+    } catch (e) {
+      print('❌ Error adding schedule: $e');
+      return false;
+    }
+  }
+
+  /// Xóa lịch tập
+  Future<bool> deleteSchedule(String scheduleId) async {
+    try {
+      await _supabase.from('scheduled_workouts').delete().eq('id', scheduleId);
+      await _notificationService.cancelNotification(scheduleId.hashCode);
+
+      if (state is ScheduleLoaded) {
+        final currentState = state as ScheduleLoaded;
+        await loadSchedulesByDate(currentState.selectedDate);
+      }
+
+      return true;
+    } catch (e) {
+      print('❌ Error deleting schedule: $e');
+      return false;
+    }
+  }
+
+  /// Đánh dấu hoàn thành
+  Future<bool> markScheduleAsCompleted(String scheduleId) async {
+    try {
+      await _supabase
+          .from('scheduled_workouts')
+          .update({'is_completed': true})
+          .eq('id', scheduleId);
+
+      await _notificationService.cancelNotification(scheduleId.hashCode);
+
+      if (state is ScheduleLoaded) {
+        final currentState = state as ScheduleLoaded;
+        await loadSchedulesByDate(currentState.selectedDate);
+      }
+
+      return true;
+    } catch (e) {
+      print('❌ Error marking completed: $e');
+      return false;
+    }
+  }
+
+  /// Private: Lên lịch notification
+  Future<void> _scheduleNotification(ScheduledWorkout schedule) async {
+    await _notificationService.scheduleWorkoutNotification(
+      id: schedule.id.hashCode,
+      title: '⏰ Đã đến giờ tập luyện!',
+      body: '${schedule.categoryName} - Bắt đầu ngay thôi! 💪',
+      scheduledTime: schedule.scheduledTime,
+    );
   }
 
   // ============ Toggle Methods ============
@@ -750,5 +866,31 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
       print('❌ Error loading weekly stats: $e');
       return List.filled(7, 0.0);
     }
+  }
+
+  // ============ ✅ Exercise Item Expansion Methods ============
+
+  /// Toggle expand/collapse cho một exercise item cụ thể
+  void toggleExerciseItemExpansion(String exerciseId) {
+    final currentState = _exerciseItemExpandedStates[exerciseId] ?? false;
+    _exerciseItemExpandedStates[exerciseId] = !currentState;
+    emit(ExerciseItemExpanded(exerciseId, !currentState));
+  }
+
+  /// Get trạng thái expand của exercise item
+  bool isExerciseItemExpanded(String exerciseId) {
+    return _exerciseItemExpandedStates[exerciseId] ?? false;
+  }
+
+  /// Expand exercise item
+  void expandExerciseItem(String exerciseId) {
+    _exerciseItemExpandedStates[exerciseId] = true;
+    emit(ExerciseItemExpanded(exerciseId, true));
+  }
+
+  /// Collapse exercise item
+  void collapseExerciseItem(String exerciseId) {
+    _exerciseItemExpandedStates[exerciseId] = false;
+    emit(ExerciseItemExpanded(exerciseId, false));
   }
 }
