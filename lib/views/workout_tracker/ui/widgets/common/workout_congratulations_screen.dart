@@ -300,7 +300,7 @@ class WorkoutCongratulationsScreen extends StatelessWidget {
                         ],
                       ),
                     );
-                  }).toList(),
+                  }),
                 ],
               ),
             ),

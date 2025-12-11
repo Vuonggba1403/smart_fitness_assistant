@@ -5,11 +5,9 @@ import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_container_check.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_drop_but.dart';
-import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'widgets/components/find_eat_cell.dart';
 import 'widgets/components/today_meal_row.dart';
 import 'widgets/meal_food_details_view.dart';
-import 'widgets/meal_schedule_view.dart';
 
 class MealPlannerView extends StatefulWidget {
   const MealPlannerView({super.key});

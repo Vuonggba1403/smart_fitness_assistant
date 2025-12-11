@@ -3,8 +3,6 @@ import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'; // ✅ THÊM import
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
-import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
-import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_container_check.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_derlight_bar.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_sliverbar.dart';

@@ -69,7 +69,6 @@ Map<String, String> enUs = {
   //Home View
   LocaleKey.welcomeBack: 'Welcome Back',
   LocaleKey.dailyActivity: 'Daily Activity',
-  LocaleKey.workoutProgress: 'Workout Progress',
   LocaleKey.latestWorkout: 'Latest Workout',
   LocaleKey.seeMore: 'See More',
   LocaleKey.todayTarget: "Today Target",

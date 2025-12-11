@@ -63,7 +63,6 @@ class LocaleKey {
   //Home view
   static const String welcomeBack = "welcome_back";
   static const String dailyActivity = "daily_activity";
-  static const String workoutProgress = "workout_progress";
   static const String latestWorkout = "latest_workout";
   static const String seeMore = "see_more";
   static const String todayTarget = "today_target";

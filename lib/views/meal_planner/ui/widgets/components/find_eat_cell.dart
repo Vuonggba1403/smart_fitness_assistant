@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
 
-import '../../../../../core/functions/colo_extension.dart';
 import '../../../../../core/widgets/round_button.dart';
 
 class FindEatCell extends StatelessWidget {

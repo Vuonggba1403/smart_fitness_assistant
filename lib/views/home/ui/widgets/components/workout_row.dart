@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart'; // ✅ THÊM import
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart'; // ✅ THÊM import
-import 'package:smart_fitness_assistant/locale/locale_key.dart';
 
 class WorkoutRow extends StatelessWidget {
   final Map wObj;

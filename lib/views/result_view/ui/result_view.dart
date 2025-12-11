@@ -25,7 +25,7 @@ class _ResultViewBody extends StatelessWidget {
   final DateTime date1;
   final DateTime date2;
 
-  const _ResultViewBody({super.key, required this.date1, required this.date2});
+  const _ResultViewBody({required this.date1, required this.date2});
 
   @override
   Widget build(BuildContext context) {

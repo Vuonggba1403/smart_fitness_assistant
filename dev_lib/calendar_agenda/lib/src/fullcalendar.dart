@@ -19,7 +19,7 @@ class FullCalendar extends StatefulWidget {
   final List<String>? events;
   final Function onDateChange;
 
-  FullCalendar({
+  const FullCalendar({
     Key? key,
     this.endDate,
     required this.startDate,
@@ -108,11 +108,11 @@ class _FullCalendarState extends State<FullCalendar> {
 
       months.sort((b, a) => a!.compareTo(b!));
 
-      final _index = months.indexWhere((element) =>
+      final index = months.indexWhere((element) =>
           element!.month == widget.selectedDate!.month &&
           element.year == widget.selectedDate!.year);
 
-      _initialPage = _index;
+      _initialPage = index;
       _horizontalScroll = PageController(initialPage: _initialPage);
 
       return Container(
@@ -187,7 +187,7 @@ class _FullCalendarState extends State<FullCalendar> {
                     ),
                   ),
                   ScrollablePositionedList.builder(
-                    initialScrollIndex: _index,
+                    initialScrollIndex: index,
                     itemCount: months.length,
                     reverse: true,
                     physics: BouncingScrollPhysics(),
@@ -221,9 +221,9 @@ class _FullCalendarState extends State<FullCalendar> {
     for (var day = 12; day <= 18; day++) {
       weekday == WeekDay.long
           ? daysNames.add(DateFormat.EEEE(locale.toString())
-              .format(DateTime.parse('1970-01-' + day.toString())))
+              .format(DateTime.parse('1970-01-$day')))
           : daysNames.add(DateFormat.E(locale.toString())
-              .format(DateTime.parse('1970-01-' + day.toString())));
+              .format(DateTime.parse('1970-01-$day')));
     }
 
     return Row(

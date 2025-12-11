@@ -9,10 +9,10 @@ class LatestWorkoutView extends StatelessWidget {
   final VoidCallback? onSeeMorePressed;
 
   const LatestWorkoutView({
-    Key? key,
+    super.key,
     required this.lastWorkoutArr,
     this.onSeeMorePressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

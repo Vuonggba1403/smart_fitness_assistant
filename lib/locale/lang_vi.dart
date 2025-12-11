@@ -64,7 +64,6 @@ Map<String, String> viVN = {
   //Home View
   LocaleKey.welcomeBack: 'Chào mừng trở lại',
   LocaleKey.dailyActivity: 'Hoạt động hàng ngày',
-  LocaleKey.workoutProgress: 'Tiến độ tập luyện',
   LocaleKey.latestWorkout: 'Buổi tập gần đây',
   LocaleKey.seeMore: 'Xem thêm',
   LocaleKey.todayTarget: "Mục tiêu hôm nay",

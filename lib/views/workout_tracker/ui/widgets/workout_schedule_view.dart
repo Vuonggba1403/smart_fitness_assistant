@@ -1,14 +1,12 @@
 import 'package:calendar_agenda/calendar_agenda.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/models/scheduled_workout.dart';
 import 'package:smart_fitness_assistant/core/services/notification_service.dart';
-import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart'; // ✅ THÊM import
 import 'add_schedule_view.dart';
 

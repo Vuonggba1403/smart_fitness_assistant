@@ -242,11 +242,11 @@ class ExerciseDetailBottomSheet extends StatelessWidget {
                                 .fitWidth, // ✅ Fit theo chiều rộng, chiều cao tự động
                             memCacheWidth: (media.width * 2).toInt(),
                             maxWidthDiskCache: 1200,
-                            placeholder: (context, url) => Container(
+                            placeholder: (context, url) => SizedBox(
                               height: 200,
                               child: Center(child: CustomCircleProgIndicator()),
                             ),
-                            errorWidget: (context, url, error) => Container(
+                            errorWidget: (context, url, error) => SizedBox(
                               height: 200,
                               child: Center(
                                 child: Column(

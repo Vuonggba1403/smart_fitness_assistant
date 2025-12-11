@@ -21,19 +21,10 @@ class HomeCubit extends Cubit<HomeState> {
     // Load workout history từ Supabase
     final lastWorkoutArr = await _loadLatestWorkouts();
 
-    final waterArr = [
-      {"title": "6am - 8am", "subtitle": "600ml"},
-      {"title": "9am - 11am", "subtitle": "500ml"},
-      {"title": "11am - 2pm", "subtitle": "1000ml"},
-      {"title": "2pm - 4pm", "subtitle": "700ml"},
-      {"title": "4pm - now", "subtitle": "900ml"},
-    ];
-
     emit(
       HomeLoaded(
         showingTooltipOnSpots: [21],
         lastWorkoutArr: lastWorkoutArr,
-        waterArr: waterArr,
         currentLanguage: savedLanguage,
       ),
     );
@@ -155,7 +146,6 @@ class HomeCubit extends Cubit<HomeState> {
         currentState.copyWith(
           showingTooltipOnSpots: currentState.showingTooltipOnSpots,
           lastWorkoutArr: currentState.lastWorkoutArr,
-          waterArr: currentState.waterArr,
         ),
       );
     }

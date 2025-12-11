@@ -260,7 +260,7 @@ class _AddScheduleViewState extends State<AddScheduleView> {
                           onChanged: (value) {
                             setState(() => _hasNotification = value);
                           },
-                          activeColor: TColor.primaryColor1,
+                          activeThumbColor: TColor.primaryColor1,
                         ),
                       ],
                     ),

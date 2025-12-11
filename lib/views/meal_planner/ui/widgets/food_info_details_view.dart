@@ -6,7 +6,6 @@ import 'package:smart_fitness_assistant/core/widgets/custom_sliverbar.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 
 import 'components/food_step_detail_row.dart';
-import 'meal_schedule_view.dart';
 
 class FoodInfoDetailsView extends StatefulWidget {
   final Map mObj;

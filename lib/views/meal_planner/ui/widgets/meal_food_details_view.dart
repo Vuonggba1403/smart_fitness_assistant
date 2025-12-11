@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'components/meal_category_cell.dart';
 import 'components/popular_meal_row.dart';
-import 'components/today_meal_row.dart';
 import 'food_info_details_view.dart';
 
 class MealFoodDetailsView extends StatefulWidget {

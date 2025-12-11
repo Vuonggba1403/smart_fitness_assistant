@@ -348,7 +348,7 @@ class ExerciseSessionView extends StatelessWidget {
             final index = entry.key;
             final set = entry.value;
             return _buildSetRow(context, set, index, textColor);
-          }).toList(),
+          }),
 
           const SizedBox(height: 10),
 
@@ -514,7 +514,7 @@ class ExerciseSessionView extends StatelessWidget {
                                   textColor,
                                 ),
                               );
-                            }).toList(),
+                            }),
 
                             const SizedBox(height: 12),
 

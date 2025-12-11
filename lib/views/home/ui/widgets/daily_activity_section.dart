@@ -4,16 +4,14 @@ import 'package:simple_animation_progress_bar/simple_animation_progress_bar.dart
 import 'package:simple_circular_progress_bar/simple_circular_progress_bar.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
-import 'package:supabase_flutter/supabase_flutter.dart'; // ✅ THÊM
-import 'package:smart_fitness_assistant/core/models/water_intake.dart'; // ✅ THÊM
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:smart_fitness_assistant/core/models/water_intake.dart';
 
 class DailyActivitySection extends StatefulWidget {
-  final List<Map<String, dynamic>> waterArr; // ✅ Deprecated - sẽ không dùng nữa
   final double mediaWidth;
 
   const DailyActivitySection({
     super.key,
-    required this.waterArr,
     required this.mediaWidth,
   });
 
@@ -29,19 +27,22 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
   List<WaterIntake> _waterIntakes = [];
   bool _isLoading = true;
 
+  int _completedExercises = 0;
+  int _totalExercises = 0;
+  DateTime? _lastLoadedDate;
+
   @override
   void initState() {
     super.initState();
     _loadWaterData();
+    _loadDailyExerciseStats();
   }
 
-  /// ✅ Load dữ liệu water intake thực tế
   Future<void> _loadWaterData() async {
     try {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) return;
 
-      // Load goal từ settings
       final settingsResponse = await _supabase
           .from('water_goal_settings')
           .select('daily_goal_ml')
@@ -52,7 +53,6 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
         _goalMl = settingsResponse['daily_goal_ml'] ?? 2000;
       }
 
-      // Load water intake hôm nay
       final now = DateTime.now();
       final startOfDay = DateTime(now.year, now.month, now.day);
       final endOfDay = startOfDay.add(const Duration(days: 1));
@@ -77,17 +77,65 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
       if (mounted) {
         setState(() {
           _totalWaterMl = total;
-          _waterIntakes = intakes.take(5).toList(); // ✅ Lấy 5 lần gần nhất
+          _waterIntakes = intakes.take(5).toList();
           _isLoading = false;
         });
       }
     } catch (e) {
-      print('❌ Error loading water data: $e');
+      debugPrint('Error loading water data: $e');
       if (mounted) {
         setState(() {
           _isLoading = false;
         });
       }
+    }
+  }
+
+  Future<void> _loadDailyExerciseStats() async {
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) return;
+
+      // ✅ Load tổng số bài tập từ exercise_items (tất cả bài tập trong hệ thống)
+      final totalExercisesResponse = await _supabase
+          .from('exercise_items')
+          .select('id');
+
+      final totalExercisesCount = totalExercisesResponse.length;
+
+      // ✅ Load số bài tập đã hoàn thành HÔM NAY từ history_workout
+      final now = DateTime.now();
+      final startOfDay = DateTime(now.year, now.month, now.day);
+      final endOfDay = startOfDay.add(const Duration(days: 1));
+
+      final response = await _supabase
+          .from('history_workout')
+          .select('completed_exercises, total_exercises')
+          .eq('for_user', userId)
+          .gte('created_at', startOfDay.toIso8601String())
+          .lt('created_at', endOfDay.toIso8601String());
+
+      int completedToday = 0;
+
+      for (var workout in response) {
+        final completed = (workout['completed_exercises'] ?? 0) as int;
+        completedToday += completed;
+      }
+
+      debugPrint('📊 Exercise stats loaded:');
+      debugPrint('   Completed today: $completedToday');
+      debugPrint('   Total exercises in system: $totalExercisesCount');
+      debugPrint('   Workouts today: ${response.length}');
+
+      if (mounted) {
+        setState(() {
+          _completedExercises = completedToday;
+          _totalExercises = totalExercisesCount;
+          _lastLoadedDate = now;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading exercise stats: $e');
     }
   }
 
@@ -105,7 +153,7 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
             children: [
               _buildSleepCard(media, theme),
               SizedBox(height: media.width * 0.05),
-              _buildCaloriesCard(media, theme),
+              _buildExercisesCard(media, theme),
             ],
           ),
         ),
@@ -113,234 +161,106 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
     );
   }
 
-  // ✅ WATER INTAKE CARD - Dùng dữ liệu thực
   Widget _buildWaterIntakeCard(Size media, ThemeData theme) {
+    final textColor = theme.textTheme.bodyMedium?.color;
     return _baseCard(
       height: media.width * 0.95,
       theme: theme,
-      child: Row(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          _waterProgressBar(media),
-          SizedBox(width: 10),
-          Expanded(child: _waterInfo(theme, media)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Water Intake",
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              Row(
+                children: [
+                  _gradientText(
+                    "${(_totalWaterMl / 1000).toStringAsFixed(1)}L",
+                    TColor.primaryG,
+                    fontSize: 14,
+                  ),
+                  Text(
+                    " / ${(_goalMl / 1000).toStringAsFixed(1)}L",
+                    style: TextStyle(
+                      color: textColor?.withOpacity(0.6),
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Expanded(
+            child: _waterProgressBar(media),
+          ),
         ],
       ),
     );
   }
 
   Widget _waterProgressBar(Size media) {
-    // ✅ FIX: Tính progress từ instance variables thay vì state
     final progress = _goalMl > 0
         ? (_totalWaterMl / _goalMl).clamp(0.0, 1.0)
         : 0.0;
 
-    // ✅ Tính các mốc chia đều (10 mốc từ 0 → goalMl)
     final milestones = List.generate(11, (index) {
       return (_goalMl / 10 * index).round();
     });
 
-    // ✅ FIX: Chiều cao của thanh progress
     final barHeight = media.width * 0.85;
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center, // ✅ Center align
-      children: [
-        // ✅ LEFT: Text labels (200ml, 400ml, ..., 2000ml)
-        SizedBox(
-          height: barHeight, // ✅ Đặt height = height của progress bar
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: milestones.reversed.map((ml) {
-              return Text(
-                '${ml}ml',
-                style: TextStyle(
-                  color: TColor.gray.withOpacity(0.6),
-                  fontSize: 10,
-                ),
-              );
-            }).toList(),
-          ),
-        ),
-
-        const SizedBox(width: 8), // ✅ Khoảng cách giữa text và bar
-        // ✅ RIGHT: Vertical Progress Bar
-        SimpleAnimationProgressBar(
-          height: barHeight, // ✅ Đồng bộ height
-          width: media.width * 0.07,
-          backgroundColor: Colors.grey.shade100,
-          foregroundColor: Colors.purple,
-          ratio: progress, // ✅ Dùng biến progress local
-          direction: Axis.vertical,
-          curve: Curves.fastLinearToSlowEaseIn,
-          duration: const Duration(seconds: 3),
-          borderRadius: BorderRadius.circular(15),
-          gradientColor: LinearGradient(
-            colors: TColor.primaryG,
-            begin: Alignment.bottomCenter,
-            end: Alignment.topCenter,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _waterInfo(ThemeData theme, Size media) {
-    final textColor = theme.textTheme.bodyMedium?.color;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "Water Intake",
-          style: TextStyle(
-            color: textColor,
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        // ✅ Hiển thị dữ liệu thực: "1.5 Liters / 2.0L Goal"
-        Row(
-          children: [
-            _gradientText(
-              "${(_totalWaterMl / 1000).toStringAsFixed(1)}L",
-              TColor.primaryG,
-              fontSize: 14,
+    return Center(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SimpleAnimationProgressBar(
+            height: barHeight,
+            width: media.width * 0.07,
+            backgroundColor: Colors.grey.shade100,
+            foregroundColor: Colors.purple,
+            ratio: progress,
+            direction: Axis.vertical,
+            curve: Curves.fastLinearToSlowEaseIn,
+            duration: const Duration(seconds: 3),
+            borderRadius: BorderRadius.circular(15),
+            gradientColor: LinearGradient(
+              colors: TColor.primaryG,
+              begin: Alignment.bottomCenter,
+              end: Alignment.topCenter,
             ),
-            Text(
-              " / ${(_goalMl / 1000).toStringAsFixed(1)}L",
-              style: TextStyle(
-                color: textColor?.withOpacity(0.6),
-                fontSize: 12,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        Text(
-          "Real time updates",
-          style: TextStyle(color: TColor.gray, fontSize: 12),
-        ),
-
-        // ✅ Timeline với dữ liệu thực
-        if (_isLoading)
-          CustomCircleProgIndicator()
-        // Padding(
-        //   padding: const EdgeInsets.symmetric(vertical: 20),
-        //   child: Center(
-        //     child: SizedBox(
-        //       width: 20,
-        //       height: 20,
-        //       child: CircularProgressIndicator(
-        //         strokeWidth: 2,
-        //         valueColor: AlwaysStoppedAnimation<Color>(
-        //           TColor.primaryColor1,
-        //         ),
-        //       ),
-        //     ),
-        //   ),
-        // )
-        else if (_waterIntakes.isEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20),
-            child: Text(
-              "Chưa uống nước",
-              style: TextStyle(color: TColor.gray, fontSize: 10),
-            ),
-          )
-        else
-          // ✅ FIX: Wrap timeline trong Expanded để chiếm hết không gian còn lại
-          Expanded(
+          ),
+          const SizedBox(width: 12),
+          SizedBox(
+            height: barHeight,
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: _waterIntakes.asMap().entries.map((entry) {
-                final index = entry.key;
-                final intake = entry.value;
-                final isLast = index == _waterIntakes.length - 1;
-
-                return Expanded(
-                  // ✅ FIX: Chia đều không gian cho mỗi item
-                  child: Row(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.stretch, // ✅ Kéo dài hết chiều cao
-                    children: [
-                      _waterTimelineDot(media, isLast),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Align(
-                          alignment: Alignment
-                              .centerLeft, // ✅ Center text theo chiều dọc
-                          child: _waterTimelineText(intake),
-                        ),
-                      ),
-                    ],
+              children: milestones.reversed.map((ml) {
+                return Text(
+                  '${ml}ml',
+                  style: TextStyle(
+                    color: TColor.gray.withOpacity(0.6),
+                    fontSize: 10,
                   ),
                 );
               }).toList(),
             ),
           ),
-      ],
+        ],
+      ),
     );
   }
 
-  Widget _waterTimelineDot(Size media, bool isLast) {
-    return Column(
-      children: [
-        Container(
-          width: 10,
-          height: 10,
-          decoration: BoxDecoration(
-            color: TColor.secondaryColor1.withOpacity(0.5),
-            borderRadius: BorderRadius.circular(5),
-          ),
-        ),
-        if (!isLast)
-          Expanded(
-            // ✅ FIX: Kéo dài line hết chiều cao còn lại
-            child: DottedDashedLine(
-              height: double.infinity, // ✅ FIX: Chiều cao tự động
-              width: 0,
-              dashColor: TColor.secondaryColor1.withOpacity(0.5),
-              axis: Axis.vertical,
-            ),
-          ),
-      ],
-    );
-  }
-
-  // ✅ Format dữ liệu thực
-  Widget _waterTimelineText(WaterIntake intake) {
-    final timeStr = _formatTimeAgo(intake.createdAt);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min, // ✅ Chỉ chiếm không gian cần thiết
-      children: [
-        Text(timeStr, style: TextStyle(color: TColor.gray, fontSize: 10)),
-        _gradientText("${intake.amountMl}ml", TColor.secondaryG, fontSize: 12),
-      ],
-    );
-  }
-
-  /// ✅ Format time ago
-  String _formatTimeAgo(DateTime dateTime) {
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-
-    if (difference.inSeconds < 60) {
-      return 'Vừa xong';
-    } else if (difference.inMinutes < 60) {
-      return '${difference.inMinutes} phút trước';
-    } else if (difference.inHours < 24) {
-      return '${difference.inHours} giờ trước';
-    } else {
-      return '${difference.inDays} ngày trước';
-    }
-  }
-
-  // ---------------------------------------------------------------------------
-  // SLEEP CARD
-  // ---------------------------------------------------------------------------
   Widget _buildSleepCard(Size media, ThemeData theme) {
     return _baseCard(
       height: media.width * 0.45,
@@ -361,26 +281,31 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // CALORIES CARD
-  // ---------------------------------------------------------------------------
-  Widget _buildCaloriesCard(Size media, ThemeData theme) {
+  Widget _buildExercisesCard(Size media, ThemeData theme) {
     return _baseCard(
       height: media.width * 0.45,
       theme: theme,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _title(theme, "Calories"),
-          _gradientText("760 kCal", TColor.primaryG, fontSize: 14),
+          _title(theme, "Bài tập"),
+          _gradientText(
+            "$_completedExercises/${_totalExercises > 0 ? _totalExercises : '0'}",
+            TColor.primaryG,
+            fontSize: 14,
+          ),
           const Spacer(),
-          _caloriesCircle(media),
+          _exercisesCircle(media),
         ],
       ),
     );
   }
 
-  Widget _caloriesCircle(Size media) {
+  Widget _exercisesCircle(Size media) {
+    final percentage = _totalExercises > 0
+        ? (_completedExercises / _totalExercises).clamp(0.0, 1.0) * 100
+        : 0.0;
+
     return Center(
       child: SizedBox(
         width: media.width * 0.2,
@@ -388,13 +313,13 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            _caloriesInnerBox(media),
+            _exercisesInnerBox(media, percentage),
             SimpleCircularProgressBar(
               progressStrokeWidth: 10,
               backStrokeWidth: 10,
               progressColors: TColor.primaryG,
               backColor: Colors.grey.shade100,
-              valueNotifier: ValueNotifier(50),
+              valueNotifier: ValueNotifier(percentage),
               startAngle: -180,
             ),
           ],
@@ -403,7 +328,7 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
     );
   }
 
-  Widget _caloriesInnerBox(Size media) {
+  Widget _exercisesInnerBox(Size media, double percentage) {
     return Container(
       width: media.width * 0.15,
       height: media.width * 0.15,
@@ -412,19 +337,13 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
         borderRadius: BorderRadius.circular(media.width * 0.075),
       ),
       alignment: Alignment.center,
-      child: FittedBox(
-        child: Text(
-          "230kCal\nleft",
-          textAlign: TextAlign.center,
-          style: TextStyle(color: TColor.white, fontSize: 11),
-        ),
+      child: Text(
+        "${percentage.toStringAsFixed(0)}%",
+        textAlign: TextAlign.center,
+        style: TextStyle(color: TColor.white, fontSize: 14),
       ),
     );
   }
-
-  // ---------------------------------------------------------------------------
-  // HELPERS
-  // ---------------------------------------------------------------------------
 
   Widget _baseCard({
     required double height,
