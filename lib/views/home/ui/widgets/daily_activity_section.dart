@@ -223,34 +223,106 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
-          SimpleAnimationProgressBar(
-            height: barHeight,
-            width: media.width * 0.07,
-            backgroundColor: Colors.grey.shade100,
-            foregroundColor: Colors.purple,
-            ratio: progress,
-            direction: Axis.vertical,
-            curve: Curves.fastLinearToSlowEaseIn,
-            duration: const Duration(seconds: 3),
-            borderRadius: BorderRadius.circular(15),
-            gradientColor: LinearGradient(
-              colors: TColor.primaryG,
-              begin: Alignment.bottomCenter,
-              end: Alignment.topCenter,
-            ),
+          // ✅ LEFT: Vertical Progress Bar with milestone markers
+          Stack(
+            children: [
+              // ✅ 1. Background container với góc tròn (nằm dưới)
+              Container(
+                width: media.width * 0.08,
+                height: barHeight,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(15),
+                  border: Border.all(
+                    color: TColor.gray.withOpacity(0.2),
+                    width: 1.5,
+                  ),
+                ),
+              ),
+
+              // ✅ 2. Progress bar (nằm giữa)
+              SimpleAnimationProgressBar(
+                height: barHeight,
+                width: media.width * 0.08,
+                backgroundColor: Colors.transparent,
+                foregroundColor: Colors.purple,
+                ratio: progress,
+                direction: Axis.vertical,
+                curve: Curves.fastLinearToSlowEaseIn,
+                duration: const Duration(seconds: 3),
+                borderRadius: BorderRadius.circular(15),
+                gradientColor: LinearGradient(
+                  colors: TColor.primaryG,
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                ),
+              ),
+
+              // ✅ 3. Milestone markers - Wrap với ClipRect
+              Positioned(
+                left: 0,
+                right: 0,
+                top: 0,
+                bottom: 0,
+                child: ClipRect(
+                  child: CustomPaint(
+                    painter: _MilestoneMarkerPainter(
+                      milestonesCount: 11,
+                      color: TColor.gray.withOpacity(0.5),
+                      barWidth: media.width * 0.08,
+                    ),
+                  ),
+                ),
+              ),
+
+              // ✅ 4. Current level indicator (nằm ngoài cùng)
+              if (progress > 0)
+                Positioned(
+                  left: -12,
+                  top: barHeight * (1 - progress) - 8,
+                  child: Container(
+                    width: 16,
+                    height: 16,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: TColor.primaryG.first,
+                      border: Border.all(color: Colors.white, width: 2),
+                      boxShadow: [
+                        BoxShadow(
+                          color: TColor.primaryG.first.withOpacity(0.4),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
           ),
+
           const SizedBox(width: 12),
+
+          // ✅ RIGHT: Text labels với ml amount
           SizedBox(
             height: barHeight,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: milestones.reversed.map((ml) {
-                return Text(
-                  '${ml}ml',
-                  style: TextStyle(
-                    color: TColor.gray.withOpacity(0.6),
-                    fontSize: 10,
+                final isCurrentLevel = ml <= _totalWaterMl && ml + (_goalMl ~/ 10) > _totalWaterMl;
+                
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 0),
+                  child: Text(
+                    '${ml}ml',
+                    style: TextStyle(
+                      color: isCurrentLevel
+                          ? TColor.primaryG.first
+                          : TColor.gray.withOpacity(0.6),
+                      fontSize: isCurrentLevel ? 10 : 9,
+                      fontWeight: isCurrentLevel ? FontWeight.w700 : FontWeight.w400,
+                      height: 1.0,
+                    ),
                   ),
                 );
               }).toList(),
@@ -260,7 +332,7 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
       ),
     );
   }
-
+//
   Widget _buildSleepCard(Size media, ThemeData theme) {
     return _baseCard(
       height: media.width * 0.45,
@@ -308,20 +380,39 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
 
     return Center(
       child: SizedBox(
-        width: media.width * 0.2,
-        height: media.width * 0.2,
+        width: media.width * 0.22,
+        height: media.width * 0.22,
         child: Stack(
           alignment: Alignment.center,
           children: [
-            _exercisesInnerBox(media, percentage),
+            // ✅ Outer glow effect
+            Container(
+              width: media.width * 0.22,
+              height: media.width * 0.22,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: TColor.primaryG.first.withOpacity(0.15),
+                    blurRadius: 12,
+                    spreadRadius: 3,
+                  ),
+                ],
+              ),
+            ),
+
+            // ✅ Circular progress bar - FIX: Không dùng Expanded
             SimpleCircularProgressBar(
-              progressStrokeWidth: 10,
-              backStrokeWidth: 10,
+              progressStrokeWidth: 12,
+              backStrokeWidth: 12,
               progressColors: TColor.primaryG,
               backColor: Colors.grey.shade100,
-              valueNotifier: ValueNotifier(percentage),
+              valueNotifier: ValueNotifier<double>(percentage),
               startAngle: -180,
             ),
+
+            // ✅ Inner circle with percentage
+            _exercisesInnerBox(media, percentage),
           ],
         ),
       ),
@@ -330,17 +421,45 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
 
   Widget _exercisesInnerBox(Size media, double percentage) {
     return Container(
-      width: media.width * 0.15,
-      height: media.width * 0.15,
+      width: media.width * 0.155,
+      height: media.width * 0.155,
       decoration: BoxDecoration(
-        gradient: LinearGradient(colors: TColor.primaryG),
-        borderRadius: BorderRadius.circular(media.width * 0.075),
+        gradient: LinearGradient(
+          colors: TColor.primaryG,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: TColor.primaryG.first.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       alignment: Alignment.center,
-      child: Text(
-        "${percentage.toStringAsFixed(0)}%",
-        textAlign: TextAlign.center,
-        style: TextStyle(color: TColor.white, fontSize: 14),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            "${percentage.toStringAsFixed(0)}%",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: TColor.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          Text(
+            "xong",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: TColor.white.withOpacity(0.8),
+              fontSize: 10,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -356,7 +475,18 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(25),
-        boxShadow: [BoxShadow(color: theme.shadowColor, blurRadius: 2)],
+        boxShadow: [
+          BoxShadow(
+            color: theme.shadowColor.withOpacity(0.15),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: theme.shadowColor.withOpacity(0.05),
+            blurRadius: 2,
+            offset: const Offset(0, 1),
+          ),
+        ],
       ),
       child: child,
     );
@@ -392,5 +522,48 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
         style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.w700),
       ),
     );
+  }
+}
+
+/// ✅ CustomPainter để vẽ các vạch milestone - FIX: Không tràn
+class _MilestoneMarkerPainter extends CustomPainter {
+  final int milestonesCount;
+  final Color color;
+  final double barWidth;
+
+  _MilestoneMarkerPainter({
+    required this.milestonesCount,
+    required this.color,
+    required this.barWidth,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.5;
+
+    final spacing = size.height / (milestonesCount - 1);
+    final markerWidth = barWidth * 0.4; // ✅ Vạch chỉ 40% chiều rộng container
+
+    for (int i = 0; i < milestonesCount; i++) {
+      final y = i * spacing;
+      final double startX = size.width - 6;        // sát mép phải
+      final double endX = startX - 12;             // độ dài vạch 12px
+
+      // ✅ Vẽ vạch ngang từ center ra (không tràn)
+      canvas.drawLine(
+        Offset(startX, y),
+        Offset(endX, y),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_MilestoneMarkerPainter oldDelegate) {
+    return oldDelegate.milestonesCount != milestonesCount ||
+        oldDelegate.color != color ||
+        oldDelegate.barWidth != barWidth;
   }
 }
