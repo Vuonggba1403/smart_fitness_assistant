@@ -482,14 +482,9 @@ class _WaterTrackerContentState extends State<_WaterTrackerContent> {
                     child: Padding(
                       padding: const EdgeInsets.all(20),
                       child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Icon(Icons.notifications_active, color: TColor.white),
-                          const SizedBox(width: 10),
-                          Text(
-                            'Next reminder',
-                            style: TextStyle(color: TColor.white, fontSize: 16),
-                          ),
-                          const Spacer(),
+                       
                           Text(
                             _getNextReminderText(loadedState.settings),
                             style: TextStyle(

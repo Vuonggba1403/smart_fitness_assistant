@@ -24,16 +24,18 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
 
   int _totalWaterMl = 0;
   int _goalMl = 2000;
-  List<WaterIntake> _waterIntakes = [];
-  bool _isLoading = true;
 
   int _completedExercises = 0;
   int _totalExercises = 0;
-  DateTime? _lastLoadedDate;
+
+  // ✅ THÊM: Persistent ValueNotifier cho progress
+  late ValueNotifier<double> _exerciseProgressNotifier;
 
   @override
   void initState() {
     super.initState();
+    // ✅ Tạo ValueNotifier một lần duy nhất
+    _exerciseProgressNotifier = ValueNotifier<double>(0.0);
     _loadWaterData();
     _loadDailyExerciseStats();
   }
@@ -77,15 +79,12 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
       if (mounted) {
         setState(() {
           _totalWaterMl = total;
-          _waterIntakes = intakes.take(5).toList();
-          _isLoading = false;
         });
       }
     } catch (e) {
       debugPrint('Error loading water data: $e');
       if (mounted) {
         setState(() {
-          _isLoading = false;
         });
       }
     }
@@ -96,14 +95,12 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) return;
 
-      // ✅ Load tổng số bài tập từ exercise_items (tất cả bài tập trong hệ thống)
       final totalExercisesResponse = await _supabase
           .from('exercise_items')
           .select('id');
 
       final totalExercisesCount = totalExercisesResponse.length;
 
-      // ✅ Load số bài tập đã hoàn thành HÔM NAY từ history_workout
       final now = DateTime.now();
       final startOfDay = DateTime(now.year, now.month, now.day);
       final endOfDay = startOfDay.add(const Duration(days: 1));
@@ -128,15 +125,29 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
       debugPrint('   Workouts today: ${response.length}');
 
       if (mounted) {
+        // ✅ Tính percentage
+        final percentage = totalExercisesCount > 0
+            ? (completedToday / totalExercisesCount).clamp(0.0, 1.0) * 100
+            : 0.0;
+
         setState(() {
           _completedExercises = completedToday;
           _totalExercises = totalExercisesCount;
-          _lastLoadedDate = now;
         });
+
+        // ✅ UPDATE ValueNotifier thay vì tạo mới
+        _exerciseProgressNotifier.value = percentage;
       }
     } catch (e) {
       debugPrint('Error loading exercise stats: $e');
     }
+  }
+
+  @override
+  void dispose() {
+    // ✅ Dispose ValueNotifier
+    _exerciseProgressNotifier.dispose();
+    super.dispose();
   }
 
   @override
@@ -275,28 +286,28 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
                 ),
               ),
 
-              // ✅ 4. Current level indicator (nằm ngoài cùng)
-              if (progress > 0)
-                Positioned(
-                  left: -12,
-                  top: barHeight * (1 - progress) - 8,
-                  child: Container(
-                    width: 16,
-                    height: 16,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: TColor.primaryG.first,
-                      border: Border.all(color: Colors.white, width: 2),
-                      boxShadow: [
-                        BoxShadow(
-                          color: TColor.primaryG.first.withOpacity(0.4),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+              // // ✅ 4. Current level indicator (nằm ngoài cùng)
+              // if (progress > 0)
+              //   Positioned(
+              //     left: -12,
+              //     top: barHeight * (1 - progress) - 8,
+              //     child: Container(
+              //       width: 16,
+              //       height: 16,
+              //       decoration: BoxDecoration(
+              //         shape: BoxShape.circle,
+              //         color: TColor.primaryG.first,
+              //         border: Border.all(color: Colors.white, width: 2),
+              //         boxShadow: [
+              //           BoxShadow(
+              //             color: TColor.primaryG.first.withOpacity(0.4),
+              //             blurRadius: 6,
+              //             offset: const Offset(0, 2),
+              //           ),
+              //         ],
+              //       ),
+              //     ),
+              //   ),
             ],
           ),
 
@@ -374,9 +385,8 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
   }
 
   Widget _exercisesCircle(Size media) {
-    final percentage = _totalExercises > 0
-        ? (_completedExercises / _totalExercises).clamp(0.0, 1.0) * 100
-        : 0.0;
+    // ✅ Lấy giá trị hiện tại từ ValueNotifier
+    final percentage = _exerciseProgressNotifier.value;
 
     return Center(
       child: SizedBox(
@@ -401,18 +411,23 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
               ),
             ),
 
-            // ✅ Circular progress bar - FIX: Không dùng Expanded
+            // ✅ Dùng ValueNotifier persistent
             SimpleCircularProgressBar(
               progressStrokeWidth: 12,
               backStrokeWidth: 12,
               progressColors: TColor.primaryG,
               backColor: Colors.grey.shade100,
-              valueNotifier: ValueNotifier<double>(percentage),
+              valueNotifier: _exerciseProgressNotifier, // ✅ Dùng persistent notifier
               startAngle: -180,
             ),
 
             // ✅ Inner circle with percentage
-            _exercisesInnerBox(media, percentage),
+            ValueListenableBuilder<double>(
+              valueListenable: _exerciseProgressNotifier,
+              builder: (context, value, child) {
+                return _exercisesInnerBox(media, value);
+              },
+            ),
           ],
         ),
       ),
@@ -451,14 +466,7 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
               fontWeight: FontWeight.w700,
             ),
           ),
-          Text(
-            "xong",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: TColor.white.withOpacity(0.8),
-              fontSize: 10,
-            ),
-          ),
+        
         ],
       ),
     );
@@ -544,7 +552,6 @@ class _MilestoneMarkerPainter extends CustomPainter {
       ..strokeWidth = 1.5;
 
     final spacing = size.height / (milestonesCount - 1);
-    final markerWidth = barWidth * 0.4; // ✅ Vạch chỉ 40% chiều rộng container
 
     for (int i = 0; i < milestonesCount; i++) {
       final y = i * spacing;

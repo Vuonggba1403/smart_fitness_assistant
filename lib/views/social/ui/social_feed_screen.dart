@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart'; // ✅ THÊM
 import 'dart:io';
 
 class SocialFeedScreen extends StatefulWidget {
@@ -14,6 +17,8 @@ class SocialFeedScreen extends StatefulWidget {
 
 class _SocialFeedScreenState extends State<SocialFeedScreen> {
   final PageController _pageController = PageController();
+  final TextEditingController _captionController = TextEditingController(); // ✅ THÊM
+  bool _showEmojiPicker = false; // ✅ THÊM
   final List<FeedPost> _posts = [
     FeedPost(
       id: '1',
@@ -48,17 +53,58 @@ class _SocialFeedScreenState extends State<SocialFeedScreen> {
   ];
 
   File? _selectedImage;
-  final TextEditingController _captionController = TextEditingController();
 
-  Future<void> _pickImage() async {
+  Future<void> _pickImage({ImageSource source = ImageSource.gallery}) async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    final pickedFile = await picker.pickImage(source: source);
 
     if (pickedFile != null) {
       setState(() {
         _selectedImage = File(pickedFile.path);
       });
     }
+  }
+
+  /// ✅ Show dialog chọn source (camera hoặc gallery)
+  void _showImageSourceDialog() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Container(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: Text(
+                'Chọn nguồn ảnh',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).textTheme.bodyMedium?.color,
+                ),
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.camera_alt, color: TColor.primaryColor1),
+              title: const Text('Chụp ảnh'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(source: ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.photo_library, color: TColor.primaryColor1),
+              title: const Text('Chọn từ thư viện'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(source: ImageSource.gallery);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _postContent() {
@@ -106,7 +152,7 @@ class _SocialFeedScreenState extends State<SocialFeedScreen> {
   @override
   void dispose() {
     _pageController.dispose();
-    _captionController.dispose();
+    _captionController.dispose(); // ✅ THÊM
     super.dispose();
   }
 
@@ -126,24 +172,7 @@ class _SocialFeedScreenState extends State<SocialFeedScreen> {
       },
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          title: Text(
-            'Social Feed',
-            style: TextStyle(
-              color: textColor,
-              fontSize: 24,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          actions: [
-            IconButton(
-              icon: Icon(Icons.notifications_outlined, color: TColor.primaryColor1),
-              onPressed: () {},
-            ),
-          ],
-        ),
+        appBar: CustomAppBar(title: "Diễn đàn xã hội", showBackButton: false),
         body: _posts.isEmpty
             ? Center(
                 child: Column(
@@ -592,7 +621,7 @@ class _SocialFeedScreenState extends State<SocialFeedScreen> {
                     children: [
                       // ✅ Image Picker
                       InkWell(
-                        onTap: _pickImage,
+                        onTap: _showImageSourceDialog,
                         child: Container(
                           width: double.infinity,
                           height: 200,
@@ -608,14 +637,27 @@ class _SocialFeedScreenState extends State<SocialFeedScreen> {
                               ? Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(
-                                      Icons.add_photo_alternate_outlined,
-                                      size: 60,
-                                      color: TColor.primaryColor1,
+                                    // ✅ Icons cho camera và gallery
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.camera_alt_outlined,
+                                          size: 40,
+                                          color: TColor.primaryColor1,
+                                        ),
+                                        const SizedBox(width: 20),
+                                        Icon(
+                                          Icons.add_photo_alternate_outlined,
+                                          size: 40,
+                                          color: TColor.primaryColor1,
+                                        ),
+                                      ],
                                     ),
                                     const SizedBox(height: 10),
                                     Text(
-                                      'Chọn ảnh từ thư viện',
+                                      'Chụp ảnh hoặc chọn từ thư viện',
                                       style: TextStyle(
                                         color: TColor.primaryColor1,
                                         fontSize: 14,
@@ -624,36 +666,143 @@ class _SocialFeedScreenState extends State<SocialFeedScreen> {
                                     ),
                                   ],
                                 )
-                              : ClipRRect(
-                                  borderRadius: BorderRadius.circular(15),
-                                  child: Image.file(
-                                    _selectedImage!,
-                                    fit: BoxFit.cover,
-                                  ),
+                              : Stack(
+                                  alignment: Alignment.bottomRight,
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(15),
+                                      child: Image.file(
+                                        _selectedImage!,
+                                        fit: BoxFit.cover,
+                                        width: double.infinity,
+                                        height: double.infinity,
+                                      ),
+                                    ),
+                                    // ✅ Button để thay đổi ảnh
+                                    Positioned(
+                                      bottom: 10,
+                                      right: 10,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: TColor.primaryColor1,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          Icons.edit,
+                                          color: TColor.white,
+                                          size: 20,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                         ),
                       ),
 
                       const SizedBox(height: 20),
 
-                      // ✅ Caption Input
-                      TextField(
-                        controller: _captionController,
-                        maxLines: 4,
-                        decoration: InputDecoration(
-                          hintText: 'Viết caption...',
-                          hintStyle: TextStyle(
-                            color: TColor.gray.withOpacity(0.6),
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            borderSide: BorderSide(
-                              color: TColor.gray.withOpacity(0.3),
+                      // ✅ Caption Input + Emoji Button
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: TColor.gray.withOpacity(0.3),
+                              ),
+                              borderRadius: BorderRadius.circular(15),
+                              color: TColor.gray.withOpacity(0.05), // ✅ FIX: Dùng 'color' thay vì 'filled'
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: TextField(
+                                    controller: _captionController,
+                                    maxLines: 4,
+                                    decoration: InputDecoration(
+                                      hintText: 'Viết caption...',
+                                      hintStyle: TextStyle(
+                                        color: TColor.gray.withOpacity(0.6),
+                                      ),
+                                      border: InputBorder.none,
+                                      contentPadding:
+                                          const EdgeInsets.all(16),
+                                    ),
+                                  ),
+                                ),
+                                // ✅ Emoji button
+                                Padding(
+                                  padding: const EdgeInsets.all(8),
+                                  child: IconButton(
+                                    icon: Icon(
+                                      Icons.sentiment_satisfied_outlined,
+                                      size: 28,
+                                      color: Colors.orange,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        _showEmojiPicker = !_showEmojiPicker;
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          filled: true,
-                          fillColor: TColor.gray.withOpacity(0.05),
-                        ),
+
+                          // ✅ Emoji Picker - Hiển thị khi tap emoji button
+                          if (_showEmojiPicker)
+                            SizedBox(
+                              height: 256,
+                              child: EmojiPicker(
+                                onEmojiSelected:
+                                    (Category? category, Emoji emoji) {
+                                  // ✅ Thêm emoji vào caption
+                                  _captionController.text +=
+                                      emoji.emoji;
+                                },
+                                onBackspacePressed: () {
+                                  // ✅ Xóa ký tự cuối cùng
+                                  if (_captionController.text.isNotEmpty) {
+                                    _captionController.text =
+                                        _captionController.text
+                                            .substring(
+                                              0,
+                                              _captionController.text.length -
+                                                  1,
+                                            );
+                                  }
+                                },
+                                textEditingController: _captionController,
+                                config: Config(
+                                  height: 256,
+                                  // backgroundColor: const Color(0xFFF2F2F2), // ✅ FIX: Dùng 'backgroundColor' thay vì 'bgColor'
+                                  checkPlatformCompatibility: true,
+                                  emojiViewConfig: EmojiViewConfig(
+                                    emojiSizeMax: 28 *
+                                        (foundation.defaultTargetPlatform ==
+                                                TargetPlatform.iOS
+                                            ? 1.20
+                                            : 1.0),
+                                  ),
+                                  viewOrderConfig:
+                                      const ViewOrderConfig(
+                                    top: EmojiPickerItem.categoryBar,
+                                    middle: EmojiPickerItem.emojiView,
+                                    bottom: EmojiPickerItem.searchBar,
+                                  ),
+                                  skinToneConfig: const SkinToneConfig(),
+                                  categoryViewConfig:
+                                      const CategoryViewConfig(),
+                                  bottomActionBarConfig:
+                                      const BottomActionBarConfig(),
+                                  searchViewConfig:
+                                      const SearchViewConfig(),
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
 
                       const SizedBox(height: 30),
@@ -664,8 +813,7 @@ class _SocialFeedScreenState extends State<SocialFeedScreen> {
                         height: 50,
                         child: ElevatedButton(
                           onPressed: () {
-                            _postContent(); // ✅ Call hàm
-                            // ✅ Không pop ở đây - để _postContent xử lý
+                            _postContent();
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: TColor.primaryColor1,
