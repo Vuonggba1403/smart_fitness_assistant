@@ -83,7 +83,7 @@ class ProfileView extends StatelessWidget {
                             ClipRRect(
                               borderRadius: BorderRadius.circular(30),
                               child: Image.asset(
-                                "assets/img/u2.png",
+                                "assets/img/u1.png",
                                 width: 50,
                                 height: 50,
                                 fit: BoxFit.cover,

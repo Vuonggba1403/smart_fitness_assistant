@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' as foundation;
-import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/models/exercise_category.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
@@ -39,13 +38,11 @@ class SocialCreatePostDialog extends StatefulWidget {
 }
 
 class _SocialCreatePostDialogState extends State<SocialCreatePostDialog> {
-  // ✅ THÊM: Local state để update ngay khi select category
   late ExerciseCategory? _localSelectedCategory;
 
   @override
   void initState() {
     super.initState();
-    // ✅ Sync với parent category
     _localSelectedCategory = widget.selectedCategory;
   }
 
@@ -290,48 +287,9 @@ class _SocialCreatePostDialogState extends State<SocialCreatePostDialog> {
                             ),
                     ),
 
-                    // ✅ Confirmation badge - Optional
-                    if (_localSelectedCategory != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 12),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: TColor.primaryColor1.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: TColor.primaryColor1.withOpacity(0.3),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.check_circle,
-                                size: 16,
-                                color: TColor.primaryColor1,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  'Đang cảm thấy có động lực với ${_localSelectedCategory!.titleEx}',
-                                  style: TextStyle(
-                                    color: TColor.primaryColor1,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
                     const SizedBox(height: 20),
 
-                    // ✅ Caption Input + Emoji Button
+                    // ✅ Caption Input
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -352,86 +310,19 @@ class _SocialCreatePostDialogState extends State<SocialCreatePostDialog> {
                             borderRadius: BorderRadius.circular(15),
                             color: TColor.gray.withOpacity(0.05),
                           ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  controller: widget.captionController,
-                                  maxLines: 5,
-                                  decoration: InputDecoration(
-                                    hintText: 'Viết caption...*',
-                                    hintStyle: TextStyle(
-                                      color: TColor.gray.withOpacity(0.6),
-                                    ),
-                                    border: InputBorder.none,
-                                    contentPadding: const EdgeInsets.all(16),
-                                  ),
-                                ),
+                          child: TextField(
+                            controller: widget.captionController,
+                            maxLines: 5,
+                            decoration: InputDecoration(
+                              hintText: 'Viết caption...*',
+                              hintStyle: TextStyle(
+                                color: TColor.gray.withOpacity(0.6),
                               ),
-                              Padding(
-                                padding: const EdgeInsets.all(8),
-                                child: IconButton(
-                                  icon: Icon(
-                                    Icons.sentiment_satisfied_outlined,
-                                    size: 28,
-                                    color: Colors.orange,
-                                  ),
-                                  onPressed: widget.onEmojiToggle,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        // ✅ Emoji Picker
-                        if (widget.showEmojiPicker)
-                          SizedBox(
-                            height: 256,
-                            child: EmojiPicker(
-                              onEmojiSelected: (Category? category,
-                                  Emoji emoji) {
-                                widget.captionController.text +=
-                                    emoji.emoji;
-                              },
-                              onBackspacePressed: () {
-                                if (widget
-                                    .captionController.text.isNotEmpty) {
-                                  widget.captionController.text =
-                                      widget.captionController.text
-                                          .substring(
-                                            0,
-                                            widget.captionController.text
-                                                    .length -
-                                                1,
-                                          );
-                                }
-                              },
-                              textEditingController:
-                                  widget.captionController,
-                              config: Config(
-                                height: 256,
-                                checkPlatformCompatibility: true,
-                                emojiViewConfig: EmojiViewConfig(
-                                  emojiSizeMax: 28 *
-                                      (foundation.defaultTargetPlatform ==
-                                              TargetPlatform.iOS
-                                          ? 1.20
-                                          : 1.0),
-                                ),
-                                viewOrderConfig: const ViewOrderConfig(
-                                  top: EmojiPickerItem.categoryBar,
-                                  middle: EmojiPickerItem.emojiView,
-                                  bottom: EmojiPickerItem.searchBar,
-                                ),
-                                skinToneConfig: const SkinToneConfig(),
-                                categoryViewConfig:
-                                    const CategoryViewConfig(),
-                                bottomActionBarConfig:
-                                    const BottomActionBarConfig(),
-                                searchViewConfig: const SearchViewConfig(),
-                              ),
+                              border: InputBorder.none,
+                              contentPadding: const EdgeInsets.all(16),
                             ),
                           ),
+                        ),
                       ],
                     ),
 

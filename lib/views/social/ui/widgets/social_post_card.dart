@@ -3,7 +3,7 @@ import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'package:smart_fitness_assistant/core/models/feed_post.dart';
 
-/// ✅ Widget: Single Post Card
+/// ✅ Widget: Single Post Card - BỎ UserDataModel
 class SocialPostCard extends StatelessWidget {
   final FeedPost post;
   final Color? textColor;
@@ -48,7 +48,7 @@ class SocialPostCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 24,
-                  backgroundImage: AssetImage('assets/img/u2.png'),
+                  backgroundImage: AssetImage('assets/img/u1.png'),
                   backgroundColor: TColor.primaryColor1.withOpacity(0.3),
                 ),
                 const SizedBox(width: 12),
@@ -57,7 +57,7 @@ class SocialPostCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        post.userName,
+                        post.userName, // ✅ Dùng post.userName thực tế
                         style: TextStyle(
                           color: textColor,
                           fontSize: 14,
@@ -106,8 +106,10 @@ class SocialPostCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Container(
+            width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
+                
                 color: theme.cardColor,
                 borderRadius: BorderRadius.circular(15),
                 boxShadow: [
@@ -132,70 +134,81 @@ class SocialPostCard extends StatelessWidget {
                     ),
                   ),
 
-                  // Image (if available)
-                  if (post.imageUrl.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: Image.network(
-                        post.imageUrl,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: 200,
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Container(
-                            height: 200,
-                            color: TColor.gray.withOpacity(0.1),
-                            child: Center(
-                              child: CustomCircleProgIndicator(),
-                            ),
-                          );
-                        },
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            height: 200,
-                            color: TColor.gray.withOpacity(0.1),
-                            child: Center(
-                              child: Icon(
-                                Icons.image_not_supported_outlined,
-                                color: TColor.gray,
-                                size: 40,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-
                   // Tagged Category
                   if (post.taggedCategory != null) ...[
                     const SizedBox(height: 12),
+                    
+                    // ✅ FIX: Container nhỏ với ảnh + tên trong 1 row
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
+                        horizontal: 10,
+                        vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: TColor.primaryColor1.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
+                        color: TColor.primaryColor1.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: TColor.primaryColor1.withOpacity(0.2),
+                        ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
-                            Icons.fitness_center,
-                            size: 14,
-                            color: TColor.primaryColor1,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            post.taggedCategory!,
-                            style: TextStyle(
-                              color: TColor.primaryColor1,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
+                          // ✅ Ảnh bài tập nhỏ
+                          if (post.categoryImageUrl != null &&
+                              post.categoryImageUrl!.isNotEmpty)
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(6),
+                              child: Image.network(
+                                post.categoryImageUrl!,
+                                width: 40,
+                                height: 40,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    width: 40,
+                                    height: 40,
+                                    decoration: BoxDecoration(
+                                      color: TColor.gray.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Icon(
+                                      Icons.fitness_center,
+                                      size: 20,
+                                      color: TColor.primaryColor1,
+                                    ),
+                                  );
+                                },
+                              ),
+                            )
+                          else
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: TColor.gray.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Icon(
+                                Icons.fitness_center,
+                                size: 20,
+                                color: TColor.primaryColor1,
+                              ),
+                            ),
+                          
+                          const SizedBox(width: 10),
+                          
+                          // ✅ Tên bài tập
+                          Expanded(
+                            child: Text(
+                              post.taggedCategory!,
+                              style: TextStyle(
+                                color: TColor.primaryColor1,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],

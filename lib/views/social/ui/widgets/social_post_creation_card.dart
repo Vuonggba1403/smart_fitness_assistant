@@ -37,7 +37,7 @@ class SocialPostCreationCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 24,
-                backgroundImage: AssetImage('assets/img/u2.png'),
+                backgroundImage: AssetImage('assets/img/u1.png'),
                 backgroundColor: TColor.primaryColor1.withOpacity(0.3),
               ),
               const SizedBox(width: 12),
