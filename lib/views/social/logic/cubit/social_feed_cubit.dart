@@ -16,15 +16,14 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
   Future<void> loadFeed() async {
     emit(SocialFeedLoading());
     try {
-    final response = await _supabase
-    .from('content_posts')
-    .select('''
-      *,
-      user(*),
-      exercise_categories!content_posts_tagged_category_id_fkey(*)
-    ''')
-    .order('created_at', ascending: false);
-
+      final response = await _supabase
+          .from('content_posts')
+          .select('''
+            *,
+            user(*),
+            exercise_categories!content_posts_tagged_category_id_fkey(*)
+          ''')
+          .order('created_at', ascending: false);
 
       emit(
         SocialFeedLoaded(
@@ -40,7 +39,10 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
   void setSelectedImage(File? image) {
     if (state is SocialFeedLoaded) {
       final currentState = state as SocialFeedLoaded;
-      emit(currentState.copyWith(selectedImage: image));
+      emit(currentState.copyWith(
+        selectedImage: image,
+        clearImage: image == null,
+      ));
     }
   }
 
@@ -70,6 +72,19 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
     }
   }
 
+  /// ✅ CLEAR SELECTED IMAGE
+  void clearSelectedImage() {
+    if (state is SocialFeedLoaded) {
+      final currentState = state as SocialFeedLoaded;
+      emit(SocialFeedLoaded(
+        posts: currentState.posts,
+        selectedImage: null,
+        selectedCategory: currentState.selectedCategory,
+        showEmojiPicker: currentState.showEmojiPicker,
+      ));
+    }
+  }
+
   /// TẠO BÀI VIẾT
   Future<bool> createPost({
     required String caption,
@@ -84,7 +99,7 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
       await _supabase.from('content_posts').insert({
         'for_user': userId,
         'caption': caption,
-        'image_url': imageUrl,
+        'image_url': imageUrl, // 👈 Lưu URL công khai vào DB
         'tagged_category_id': taggedCategoryId,
         'tagged_category_name': taggedCategoryName,
       });

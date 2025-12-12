@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/models/content_post.dart';
 import 'package:smart_fitness_assistant/core/functions/cache_images_view.dart';
+import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
 
 /// ✅ Widget: Single Post Card
 class SocialPostCard extends StatelessWidget {
@@ -161,7 +162,10 @@ class SocialPostCard extends StatelessWidget {
                         vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: TColor.primaryColor1.withOpacity(0.08),
+                        gradient: LinearGradient(
+                          colors: AppTheme.gradientColors1(context),
+                        ),
+                        // color: TColor.primaryColor1.withOpacity(0.08),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
                           color: TColor.primaryColor1.withOpacity(0.2),
@@ -173,8 +177,11 @@ class SocialPostCard extends StatelessWidget {
                             width: 40,
                             height: 40,
                             decoration: BoxDecoration(
-                              color: TColor.gray.withOpacity(0.2),
+                              // color: gradient
                               borderRadius: BorderRadius.circular(6),
+                              gradient: LinearGradient(
+                                colors: AppTheme.gradientColors(context),
+                              ),
                             ),
                             child:
                                 (post.categoryImageUrl != null &&

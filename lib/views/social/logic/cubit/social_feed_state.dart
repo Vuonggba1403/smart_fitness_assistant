@@ -24,10 +24,11 @@ class SocialFeedLoaded extends SocialFeedState {
     File? selectedImage,
     ExerciseCategory? selectedCategory,
     bool? showEmojiPicker,
+    bool clearImage = false,
   }) {
     return SocialFeedLoaded(
       posts: posts ?? this.posts,
-      selectedImage: selectedImage ?? this.selectedImage,
+      selectedImage: clearImage ? null : (selectedImage ?? this.selectedImage),
       selectedCategory: selectedCategory ?? this.selectedCategory,
       showEmojiPicker: showEmojiPicker ?? this.showEmojiPicker,
     );
@@ -48,3 +49,5 @@ class SocialFeedError extends SocialFeedState {
   final String message;
   SocialFeedError(this.message);
 }
+
+const _sentinel = Object();

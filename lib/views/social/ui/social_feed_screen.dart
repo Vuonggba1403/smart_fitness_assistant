@@ -100,13 +100,15 @@ class _SocialFeedScreenState extends State<SocialFeedScreen> {
         final fileName =
             'posts/$userId/${DateTime.now().millisecondsSinceEpoch}.jpg';
 
+        // 1️⃣ UPLOAD FILE LÊN STORAGE BUCKET
         await _supabase.storage
-            .from('fitness_posts')
-            .upload(fileName, cubitState.selectedImage!);
+            .from('fitness_posts')  // Tên bucket
+            .upload(fileName, cubitState.selectedImage!);  // Upload file thực
 
+        // 2️⃣ LẤY PUBLIC URL
         imageUrl = _supabase.storage
             .from('fitness_posts')
-            .getPublicUrl(fileName);
+            .getPublicUrl(fileName);  // Lấy URL công khai: https://...
       }
 
       await context.read<SocialFeedCubit>().createPost(
@@ -216,7 +218,7 @@ class _SocialFeedScreenState extends State<SocialFeedScreen> {
               context.read<SocialFeedCubit>().setSelectedCategory(c);
             },
             onImageRemove: () {
-              context.read<SocialFeedCubit>().setSelectedImage(null);
+              context.read<SocialFeedCubit>().clearSelectedImage();
             },
             onShowEmojiPickerChanged: (v) {
               context.read<SocialFeedCubit>().setShowEmojiPicker(v);
