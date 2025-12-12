@@ -10,10 +10,7 @@ import 'package:smart_fitness_assistant/core/models/water_intake.dart';
 class DailyActivitySection extends StatefulWidget {
   final double mediaWidth;
 
-  const DailyActivitySection({
-    super.key,
-    required this.mediaWidth,
-  });
+  const DailyActivitySection({super.key, required this.mediaWidth});
 
   @override
   State<DailyActivitySection> createState() => _DailyActivitySectionState();
@@ -84,8 +81,7 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
     } catch (e) {
       debugPrint('Error loading water data: $e');
       if (mounted) {
-        setState(() {
-        });
+        setState(() {});
       }
     }
   }
@@ -210,9 +206,7 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
             ],
           ),
           const SizedBox(height: 10),
-          Expanded(
-            child: _waterProgressBar(media),
-          ),
+          Expanded(child: _waterProgressBar(media)),
         ],
       ),
     );
@@ -320,8 +314,9 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: milestones.reversed.map((ml) {
-                final isCurrentLevel = ml <= _totalWaterMl && ml + (_goalMl ~/ 10) > _totalWaterMl;
-                
+                final isCurrentLevel =
+                    ml <= _totalWaterMl && ml + (_goalMl ~/ 10) > _totalWaterMl;
+
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 0),
                   child: Text(
@@ -331,7 +326,9 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
                           ? TColor.primaryG.first
                           : TColor.gray.withOpacity(0.6),
                       fontSize: isCurrentLevel ? 10 : 9,
-                      fontWeight: isCurrentLevel ? FontWeight.w700 : FontWeight.w400,
+                      fontWeight: isCurrentLevel
+                          ? FontWeight.w700
+                          : FontWeight.w400,
                       height: 1.0,
                     ),
                   ),
@@ -343,7 +340,8 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
       ),
     );
   }
-//
+
+  //
   Widget _buildSleepCard(Size media, ThemeData theme) {
     return _baseCard(
       height: media.width * 0.45,
@@ -417,7 +415,8 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
               backStrokeWidth: 12,
               progressColors: TColor.primaryG,
               backColor: Colors.grey.shade100,
-              valueNotifier: _exerciseProgressNotifier, // ✅ Dùng persistent notifier
+              valueNotifier:
+                  _exerciseProgressNotifier, // ✅ Dùng persistent notifier
               startAngle: -180,
             ),
 
@@ -466,7 +465,6 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
               fontWeight: FontWeight.w700,
             ),
           ),
-        
         ],
       ),
     );
@@ -555,15 +553,11 @@ class _MilestoneMarkerPainter extends CustomPainter {
 
     for (int i = 0; i < milestonesCount; i++) {
       final y = i * spacing;
-      final double startX = size.width - 6;        // sát mép phải
-      final double endX = startX - 12;             // độ dài vạch 12px
+      final double startX = size.width - 6; // sát mép phải
+      final double endX = startX - 12; // độ dài vạch 12px
 
       // ✅ Vẽ vạch ngang từ center ra (không tràn)
-      canvas.drawLine(
-        Offset(startX, y),
-        Offset(endX, y),
-        paint,
-      );
+      canvas.drawLine(Offset(startX, y), Offset(endX, y), paint);
     }
   }
 

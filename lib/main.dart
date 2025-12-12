@@ -8,6 +8,7 @@ import 'package:smart_fitness_assistant/views/auth/cubit/authentication_cubit.da
 
 import 'package:smart_fitness_assistant/views/home/logic/cubit/home_cubit.dart';
 import 'package:smart_fitness_assistant/views/onboarding/ui/started_view.dart';
+import 'package:smart_fitness_assistant/views/social/logic/cubit/social_feed_cubit.dart';
 import 'core/functions/app_shared.dart';
 import 'locale/translation_manager.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -44,6 +45,9 @@ Future<void> main() async {
         BlocProvider(create: (_) => HomeCubit()),
         BlocProvider(create: (_) => AuthenticationCubit()),
         BlocProvider(create: (_) => WorkoutTrackerCubit()),
+        BlocProvider(
+          create: (_) => SocialFeedCubit()..loadFeed(), // ✅ THÊM: ..loadFeed()
+        ),
       ],
       child: const MyApp(),
     ),

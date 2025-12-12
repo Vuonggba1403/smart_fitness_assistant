@@ -207,14 +207,11 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
                                   SizedBox(height: media.width * 0.05),
 
                                   // === Daily Activity ===
-                                  DailyActivitySection(
-                                    mediaWidth: media.width,
-                                  ),
+                                  DailyActivitySection(mediaWidth: media.width),
 
                                   SizedBox(height: media.width * 0.1),
 
                                   // === Workout Progress Chart ===
- 
                                   SizedBox(height: media.width * 0.05),
 
                                   // === Latest Workout ===

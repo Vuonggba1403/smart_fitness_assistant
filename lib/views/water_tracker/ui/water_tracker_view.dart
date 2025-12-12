@@ -484,7 +484,6 @@ class _WaterTrackerContentState extends State<_WaterTrackerContent> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                       
                           Text(
                             _getNextReminderText(loadedState.settings),
                             style: TextStyle(

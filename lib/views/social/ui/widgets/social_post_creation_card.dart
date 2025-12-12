@@ -52,9 +52,7 @@ class SocialPostCreationCard extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: theme.scaffoldBackgroundColor,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: TColor.gray.withOpacity(0.2),
-                      ),
+                      border: Border.all(color: TColor.gray.withOpacity(0.2)),
                     ),
                     child: Text(
                       'Bạn có gì mới? 💭',

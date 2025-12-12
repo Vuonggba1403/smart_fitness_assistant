@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
-import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
-import 'package:smart_fitness_assistant/core/models/feed_post.dart';
+import 'package:smart_fitness_assistant/core/models/content_post.dart';
+import 'package:smart_fitness_assistant/core/functions/cache_images_view.dart';
 
-/// ✅ Widget: Single Post Card - BỎ UserDataModel
+/// ✅ Widget: Single Post Card
 class SocialPostCard extends StatelessWidget {
-  final FeedPost post;
+  final ContentPost post;
   final Color? textColor;
   final ThemeData theme;
+  final VoidCallback? onLikeTap; // ✅ THÊM callback
 
   const SocialPostCard({
     super.key,
     required this.post,
     required this.textColor,
     required this.theme,
+    this.onLikeTap, // ✅ THÊM
   });
 
   String _formatTimeAgo(DateTime dateTime) {
@@ -48,7 +50,7 @@ class SocialPostCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 24,
-                  backgroundImage: AssetImage('assets/img/u1.png'),
+                  backgroundImage: const AssetImage('assets/img/u1.png'),
                   backgroundColor: TColor.primaryColor1.withOpacity(0.3),
                 ),
                 const SizedBox(width: 12),
@@ -57,7 +59,7 @@ class SocialPostCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        post.userName, // ✅ Dùng post.userName thực tế
+                        post.authorName ?? 'Anonymous',
                         style: TextStyle(
                           color: textColor,
                           fontSize: 14,
@@ -65,7 +67,7 @@ class SocialPostCard extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        _formatTimeAgo(post.timestamp),
+                        _formatTimeAgo(post.createdAt ?? DateTime.now()),
                         style: TextStyle(
                           color: textColor?.withOpacity(0.6),
                           fontSize: 12,
@@ -106,10 +108,9 @@ class SocialPostCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Container(
-            width: double.infinity,
+              width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                
                 color: theme.cardColor,
                 borderRadius: BorderRadius.circular(15),
                 boxShadow: [
@@ -125,7 +126,7 @@ class SocialPostCard extends StatelessWidget {
                 children: [
                   // Caption
                   Text(
-                    post.caption,
+                    post.caption ?? '',
                     style: TextStyle(
                       color: textColor,
                       fontSize: 15,
@@ -134,11 +135,24 @@ class SocialPostCard extends StatelessWidget {
                     ),
                   ),
 
-                  // Tagged Category
-                  if (post.taggedCategory != null) ...[
+                  // ✅ Ảnh bài đăng (nếu có)
+                  if (post.imageUrl != null &&
+                      post.imageUrl.toString().isNotEmpty) ...[
                     const SizedBox(height: 12),
-                    
-                    // ✅ FIX: Container nhỏ với ảnh + tên trong 1 row
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: CacheImage(
+                        url: post.imageUrl.toString(),
+                        width: double.infinity,
+                        height: 200,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ],
+
+                  // ✅ Ảnh theo category (nếu có tagged category)
+                  if (post.taggedCategoryName != null) ...[
+                    const SizedBox(height: 12),
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 10,
@@ -154,60 +168,29 @@ class SocialPostCard extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // ✅ Ảnh bài tập nhỏ
-                          if (post.categoryImageUrl != null &&
-                              post.categoryImageUrl!.isNotEmpty)
-                            ClipRRect(
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: TColor.gray.withOpacity(0.2),
                               borderRadius: BorderRadius.circular(6),
-                              child: Image.network(
-                                post.categoryImageUrl!,
-                                width: 40,
-                                height: 40,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Container(
-                                    width: 40,
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      color: TColor.gray.withOpacity(0.2),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: Icon(
-                                      Icons.fitness_center,
-                                      size: 20,
-                                      color: TColor.primaryColor1,
-                                    ),
-                                  );
-                                },
-                              ),
-                            )
-                          else
-                            Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: TColor.gray.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Icon(
-                                Icons.fitness_center,
-                                size: 20,
-                                color: TColor.primaryColor1,
-                              ),
                             ),
-                          
+                            child: Icon(
+                              Icons.fitness_center,
+                              size: 20,
+                              color: TColor.primaryColor1,
+                            ),
+                          ),
                           const SizedBox(width: 10),
-                          
-                          // ✅ Tên bài tập
                           Expanded(
                             child: Text(
-                              post.taggedCategory!,
+                              post.taggedCategoryName ?? 'Category',
                               style: TextStyle(
                                 color: TColor.primaryColor1,
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
                               ),
-                              maxLines: 2,
+                              maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -228,7 +211,7 @@ class SocialPostCard extends StatelessWidget {
             child: Row(
               children: [
                 InkWell(
-                  onTap: () {},
+                  onTap: onLikeTap,
                   child: Row(
                     children: [
                       Icon(
@@ -238,7 +221,7 @@ class SocialPostCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        '${post.likes}',
+                        '${post.likesCount ?? 0}',
                         style: TextStyle(
                           color: textColor?.withOpacity(0.8),
                           fontSize: 12,
@@ -259,7 +242,7 @@ class SocialPostCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        '${post.comments}',
+                        '${post.commentsCount ?? 0}',
                         style: TextStyle(
                           color: textColor?.withOpacity(0.8),
                           fontSize: 12,

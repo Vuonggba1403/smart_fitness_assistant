@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' as foundation;
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/models/exercise_category.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
@@ -13,6 +14,7 @@ class SocialCreatePostDialog extends StatefulWidget {
   final List<ExerciseCategory>? categories;
   final ExerciseCategory? selectedCategory;
   final VoidCallback onImagePickerTap;
+  final VoidCallback? onImageRemove; // ✅ THÊM
   final Function(ExerciseCategory?) onCategoryChanged;
   final VoidCallback onEmojiToggle;
   final VoidCallback onPostPressed;
@@ -26,6 +28,7 @@ class SocialCreatePostDialog extends StatefulWidget {
     required this.categories,
     required this.selectedCategory,
     required this.onImagePickerTap,
+    this.onImageRemove, // ✅ THÊM
     required this.onCategoryChanged,
     required this.onEmojiToggle,
     required this.onPostPressed,
@@ -33,8 +36,7 @@ class SocialCreatePostDialog extends StatefulWidget {
   });
 
   @override
-  State<SocialCreatePostDialog> createState() =>
-      _SocialCreatePostDialogState();
+  State<SocialCreatePostDialog> createState() => _SocialCreatePostDialogState();
 }
 
 class _SocialCreatePostDialogState extends State<SocialCreatePostDialog> {
@@ -99,7 +101,7 @@ class _SocialCreatePostDialogState extends State<SocialCreatePostDialog> {
                       onTap: widget.onImagePickerTap,
                       child: Container(
                         width: double.infinity,
-                        height: 200,
+                        height: 150,
                         decoration: BoxDecoration(
                           color: TColor.gray.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(15),
@@ -112,25 +114,14 @@ class _SocialCreatePostDialogState extends State<SocialCreatePostDialog> {
                             ? Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.camera_alt_outlined,
-                                        size: 40,
-                                        color: TColor.primaryColor1,
-                                      ),
-                                      const SizedBox(width: 20),
-                                      Icon(
-                                        Icons.add_photo_alternate_outlined,
-                                        size: 40,
-                                        color: TColor.primaryColor1,
-                                      ),
-                                    ],
+                                  Icon(
+                                    Icons.add_photo_alternate_outlined,
+                                    size: 40,
+                                    color: TColor.primaryColor1,
                                   ),
-                                  const SizedBox(height: 10),
+                                  const SizedBox(height: 8),
                                   Text(
-                                    'Chụp ảnh hoặc chọn từ thư viện',
+                                    'Chọn ảnh từ thư viện',
                                     style: TextStyle(
                                       color: TColor.primaryColor1,
                                       fontSize: 14,
@@ -139,42 +130,17 @@ class _SocialCreatePostDialogState extends State<SocialCreatePostDialog> {
                                   ),
                                 ],
                               )
-                            : Stack(
-                                alignment: Alignment.bottomRight,
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(15),
-                                    child: Image.file(
-                                      widget.selectedImage!,
-                                      fit: BoxFit.cover,
-                                      width: double.infinity,
-                                      height: double.infinity,
-                                    ),
-                                  ),
-                                  Positioned(
-                                    bottom: 10,
-                                    right: 10,
-                                    child: Container(
-                                      padding: const EdgeInsets.all(8),
-                                      decoration: BoxDecoration(
-                                        color: TColor.primaryColor1,
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Icon(
-                                        Icons.edit,
-                                        color: TColor.white,
-                                        size: 20,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                            : Icon(
+                                Icons.check_circle,
+                                size: 50,
+                                color: Colors.green,
                               ),
                       ),
                     ),
 
                     const SizedBox(height: 20),
 
-                    // ✅ Category Tag Section - FIX: Dùng local state
+                    // ✅ Category Tag Section
                     Text(
                       'Gắn thẻ bài tập (tuỳ chọn)',
                       style: TextStyle(
@@ -212,7 +178,6 @@ class _SocialCreatePostDialogState extends State<SocialCreatePostDialog> {
                             )
                           : DropdownButton<ExerciseCategory>(
                               isExpanded: true,
-                              // ✅ FIX: Dùng conditional hint với local state
                               hint: _localSelectedCategory == null
                                   ? Row(
                                       children: [
@@ -268,15 +233,12 @@ class _SocialCreatePostDialogState extends State<SocialCreatePostDialog> {
                                 );
                               }).toList(),
                               onChanged: (category) {
-                                // ✅ Update local state
                                 setState(() {
                                   _localSelectedCategory = category;
                                 });
-                                // ✅ Notify parent
                                 widget.onCategoryChanged(category);
                               },
-                              dropdownColor:
-                                  theme.scaffoldBackgroundColor,
+                              dropdownColor: theme.scaffoldBackgroundColor,
                               borderRadius: BorderRadius.circular(10),
                               icon: Icon(
                                 Icons.expand_more,
@@ -288,6 +250,79 @@ class _SocialCreatePostDialogState extends State<SocialCreatePostDialog> {
                     ),
 
                     const SizedBox(height: 20),
+
+                    // ✅ THÊM: Preview ảnh đã chọn
+                    if (widget.selectedImage != null)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Ảnh đã chọn',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: theme.textTheme.bodyMedium?.color,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.file(
+                                  widget.selectedImage!,
+                                  width: double.infinity,
+                                  height: 180,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              Positioned(
+                                top: 8,
+                                right: 8,
+                                child: InkWell(
+                                  onTap: widget.onImageRemove,
+                                  child: Container(
+                                    width: 36,
+                                    height: 36,
+                                    decoration: BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.3),
+                                          blurRadius: 4,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Icon(
+                                      Icons.close,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              onPressed: widget.onImagePickerTap,
+                              icon: Icon(Icons.edit, size: 18),
+                              label: const Text('Thay đổi ảnh'),
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
+                                side: BorderSide(color: TColor.primaryColor1),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
 
                     // ✅ Caption Input
                     Column(
@@ -310,19 +345,84 @@ class _SocialCreatePostDialogState extends State<SocialCreatePostDialog> {
                             borderRadius: BorderRadius.circular(15),
                             color: TColor.gray.withOpacity(0.05),
                           ),
-                          child: TextField(
-                            controller: widget.captionController,
-                            maxLines: 5,
-                            decoration: InputDecoration(
-                              hintText: 'Viết caption...*',
-                              hintStyle: TextStyle(
-                                color: TColor.gray.withOpacity(0.6),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  controller: widget.captionController,
+                                  maxLines: 5,
+                                  decoration: InputDecoration(
+                                    hintText: 'Viết caption...*',
+                                    hintStyle: TextStyle(
+                                      color: TColor.gray.withOpacity(0.6),
+                                    ),
+                                    border: InputBorder.none,
+                                    contentPadding: const EdgeInsets.all(16),
+                                  ),
+                                ),
                               ),
-                              border: InputBorder.none,
-                              contentPadding: const EdgeInsets.all(16),
-                            ),
+                              Padding(
+                                padding: const EdgeInsets.all(8),
+                                child: IconButton(
+                                  icon: Icon(
+                                    Icons.sentiment_satisfied_outlined,
+                                    size: 28,
+                                    color: Colors.orange,
+                                  ),
+                                  onPressed: widget.onEmojiToggle,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
+
+                        // ✅ Emoji Picker
+                        if (widget.showEmojiPicker)
+                          SizedBox(
+                            height: 256,
+                            child: EmojiPicker(
+                              onEmojiSelected:
+                                  (Category? category, Emoji emoji) {
+                                    widget.captionController.text +=
+                                        emoji.emoji;
+                                  },
+                              onBackspacePressed: () {
+                                if (widget.captionController.text.isNotEmpty) {
+                                  widget.captionController.text = widget
+                                      .captionController
+                                      .text
+                                      .substring(
+                                        0,
+                                        widget.captionController.text.length -
+                                            1,
+                                      );
+                                }
+                              },
+                              textEditingController: widget.captionController,
+                              config: Config(
+                                height: 256,
+                                checkPlatformCompatibility: true,
+                                emojiViewConfig: EmojiViewConfig(
+                                  emojiSizeMax:
+                                      28 *
+                                      (foundation.defaultTargetPlatform ==
+                                              TargetPlatform.iOS
+                                          ? 1.20
+                                          : 1.0),
+                                ),
+                                viewOrderConfig: const ViewOrderConfig(
+                                  top: EmojiPickerItem.categoryBar,
+                                  middle: EmojiPickerItem.emojiView,
+                                  bottom: EmojiPickerItem.searchBar,
+                                ),
+                                skinToneConfig: const SkinToneConfig(),
+                                categoryViewConfig: const CategoryViewConfig(),
+                                bottomActionBarConfig:
+                                    const BottomActionBarConfig(),
+                                searchViewConfig: const SearchViewConfig(),
+                              ),
+                            ),
+                          ),
                       ],
                     ),
 
