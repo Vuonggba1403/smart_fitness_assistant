@@ -151,7 +151,9 @@ class SocialPostCard extends StatelessWidget {
                   ],
 
                   // ✅ Ảnh theo category (nếu có tagged category)
-                  if (post.taggedCategoryName != null) ...[
+                  // Category block
+                  if (post.taggedCategoryName != null &&
+                      post.taggedCategoryName!.isNotEmpty) ...[
                     const SizedBox(height: 12),
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -166,7 +168,6 @@ class SocialPostCard extends StatelessWidget {
                         ),
                       ),
                       child: Row(
-                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Container(
                             width: 40,
@@ -175,11 +176,25 @@ class SocialPostCard extends StatelessWidget {
                               color: TColor.gray.withOpacity(0.2),
                               borderRadius: BorderRadius.circular(6),
                             ),
-                            child: Icon(
-                              Icons.fitness_center,
-                              size: 20,
-                              color: TColor.primaryColor1,
-                            ),
+                            child:
+                                (post.categoryImageUrl != null &&
+                                    post.categoryImageUrl!.isNotEmpty)
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(6),
+                                    child: CacheImage(
+                                      url: post.categoryImageUrl!,
+                                      width: 40,
+                                      height: 40,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  )
+                                : Icon(
+                                    Icons.fitness_center,
+                                    color: TColor.primaryColor1.withOpacity(
+                                      0.6,
+                                    ),
+                                    size: 22,
+                                  ),
                           ),
                           const SizedBox(width: 10),
                           Expanded(

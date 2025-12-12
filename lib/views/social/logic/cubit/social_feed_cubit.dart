@@ -1,7 +1,9 @@
+import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:smart_fitness_assistant/core/models/content_post.dart';
+import 'package:smart_fitness_assistant/core/models/exercise_category.dart';
 
 part 'social_feed_state.dart';
 
@@ -14,16 +16,57 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
   Future<void> loadFeed() async {
     emit(SocialFeedLoading());
     try {
-      final response = await _supabase
-          .from('content_posts')
-          .select()
-          .order('created_at', ascending: false);
+    final response = await _supabase
+    .from('content_posts')
+    .select('''
+      *,
+      user(*),
+      exercise_categories!content_posts_tagged_category_id_fkey(*)
+    ''')
+    .order('created_at', ascending: false);
+
 
       emit(
-        SocialFeedLoaded(response.map((e) => ContentPost.fromJson(e)).toList()),
+        SocialFeedLoaded(
+          posts: response.map((e) => ContentPost.fromJson(e)).toList(),
+        ),
       );
     } catch (e) {
       emit(SocialFeedError('Không thể tải bài viết'));
+    }
+  }
+
+  /// ✅ UPDATE SELECTED IMAGE
+  void setSelectedImage(File? image) {
+    if (state is SocialFeedLoaded) {
+      final currentState = state as SocialFeedLoaded;
+      emit(currentState.copyWith(selectedImage: image));
+    }
+  }
+
+  /// ✅ UPDATE SELECTED CATEGORY
+  void setSelectedCategory(ExerciseCategory? category) {
+    if (state is SocialFeedLoaded) {
+      final currentState = state as SocialFeedLoaded;
+      emit(currentState.copyWith(selectedCategory: category));
+    }
+  }
+
+  /// ✅ TOGGLE EMOJI PICKER
+  void toggleEmojiPicker() {
+    if (state is SocialFeedLoaded) {
+      final currentState = state as SocialFeedLoaded;
+      emit(currentState.copyWith(
+        showEmojiPicker: !currentState.showEmojiPicker,
+      ));
+    }
+  }
+
+  /// ✅ SET EMOJI PICKER
+  void setShowEmojiPicker(bool value) {
+    if (state is SocialFeedLoaded) {
+      final currentState = state as SocialFeedLoaded;
+      emit(currentState.copyWith(showEmojiPicker: value));
     }
   }
 
@@ -47,6 +90,11 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
       });
 
       await loadFeed();
+      // ✅ Reset UI state after successful post
+      if (state is SocialFeedLoaded) {
+        final currentState = state as SocialFeedLoaded;
+        emit(currentState.resetUIState());
+      }
       return true;
     } catch (e) {
       print('❌ Error creating post: $e');

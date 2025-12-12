@@ -104,37 +104,7 @@ class SocialPostCreationCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Expanded(
-                child: InkWell(
-                  onTap: () {},
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: theme.scaffoldBackgroundColor,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.sentiment_satisfied_outlined,
-                          size: 20,
-                          color: Colors.orange,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Cảm xúc',
-                          style: TextStyle(
-                            color: Colors.orange,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+              
             ],
           ),
         ],

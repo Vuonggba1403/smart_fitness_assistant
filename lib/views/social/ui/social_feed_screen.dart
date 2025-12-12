@@ -22,19 +22,14 @@ class SocialFeedScreen extends StatefulWidget {
 
 class _SocialFeedScreenState extends State<SocialFeedScreen> {
   final TextEditingController _captionController = TextEditingController();
-  File? _selectedImage;
-  ExerciseCategory? _selectedCategory;
-  bool _showEmojiPicker = false;
-
   final _supabase = Supabase.instance.client;
-
   List<ExerciseCategory>? _categories;
 
   @override
   void initState() {
     super.initState();
     _loadCategories();
-    context.read<SocialFeedCubit>(); // ✅ THÊM: Load feed
+    context.read<SocialFeedCubit>().loadFeed();
   }
 
   Future<void> _loadCategories() async {
@@ -50,7 +45,8 @@ class _SocialFeedScreenState extends State<SocialFeedScreen> {
       final picker = ImagePicker();
       final img = await picker.pickImage(source: source);
       if (img != null) {
-        setState(() => _selectedImage = File(img.path));
+        // ✅ Update Cubit state instead of local state
+        context.read<SocialFeedCubit>().setSelectedImage(File(img.path));
       }
     } catch (e) {
       print('❌ pickImage error: $e');
@@ -93,16 +89,20 @@ class _SocialFeedScreenState extends State<SocialFeedScreen> {
     final userId = _supabase.auth.currentUser?.id;
     if (userId == null) return;
 
+    // ✅ Get state from Cubit
+    final cubitState = context.read<SocialFeedCubit>().state;
+    if (cubitState is! SocialFeedLoaded) return;
+
     String? imageUrl;
 
     try {
-      if (_selectedImage != null) {
+      if (cubitState.selectedImage != null) {
         final fileName =
             'posts/$userId/${DateTime.now().millisecondsSinceEpoch}.jpg';
 
         await _supabase.storage
             .from('fitness_posts')
-            .upload(fileName, _selectedImage!);
+            .upload(fileName, cubitState.selectedImage!);
 
         imageUrl = _supabase.storage
             .from('fitness_posts')
@@ -112,16 +112,13 @@ class _SocialFeedScreenState extends State<SocialFeedScreen> {
       await context.read<SocialFeedCubit>().createPost(
         caption: _captionController.text,
         imageUrl: imageUrl,
-        taggedCategoryId: _selectedCategory?.id,
-        taggedCategoryName: _selectedCategory?.titleEx,
+        taggedCategoryId: cubitState.selectedCategory?.id,
+        taggedCategoryName: cubitState.selectedCategory?.titleEx,
       );
 
       if (mounted) Navigator.pop(context);
 
       _captionController.clear();
-      _selectedImage = null;
-      _selectedCategory = null;
-      _showEmojiPicker = false;
     } catch (e) {
       print("❌ Error posting: $e");
     }
@@ -198,29 +195,34 @@ class _SocialFeedScreenState extends State<SocialFeedScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => BlocProvider.value(
-        value: context.read<SocialFeedCubit>(),
-        child: SocialCreatePostDialog(
-          captionController: _captionController,
-          selectedImage: _selectedImage,
-          categories: _categories,
-          selectedCategory: _selectedCategory,
-          showEmojiPicker: _showEmojiPicker,
-          onImagePickerTap: _showImageSourceDialog,
-          onPostPressed: _postContent,
-          onEmojiToggle: () {
-            setState(() => _showEmojiPicker = !_showEmojiPicker);
-          },
-          onCategoryChanged: (c) {
-            setState(() => _selectedCategory = c);
-          },
-          onImageRemove: () {
-            setState(() => _selectedImage = null);
-          },
-          onShowEmojiPickerChanged: (v) {
-            setState(() => _showEmojiPicker = v);
-          },
-        ),
+      builder: (context) => BlocBuilder<SocialFeedCubit, SocialFeedState>(
+        builder: (bottomContext, state) {
+          if (state is! SocialFeedLoaded) {
+            return const SizedBox();
+          }
+
+          return SocialCreatePostDialog(
+            captionController: _captionController,
+            selectedImage: state.selectedImage,
+            categories: _categories,
+            selectedCategory: state.selectedCategory,
+            showEmojiPicker: state.showEmojiPicker,
+            onImagePickerTap: _showImageSourceDialog,
+            onPostPressed: _postContent,
+            onEmojiToggle: () {
+              context.read<SocialFeedCubit>().toggleEmojiPicker();
+            },
+            onCategoryChanged: (c) {
+              context.read<SocialFeedCubit>().setSelectedCategory(c);
+            },
+            onImageRemove: () {
+              context.read<SocialFeedCubit>().setSelectedImage(null);
+            },
+            onShowEmojiPickerChanged: (v) {
+              context.read<SocialFeedCubit>().setShowEmojiPicker(v);
+            },
+          );
+        },
       ),
     );
   }

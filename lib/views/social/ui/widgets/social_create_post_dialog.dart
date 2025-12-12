@@ -7,14 +7,14 @@ import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.
 import 'dart:io';
 
 /// ✅ Widget: Create Post Bottom Sheet Dialog
-class SocialCreatePostDialog extends StatefulWidget {
+class SocialCreatePostDialog extends StatelessWidget {
   final File? selectedImage;
   final TextEditingController captionController;
   final bool showEmojiPicker;
   final List<ExerciseCategory>? categories;
   final ExerciseCategory? selectedCategory;
   final VoidCallback onImagePickerTap;
-  final VoidCallback? onImageRemove; // ✅ THÊM
+  final VoidCallback? onImageRemove;
   final Function(ExerciseCategory?) onCategoryChanged;
   final VoidCallback onEmojiToggle;
   final VoidCallback onPostPressed;
@@ -28,25 +28,12 @@ class SocialCreatePostDialog extends StatefulWidget {
     required this.categories,
     required this.selectedCategory,
     required this.onImagePickerTap,
-    this.onImageRemove, // ✅ THÊM
+    this.onImageRemove,
     required this.onCategoryChanged,
     required this.onEmojiToggle,
     required this.onPostPressed,
     required this.onShowEmojiPickerChanged,
   });
-
-  @override
-  State<SocialCreatePostDialog> createState() => _SocialCreatePostDialogState();
-}
-
-class _SocialCreatePostDialogState extends State<SocialCreatePostDialog> {
-  late ExerciseCategory? _localSelectedCategory;
-
-  @override
-  void initState() {
-    super.initState();
-    _localSelectedCategory = widget.selectedCategory;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +63,6 @@ class _SocialCreatePostDialogState extends State<SocialCreatePostDialog> {
               ),
             ),
             const SizedBox(height: 20),
-
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Text(
@@ -88,7 +74,6 @@ class _SocialCreatePostDialogState extends State<SocialCreatePostDialog> {
                 ),
               ),
             ),
-
             Expanded(
               child: SingleChildScrollView(
                 controller: scrollController,
@@ -98,7 +83,7 @@ class _SocialCreatePostDialogState extends State<SocialCreatePostDialog> {
                   children: [
                     // ✅ Image Picker
                     InkWell(
-                      onTap: widget.onImagePickerTap,
+                      onTap: onImagePickerTap,
                       child: Container(
                         width: double.infinity,
                         height: 150,
@@ -110,7 +95,7 @@ class _SocialCreatePostDialogState extends State<SocialCreatePostDialog> {
                             width: 2,
                           ),
                         ),
-                        child: widget.selectedImage == null
+                        child: selectedImage == null
                             ? Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -158,17 +143,17 @@ class _SocialCreatePostDialogState extends State<SocialCreatePostDialog> {
                       ),
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color: _localSelectedCategory != null
+                          color: selectedCategory != null
                               ? TColor.primaryColor1
                               : TColor.gray.withOpacity(0.3),
-                          width: _localSelectedCategory != null ? 2 : 1,
+                          width: selectedCategory != null ? 2 : 1,
                         ),
                         borderRadius: BorderRadius.circular(10),
-                        color: _localSelectedCategory != null
+                        color: selectedCategory != null
                             ? TColor.primaryColor1.withOpacity(0.05)
                             : Colors.transparent,
                       ),
-                      child: widget.categories == null
+                      child: categories == null
                           ? Padding(
                               padding: const EdgeInsets.all(12),
                               child: Text(
@@ -178,7 +163,7 @@ class _SocialCreatePostDialogState extends State<SocialCreatePostDialog> {
                             )
                           : DropdownButton<ExerciseCategory>(
                               isExpanded: true,
-                              hint: _localSelectedCategory == null
+                              hint: selectedCategory == null
                                   ? Row(
                                       children: [
                                         Icon(
@@ -206,8 +191,7 @@ class _SocialCreatePostDialogState extends State<SocialCreatePostDialog> {
                                         const SizedBox(width: 8),
                                         Expanded(
                                           child: Text(
-                                            _localSelectedCategory!.titleEx ??
-                                                'N/A',
+                                            selectedCategory!.titleEx ?? 'N/A',
                                             style: TextStyle(
                                               color: TColor.primaryColor1,
                                               fontSize: 14,
@@ -218,9 +202,9 @@ class _SocialCreatePostDialogState extends State<SocialCreatePostDialog> {
                                         ),
                                       ],
                                     ),
-                              value: _localSelectedCategory,
+                              value: selectedCategory,
                               underline: const SizedBox.shrink(),
-                              items: widget.categories!.map((category) {
+                              items: categories!.map((category) {
                                 return DropdownMenuItem(
                                   value: category,
                                   child: Text(
@@ -232,17 +216,12 @@ class _SocialCreatePostDialogState extends State<SocialCreatePostDialog> {
                                   ),
                                 );
                               }).toList(),
-                              onChanged: (category) {
-                                setState(() {
-                                  _localSelectedCategory = category;
-                                });
-                                widget.onCategoryChanged(category);
-                              },
+                              onChanged: onCategoryChanged,
                               dropdownColor: theme.scaffoldBackgroundColor,
                               borderRadius: BorderRadius.circular(10),
                               icon: Icon(
                                 Icons.expand_more,
-                                color: _localSelectedCategory != null
+                                color: selectedCategory != null
                                     ? TColor.primaryColor1
                                     : TColor.gray,
                               ),
@@ -251,8 +230,8 @@ class _SocialCreatePostDialogState extends State<SocialCreatePostDialog> {
 
                     const SizedBox(height: 20),
 
-                    // ✅ THÊM: Preview ảnh đã chọn
-                    if (widget.selectedImage != null)
+                    // ✅ Preview ảnh đã chọn
+                    if (selectedImage != null)
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -270,7 +249,7 @@ class _SocialCreatePostDialogState extends State<SocialCreatePostDialog> {
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
                                 child: Image.file(
-                                  widget.selectedImage!,
+                                  selectedImage!,
                                   width: double.infinity,
                                   height: 180,
                                   fit: BoxFit.cover,
@@ -280,7 +259,7 @@ class _SocialCreatePostDialogState extends State<SocialCreatePostDialog> {
                                 top: 8,
                                 right: 8,
                                 child: InkWell(
-                                  onTap: widget.onImageRemove,
+                                  onTap: onImageRemove,
                                   child: Container(
                                     width: 36,
                                     height: 36,
@@ -309,7 +288,7 @@ class _SocialCreatePostDialogState extends State<SocialCreatePostDialog> {
                           SizedBox(
                             width: double.infinity,
                             child: OutlinedButton.icon(
-                              onPressed: widget.onImagePickerTap,
+                              onPressed: onImagePickerTap,
                               icon: Icon(Icons.edit, size: 18),
                               label: const Text('Thay đổi ảnh'),
                               style: OutlinedButton.styleFrom(
@@ -349,7 +328,7 @@ class _SocialCreatePostDialogState extends State<SocialCreatePostDialog> {
                             children: [
                               Expanded(
                                 child: TextField(
-                                  controller: widget.captionController,
+                                  controller: captionController,
                                   maxLines: 5,
                                   decoration: InputDecoration(
                                     hintText: 'Viết caption...*',
@@ -361,15 +340,13 @@ class _SocialCreatePostDialogState extends State<SocialCreatePostDialog> {
                                   ),
                                 ),
                               ),
-                              Padding(
-                                padding: const EdgeInsets.all(8),
-                                child: IconButton(
-                                  icon: Icon(
-                                    Icons.sentiment_satisfied_outlined,
-                                    size: 28,
-                                    color: Colors.orange,
-                                  ),
-                                  onPressed: widget.onEmojiToggle,
+                              IconButton(
+                                onPressed: onEmojiToggle,
+                                icon: Icon(
+                                  Icons.emoji_emotions_outlined,
+                                  color: showEmojiPicker
+                                      ? TColor.primaryColor1
+                                      : TColor.gray,
                                 ),
                               ),
                             ],
@@ -377,28 +354,25 @@ class _SocialCreatePostDialogState extends State<SocialCreatePostDialog> {
                         ),
 
                         // ✅ Emoji Picker
-                        if (widget.showEmojiPicker)
+                        if (showEmojiPicker)
                           SizedBox(
                             height: 256,
                             child: EmojiPicker(
                               onEmojiSelected:
                                   (Category? category, Emoji emoji) {
-                                    widget.captionController.text +=
-                                        emoji.emoji;
+                                    captionController.text += emoji.emoji;
                                   },
                               onBackspacePressed: () {
-                                if (widget.captionController.text.isNotEmpty) {
-                                  widget.captionController.text = widget
-                                      .captionController
+                                if (captionController.text.isNotEmpty) {
+                                  captionController.text = captionController
                                       .text
                                       .substring(
                                         0,
-                                        widget.captionController.text.length -
-                                            1,
+                                        captionController.text.length - 1,
                                       );
                                 }
                               },
-                              textEditingController: widget.captionController,
+                              textEditingController: captionController,
                               config: Config(
                                 height: 256,
                                 checkPlatformCompatibility: true,
@@ -433,7 +407,7 @@ class _SocialCreatePostDialogState extends State<SocialCreatePostDialog> {
                       width: double.infinity,
                       height: 50,
                       child: ElevatedButton(
-                        onPressed: widget.onPostPressed,
+                        onPressed: onPostPressed,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: TColor.primaryColor1,
                           shape: RoundedRectangleBorder(
