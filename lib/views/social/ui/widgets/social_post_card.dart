@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/models/content_post.dart';
 import 'package:smart_fitness_assistant/core/functions/cache_images_view.dart';
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
 import 'package:smart_fitness_assistant/views/social/ui/widgets/social_comment_bottom_sheet.dart';
+import 'package:smart_fitness_assistant/views/social/logic/cubit/social_feed_cubit.dart';
 
 /// ✅ Widget: Single Post Card
-class SocialPostCard extends StatelessWidget {
+class SocialPostCard extends StatefulWidget {
   final ContentPost post;
   final Color? textColor;
   final ThemeData theme;
-  final VoidCallback? onLikeTap; // ✅ THÊM callback
+  final VoidCallback? onLikeTap;
   final VoidCallback? onCommentTap;
 
   const SocialPostCard({
@@ -18,9 +21,20 @@ class SocialPostCard extends StatelessWidget {
     required this.post,
     required this.textColor,
     required this.theme,
-    this.onLikeTap, // ✅ THÊM
+    this.onLikeTap,
     this.onCommentTap,
   });
+
+  @override
+  State<SocialPostCard> createState() => _SocialPostCardState();
+}
+
+class _SocialPostCardState extends State<SocialPostCard> {
+  // ✅ Kiểm tra user hiện tại có phải chủ bài hay không
+  bool _isPostOwner() {
+    final currentUserId = Supabase.instance.client.auth.currentUser?.id;
+    return currentUserId == widget.post.forUser;
+  }
 
   String _formatTimeAgo(DateTime dateTime) {
     final now = DateTime.now();
@@ -45,9 +59,136 @@ class SocialPostCard extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => SocialCommentBottomSheet(
-        postId: post.id ?? '',
-        theme: theme,
-        textColor: textColor,
+        postId: widget.post.id ?? '',
+        theme: widget.theme,
+        textColor: widget.textColor,
+      ),
+    );
+  }
+
+  void _showEditDialog() {
+    final editController = TextEditingController(text: widget.post.caption);
+    bool isLoading = false;
+    
+    showDialog(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Chỉnh sửa bài đăng'),
+          content: isLoading
+              ? Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 16),
+                    const Text('Đang cập nhật...'),
+                  ],
+                )
+              : TextField(
+                  controller: editController,
+                  maxLines: 5,
+                  decoration: InputDecoration(
+                    hintText: 'Chỉnh sửa caption...',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+          actions: isLoading
+              ? []
+              : [
+                  TextButton(
+                    onPressed: () {
+                      editController.dispose();
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Huỷ'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      setState(() => isLoading = true);
+
+                      final success = await context
+                          .read<SocialFeedCubit>()
+                          .updatePost(
+                            postId: widget.post.id ?? '',
+                            caption: editController.text,
+                          );
+
+                      // ✅ Close dialog immediately
+                      if (mounted) {
+                        editController.dispose();
+                        Navigator.pop(context);
+                      }
+
+                      // ✅ Show snackbar after dialog closes
+                      Future.delayed(const Duration(milliseconds: 300), () {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                success
+                                    ? '✅ Cập nhật thành công'
+                                    : '❌ Cập nhật thất bại',
+                              ),
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                        }
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: TColor.primaryColor2,
+                    ),
+                    child: const Text('Lưu'),
+                  ),
+                ],
+        ),
+      ),
+    ).then((_) {
+      editController.dispose();
+    });
+  }
+
+  void _showDeleteDialog() {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Xoá bài đăng'),
+        content: const Text('Bạn có chắc muốn xoá bài đăng này? Hành động này không thể hoàn tác.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Huỷ'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              
+              final success = await context
+                  .read<SocialFeedCubit>()
+                  .deletePost(widget.post.id ?? '');
+
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      success ? '✅ Xoá thành công' : '❌ Xoá thất bại',
+                    ),
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+            child: const Text(
+              'Xoá',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -76,45 +217,49 @@ class SocialPostCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        post.authorName ?? 'Anonymous',
+                        widget.post.authorName ?? 'Anonymous',
                         style: TextStyle(
-                          color: textColor,
+                          color: widget.textColor,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       Text(
-                        _formatTimeAgo(post.createdAt ?? DateTime.now()),
+                        _formatTimeAgo(widget.post.createdAt ?? DateTime.now()),
                         style: TextStyle(
-                          color: textColor?.withOpacity(0.6),
+                          color: widget.textColor?.withOpacity(0.6),
                           fontSize: 12,
                         ),
                       ),
                     ],
                   ),
                 ),
-                PopupMenuButton(
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(
-                      child: Row(
-                        children: [
-                          Icon(Icons.edit, size: 18),
-                          SizedBox(width: 8),
-                          Text('Chỉnh sửa'),
-                        ],
+                // ✅ Chỉ hiển thị menu nếu user là chủ bài
+                if (_isPostOwner())
+                  PopupMenuButton(
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        onTap: _showEditDialog,
+                        child: Row(
+                          children: const [
+                            Icon(Icons.edit, size: 18),
+                            SizedBox(width: 8),
+                            Text('Chỉnh sửa'),
+                          ],
+                        ),
                       ),
-                    ),
-                    const PopupMenuItem(
-                      child: Row(
-                        children: [
-                          Icon(Icons.delete, size: 18),
-                          SizedBox(width: 8),
-                          Text('Xóa'),
-                        ],
+                      PopupMenuItem(
+                        onTap: _showDeleteDialog,
+                        child: Row(
+                          children: const [
+                            Icon(Icons.delete, size: 18, color: Colors.red),
+                            SizedBox(width: 8),
+                            Text('Xoá', style: TextStyle(color: Colors.red)),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
               ],
             ),
           ),
@@ -128,11 +273,11 @@ class SocialPostCard extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: theme.cardColor,
+                color: widget.theme.cardColor,
                 borderRadius: BorderRadius.circular(15),
                 boxShadow: [
                   BoxShadow(
-                    color: theme.shadowColor.withOpacity(0.15),
+                    color: widget.theme.shadowColor.withOpacity(0.15),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),
@@ -143,9 +288,9 @@ class SocialPostCard extends StatelessWidget {
                 children: [
                   // Caption
                   Text(
-                    post.caption ?? '',
+                    widget.post.caption ?? '',
                     style: TextStyle(
-                      color: textColor,
+                      color: widget.textColor,
                       fontSize: 15,
                       height: 1.5,
                       fontWeight: FontWeight.w500,
@@ -153,13 +298,13 @@ class SocialPostCard extends StatelessWidget {
                   ),
 
                   // ✅ Ảnh bài đăng (nếu có)
-                  if (post.imageUrl != null &&
-                      post.imageUrl.toString().isNotEmpty) ...[
+                  if (widget.post.imageUrl != null &&
+                      widget.post.imageUrl.toString().isNotEmpty) ...[
                     const SizedBox(height: 12),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child: CacheImage(
-                        url: post.imageUrl.toString(),
+                        url: widget.post.imageUrl.toString(),
                         width: double.infinity,
                         height: 200,
                         borderRadius: BorderRadius.circular(10),
@@ -167,10 +312,9 @@ class SocialPostCard extends StatelessWidget {
                     ),
                   ],
 
-                  // ✅ Ảnh theo category (nếu có tagged category)
-                  // Category block
-                  if (post.taggedCategoryName != null &&
-                      post.taggedCategoryName!.isNotEmpty) ...[
+                  // ✅ Category block
+                  if (widget.post.taggedCategoryName != null &&
+                      widget.post.taggedCategoryName!.isNotEmpty) ...[
                     const SizedBox(height: 12),
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -181,7 +325,6 @@ class SocialPostCard extends StatelessWidget {
                         gradient: LinearGradient(
                           colors: AppTheme.gradientColors1(context),
                         ),
-                        // color: TColor.primaryColor1.withOpacity(0.08),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
                           color: TColor.primaryColor1.withOpacity(0.2),
@@ -193,19 +336,18 @@ class SocialPostCard extends StatelessWidget {
                             width: 40,
                             height: 40,
                             decoration: BoxDecoration(
-                              // color: gradient
                               borderRadius: BorderRadius.circular(6),
                               gradient: LinearGradient(
                                 colors: AppTheme.gradientColors(context),
                               ),
                             ),
                             child:
-                                (post.categoryImageUrl != null &&
-                                    post.categoryImageUrl!.isNotEmpty)
+                                (widget.post.categoryImageUrl != null &&
+                                    widget.post.categoryImageUrl!.isNotEmpty)
                                 ? ClipRRect(
                                     borderRadius: BorderRadius.circular(6),
                                     child: CacheImage(
-                                      url: post.categoryImageUrl!,
+                                      url: widget.post.categoryImageUrl!,
                                       width: 40,
                                       height: 40,
                                       fit: BoxFit.cover,
@@ -222,7 +364,7 @@ class SocialPostCard extends StatelessWidget {
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              post.taggedCategoryName ?? 'Category',
+                              widget.post.taggedCategoryName ?? 'Category',
                               style: TextStyle(
                                 color: TColor.primaryColor1,
                                 fontSize: 13,
@@ -249,19 +391,19 @@ class SocialPostCard extends StatelessWidget {
             child: Row(
               children: [
                 InkWell(
-                  onTap: onLikeTap,
+                  onTap: widget.onLikeTap,
                   child: Row(
                     children: [
                       Icon(
-                        post.isLikedByMe ? Icons.favorite : Icons.favorite_border,
+                        widget.post.isLikedByMe ? Icons.favorite : Icons.favorite_border,
                         color: TColor.primaryColor1,
                         size: 20,
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        '${post.likesCount ?? 0}',
+                        '${widget.post.likesCount ?? 0}',
                         style: TextStyle(
-                          color: textColor?.withOpacity(0.8),
+                          color: widget.textColor?.withOpacity(0.8),
                           fontSize: 12,
                         ),
                       ),
@@ -280,9 +422,9 @@ class SocialPostCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        '${post.commentsCount ?? 0}',
+                        '${widget.post.commentsCount ?? 0}',
                         style: TextStyle(
-                          color: textColor?.withOpacity(0.8),
+                          color: widget.textColor?.withOpacity(0.8),
                           fontSize: 12,
                         ),
                       ),

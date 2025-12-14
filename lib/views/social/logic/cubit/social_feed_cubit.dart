@@ -374,4 +374,103 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
       return false;
     }
   }
+
+  /// UPDATE POST
+  Future<bool> updatePost({
+    required String postId,
+    required String caption,
+  }) async {
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) return false;
+
+      await _supabase
+          .from('content_posts')
+          .update({'caption': caption})
+          .eq('id', postId)
+          .eq('for_user', userId);
+
+      // ✅ Update local state instead of reloading entire feed
+      if (state is SocialFeedLoaded) {
+        final currentState = state as SocialFeedLoaded;
+        final postIndex = currentState.posts.indexWhere((p) => p.id == postId);
+        if (postIndex != -1) {
+          final updatedPost = currentState.posts[postIndex];
+          List<ContentPost> updatedPosts = List.from(currentState.posts);
+          updatedPosts[postIndex] = ContentPost(
+            id: updatedPost.id,
+            forUser: updatedPost.forUser,
+            caption: caption,
+            taggedCategoryId: updatedPost.taggedCategoryId,
+            taggedCategoryName: updatedPost.taggedCategoryName,
+            likesCount: updatedPost.likesCount,
+            commentsCount: updatedPost.commentsCount,
+            createdAt: updatedPost.createdAt,
+            updatedAt: updatedPost.updatedAt,
+            imageUrl: updatedPost.imageUrl,
+            authorName: updatedPost.authorName,
+            categoryImageUrl: updatedPost.categoryImageUrl,
+            isLikedByMe: updatedPost.isLikedByMe,
+          );
+          emit(currentState.copyWith(posts: updatedPosts));
+        }
+      }
+
+      // ✅ Reload feed in background (không chặn dialog)
+      loadFeed();
+
+      return true;
+    } catch (e) {
+      print('❌ Error updating post: $e');
+      return false;
+    }
+  }
+
+  /// DELETE POST
+  Future<bool> deletePost(String postId) async {
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) return false;
+
+      // ✅ Remove post from local state immediately (optimistic delete)
+      if (state is SocialFeedLoaded) {
+        final currentState = state as SocialFeedLoaded;
+        final updatedPosts = currentState.posts
+            .where((post) => post.id != postId)
+            .toList();
+        emit(currentState.copyWith(posts: updatedPosts));
+      }
+
+      // 🔥 Delete from database in background
+      // Delete all comments first
+      await _supabase
+          .from('post_comments')
+          .delete()
+          .eq('for_post', postId);
+
+      // Delete all likes
+      await _supabase
+          .from('post_favorites')
+          .delete()
+          .eq('for_post', postId);
+
+      // Delete the post
+      await _supabase
+          .from('content_posts')
+          .delete()
+          .eq('id', postId)
+          .eq('for_user', userId);
+
+      // ✅ Reload feed in background (không chặn UI)
+      loadFeed();
+
+      return true;
+    } catch (e) {
+      print('❌ Error deleting post: $e');
+      
+      // ❌ Revert local state on error
+      loadFeed();
+      return false;
+    }
+  }
 }
