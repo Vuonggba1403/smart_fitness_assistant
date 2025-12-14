@@ -18,6 +18,9 @@ class ContentPost extends Equatable {
   /// Category image lấy từ exercise_categories.img_url
   final String? categoryImageUrl;
 
+  /// Track if current user has liked this post
+  final bool isLikedByMe;
+
   const ContentPost({
     this.id,
     this.forUser,
@@ -31,6 +34,7 @@ class ContentPost extends Equatable {
     this.imageUrl,
     this.authorName,
     this.categoryImageUrl,
+    this.isLikedByMe = false,
   });
 
   factory ContentPost.fromJson(Map<String, dynamic> json) {
@@ -58,6 +62,9 @@ class ContentPost extends Equatable {
 
       /// 🔥 LẤY ẢNH CATEGORY TỪ exercise_categories.img_url
       categoryImageUrl: json["exercise_categories"]?["img_url"],
+
+      /// 🔥 Check if current user has liked this post
+      isLikedByMe: json['is_liked_by_me'] as bool? ?? false,
     );
   }
 
@@ -75,6 +82,7 @@ class ContentPost extends Equatable {
       'image_url': imageUrl,
       'author_name': authorName,
       'category_image_url': categoryImageUrl,
+      'is_liked_by_me': isLikedByMe,
     };
   }
 
@@ -92,5 +100,6 @@ class ContentPost extends Equatable {
         imageUrl,
         authorName,
         categoryImageUrl,
+        isLikedByMe,
       ];
 }

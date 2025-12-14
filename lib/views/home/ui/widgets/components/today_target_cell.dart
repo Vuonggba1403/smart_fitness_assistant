@@ -17,8 +17,7 @@ class TodayTargetCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textColor = theme.textTheme.bodyMedium?.color;
+    Theme.of(context);
 
     return Container(
       height: 70,
@@ -51,6 +50,7 @@ class TodayTargetCell extends StatelessWidget {
                   Text(
                     subtitle!,
                     style: TextStyle(
+                      // ignore: deprecated_member_use
                       color: TColor.gray.withOpacity(0.6),
                       fontSize: 8,
                     ),

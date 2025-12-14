@@ -111,6 +111,7 @@ class _SocialFeedScreenState extends State<SocialFeedScreen> {
             .getPublicUrl(fileName);  // Lấy URL công khai: https://...
       }
 
+      // ignore: use_build_context_synchronously
       await context.read<SocialFeedCubit>().createPost(
         caption: _captionController.text,
         imageUrl: imageUrl,
@@ -136,15 +137,15 @@ class _SocialFeedScreenState extends State<SocialFeedScreen> {
       backgroundColor: theme.scaffoldBackgroundColor,
       body: BlocBuilder<SocialFeedCubit, SocialFeedState>(
         builder: (context, state) {
-          /// LOADING
-          if (state is SocialFeedLoading) {
-            return const Center(child: CustomCircleProgIndicator());
-          }
+          // /// LOADING
+          // if (state is SocialFeedLoading) {
+          //   return const Center(child: CustomCircleProgIndicator());
+          // }
 
-          /// ERROR
-          if (state is SocialFeedError) {
-            return Center(child: Text(state.message));
-          }
+          // /// ERROR
+          // if (state is SocialFeedError) {
+          //   return Center(child: Text(state.message));
+          // }
 
           /// LOADED
           if (state is SocialFeedLoaded) {

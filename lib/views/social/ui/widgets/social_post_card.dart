@@ -3,6 +3,7 @@ import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/models/content_post.dart';
 import 'package:smart_fitness_assistant/core/functions/cache_images_view.dart';
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
+import 'package:smart_fitness_assistant/views/social/ui/widgets/social_comment_bottom_sheet.dart';
 
 /// ✅ Widget: Single Post Card
 class SocialPostCard extends StatelessWidget {
@@ -10,6 +11,7 @@ class SocialPostCard extends StatelessWidget {
   final Color? textColor;
   final ThemeData theme;
   final VoidCallback? onLikeTap; // ✅ THÊM callback
+  final VoidCallback? onCommentTap;
 
   const SocialPostCard({
     super.key,
@@ -17,6 +19,7 @@ class SocialPostCard extends StatelessWidget {
     required this.textColor,
     required this.theme,
     this.onLikeTap, // ✅ THÊM
+    this.onCommentTap,
   });
 
   String _formatTimeAgo(DateTime dateTime) {
@@ -34,6 +37,19 @@ class SocialPostCard extends StatelessWidget {
     } else {
       return '${(difference.inDays / 7).floor()}w';
     }
+  }
+
+  void _showCommentSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => SocialCommentBottomSheet(
+        postId: post.id ?? '',
+        theme: theme,
+        textColor: textColor,
+      ),
+    );
   }
 
   @override
@@ -237,7 +253,7 @@ class SocialPostCard extends StatelessWidget {
                   child: Row(
                     children: [
                       Icon(
-                        Icons.favorite_border,
+                        post.isLikedByMe ? Icons.favorite : Icons.favorite_border,
                         color: TColor.primaryColor1,
                         size: 20,
                       ),
@@ -254,7 +270,7 @@ class SocialPostCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 20),
                 InkWell(
-                  onTap: () {},
+                  onTap: () => _showCommentSheet(context),
                   child: Row(
                     children: [
                       Icon(
