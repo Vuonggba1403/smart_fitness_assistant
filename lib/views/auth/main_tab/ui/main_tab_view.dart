@@ -105,16 +105,16 @@ class _MainTabViewState extends State<MainTabView> {
                   children: [
                     Expanded(
                       child: TabButton(
-                        icon: "assets/img/home_tab.png",
-                        selectIcon: "assets/img/home_tab_select.png",
+                        icon: "assets/img/home.png",
+                        selectIcon: "assets/img/home_select.png",
                         isActive: cubit.currentIndex == 0,
                         onTap: () => cubit.changeCurrentIndex(0),
                       ),
                     ),
                     Expanded(
                       child: TabButton(
-                        icon: "assets/img/activity_tab.png",
-                        selectIcon: "assets/img/activity_tab_select.png",
+                        icon: "assets/img/choice.png",
+                        selectIcon: "assets/img/choice_select.png",
                         isActive: cubit.currentIndex == 1,
                         onTap: () => cubit.changeCurrentIndex(1),
                       ),
@@ -122,16 +122,16 @@ class _MainTabViewState extends State<MainTabView> {
                     const SizedBox(width: 40),
                     Expanded(
                       child: TabButton(
-                        icon: "assets/img/camera_tab.png",
-                        selectIcon: "assets/img/camera_tab_select.png",
+                        icon: "assets/img/social-media.png",
+                        selectIcon: "assets/img/social-media_select.png",
                         isActive: cubit.currentIndex == 2,
                         onTap: () => cubit.changeCurrentIndex(2),
                       ),
                     ),
                     Expanded(
                       child: TabButton(
-                        icon: "assets/img/profile_tab.png",
-                        selectIcon: "assets/img/profile_tab_select.png",
+                        icon: "assets/img/user.png",
+                        selectIcon: "assets/img/user_select.png",
                         isActive: cubit.currentIndex == 3,
                         onTap: () => cubit.changeCurrentIndex(3),
                       ),
