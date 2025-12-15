@@ -6,6 +6,7 @@ import 'package:smart_fitness_assistant/core/models/content_post.dart';
 import 'package:smart_fitness_assistant/core/functions/cache_images_view.dart';
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
 import 'package:smart_fitness_assistant/views/social/ui/widgets/social_comment_bottom_sheet.dart';
+import 'package:smart_fitness_assistant/views/social/ui/widgets/social_share_dialog.dart';
 import 'package:smart_fitness_assistant/views/social/logic/cubit/social_feed_cubit.dart';
 
 /// ✅ Widget: Single Post Card
@@ -69,7 +70,7 @@ class _SocialPostCardState extends State<SocialPostCard> {
   void _showEditDialog() {
     final editController = TextEditingController(text: widget.post.caption);
     bool isLoading = false;
-    
+
     showDialog(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
@@ -121,21 +122,21 @@ class _SocialPostCardState extends State<SocialPostCard> {
                         Navigator.pop(context);
                       }
 
-                      // ✅ Show snackbar after dialog closes
-                      Future.delayed(const Duration(milliseconds: 300), () {
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                success
-                                    ? '✅ Cập nhật thành công'
-                                    : '❌ Cập nhật thất bại',
-                              ),
-                              duration: const Duration(seconds: 2),
-                            ),
-                          );
-                        }
-                      });
+                      // // ✅ Show snackbar after dialog closes
+                      // Future.delayed(const Duration(milliseconds: 300), () {
+                      //   if (mounted) {
+                      //     ScaffoldMessenger.of(context).showSnackBar(
+                      //       SnackBar(
+                      //         content: Text(
+                      //           success
+                      //               ? '✅ Cập nhật thành công'
+                      //               : '❌ Cập nhật thất bại',
+                      //         ),
+                      //         duration: const Duration(seconds: 2),
+                      //       ),
+                      //     );
+                      //   }
+                      // });
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: TColor.primaryColor2,
@@ -155,7 +156,9 @@ class _SocialPostCardState extends State<SocialPostCard> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Xoá bài đăng'),
-        content: const Text('Bạn có chắc muốn xoá bài đăng này? Hành động này không thể hoàn tác.'),
+        content: const Text(
+          'Bạn có chắc muốn xoá bài đăng này? Hành động này không thể hoàn tác.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -164,10 +167,10 @@ class _SocialPostCardState extends State<SocialPostCard> {
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
-              
-              final success = await context
-                  .read<SocialFeedCubit>()
-                  .deletePost(widget.post.id ?? '');
+
+              final success = await context.read<SocialFeedCubit>().deletePost(
+                widget.post.id ?? '',
+              );
 
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -180,15 +183,21 @@ class _SocialPostCardState extends State<SocialPostCard> {
                 );
               }
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-            ),
-            child: const Text(
-              'Xoá',
-              style: TextStyle(color: Colors.white),
-            ),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Xoá', style: TextStyle(color: Colors.white)),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showShareDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => SocialShareDialog(
+        post: widget.post,
+        textColor: widget.textColor,
+        theme: widget.theme,
       ),
     );
   }
@@ -395,7 +404,9 @@ class _SocialPostCardState extends State<SocialPostCard> {
                   child: Row(
                     children: [
                       Icon(
-                        widget.post.isLikedByMe ? Icons.favorite : Icons.favorite_border,
+                        widget.post.isLikedByMe
+                            ? Icons.favorite
+                            : Icons.favorite_border,
                         color: TColor.primaryColor1,
                         size: 20,
                       ),
@@ -432,10 +443,14 @@ class _SocialPostCardState extends State<SocialPostCard> {
                   ),
                 ),
                 const Spacer(),
-                Icon(
-                  Icons.share_outlined,
-                  color: TColor.primaryColor1,
-                  size: 20,
+                // ✅ Share
+                InkWell(
+                  onTap: _showShareDialog,
+                  child: Icon(
+                    Icons.share_outlined,
+                    color: TColor.primaryColor1,
+                    size: 20,
+                  ),
                 ),
               ],
             ),
