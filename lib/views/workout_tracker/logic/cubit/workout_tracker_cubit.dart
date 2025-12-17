@@ -31,8 +31,13 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
   final Map<String, bool> _exerciseItemExpandedStates = {};
 
   @override
-  Future<void> close() {
+  Future<void> close() async {
     _sessionTimer?.cancel();
+    // ✅ Cancel all workout reminders when cubit is closed (logout)
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId != null) {
+      await _cancelUserWorkoutReminders(userId);
+    }
     return super.close();
   }
 
@@ -143,14 +148,51 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
     }
   }
 
-  /// Private: Lên lịch notification
+  /// ✅ Private: Lên lịch notification với user-specific ID
   Future<void> _scheduleNotification(ScheduledWorkout schedule) async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) return;
+
+    // ✅ Generate user-specific notification ID
+    final notificationId = _generateWorkoutNotificationId(userId, schedule.id!);
+
     await _notificationService.scheduleWorkoutNotification(
-      id: schedule.id.hashCode,
+      id: notificationId,
       title: '⏰ Đã đến giờ tập luyện!',
       body: '${schedule.categoryName} - Bắt đầu ngay thôi! 💪',
       scheduledTime: schedule.scheduledTime,
     );
+  }
+
+  /// ✅ Generate user-specific workout notification ID
+  int _generateWorkoutNotificationId(String userId, String scheduleId) {
+    final userHash = userId.hashCode.abs() % 10000;
+    final scheduleHash = scheduleId.hashCode.abs() % 10000;
+    return 200000 + userHash + scheduleHash; // ✅ Khác với water (100000)
+  }
+
+  /// ✅ Cancel all workout reminders for current user
+  Future<void> _cancelUserWorkoutReminders(String userId) async {
+    try {
+      // ✅ Load tất cả scheduled_workouts của user
+      final response = await _supabase
+          .from('scheduled_workouts')
+          .select('id')
+          .eq('for_user', userId);
+
+      for (var record in response) {
+        final scheduleId = record['id'] as String;
+        final notificationId = _generateWorkoutNotificationId(
+          userId,
+          scheduleId,
+        );
+        await _notificationService.cancelNotification(notificationId);
+      }
+
+      print('✅ Cancelled all workout reminders for user: $userId');
+    } catch (e) {
+      print('❌ Error cancelling workout reminders: $e');
+    }
   }
 
   // ============ Toggle Methods ============

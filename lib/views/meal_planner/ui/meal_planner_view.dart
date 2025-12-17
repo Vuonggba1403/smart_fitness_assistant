@@ -247,10 +247,14 @@ class _MealPlannerViewState extends State<MealPlannerView> {
   ) {
     return BlocBuilder<MealPlannerCubit, MealPlannerState>(
       builder: (context, state) {
-        int tdee = 0;
+        int currentCalories = 0;
+        int targetCalories = 2000;
+        int remainingCalories = targetCalories;
 
         if (state is MealsLoaded) {
-          tdee = state.targetCalories;
+          currentCalories = state.currentCalories; // ✅ Calo nhập
+          targetCalories = state.targetCalories; // ✅ Mục tiêu
+          remainingCalories = targetCalories - currentCalories; // ✅ Còn lại
         }
 
         return Container(
@@ -265,9 +269,9 @@ class _MealPlannerViewState extends State<MealPlannerView> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _calorieItem('🍽️', 'Calo nhập', '0'),
-              _calorieItem('📊', 'Còn lại', '$tdee'),
-              _calorieItem('🎯', 'Mục tiêu', '$tdee'),
+              _calorieItem('🍽️', 'Calo nhập', '$currentCalories'),
+              _calorieItem('📊', 'Còn lại', '$remainingCalories'),
+              _calorieItem('🎯', 'Mục tiêu', '$targetCalories'),
             ],
           ),
         );

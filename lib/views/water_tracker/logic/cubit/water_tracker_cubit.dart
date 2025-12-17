@@ -9,7 +9,7 @@ part 'water_tracker_state.dart';
 class WaterTrackerCubit extends Cubit<WaterTrackerState> {
   final _supabase = Supabase.instance.client;
   final _notificationService = NotificationService();
-  bool _hasShownCongratulations = false; // ✅ Track đã show congratulations chưa
+  bool _hasShownCongratulations = false;
 
   WaterTrackerCubit() : super(WaterTrackerInitial()) {
     loadTodayWaterIntake();
@@ -26,10 +26,8 @@ class WaterTrackerCubit extends Cubit<WaterTrackerState> {
         return;
       }
 
-      // Load settings
       final settings = await _loadSettings(userId);
 
-      // Load water intake
       final now = DateTime.now();
       final startOfDay = DateTime(now.year, now.month, now.day);
       final endOfDay = startOfDay.add(const Duration(days: 1));
@@ -50,7 +48,6 @@ class WaterTrackerCubit extends Cubit<WaterTrackerState> {
         (sum, intake) => sum + intake.amountMl,
       );
 
-      // ✅ Reset flag nếu chưa đạt goal
       if (totalMl < settings.dailyGoalMl) {
         _hasShownCongratulations = false;
       }
@@ -64,7 +61,6 @@ class WaterTrackerCubit extends Cubit<WaterTrackerState> {
         ),
       );
 
-      // Schedule reminders nếu enabled
       if (settings.reminderEnabled) {
         await _scheduleWaterReminders(settings);
       }
@@ -73,7 +69,7 @@ class WaterTrackerCubit extends Cubit<WaterTrackerState> {
     }
   }
 
-  /// ✅ Load settings từ DB
+  /// Load settings từ DB
   Future<WaterGoalSettings> _loadSettings(String userId) async {
     try {
       final response = await _supabase
@@ -98,7 +94,6 @@ class WaterTrackerCubit extends Cubit<WaterTrackerState> {
       await _supabase
           .from('water_goal_settings')
           .insert(defaultSettings.toJson());
-
       return defaultSettings;
     } catch (e) {
       print('❌ Error loading settings: $e');
@@ -106,7 +101,7 @@ class WaterTrackerCubit extends Cubit<WaterTrackerState> {
     }
   }
 
-  /// ✅ Update goal
+  /// Update goal
   Future<void> updateGoal(int newGoalMl) async {
     try {
       final userId = _supabase.auth.currentUser?.id;
@@ -117,26 +112,20 @@ class WaterTrackerCubit extends Cubit<WaterTrackerState> {
 
       print('🔄 Updating goal to: ${newGoalMl}ml for user: $userId');
 
-      // ✅ Upsert với conflict resolution
-      final response = await _supabase.from('water_goal_settings').upsert(
-        {
-          'for_user': userId,
-          'daily_goal_ml': newGoalMl,
-          'updated_at': DateTime.now().toIso8601String(),
-        },
-        onConflict: 'for_user', // ✅ QUAN TRỌNG: Conflict trên for_user
-      ).select();
+      await _supabase.from('water_goal_settings').upsert({
+        'for_user': userId,
+        'daily_goal_ml': newGoalMl,
+        'updated_at': DateTime.now().toIso8601String(),
+      }, onConflict: 'for_user').select();
 
-      print('✅ Goal updated successfully: $response');
-
-      // ✅ Reload để cập nhật UI
+      print('✅ Goal updated successfully');
       await loadTodayWaterIntake();
     } catch (e) {
       print('❌ Error updating goal: $e');
     }
   }
 
-  /// ✅ Update reminder settings - FIX duplicate key error
+  /// Update reminder settings
   Future<void> updateReminderSettings(WaterGoalSettings newSettings) async {
     try {
       final userId = _supabase.auth.currentUser?.id;
@@ -147,42 +136,38 @@ class WaterTrackerCubit extends Cubit<WaterTrackerState> {
 
       print('🔄 Updating reminder settings for user: $userId');
 
-      // ✅ FIX: Upsert với onConflict
-      await _supabase.from('water_goal_settings').upsert(
-        {
-          'for_user': userId,
-          'daily_goal_ml': newSettings.dailyGoalMl,
-          'reminder_enabled': newSettings.reminderEnabled,
-          'reminder_interval_minutes': newSettings.reminderIntervalMinutes,
-          'reminder_start_time': _formatTimeOfDay(
-            newSettings.reminderStartTime,
-          ),
-          'reminder_end_time': _formatTimeOfDay(newSettings.reminderEndTime),
-          'updated_at': DateTime.now().toIso8601String(),
-        },
-        onConflict: 'for_user', // ✅ QUAN TRỌNG: Conflict resolution
-      );
+      await _supabase.from('water_goal_settings').upsert({
+        'for_user': userId,
+        'daily_goal_ml': newSettings.dailyGoalMl,
+        'reminder_enabled': newSettings.reminderEnabled,
+        'reminder_interval_minutes': newSettings.reminderIntervalMinutes,
+        'reminder_start_time': _formatTimeOfDay(newSettings.reminderStartTime),
+        'reminder_end_time': _formatTimeOfDay(newSettings.reminderEndTime),
+        'updated_at': DateTime.now().toIso8601String(),
+      }, onConflict: 'for_user');
 
       print('✅ Reminder settings updated successfully');
-
       await loadTodayWaterIntake();
     } catch (e) {
       print('❌ Error updating reminder: $e');
     }
   }
 
-  /// ✅ Helper: Format TimeOfDay to string
+  /// Helper: Format TimeOfDay to string
   String? _formatTimeOfDay(TimeOfDay? time) {
     if (time == null) return null;
     return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
   }
 
-  /// ✅ Schedule water reminders
+  /// Schedule water reminders với user-specific ID
   Future<void> _scheduleWaterReminders(WaterGoalSettings settings) async {
     if (!settings.reminderEnabled) return;
 
-    // Cancel existing reminders
-    await _notificationService.cancelNotification(999);
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) return;
+
+    // Cancel existing reminders for this user
+    await _cancelUserWaterReminders(userId);
 
     final startTime =
         settings.reminderStartTime ?? TimeOfDay(hour: 8, minute: 0);
@@ -203,15 +188,46 @@ class WaterTrackerCubit extends Cubit<WaterTrackerState> {
         (nextReminder.hour == endTime.hour &&
             nextReminder.minute <= endTime.minute)) {
       if (nextReminder.isAfter(now)) {
+        final reminderId = _generateReminderId(userId, nextReminder);
         await _notificationService.scheduleWorkoutNotification(
-          id: 999 + nextReminder.hour * 60 + nextReminder.minute,
+          id: reminderId,
           title: '💧 Đã đến giờ uống nước!',
           body: 'Hãy uống nước để giữ sức khỏe nhé! 🥤',
           scheduledTime: nextReminder,
         );
       }
-
       nextReminder = nextReminder.add(Duration(minutes: intervalMinutes));
+    }
+  }
+
+  /// Generate user-specific reminder ID
+  int _generateReminderId(String userId, DateTime dateTime) {
+    final userHash = userId.hashCode.abs() % 10000;
+    final timeComponent = dateTime.hour * 100 + dateTime.minute;
+    return 100000 + userHash + timeComponent;
+  }
+
+  /// Cancel all water reminders for current user
+  Future<void> _cancelUserWaterReminders(String userId) async {
+    try {
+      for (int hour = 0; hour < 24; hour++) {
+        for (int minute = 0; minute < 60; minute += 5) {
+          final reminderId = _generateReminderId(
+            userId,
+            DateTime(
+              DateTime.now().year,
+              DateTime.now().month,
+              DateTime.now().day,
+              hour,
+              minute,
+            ),
+          );
+          await _notificationService.cancelNotification(reminderId);
+        }
+      }
+      print('✅ Cancelled all water reminders for user: $userId');
+    } catch (e) {
+      print('❌ Error cancelling reminders: $e');
     }
   }
 
@@ -228,16 +244,13 @@ class WaterTrackerCubit extends Cubit<WaterTrackerState> {
       );
 
       await _supabase.from('water_intake').insert(intake.toJson());
-
-      // Reload
       await loadTodayWaterIntake();
 
-      // ✅ Check xem đã đạt goal chưa
+      // Check xem đã đạt goal chưa
       final currentState = state;
       if (currentState is WaterTrackerLoaded) {
         if (currentState.totalMl >= currentState.goalMl &&
             !_hasShownCongratulations) {
-          // ✅ Emit state để trigger congratulations
           emit(
             WaterGoalAchieved(
               totalMl: currentState.totalMl,
@@ -246,7 +259,6 @@ class WaterTrackerCubit extends Cubit<WaterTrackerState> {
           );
           _hasShownCongratulations = true;
 
-          // ✅ Sau 1 giây, emit lại WaterTrackerLoaded
           await Future.delayed(const Duration(seconds: 1));
           emit(currentState);
         }
@@ -264,5 +276,15 @@ class WaterTrackerCubit extends Cubit<WaterTrackerState> {
     } catch (e) {
       print('❌ Error deleting water intake: $e');
     }
+  }
+
+  @override
+  Future<void> close() async {
+    // Cancel all reminders when cubit is closed (logout)
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId != null) {
+      await _cancelUserWaterReminders(userId);
+    }
+    return super.close();
   }
 }

@@ -316,9 +316,10 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
           .from('user_meals')
           .delete()
           .eq('id', mealId)
-          .eq('for_user', userId); // ✅ Đúng với tên cột
+          .eq('for_user', userId);
 
-      emit(MealRemoved(''));
+      // ✅ Load meals ngay sau khi xóa để update calories
+      await loadMealsByDate(_selectedDateTime);
     } catch (e) {
       emit(MealPlannerError('Error removing meal: ${e.toString()}'));
     }

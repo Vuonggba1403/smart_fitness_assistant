@@ -129,19 +129,18 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
   /// ✅ Toggle notification cho workout với chọn giờ
   Future<void> _toggleNotification(int index, bool enabled) async {
     final workout = _upcomingWorkouts[index];
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) return;
 
     if (enabled) {
       // ✅ Hiển thị dialog chọn giờ
       final scheduledTime = await WorkoutTimePicker.show(context);
 
       if (scheduledTime == null) {
-        // ❌ User hủy → Không làm gì
         return;
       }
 
       final now = DateTime.now();
-
-      // ✅ Kiểm tra thời gian tập phải sau ít nhất 1 phút
       final minScheduledTime = now.add(const Duration(minutes: 1));
 
       if (scheduledTime.isBefore(minScheduledTime)) {
@@ -159,12 +158,18 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
         return;
       }
 
-      // ✅ FIX: Báo ĐÚNG GIỜ user chọn (không trừ 15 phút)
+      // ✅ Generate user-specific notification ID
+      final cubit = context.read<WorkoutTrackerCubit>();
+      final notificationId =
+          200000 +
+          (userId.hashCode.abs() % 10000) +
+          (workout.categoryId.hashCode.abs() % 10000);
+
       await _notificationService.scheduleWorkoutNotification(
-        id: workout.categoryId.hashCode,
+        id: notificationId, // ✅ Dùng user-specific ID
         title: '⏰ Đã đến giờ tập luyện!',
         body: '${workout.categoryName} - Bắt đầu ngay thôi! 💪',
-        scheduledTime: scheduledTime, // ✅ Đúng giờ user chọn
+        scheduledTime: scheduledTime,
       );
 
       // ✅ Debug: Kiểm tra pending notifications
@@ -175,7 +180,6 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
       }
 
       if (mounted) {
-        // ✅ Cập nhật state với thời gian mới
         setState(() {
           _upcomingWorkouts[index] = workout.copyWith(
             isNotificationEnabled: true,
@@ -194,10 +198,13 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
         );
       }
     } else {
-      // ✅ TẮT notification
-      await _notificationService.cancelNotification(
-        workout.categoryId.hashCode,
-      );
+      // ✅ TẮT notification với user-specific ID
+      final notificationId =
+          200000 +
+          (userId.hashCode.abs() % 10000) +
+          (workout.categoryId.hashCode.abs() % 10000);
+
+      await _notificationService.cancelNotification(notificationId);
 
       if (mounted) {
         setState(() {
@@ -206,12 +213,6 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
           );
         });
 
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   const SnackBar(
-        //     content: Text('Đã hủy nhắc nhở'),
-        //     backgroundColor: Colors.orange,
-        //   ),
-        // );
         showCustomDelightToastBar(
           context,
           'Đã hủy nhắc nhở',
@@ -243,6 +244,16 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) return;
 
+      // ✅ Lấy schedule ID trước khi xóa
+      final scheduleResponse = await _supabase
+          .from('scheduled_workouts')
+          .select('id')
+          .eq('for_user', userId)
+          .eq('category_id', categoryId)
+          .single();
+
+      final scheduleId = scheduleResponse['id'] as String;
+
       // ✅ Xóa schedule từ DB
       await _supabase
           .from('scheduled_workouts')
@@ -250,11 +261,15 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
           .eq('for_user', userId)
           .eq('category_id', categoryId);
 
-      // ✅ Hủy notification
-      await _notificationService.cancelNotification(categoryId.hashCode);
+      // ✅ Hủy notification với user-specific ID
+      final cubit = context.read<WorkoutTrackerCubit>();
+      final notificationId =
+          200000 +
+          (userId.hashCode.abs() % 10000) +
+          (scheduleId.hashCode.abs() % 10000);
+      await _notificationService.cancelNotification(notificationId);
 
       // ✅ Reload data
-      final cubit = context.read<WorkoutTrackerCubit>();
       final updatedWorkouts = await cubit.loadUpcomingWorkouts(
         forceRefresh: true,
       );
