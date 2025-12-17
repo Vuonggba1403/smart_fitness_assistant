@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:smart_fitness_assistant/core/models/activity_level.dart';
 import 'package:smart_fitness_assistant/core/models/meal.dart';
+import 'package:flutter/foundation.dart'; // ✅ THÊM import cho debugPrint
 
 part 'meal_planner_state.dart';
 
@@ -14,6 +15,9 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
 
   /// ⏱ DateTime hiện tại
   DateTime _selectedDateTime = DateTime.now();
+
+  // ✅ THÊM: Track ngày lần cuối load để reset qua ngày
+  DateTime? _lastLoadedDate;
 
   DateTime get selectedDateTime => _selectedDateTime;
 
@@ -148,9 +152,28 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
         });
       }
 
-      emit(ActivityPreferenceSaved(activityLevelId, dailyCalories));
+      // ✅ NGAY SAU KHI LƯU → LOAD LẠI MEALS ĐỂ CẬP NHẬT TARGET
+      await loadMealsByDate(_selectedDateTime);
+
+      debugPrint('✅ Activity preference saved and meals reloaded');
     } catch (e) {
       emit(MealPlannerError('Error saving activity preference: $e'));
+    }
+  }
+
+  /// ✅ Refresh meals khi quay lại màn hình (qua ngày sẽ reset)
+  Future<void> refreshMealsByDate(DateTime date) async {
+    final now = DateTime.now();
+
+    // ✅ Nếu ngày khác, clear cache và reload
+    if (_lastLoadedDate?.year != now.year ||
+        _lastLoadedDate?.month != now.month ||
+        _lastLoadedDate?.day != now.day) {
+      _lastLoadedDate = now;
+      await loadMealsByDate(now);
+    } else {
+      // Cùng ngày thì reload bình thường
+      await loadMealsByDate(date);
     }
   }
 
@@ -158,6 +181,7 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
   Future<void> loadMealsByDate(DateTime date) async {
     try {
       _selectedDateTime = date;
+      _lastLoadedDate = date;
 
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) {
@@ -165,27 +189,28 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
         return;
       }
 
-      // ✅ Get target calories
+      // ✅ Lấy target calories từ user_activity_preferences
       final pref = await _supabase
           .from('user_activity_preferences')
           .select('daily_calorie_target')
           .eq('for_user', userId)
           .maybeSingle();
 
-      int targetCalories = pref?['daily_calorie_target'] ?? 2000;
+      // ✅ Để null nếu chưa set, thay vì mặc định 2000
+      int targetCalories = pref?['daily_calorie_target'] ?? 0;
 
-      // ✅ Load meals grouped by type
+      // ✅ Load meals của ngày hôm nay (reset qua ngày)
       final mealsByType = await loadMealsByDateAndType(date);
       final currentCalories = _calculateTotalCalories(mealsByType);
 
-      // ✅ Emit loaded state with meals data
+      // ✅ Emit loaded state với meals của ngày + goal không thay đổi
       emit(
         MealsLoaded(
           breakfast: mealsByType['breakfast'] ?? [],
           lunch: mealsByType['lunch'] ?? [],
           dinner: mealsByType['dinner'] ?? [],
           currentCalories: currentCalories,
-          targetCalories: targetCalories,
+          targetCalories: targetCalories, // ✅ Để 0 nếu chưa set
           selectedDateTime: date,
         ),
       );
@@ -218,30 +243,33 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
         'meal_time': DateFormat('HH:mm').format(date),
       });
 
-      // ✅ Emit success state
-      emit(
-        MealAdded(
-          mealType: mealType,
-          mealName: meal['name'],
-          calories: meal['calories'] ?? 0,
-          dateTime: date,
-        ),
-      );
-
-      // 🔄 Load meals ngay sau khi thêm
-      await Future.delayed(const Duration(milliseconds: 300));
+      // ✅ NGAY LẬP TỨC reload và emit
       final mealsByType = await loadMealsByDateAndType(date);
+      final currentCalories = _calculateTotalCalories(mealsByType);
 
-      // ✅ Emit state mới với dữ liệu meals đã update
+      // ✅ Lấy target calories
+      final pref = await _supabase
+          .from('user_activity_preferences')
+          .select('daily_calorie_target')
+          .eq('for_user', userId)
+          .maybeSingle();
+
+      int targetCalories = pref?['daily_calorie_target'] ?? 0;
+
+      // ✅ Emit state MỚI ngay lập tức
       emit(
         MealsLoaded(
           breakfast: mealsByType['breakfast'] ?? [],
           lunch: mealsByType['lunch'] ?? [],
           dinner: mealsByType['dinner'] ?? [],
-          currentCalories: _calculateTotalCalories(mealsByType),
-          targetCalories: 2000,
+          currentCalories: currentCalories,
+          targetCalories: targetCalories,
           selectedDateTime: date,
         ),
+      );
+
+      debugPrint(
+        '✅ Meal added: ${meal['name']}, Total calories: $currentCalories',
       );
     } catch (e) {
       emit(MealPlannerError('Error adding meal: ${e.toString()}'));
@@ -274,7 +302,7 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
       final response = await _supabase
           .from('user_meals')
           .select()
-          .eq('for_user', userId) // ✅ Đúng với tên cột
+          .eq('for_user', userId)
           .eq('meal_date', dateStr);
 
       if (response == null || (response as List).isEmpty) {
@@ -318,8 +346,10 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
           .eq('id', mealId)
           .eq('for_user', userId);
 
-      // ✅ Load meals ngay sau khi xóa để update calories
+      // ✅ NGAY LẬP TỨC reload và emit
       await loadMealsByDate(_selectedDateTime);
+
+      debugPrint('✅ Meal removed, reloaded calories');
     } catch (e) {
       emit(MealPlannerError('Error removing meal: ${e.toString()}'));
     }

@@ -51,9 +51,10 @@ class _SignUpFormState extends State<_SignUpForm> {
 
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted && context.mounted) {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (_) => const LoginView()),
-              );
+              // Navigator.of(context).pushReplacement(
+              //   MaterialPageRoute(builder: (_) => const LoginView()),
+              // );
+              navigateTo(context, const LoginView());
             }
           });
         }

@@ -54,6 +54,7 @@ dependencies:
   supabase_flutter: ^2.10.3
   image_picker: ^1.2.1
   emoji_picker_flutter: ^4.4.0
+  mobile_scanner: ^7.1.4
 
 dependency_overrides:
   intl: ^0.18.1 # Override intl version for compatibility

@@ -30,6 +30,9 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
   // ✅ THÊM: Map lưu trạng thái expand của từng exercise item
   final Map<String, bool> _exerciseItemExpandedStates = {};
 
+  // ✅ THÊM: Lưu list reminder IDs đã schedule
+  final Map<String, int> _scheduledWorkoutReminderIds = {};
+
   @override
   Future<void> close() async {
     _sessionTimer?.cancel();
@@ -148,6 +151,27 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
     }
   }
 
+  /// ✅ Cancel all workout reminders for current user - CHỈ cancel những cái thực tế
+  Future<void> _cancelUserWorkoutReminders(String userId) async {
+    try {
+      // ✅ Chỉ cancel những reminder đã được schedule
+      for (final scheduleId in _scheduledWorkoutReminderIds.keys) {
+        final notificationId = _scheduledWorkoutReminderIds[scheduleId]!;
+        await _notificationService.cancelNotification(notificationId);
+        print(
+          '❌ Notification $notificationId for schedule $scheduleId cancelled',
+        );
+      }
+
+      // ✅ Clear map sau khi cancel
+      _scheduledWorkoutReminderIds.clear();
+
+      print('✅ Cancelled all workout reminders for user: $userId');
+    } catch (e) {
+      print('❌ Error cancelling workout reminders: $e');
+    }
+  }
+
   /// ✅ Private: Lên lịch notification với user-specific ID
   Future<void> _scheduleNotification(ScheduledWorkout schedule) async {
     final userId = _supabase.auth.currentUser?.id;
@@ -156,12 +180,17 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
     // ✅ Generate user-specific notification ID
     final notificationId = _generateWorkoutNotificationId(userId, schedule.id!);
 
+    // ✅ LƯU vào map
+    _scheduledWorkoutReminderIds[schedule.id!] = notificationId;
+
     await _notificationService.scheduleWorkoutNotification(
       id: notificationId,
       title: '⏰ Đã đến giờ tập luyện!',
       body: '${schedule.categoryName} - Bắt đầu ngay thôi! 💪',
       scheduledTime: schedule.scheduledTime,
     );
+
+    print('✅ Workout reminder ID: $notificationId for schedule ${schedule.id}');
   }
 
   /// ✅ Generate user-specific workout notification ID
@@ -169,30 +198,6 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
     final userHash = userId.hashCode.abs() % 10000;
     final scheduleHash = scheduleId.hashCode.abs() % 10000;
     return 200000 + userHash + scheduleHash; // ✅ Khác với water (100000)
-  }
-
-  /// ✅ Cancel all workout reminders for current user
-  Future<void> _cancelUserWorkoutReminders(String userId) async {
-    try {
-      // ✅ Load tất cả scheduled_workouts của user
-      final response = await _supabase
-          .from('scheduled_workouts')
-          .select('id')
-          .eq('for_user', userId);
-
-      for (var record in response) {
-        final scheduleId = record['id'] as String;
-        final notificationId = _generateWorkoutNotificationId(
-          userId,
-          scheduleId,
-        );
-        await _notificationService.cancelNotification(notificationId);
-      }
-
-      print('✅ Cancelled all workout reminders for user: $userId');
-    } catch (e) {
-      print('❌ Error cancelling workout reminders: $e');
-    }
   }
 
   // ============ Toggle Methods ============
@@ -935,4 +940,8 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
     _exerciseItemExpandedStates[exerciseId] = false;
     emit(ExerciseItemExpanded(exerciseId, false));
   }
+
+  // ✅ Public getter for cache (để workout_tracker_view có thể access)
+  List<UpcomingWorkout>? get cachedUpcomingWorkouts => _cachedUpcomingWorkouts;
+  List<double>? get cachedWeeklyStats => _cachedWeeklyStats;
 }

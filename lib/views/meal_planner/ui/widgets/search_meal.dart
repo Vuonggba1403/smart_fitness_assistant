@@ -7,6 +7,7 @@ import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/models/meal.dart';
 import 'package:smart_fitness_assistant/views/meal_planner/ui/widgets/food_details.dart';
 import 'package:smart_fitness_assistant/views/meal_planner/logic/cubit/meal_planner_cubit.dart';
+import 'package:supabase_flutter/supabase_flutter.dart'; // ✅ THÊM import
 
 class SearchMeal extends StatefulWidget {
   const SearchMeal({super.key});
@@ -71,54 +72,37 @@ class _SearchMealState extends State<SearchMeal>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final media = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-
-      /// 🧭 APPBAR
-      appBar: AppBar(
-        backgroundColor: theme.scaffoldBackgroundColor,
-        elevation: 0,
-        leading: const BackButton(),
-        centerTitle: true,
-        title: GestureDetector(
-          onTap: _openDateTimePicker,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                formattedDateTime,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(width: 6),
-              const Icon(Icons.arrow_drop_down),
-            ],
-          ),
-        ),
-        actions: [
-          IconButton(icon: const Icon(Icons.info_outline), onPressed: () {}),
+      appBar: AppBar(title: const Text('Tìm kiếm thực phẩm'), actions: [
+       
         ],
       ),
-
       body: Column(
         children: [
-          /// 🔍 SEARCH BAR
-          Container(
-            margin: const EdgeInsets.all(20),
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              color: theme.cardColor,
-              borderRadius: BorderRadius.circular(16),
-            ),
+          // ✅ Search TextField
+          Padding(
+            padding: const EdgeInsets.all(16),
             child: TextField(
               controller: txtSearch,
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-                hintText: 'Tìm thực phẩm hoặc món ăn',
-                prefixIcon: Icon(Icons.search),
+              decoration: InputDecoration(
+                hintText: 'Tìm kiếm thực phẩm...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: txtSearch.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          txtSearch.clear();
+                          setState(() {});
+                        },
+                      )
+                    : null,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
+              onChanged: (value) => setState(() {}),
             ),
           ),
 
@@ -571,6 +555,151 @@ class _SearchMealState extends State<SearchMeal>
         .difference(DateTime(today.year, today.month, today.day))
         .inDays;
     return difference.clamp(0, 29);
+  }
+
+  /// ✅ Search meals theo tên, category, keywords, ingredients
+  List<Map> _filterMeals(String query, List<Map> meals) {
+    if (query.isEmpty) {
+      return meals;
+    }
+
+    final queryLower = query.toLowerCase().trim();
+
+    return meals.where((meal) {
+      // ✅ 1. Tìm theo tên món ăn
+      final mealName = (meal['meal_name'] ?? '').toString().toLowerCase();
+      if (mealName.contains(queryLower)) {
+        return true;
+      }
+
+      // ✅ 2. Tìm theo category (ngành hàng)
+      final category = (meal['category'] ?? '').toString().toLowerCase();
+      if (category.contains(queryLower)) {
+        return true;
+      }
+
+      // ✅ 3. Tìm theo ingredients (thành phần)
+      final ingredients = (meal['ingredients'] ?? '').toString().toLowerCase();
+      if (ingredients.contains(queryLower)) {
+        return true;
+      }
+
+      // ✅ 4. Tìm theo keywords
+      final keywords = (meal['keywords'] ?? '').toString().toLowerCase();
+      if (keywords.contains(queryLower)) {
+        return true;
+      }
+
+      return false;
+    }).toList();
+  }
+
+  /// ✅ Handle barcode scanned - FIX
+  Future<void> _handleBarcodeScanned(String barcode) async {
+    print('📦 Barcode received: $barcode');
+
+    // ✅ Search meal by barcode in your database
+    final meals = await _searchMealByBarcode(barcode);
+
+    if (meals.isNotEmpty) {
+      // ✅ Add first meal found
+      final meal = meals.first;
+
+      // ✅ Xác định bữa ăn dựa vào giờ hiện tại
+      final hour = DateTime.now().hour;
+      String mealType = '';
+
+      if (hour >= 6 && hour < 10) {
+        mealType = 'breakfast';
+      } else if (hour >= 10 && hour < 14) {
+        mealType = 'lunch';
+      } else if (hour >= 14 && hour <= 22) {
+        mealType = 'dinner';
+      } else {
+        mealType = 'snack';
+      }
+
+      // ✅ Call addMealToType (đúng với API)
+      context.read<MealPlannerCubit>().addMealToType(mealType, {
+        'id': meal['id'],
+        'meal_name': meal['meal_name'],
+        'calories': meal['calories'] ?? 0,
+        'protein': meal['protein'] ?? 0.0,
+        'carbs': meal['carbs'] ?? 0.0,
+        'fat': meal['fat'] ?? 0.0,
+      }, DateTime.now());
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '✅ Đã thêm: ${meal['meal_name']} vào ${_getMealTypeName(mealType)}',
+            ),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('❌ Không tìm thấy thực phẩm với mã vạch này'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
+
+  /// ✅ Helper: Lấy tên bữa ăn
+  String _getMealTypeName(String mealType) {
+    switch (mealType) {
+      case 'breakfast':
+        return 'Bữa sáng';
+      case 'lunch':
+        return 'Bữa trưa';
+      case 'dinner':
+        return 'Bữa tối';
+      case 'snack':
+        return 'Bữa phụ';
+      default:
+        return 'Bữa ăn';
+    }
+  }
+
+  /// ✅ Search meal by barcode
+  Future<List<Map>> _searchMealByBarcode(String barcode) async {
+    try {
+      final _supabase = Supabase.instance.client;
+      final response = await _supabase
+          .from('meals')
+          .select()
+          .eq('barcode', barcode)
+          .limit(1);
+
+      return List<Map>.from(response);
+    } catch (e) {
+      print('❌ Error searching by barcode: $e');
+      return [];
+    }
+  }
+
+  /// ✅ Add meal to date
+  void _addMealToDate(Map meal) {
+    context.read<MealPlannerCubit>().addMealToType(
+      'lunch', // ✅ mealType: lunch
+      {
+        'id': meal['id'],
+        'meal_name': meal['meal_name'],
+        'calories': meal['calories'],
+        'protein': meal['protein'] ?? 0.0,
+        'carbs': meal['carbs'] ?? 0.0,
+        'fat': meal['fat'] ?? 0.0,
+      },
+      DateTime.now(), // ✅ selectedDate
+    );
   }
 
   @override

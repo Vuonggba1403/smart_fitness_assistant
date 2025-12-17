@@ -23,6 +23,10 @@ class ActivityLevelDialog extends StatefulWidget {
 }
 
 class _ActivityLevelDialogState extends State<ActivityLevelDialog> {
+  // ✅ THÊM: Missing state variables
+  ActivityLevel? _selectedLevel;
+  bool _isSaving = false;
+
   late Future<String> _usernameFuture;
 
   @override
@@ -43,6 +47,82 @@ class _ActivityLevelDialogState extends State<ActivityLevelDialog> {
       return user?.email?.split('@').first ?? 'User';
     } catch (_) {
       return 'User';
+    }
+  }
+
+  /// ✅ THÊM: Calculate daily calories method - FIX: Tính từ user data
+  int _calculateDailyCalories(ActivityLevel level, double activityFactor) {
+    // ✅ TODO: Lấy từ user profile (weight, height, age, gender)
+    // Hiện tại dùng giá trị mặc định
+
+    // Công thức BMR (Mifflin-St Jeor):
+    // Nam: BMR = 10 × weight(kg) + 6.25 × height(cm) - 5 × age + 5
+    // Nữ: BMR = 10 × weight(kg) + 6.25 × height(cm) - 5 × age - 161
+
+    // ✅ Giả sử giá trị mặc định
+    const weight = 70; // kg
+    const height = 170; // cm
+    const age = 25;
+    const isMale = true;
+
+    double bmr;
+    if (isMale) {
+      bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+    } else {
+      bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+    }
+
+    // TDEE = BMR × Activity Factor
+    final tdee = (bmr * activityFactor).round();
+
+    return tdee;
+  }
+
+  /// ✅ Save selection method
+  Future<void> _saveSelection() async {
+    if (_selectedLevel == null) return;
+
+    setState(() => _isSaving = true);
+
+    try {
+      // ✅ Calculate daily calorie target
+      final dailyCalories = _calculateDailyCalories(
+        _selectedLevel!,
+        context.read<MealPlannerCubit>().currentActivityFactor,
+      );
+
+      // ✅ Save preference
+      await context.read<MealPlannerCubit>().saveActivityPreference(
+        _selectedLevel!.id,
+        dailyCalories,
+      );
+
+      if (mounted) {
+        // ✅ Close dialog
+        Navigator.of(context).pop();
+
+        // ✅ Callback để parent reload
+        widget.onActivitySelected(widget.selectedDate);
+
+        // ✅ Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('✅ Đã lưu: Mục tiêu $dailyCalories kcal/ngày'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('❌ Lỗi: $e'), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
     }
   }
 
@@ -107,14 +187,14 @@ class _ActivityLevelDialogState extends State<ActivityLevelDialog> {
                     );
 
                     // ✅ Hiển thị thông tin calo
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'BMR: $bmr kcal | TDEE: $dailyCalories kcal/ngày',
-                        ),
-                        duration: const Duration(seconds: 2),
-                      ),
-                    );
+                    // ScaffoldMessenger.of(context).showSnackBar(
+                    //   SnackBar(
+                    //     content: Text(
+                    //       'BMR: $bmr kcal | TDEE: $dailyCalories kcal/ngày',
+                    //     ),
+                    //     duration: const Duration(seconds: 2),
+                    //   ),
+                    // );
 
                     Navigator.pop(context);
                     widget.onActivitySelected(widget.selectedDate);

@@ -30,21 +30,12 @@ class CompleteProfileDialog extends StatefulWidget {
 }
 
 class _CompleteProfileDialogState extends State<CompleteProfileDialog> {
-  late TextEditingController txtHeight;
-  late TextEditingController txtWeight;
-  late TextEditingController txtWeightGoal;
-  late TextEditingController txtAge;
-  late GlobalKey<FormState> formKey;
+  final txtHeight = TextEditingController();
+  final txtWeight = TextEditingController();
+  final txtWeightGoal = TextEditingController();
+  final txtAge = TextEditingController();
 
-  @override
-  void initState() {
-    super.initState();
-    txtHeight = TextEditingController();
-    txtWeight = TextEditingController();
-    txtWeightGoal = TextEditingController();
-    txtAge = TextEditingController();
-    formKey = GlobalKey<FormState>();
-  }
+  final formKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
@@ -180,9 +171,6 @@ class _CompleteProfileDialogState extends State<CompleteProfileDialog> {
                     // Validate age
                     final age = int.tryParse(txtAge.text.trim());
                     if (age == null || age < 0 || age > 100) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Tuổi phải từ 0 đến 100")),
-                      );
                       return;
                     }
 

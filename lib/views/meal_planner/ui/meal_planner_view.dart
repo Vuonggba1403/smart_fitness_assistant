@@ -28,20 +28,12 @@ class _MealPlannerViewState extends State<MealPlannerView> {
   bool _activityDialogShown = false;
   final TextEditingController txtSearch = TextEditingController();
 
-  // 🍽️ Store meals by type
-  Map<String, List<Map>> _mealsByType = {
-    'breakfast': [],
-    'lunch': [],
-    'dinner': [],
-  };
-
   @override
   void initState() {
     super.initState();
     _selectedDate = DateTime.now();
 
     context.read<MealPlannerCubit>().loadMealsByDate(_selectedDate);
-    _loadUserMeals();
     context.read<MealPlannerCubit>().loadActivityLevels();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -57,13 +49,13 @@ class _MealPlannerViewState extends State<MealPlannerView> {
     });
   }
 
-  /// 📥 Load user meals
-  Future<void> _loadUserMeals() async {
-    final meals = await context.read<MealPlannerCubit>().loadMealsByDateAndType(
-      _selectedDate,
-    );
-    setState(() {
-      _mealsByType = meals;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<MealPlannerCubit>().loadMealsByDate(_selectedDate);
+      }
     });
   }
 
@@ -90,137 +82,121 @@ class _MealPlannerViewState extends State<MealPlannerView> {
     return Scaffold(
       appBar: CustomAppBar(title: LocaleKey.mealPlanner.tr),
       backgroundColor: theme.scaffoldBackgroundColor,
-      body: BlocListener<MealPlannerCubit, MealPlannerState>(
-        listener: (context, state) {
-          if (state is MealsLoaded) {
-            // ✅ Update meals khi state thay đổi
-            setState(() {
-              _mealsByType = {
-                'breakfast': state.breakfast,
-                'lunch': state.lunch,
-                'dinner': state.dinner,
-              };
-            });
-          } else if (state is MealAdded) {
-            // ✅ Hiển thị snackbar
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  '${state.mealName} được thêm vào ${_getMealTypeName(state.mealType)}',
-                ),
-                duration: const Duration(seconds: 2),
-              ),
-            );
-          } else if (state is MealRemoved) {
-            // ✅ Reload meals khi xóa
-            _loadUserMeals();
-          }
-        },
-        child: SafeArea(
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                /// 🔥 DAILY CALORIE CARD
-                _buildDailyCalorieCard(context, theme, media),
+      body: BlocBuilder<MealPlannerCubit, MealPlannerState>(
+        builder: (context, state) {
+          final mealsByType = state is MealsLoaded
+              ? {
+                  'breakfast': state.breakfast,
+                  'lunch': state.lunch,
+                  'dinner': state.dinner,
+                }
+              : <String, List<Map>>{'breakfast': [], 'lunch': [], 'dinner': []};
 
-                /// 📅 CALENDAR
-                CustomCalendarAgenda(
-                  controller: _calendarController,
-                  selectedDate: _selectedDate,
-                  textColor: textColor,
-                  onDateSelected: (date) {
-                    setState(() => _selectedDate = date);
-                    context.read<MealPlannerCubit>().loadMealsByDate(date);
-                    _loadUserMeals();
-                  },
-                ),
+          return SafeArea(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  /// 🔥 DAILY CALORIE CARD - ✅ Pass state từ parent
+                  _buildDailyCalorieCard(context, theme, media, state),
 
-                /// 🔍 SEARCH
-                Hero(
-                  tag: 'meal_search_bar',
-                  child: InkWell(
-                    onTap: () {
-                      navigateTo(context, const SearchMeal());
+                  /// 📅 CALENDAR
+                  CustomCalendarAgenda(
+                    controller: _calendarController,
+                    selectedDate: _selectedDate,
+                    textColor: textColor,
+                    onDateSelected: (date) {
+                      _selectedDate = date;
+                      context.read<MealPlannerCubit>().loadMealsByDate(date);
                     },
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 20),
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      decoration: BoxDecoration(
-                        color: cardColor,
-                        borderRadius: BorderRadius.circular(15),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 2,
-                            offset: Offset(0, 1),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: txtSearch,
-                              enabled: false,
-                              decoration: InputDecoration(
-                                focusedBorder: InputBorder.none,
-                                enabledBorder: InputBorder.none,
-                                prefixIcon: Image.asset(
-                                  "assets/img/search.png",
-                                  width: 25,
-                                  height: 25,
+                  ),
+
+                  /// 🔍 SEARCH
+                  Hero(
+                    tag: 'meal_search_bar',
+                    child: InkWell(
+                      onTap: () {
+                        navigateTo(context, const SearchMeal());
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 20),
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        decoration: BoxDecoration(
+                          color: cardColor,
+                          borderRadius: BorderRadius.circular(15),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 2,
+                              offset: Offset(0, 1),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: txtSearch,
+                                enabled: false,
+                                decoration: InputDecoration(
+                                  focusedBorder: InputBorder.none,
+                                  enabledBorder: InputBorder.none,
+                                  prefixIcon: Image.asset(
+                                    "assets/img/search.png",
+                                    width: 25,
+                                    height: 25,
+                                  ),
+                                  hintText: "Tìm thực phẩm hoặc món ăn",
                                 ),
-                                hintText: "Tìm thực phẩm hoặc món ăn",
                               ),
                             ),
-                          ),
-                          Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 8),
-                            width: 1,
-                            height: 25,
-                            color: TColor.gray.withOpacity(0.3),
-                          ),
-                          InkWell(
-                            onTap: () {},
-                            child: Image.asset(
-                              "assets/img/filter.png",
-                              width: 25,
+                            Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 8),
+                              width: 1,
                               height: 25,
+                              color: TColor.gray.withOpacity(0.3),
                             ),
-                          ),
-                        ],
+                            InkWell(
+                              onTap: () {},
+                              child: Image.asset(
+                                "assets/img/filter.png",
+                                width: 25,
+                                height: 25,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
 
-                SizedBox(height: media.width * 0.04),
+                  SizedBox(height: media.width * 0.04),
 
-                /// 🍽️ MEALS (HIỂN THỊ MEALS ĐÃ ADD)
-                _buildMealSection(
-                  context: context,
-                  title: 'Bữa sáng',
-                  meals: _mealsByType['breakfast'] ?? [],
-                  mealType: 'breakfast',
-                ),
-                _buildMealSection(
-                  context: context,
-                  title: 'Bữa trưa',
-                  meals: _mealsByType['lunch'] ?? [],
-                  mealType: 'lunch',
-                ),
-                _buildMealSection(
-                  context: context,
-                  title: 'Bữa tối',
-                  meals: _mealsByType['dinner'] ?? [],
-                  mealType: 'dinner',
-                ),
+                  /// 🍽️ MEALS (HIỂN THỊ MEALS ĐÃ ADD)
+                  _buildMealSection(
+                    context: context,
+                    title: 'Bữa sáng',
+                    meals: mealsByType['breakfast'] ?? [],
+                    mealType: 'breakfast',
+                  ),
+                  _buildMealSection(
+                    context: context,
+                    title: 'Bữa trưa',
+                    meals: mealsByType['lunch'] ?? [],
+                    mealType: 'lunch',
+                  ),
+                  _buildMealSection(
+                    context: context,
+                    title: 'Bữa tối',
+                    meals: mealsByType['dinner'] ?? [],
+                    mealType: 'dinner',
+                  ),
 
-                SizedBox(height: media.width * 0.04),
-              ],
+                  SizedBox(height: media.width * 0.04),
+                ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
@@ -244,38 +220,42 @@ class _MealPlannerViewState extends State<MealPlannerView> {
     BuildContext context,
     ThemeData theme,
     Size media,
+    MealPlannerState state, // ✅ THÊM: Nhận state từ parent
   ) {
-    return BlocBuilder<MealPlannerCubit, MealPlannerState>(
-      builder: (context, state) {
-        int currentCalories = 0;
-        int targetCalories = 2000;
-        int remainingCalories = targetCalories;
+    int currentCalories = 0;
+    int targetCalories = 0; // ✅ Default 0 thay vì 2000
+    int remainingCalories = 0;
 
-        if (state is MealsLoaded) {
-          currentCalories = state.currentCalories; // ✅ Calo nhập
-          targetCalories = state.targetCalories; // ✅ Mục tiêu
-          remainingCalories = targetCalories - currentCalories; // ✅ Còn lại
-        }
+    if (state is MealsLoaded) {
+      currentCalories = state.currentCalories;
+      targetCalories = state.targetCalories;
+      remainingCalories = (targetCalories - currentCalories).clamp(
+        0,
+        targetCalories,
+      );
+    }
 
-        return Container(
-          margin: EdgeInsets.all(media.width * 0.04),
-          padding: EdgeInsets.all(media.width * 0.04),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blue.shade400, Colors.blue.shade600],
-            ),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _calorieItem('🍽️', 'Calo nhập', '$currentCalories'),
-              _calorieItem('📊', 'Còn lại', '$remainingCalories'),
-              _calorieItem('🎯', 'Mục tiêu', '$targetCalories'),
-            ],
-          ),
-        );
-      },
+    // ✅ Hiển thị "--" nếu chưa có target
+    final targetText = targetCalories > 0 ? '$targetCalories' : '--';
+    final remainingText = targetCalories > 0 ? '$remainingCalories' : '--';
+
+    return Container(
+      margin: EdgeInsets.all(media.width * 0.04),
+      padding: EdgeInsets.all(media.width * 0.04),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.blue.shade400, Colors.blue.shade600],
+        ),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _calorieItem('🍽️', 'Calo nhập', '$currentCalories'),
+          _calorieItem('📊', 'Còn lại', remainingText),
+          _calorieItem('🎯', 'Mục tiêu', targetText),
+        ],
+      ),
     );
   }
 
@@ -470,7 +450,6 @@ class _MealPlannerViewState extends State<MealPlannerView> {
   /// 🗑️ REMOVE MEAL
   void _removeMeal(String mealId) {
     context.read<MealPlannerCubit>().removeMeal(mealId);
-    _loadUserMeals();
   }
 
   @override

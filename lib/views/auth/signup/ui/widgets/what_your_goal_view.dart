@@ -35,7 +35,7 @@ class _WhatYourGoalViewState extends State<WhatYourGoalView> {
       {
         'title': 'Build Muscle',
         'icon': '💪',
-        'isValid': weightGoal > currentWeight,
+        'isValid': weightGoal >= currentWeight,
       },
       {
         'title': 'Keep Fit',

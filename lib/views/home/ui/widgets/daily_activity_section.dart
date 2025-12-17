@@ -1,3 +1,4 @@
+import 'dart:async'; // ✅ THÊM import
 import 'package:flutter/material.dart';
 import 'package:simple_animation_progress_bar/simple_animation_progress_bar.dart';
 import 'package:simple_circular_progress_bar/simple_circular_progress_bar.dart';
@@ -24,6 +25,9 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
   int _completedExercises = 0;
   int _totalExercises = 0;
 
+  int _totalCalories = 0;
+  int? _calorieGoal; // ✅ Thay đổi từ int thành int?
+
   // ✅ THÊM: Persistent ValueNotifier cho progress
   late ValueNotifier<double> _exerciseProgressNotifier;
 
@@ -34,6 +38,21 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
     _exerciseProgressNotifier = ValueNotifier<double>(0.0);
     _loadWaterData();
     _loadDailyExerciseStats();
+    _loadDailyCalories();
+
+    // ✅ THÊM: Auto refresh mỗi 5 giây
+    _startAutoRefresh();
+  }
+
+  Timer? _refreshTimer;
+
+  /// ✅ Auto refresh calories every 5 seconds
+  void _startAutoRefresh() {
+    _refreshTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      if (mounted) {
+        _loadDailyCalories();
+      }
+    });
   }
 
   Future<void> _loadWaterData() async {
@@ -138,10 +157,62 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
     }
   }
 
+  /// ✅ Load daily calories từ user_meals table
+  Future<void> _loadDailyCalories() async {
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) return;
+
+      final now = DateTime.now();
+      final dateStr =
+          '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}'; // ✅ FIX: Thêm dấu ngoặc
+
+      // ✅ Lấy goal từ user_activity_preferences (không reset)
+      final preferencesResponse = await _supabase
+          .from('user_activity_preferences')
+          .select('daily_calorie_target')
+          .eq('for_user', userId)
+          .maybeSingle();
+
+      if (preferencesResponse != null &&
+          preferencesResponse['daily_calorie_target'] != null) {
+        _calorieGoal = preferencesResponse['daily_calorie_target'] as int;
+      } else {
+        _calorieGoal = null;
+      }
+
+      // ✅ Lấy meals của ngày hôm nay từ user_meals
+      final response = await _supabase
+          .from('user_meals')
+          .select('calories')
+          .eq('for_user', userId)
+          .eq('meal_date', dateStr);
+
+      // ✅ Tính tổng calo
+      int totalCalories = 0;
+      for (var meal in response) {
+        totalCalories += (meal['calories'] as int? ?? 0);
+      }
+
+      if (mounted) {
+        setState(() {
+          _totalCalories = totalCalories;
+        });
+      }
+
+      debugPrint(
+        '🍽️ Daily calories loaded: $_totalCalories / ${_calorieGoal ?? "--"}',
+      );
+    } catch (e) {
+      debugPrint('❌ Error loading calories: $e');
+    }
+  }
+
   @override
   void dispose() {
     // ✅ Dispose ValueNotifier
     _exerciseProgressNotifier.dispose();
+    _refreshTimer?.cancel(); // ✅ Cancel timer
     super.dispose();
   }
 
@@ -157,7 +228,7 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
         Expanded(
           child: Column(
             children: [
-              _buildSleepCard(media, theme),
+              _buildCaloCard(media, theme), // ✅ ĐỔI từ _buildSleepCard
               SizedBox(height: media.width * 0.05),
               _buildExercisesCard(media, theme),
             ],
@@ -278,29 +349,6 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
                   ),
                 ),
               ),
-
-              // // ✅ 4. Current level indicator (nằm ngoài cùng)
-              // if (progress > 0)
-              //   Positioned(
-              //     left: -12,
-              //     top: barHeight * (1 - progress) - 8,
-              //     child: Container(
-              //       width: 16,
-              //       height: 16,
-              //       decoration: BoxDecoration(
-              //         shape: BoxShape.circle,
-              //         color: TColor.primaryG.first,
-              //         border: Border.all(color: Colors.white, width: 2),
-              //         boxShadow: [
-              //           BoxShadow(
-              //             color: TColor.primaryG.first.withOpacity(0.4),
-              //             blurRadius: 6,
-              //             offset: const Offset(0, 2),
-              //           ),
-              //         ],
-              //       ),
-              //     ),
-              //   ),
             ],
           ),
 
@@ -340,21 +388,52 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
     );
   }
 
-  //
-  Widget _buildSleepCard(Size media, ThemeData theme) {
+  /// ✅ Build Calorie Card - Hiển thị "--" nếu chưa set goal
+  Widget _buildCaloCard(Size media, ThemeData theme) {
+    final textColor = theme.textTheme.bodyMedium?.color;
+
+    // ✅ Tính progress dựa trên goal hiện tại
+    final progress = _calorieGoal != null && _calorieGoal! > 0
+        ? (_totalCalories / _calorieGoal!).clamp(0.0, 1.0)
+        : 0.0;
+
     return _baseCard(
       height: media.width * 0.45,
       theme: theme,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _title(theme, "Sleep"),
-          _gradientText("8h 20m", TColor.primaryG, fontSize: 14),
+          _title(theme, "Calories"),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              _gradientText("$_totalCalories", TColor.primaryG, fontSize: 18),
+              const SizedBox(width: 4),
+              Text(
+                // ✅ Hiển thị "--" nếu goal chưa set
+                _calorieGoal != null ? "/ $_calorieGoal kcal" : "/ -- kcal",
+                style: TextStyle(
+                  color: textColor?.withOpacity(0.6),
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
           const Spacer(),
-          Image.asset(
-            "assets/img/sleep_grap.png",
-            width: double.maxFinite,
-            fit: BoxFit.fitWidth,
+          // ✅ Progress bar
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 8,
+              backgroundColor: TColor.gray.withOpacity(0.2),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                _calorieGoal == null
+                    ? TColor.gray.withOpacity(0.5) // Xám nếu chưa set
+                    : (progress >= 1.0 ? Colors.green : TColor.primaryG.first),
+              ),
+            ),
           ),
         ],
       ),

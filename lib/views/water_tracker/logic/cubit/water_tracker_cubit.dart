@@ -11,6 +11,9 @@ class WaterTrackerCubit extends Cubit<WaterTrackerState> {
   final _notificationService = NotificationService();
   bool _hasShownCongratulations = false;
 
+  // ✅ THÊM: Lưu list reminder IDs đã schedule
+  final List<int> _scheduledReminderIds = [];
+
   WaterTrackerCubit() : super(WaterTrackerInitial()) {
     loadTodayWaterIntake();
   }
@@ -183,49 +186,49 @@ class WaterTrackerCubit extends Cubit<WaterTrackerState> {
       startTime.minute,
     );
 
+    // ✅ Clear list cũ
+    _scheduledReminderIds.clear();
+
     // Schedule multiple reminders trong ngày
     while (nextReminder.hour < endTime.hour ||
         (nextReminder.hour == endTime.hour &&
             nextReminder.minute <= endTime.minute)) {
       if (nextReminder.isAfter(now)) {
         final reminderId = _generateReminderId(userId, nextReminder);
+
+        // ✅ LƯU ID vào list
+        _scheduledReminderIds.add(reminderId);
+
         await _notificationService.scheduleWorkoutNotification(
           id: reminderId,
           title: '💧 Đã đến giờ uống nước!',
           body: 'Hãy uống nước để giữ sức khỏe nhé! 🥤',
           scheduledTime: nextReminder,
         );
+
+        print('✅ Reminder ID: $reminderId');
       }
       nextReminder = nextReminder.add(Duration(minutes: intervalMinutes));
     }
+
+    print('✅ Total reminders scheduled: ${_scheduledReminderIds.length}');
   }
 
-  /// Generate user-specific reminder ID
-  int _generateReminderId(String userId, DateTime dateTime) {
-    final userHash = userId.hashCode.abs() % 10000;
-    final timeComponent = dateTime.hour * 100 + dateTime.minute;
-    return 100000 + userHash + timeComponent;
-  }
-
-  /// Cancel all water reminders for current user
+  /// ✅ Cancel all water reminders for current user - CHỈ cancel những cái thực tế
   Future<void> _cancelUserWaterReminders(String userId) async {
     try {
-      for (int hour = 0; hour < 24; hour++) {
-        for (int minute = 0; minute < 60; minute += 5) {
-          final reminderId = _generateReminderId(
-            userId,
-            DateTime(
-              DateTime.now().year,
-              DateTime.now().month,
-              DateTime.now().day,
-              hour,
-              minute,
-            ),
-          );
-          await _notificationService.cancelNotification(reminderId);
-        }
+      // ✅ Chỉ cancel những reminder đã được schedule
+      for (final reminderId in _scheduledReminderIds) {
+        await _notificationService.cancelNotification(reminderId);
+        print('❌ Notification $reminderId cancelled');
       }
-      print('✅ Cancelled all water reminders for user: $userId');
+
+      // ✅ Clear list sau khi cancel
+      _scheduledReminderIds.clear();
+
+      print(
+        '✅ Cancelled ${_scheduledReminderIds.length} water reminders for user: $userId',
+      );
     } catch (e) {
       print('❌ Error cancelling reminders: $e');
     }
@@ -276,6 +279,13 @@ class WaterTrackerCubit extends Cubit<WaterTrackerState> {
     } catch (e) {
       print('❌ Error deleting water intake: $e');
     }
+  }
+
+  /// ✅ Generate user-specific reminder ID
+  int _generateReminderId(String userId, DateTime dateTime) {
+    final userHash = userId.hashCode.abs() % 10000;
+    final timeComponent = dateTime.hour * 100 + dateTime.minute;
+    return 100000 + userHash + timeComponent;
   }
 
   @override

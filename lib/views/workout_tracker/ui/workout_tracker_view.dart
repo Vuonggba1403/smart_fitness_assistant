@@ -30,95 +30,41 @@ class WorkoutTrackerView extends StatefulWidget {
 }
 
 class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
-  // ✅ THÊM Supabase instance
   final _supabase = Supabase.instance.client;
 
   late Stream<List<ExerciseCategory>> _categoriesStream;
-  late Stream<List<ExerciseCategory>> _gymCategoriesStream; // ✅ THÊM
-  late Stream<List<ExerciseCategory>> _homeCategoriesStream; // ✅ THÊM
+  late Stream<List<ExerciseCategory>> _gymCategoriesStream;
+  late Stream<List<ExerciseCategory>> _homeCategoriesStream;
   final NotificationService _notificationService = NotificationService();
-  List<UpcomingWorkout> _upcomingWorkouts = [];
-  int _rebuildKey = 0;
-  List<double> _weeklyStats = List.filled(7, 0.0);
+
   final GlobalKey _upcomingKey = GlobalKey();
-  final GlobalKey _gymCategoriesKey = GlobalKey(); // ✅ THÊM
-  final GlobalKey _homeCategoriesKey = GlobalKey(); // ✅ THÊM
+  final GlobalKey _gymCategoriesKey = GlobalKey();
+  final GlobalKey _homeCategoriesKey = GlobalKey();
+
+  // ✅ THÊM: Local state variables cần thiết
+  int _rebuildKey = 0;
 
   @override
   void initState() {
     super.initState();
     _initializeNotifications();
-    _loadInitialData();
-    _forceRefreshStreams();
+    // ✅ Load data vào cubit ngay từ đầu
+    final cubit = context.read<WorkoutTrackerCubit>();
+    cubit.loadWeeklyWorkoutStats();
+    cubit.loadUpcomingWorkouts();
   }
 
-  // ✅ THÊM: Auto refresh khi quay lại màn hình
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // ✅ Reload data mỗi khi quay lại màn hình
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        _refreshData();
+        // ✅ Refresh qua cubit
+        final cubit = context.read<WorkoutTrackerCubit>();
+        cubit.loadWeeklyWorkoutStats(forceRefresh: true);
+        cubit.loadUpcomingWorkouts(forceRefresh: true);
       }
     });
-  }
-
-  /// ✅ Force refresh streams
-  void _forceRefreshStreams() {
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (mounted) {
-        setState(() {
-          // Force rebuild tất cả streams
-        });
-      }
-    });
-  }
-
-  /// ✅ Load tất cả data khi khởi động app
-  Future<void> _loadInitialData() async {
-    final cubit = context.read<WorkoutTrackerCubit>();
-
-    // Load parallel để nhanh hơn
-    await Future.wait([
-      cubit.loadWeeklyWorkoutStats().then((stats) {
-        if (mounted) {
-          setState(() {
-            _weeklyStats = stats;
-          });
-        }
-      }),
-      cubit.loadUpcomingWorkouts().then((workouts) {
-        if (mounted) {
-          setState(() {
-            _upcomingWorkouts = workouts;
-          });
-        }
-      }),
-    ]);
-  }
-
-  /// ✅ Refresh data sau khi hoàn thành workout
-  Future<void> _refreshData() async {
-    final cubit = context.read<WorkoutTrackerCubit>();
-    cubit.clearCache(); // ✅ Clear cache trước khi load lại
-
-    await Future.wait([
-      cubit.loadWeeklyWorkoutStats(forceRefresh: true).then((stats) {
-        if (mounted) {
-          setState(() {
-            _weeklyStats = stats;
-          });
-        }
-      }),
-      cubit.loadUpcomingWorkouts(forceRefresh: true).then((workouts) {
-        if (mounted) {
-          setState(() {
-            _upcomingWorkouts = workouts;
-          });
-        }
-      }),
-    ]);
   }
 
   Future<void> _initializeNotifications() async {
@@ -128,7 +74,13 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
 
   /// ✅ Toggle notification cho workout với chọn giờ
   Future<void> _toggleNotification(int index, bool enabled) async {
-    final workout = _upcomingWorkouts[index];
+    // ✅ Get workouts từ cubit cache - DÙNG PUBLIC GETTER
+    final cubit = context.read<WorkoutTrackerCubit>();
+    final workouts = cubit.cachedUpcomingWorkouts ?? []; // ✅ FIX
+
+    if (index >= workouts.length) return;
+
+    final workout = workouts[index];
     final userId = _supabase.auth.currentUser?.id;
     if (userId == null) return;
 
@@ -159,7 +111,6 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
       }
 
       // ✅ Generate user-specific notification ID
-      final cubit = context.read<WorkoutTrackerCubit>();
       final notificationId =
           200000 +
           (userId.hashCode.abs() % 10000) +
@@ -172,20 +123,9 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
         scheduledTime: scheduledTime,
       );
 
-      // ✅ Debug: Kiểm tra pending notifications
-      final pending = await _notificationService.getPendingNotifications();
-      print('📋 Pending notifications: ${pending.length}');
-      for (final p in pending) {
-        print('   - ID: ${p.id}, Title: ${p.title}');
-      }
-
+      // ✅ Reload qua cubit
       if (mounted) {
-        setState(() {
-          _upcomingWorkouts[index] = workout.copyWith(
-            isNotificationEnabled: true,
-            scheduledTime: scheduledTime,
-          );
-        });
+        await cubit.loadUpcomingWorkouts(forceRefresh: true);
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -206,12 +146,9 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
 
       await _notificationService.cancelNotification(notificationId);
 
+      // ✅ Reload qua cubit
       if (mounted) {
-        setState(() {
-          _upcomingWorkouts[index] = workout.copyWith(
-            isNotificationEnabled: false,
-          );
-        });
+        await cubit.loadUpcomingWorkouts(forceRefresh: true);
 
         showCustomDelightToastBar(
           context,
@@ -269,15 +206,11 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
           (scheduleId.hashCode.abs() % 10000);
       await _notificationService.cancelNotification(notificationId);
 
-      // ✅ Reload data
-      final updatedWorkouts = await cubit.loadUpcomingWorkouts(
-        forceRefresh: true,
-      );
-
+      // ✅ Reload qua cubit
       if (mounted) {
-        setState(() {
-          _upcomingWorkouts = updatedWorkouts;
-        });
+        await context.read<WorkoutTrackerCubit>().loadUpcomingWorkouts(
+          forceRefresh: true,
+        );
 
         showCustomDelightToastBar(
           context,
@@ -302,7 +235,6 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
         builder: (context) {
           final cubit = context.read<WorkoutTrackerCubit>();
 
-          // ✅ Tạo 3 streams riêng biệt
           _categoriesStream = cubit.streamExerciseCategoriesWithCount();
           _gymCategoriesStream = cubit.streamGymCategories();
           _homeCategoriesStream = cubit.streamHomeCategories();
@@ -328,35 +260,48 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       height: media.width * 0.5,
                       width: double.infinity,
-                      child: LineChart(
-                        LineChartData(
-                          lineTouchData: lineTouchData1,
-                          lineBarsData:
-                              _buildChartData(), // ✅ Dùng dữ liệu thực
-                          minY: -0.5,
-                          maxY: 110,
-                          titlesData: FlTitlesData(
-                            show: true,
-                            leftTitles: const AxisTitles(),
-                            topTitles: const AxisTitles(),
-                            bottomTitles: AxisTitles(sideTitles: bottomTitles),
-                            rightTitles: AxisTitles(sideTitles: rightTitles),
-                          ),
-                          gridData: FlGridData(
-                            show: true,
-                            drawHorizontalLine: true,
-                            horizontalInterval: 25,
-                            drawVerticalLine: false,
-                            getDrawingHorizontalLine: (value) {
-                              return FlLine(
-                                color: TColor.white.withOpacity(0.15),
-                                strokeWidth: 2,
+                      child:
+                          BlocBuilder<WorkoutTrackerCubit, WorkoutTrackerState>(
+                            builder: (context, state) {
+                              // ✅ Lấy stats từ cache - DÙNG PUBLIC GETTER
+                              final weeklyStats =
+                                  cubit.cachedWeeklyStats ?? // ✅ FIX
+                                  List.filled(7, 0.0);
+
+                              return LineChart(
+                                LineChartData(
+                                  lineTouchData: lineTouchData1,
+                                  lineBarsData: _buildChartData(weeklyStats),
+                                  minY: -0.5,
+                                  maxY: 110,
+                                  titlesData: FlTitlesData(
+                                    show: true,
+                                    leftTitles: const AxisTitles(),
+                                    topTitles: const AxisTitles(),
+                                    bottomTitles: AxisTitles(
+                                      sideTitles: bottomTitles,
+                                    ),
+                                    rightTitles: AxisTitles(
+                                      sideTitles: rightTitles,
+                                    ),
+                                  ),
+                                  gridData: FlGridData(
+                                    show: true,
+                                    drawHorizontalLine: true,
+                                    horizontalInterval: 25,
+                                    drawVerticalLine: false,
+                                    getDrawingHorizontalLine: (value) {
+                                      return FlLine(
+                                        color: TColor.white.withOpacity(0.15),
+                                        strokeWidth: 2,
+                                      );
+                                    },
+                                  ),
+                                  borderData: FlBorderData(show: false),
+                                ),
                               );
                             },
                           ),
-                          borderData: FlBorderData(show: false),
-                        ),
-                      ),
                     ),
                   ),
                 ];
@@ -392,24 +337,28 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                           name: LocaleKey.dailyWorkoutSchedule.tr,
                           title: LocaleKey.check.tr,
                           onPressed: () async {
-                            // ✅ Chờ quay lại từ WorkoutScheduleView
                             await navigateTo(
                               context,
                               const WorkoutScheduleView(),
                             );
 
-                            // ✅ Refresh data sau khi quay lại
+                            // ✅ Refresh qua cubit
                             if (mounted) {
-                              await _refreshData();
+                              cubit.loadWeeklyWorkoutStats(forceRefresh: true);
+                              cubit.loadUpcomingWorkouts(forceRefresh: true);
                             }
                           },
                         ),
 
                         SizedBox(height: media.width * 0.05),
 
-                        /// ✅ Upcoming Workouts - Không dùng FutureBuilder
-                        _upcomingWorkouts.isEmpty
-                            ? Padding(
+                        /// ✅ Upcoming Workouts - FIX: Không cần pass workouts
+                        FutureBuilder<List<UpcomingWorkout>>(
+                          key: _upcomingKey,
+                          future: cubit.loadUpcomingWorkouts(),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                              return Padding(
                                 padding: const EdgeInsets.all(20),
                                 child: Text(
                                   "Chưa có lịch tập nào! ✨\nThêm lịch tại Daily Workout Schedule",
@@ -419,31 +368,38 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                                     fontSize: 14,
                                   ),
                                 ),
-                              )
-                            : ListView.builder(
-                                padding: EdgeInsets.zero,
-                                physics: const NeverScrollableScrollPhysics(),
-                                shrinkWrap: true,
-                                itemCount: _upcomingWorkouts.length,
-                                itemBuilder: (context, index) {
-                                  final workout = _upcomingWorkouts[index];
+                              );
+                            }
 
-                                  return UpcomingWorkoutRow(
-                                    key: ValueKey(
-                                      'upcoming_${workout.categoryId}_$index',
-                                    ),
-                                    workout: workout,
-                                    onNotificationToggle: (enabled) {
-                                      _toggleNotification(index, enabled);
-                                    },
-                                    onDelete: () {
-                                      _deleteScheduledWorkout(
-                                        workout.categoryId,
-                                      ); // ✅ Delete
-                                    },
-                                  );
-                                },
-                              ),
+                            final upcomingWorkouts = snapshot.data!;
+
+                            return ListView.builder(
+                              padding: EdgeInsets.zero,
+                              physics: const NeverScrollableScrollPhysics(),
+                              shrinkWrap: true,
+                              itemCount: upcomingWorkouts.length,
+                              itemBuilder: (context, index) {
+                                final workout = upcomingWorkouts[index];
+
+                                return UpcomingWorkoutRow(
+                                  key: ValueKey(
+                                    'upcoming_${workout.categoryId}_$index',
+                                  ),
+                                  workout: workout,
+                                  onNotificationToggle: (enabled) {
+                                    _toggleNotification(
+                                      index,
+                                      enabled,
+                                    ); // ✅ FIXED
+                                  },
+                                  onDelete: () {
+                                    _deleteScheduledWorkout(workout.categoryId);
+                                  },
+                                );
+                              },
+                            );
+                          },
+                        ),
 
                         SizedBox(height: media.width * 0.05),
 
@@ -646,8 +602,15 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
     );
   }
 
-  // ✅ Build chart data từ weekly stats thực tế
-  List<LineChartBarData> _buildChartData() {
+  // ✅ THÊM: _refreshData method
+  Future<void> _refreshData() async {
+    final cubit = context.read<WorkoutTrackerCubit>();
+    await cubit.loadWeeklyWorkoutStats(forceRefresh: true);
+    await cubit.loadUpcomingWorkouts(forceRefresh: true);
+  }
+
+  // ✅ Build chart data
+  List<LineChartBarData> _buildChartData(List<double> weeklyStats) {
     return [
       LineChartBarData(
         isCurved: true,
@@ -656,7 +619,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
         isStrokeCapRound: true,
         dotData: const FlDotData(show: false),
         belowBarData: BarAreaData(show: false),
-        spots: _weeklyStats.asMap().entries.map((entry) {
+        spots: weeklyStats.asMap().entries.map((entry) {
           return FlSpot((entry.key + 1).toDouble(), entry.value);
         }).toList(),
       ),
