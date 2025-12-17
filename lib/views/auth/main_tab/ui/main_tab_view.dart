@@ -106,6 +106,7 @@ class _MainTabViewState extends State<MainTabView> {
                     Expanded(
                       child: TabButton(
                         icon: "assets/img/home.png",
+
                         selectIcon: "assets/img/home_select.png",
                         isActive: cubit.currentIndex == 0,
                         onTap: () => cubit.changeCurrentIndex(0),

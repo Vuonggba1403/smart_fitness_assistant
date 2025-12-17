@@ -94,16 +94,29 @@ class ProfileView extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    user?.username ?? "",
-                                    style: TextStyle(
-                                      color: textColor,
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 14,
-                                    ),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        user?.username ?? "",
+                                        style: TextStyle(
+                                          color: textColor,
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      SizedBox(width: 5),
+                                      Text(
+                                        "(${user?.age ?? ""} tuổi)",
+                                        style: TextStyle(
+                                          color: textColor,
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                   Text(
-                                    "Lose a Fat Program",
+                                    user?.your_goals ?? "",
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: theme.textTheme.bodySmall?.color,

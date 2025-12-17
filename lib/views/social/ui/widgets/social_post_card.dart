@@ -6,7 +6,6 @@ import 'package:smart_fitness_assistant/core/models/content_post.dart';
 import 'package:smart_fitness_assistant/core/functions/cache_images_view.dart';
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
 import 'package:smart_fitness_assistant/views/social/ui/widgets/social_comment_bottom_sheet.dart';
-import 'package:smart_fitness_assistant/views/social/ui/widgets/social_share_dialog.dart';
 import 'package:smart_fitness_assistant/views/social/logic/cubit/social_feed_cubit.dart';
 
 /// ✅ Widget: Single Post Card
@@ -187,17 +186,6 @@ class _SocialPostCardState extends State<SocialPostCard> {
             child: const Text('Xoá', style: TextStyle(color: Colors.white)),
           ),
         ],
-      ),
-    );
-  }
-
-  void _showShareDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => SocialShareDialog(
-        post: widget.post,
-        textColor: widget.textColor,
-        theme: widget.theme,
       ),
     );
   }
@@ -394,7 +382,7 @@ class _SocialPostCardState extends State<SocialPostCard> {
 
           const SizedBox(height: 12),
 
-          // ✅ Likes & Comments & Share
+          // ✅ Likes & Comments (XOÁ Share)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
@@ -440,16 +428,6 @@ class _SocialPostCardState extends State<SocialPostCard> {
                         ),
                       ),
                     ],
-                  ),
-                ),
-                const Spacer(),
-                // ✅ Share
-                InkWell(
-                  onTap: _showShareDialog,
-                  child: Icon(
-                    Icons.share_outlined,
-                    color: TColor.primaryColor1,
-                    size: 20,
                   ),
                 ),
               ],

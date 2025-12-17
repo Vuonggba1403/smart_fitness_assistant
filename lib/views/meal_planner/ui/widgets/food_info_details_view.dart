@@ -5,7 +5,7 @@ import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_sliverbar.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 
-import 'components/food_step_detail_row.dart';
+import 'food_step_detail_row.dart';
 
 class FoodInfoDetailsView extends StatefulWidget {
   final Map mObj;
@@ -409,8 +409,10 @@ class _FoodInfoDetailsViewState extends State<FoodInfoDetailsView> {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 15),
                         child: RoundButton(
-                          title: "Add to ${widget.mObj["name"]} Meal",
-                          onPressed: () {},
+                          title: "Add to Meal",
+                          onPressed: () {
+                            Navigator.pop(context, true);
+                          },
                         ),
                       ),
                     ],

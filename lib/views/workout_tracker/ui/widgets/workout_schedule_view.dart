@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:calendar_agenda/calendar_agenda.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_utils/src/extensions/internacionalization.dart';
 import 'package:intl/intl.dart';
@@ -11,7 +10,9 @@ import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/models/scheduled_workout.dart';
 import 'package:smart_fitness_assistant/core/services/notification_service.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_calendar_agenda.dart';
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
+import 'package:calendar_agenda/calendar_agenda.dart';
 import 'add_schedule_view.dart';
 
 class WorkoutScheduleView extends StatefulWidget {
@@ -133,7 +134,6 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
     var media = MediaQuery.of(context).size;
     final theme = Theme.of(context);
     final textColor = theme.textTheme.bodyMedium?.color;
-    final cardColor = theme.cardColor;
 
     return Scaffold(
       appBar: CustomAppBar(title: LocaleKey.dailyWorkoutSchedule.tr),
@@ -141,80 +141,23 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ✅ Calendar (giữ nguyên)
-          CalendarAgenda(
+          // ✅ Use CustomCalendarAgenda
+          CustomCalendarAgenda(
             controller: _calendarAgendaControllerAppBar,
-            appbar: false,
-            selectedDayPosition: SelectedDayPosition.center,
-            weekDay: WeekDay.short,
-            dayNameFontSize: 12,
-            dayNumberFontSize: 16,
-            backgroundColor: Colors.transparent,
-            fullCalendarScroll: FullCalendarScroll.horizontal,
-            fullCalendarDay: WeekDay.short,
-            // mau selected
-            selectedDateColor: TColor.primaryColor2,
-            dateColor: textColor ?? Colors.black,
-            initialDate: DateTime.now(),
-            calendarEventColor: TColor.primaryColor2,
-            firstDate: DateTime.now().subtract(const Duration(days: 140)),
-            lastDate: DateTime.now().add(const Duration(days: 60)),
-            selectedDayLogoWidget: Container(
-              width: double.maxFinite,
-              height: double.maxFinite,
-              decoration: BoxDecoration(
-                // ✅ Gradient từ AppTheme
-                gradient: LinearGradient(
-                  colors: AppTheme.gradientColors1(context),
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-                borderRadius: BorderRadius.circular(10.0),
-                // ✅ Thêm shadow để nổi hơn
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "${_selectedDateAppBBar.day}",
-                    style: const TextStyle(
-                      color: Colors.white, // ✅ Đổi sang trắng để nổi hơn
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    DateFormat('EEE').format(_selectedDateAppBBar),
-                    style: const TextStyle(
-                      color: Colors.white, // ✅ Đổi sang trắng
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
+            selectedDate: _selectedDateAppBBar,
+            textColor: textColor,
             onDateSelected: (date) {
               setState(() {
                 _selectedDateAppBBar = date;
               });
-              _loadSchedules(); // ✅ Reload khi đổi ngày
+              _loadSchedules();
             },
           ),
 
           // ✅ Timeline với tags
           Expanded(
             child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
+              scrollDirection: Axis.vertical,
               child: SizedBox(
                 width: media.width * 1.5,
                 child: ListView.separated(
@@ -239,10 +182,7 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                             width: 80,
                             child: Text(
                               getTime(index * 60),
-                              style: TextStyle(
-                                color: TColor.black,
-                                fontSize: 12,
-                              ),
+                              style: TextStyle(color: textColor, fontSize: 12),
                             ),
                           ),
 

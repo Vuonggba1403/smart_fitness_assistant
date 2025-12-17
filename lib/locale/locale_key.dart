@@ -51,8 +51,10 @@ class LocaleKey {
   static const String hintHeight = "hint_height";
   static const String hintWeight = "hint_weight";
   static const String hintWeightGoal = "hint_weight_goal";
+  static const String hintAge = "hint_age";
   static const String textHeight1 = "text_height1";
   static const String textWeight1 = "text_weight1";
+  static const String textAge = "text_age";
   static const String buttonNext = "button_next";
   //Register-Message
   //Login View - Message

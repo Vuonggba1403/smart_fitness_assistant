@@ -17,19 +17,45 @@ class WhatYourGoalView extends StatefulWidget {
 }
 
 class _WhatYourGoalViewState extends State<WhatYourGoalView> {
-  String selectedGoal = '';
+  String? selectedGoal;
 
-  final List<Map<String, String>> goals = [
-    {'title': 'Lose Weight', 'icon': '🔥'},
-    {'title': 'Build Muscle', 'icon': '💪'},
-    {'title': 'Keep Fit', 'icon': '🏃'},
-    {'title': 'Gain Weight', 'icon': '📈'},
-  ];
+  List<Map<String, dynamic>> _getGoalsWithValidation(BuildContext context) {
+    final cubit = context.read<AuthenticationCubit>();
+    final currentWeight =
+        double.tryParse(cubit.userDataModel?.weight ?? '0') ?? 0;
+    final weightGoal =
+        double.tryParse(cubit.userDataModel?.weight_goal ?? '0') ?? 0;
+
+    return [
+      {
+        'title': 'Lose Weight',
+        'icon': '🔥',
+        'isValid': weightGoal < currentWeight,
+      },
+      {
+        'title': 'Build Muscle',
+        'icon': '💪',
+        'isValid': weightGoal > currentWeight,
+      },
+      {
+        'title': 'Keep Fit',
+        'icon': '🏃',
+        'isValid': weightGoal == currentWeight,
+      },
+      {
+        'title': 'Gain Weight',
+        'icon': '📈',
+        'isValid': weightGoal > currentWeight,
+      },
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
+    final goals = _getGoalsWithValidation(context);
     final theme = Theme.of(context);
     final textColor = theme.textTheme.bodyMedium?.color;
+    final media = MediaQuery.of(context).size;
 
     return BlocConsumer<AuthenticationCubit, AuthenticationState>(
       listener: (context, state) {
@@ -39,17 +65,15 @@ class _WhatYourGoalViewState extends State<WhatYourGoalView> {
           showCustomDelightToastBar(
             context,
             LocaleKey.registerSuccess.tr,
-            Icon(Icons.check, color: Colors.green),
+            const Icon(Icons.check, color: Colors.green),
           );
 
-          // ✅ Navigate an toàn
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (!mounted) return;
-
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (context) => const LoginView()),
-              (route) => false,
-            );
+            if (mounted && context.mounted) {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (_) => const LoginView()),
+              );
+            }
           });
         }
         if (state is SignUpError) {
@@ -58,7 +82,7 @@ class _WhatYourGoalViewState extends State<WhatYourGoalView> {
           showCustomDelightToastBar(
             context,
             state.message,
-            Icon(Icons.error, color: Colors.red),
+            const Icon(Icons.error, color: Colors.red),
           );
         }
       },
@@ -67,82 +91,95 @@ class _WhatYourGoalViewState extends State<WhatYourGoalView> {
 
         return Scaffold(
           appBar: CustomAppBar(title: LocaleKey.whatYourGoal.tr),
-          body: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              children: [
-                Text(
-                  'Select your fitness goal',
-                  style: TextStyle(
-                    color: textColor,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                SizedBox(height: 30),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: goals.length,
-                    itemBuilder: (context, index) {
-                      final goal = goals[index];
-                      final isSelected = selectedGoal == goal['title'];
+          body: SafeArea(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: media.width * 0.05),
+                    Text(
+                      LocaleKey.whatYourGoal.tr,
+                      style: TextStyle(
+                        color: textColor,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    SizedBox(height: media.width * 0.04),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: goals.length,
+                      itemBuilder: (context, index) {
+                        final goal = goals[index];
+                        final isValid = goal['isValid'] as bool;
 
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            selectedGoal = goal['title']!;
-                          });
-                        },
-                        child: Container(
-                          margin: EdgeInsets.only(bottom: 15),
-                          padding: EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? theme.primaryColor.withOpacity(0.1)
-                                : theme.cardColor,
-                            borderRadius: BorderRadius.circular(15),
-                            border: Border.all(
-                              color: isSelected
-                                  ? theme.primaryColor
-                                  : theme.dividerColor,
-                              width: 2,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Text(
-                                goal['icon']!,
-                                style: TextStyle(fontSize: 30),
+                        return GestureDetector(
+                          onTap: isValid
+                              ? () {
+                                  setState(() {
+                                    selectedGoal = goal['title'];
+                                  });
+                                }
+                              : null,
+                          child: Opacity(
+                            opacity: isValid ? 1.0 : 0.5,
+                            child: Card(
+                              margin: EdgeInsets.symmetric(
+                                vertical: media.width * 0.02,
                               ),
-                              SizedBox(width: 15),
-                              Text(
-                                goal['title']!,
-                                style: TextStyle(
-                                  color: textColor,
-                                  fontSize: 16,
-                                  fontWeight: isSelected
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      goal['icon'],
+                                      style: const TextStyle(fontSize: 32),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: Text(
+                                        goal['title'],
+                                        style: TextStyle(
+                                          color: textColor,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                    if (selectedGoal == goal['title'])
+                                      const Icon(
+                                        Icons.check_circle,
+                                        color: Colors.green,
+                                      ),
+                                  ],
                                 ),
                               ),
-                            ],
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
+                        );
+                      },
+                    ),
+                    SizedBox(height: media.width * 0.1),
+                    RoundButton(
+                      title: isLoading
+                          ? 'Loading...'
+                          : LocaleKey.buttonRegis.tr,
+                      onPressed: isLoading || selectedGoal == null
+                          ? null
+                          : () {
+                              context
+                                  .read<AuthenticationCubit>()
+                                  .completeRegistration(
+                                    yourGoals: selectedGoal!,
+                                  );
+                            },
+                    ),
+                  ],
                 ),
-                RoundButton(
-                  title: isLoading ? 'Loading...' : LocaleKey.buttonRegis.tr,
-                  onPressed: isLoading || selectedGoal.isEmpty
-                      ? null
-                      : () {
-                          context
-                              .read<AuthenticationCubit>()
-                              .completeRegistration(yourGoals: selectedGoal);
-                        },
-                ),
-              ],
+              ),
             ),
           ),
         );

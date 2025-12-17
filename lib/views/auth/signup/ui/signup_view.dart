@@ -50,15 +50,11 @@ class _SignUpFormState extends State<_SignUpForm> {
           log('✅ SignUp Success - Navigating to LoginView');
 
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (!mounted) return;
-
-            // ✅ Navigate và truyền flag để show success message
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(
-                builder: (_) => const LoginView(showSignUpSuccess: true),
-              ),
-              (route) => false,
-            );
+            if (mounted && context.mounted) {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (_) => const LoginView()),
+              );
+            }
           });
         }
 
@@ -68,13 +64,13 @@ class _SignUpFormState extends State<_SignUpForm> {
           log('❌ SignUp Error: ${state.message}');
 
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (!mounted) return;
-
-            showCustomDelightToastBar(
-              context,
-              state.message,
-              Icon(Icons.error, color: Colors.red),
-            );
+            if (mounted && context.mounted) {
+              showCustomDelightToastBar(
+                context,
+                state.message,
+                const Icon(Icons.error, color: Colors.red),
+              );
+            }
           });
         }
       },

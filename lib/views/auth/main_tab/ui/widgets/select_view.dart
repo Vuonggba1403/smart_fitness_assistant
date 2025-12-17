@@ -35,7 +35,7 @@ class SelectView extends StatelessWidget {
             RoundButton(
               title: LocaleKey.mealPlanner.tr,
               onPressed: () {
-                navigateTo(context, MealPlannerView());
+                navigateTo(context, MealPlannerView(eObj: {}));
               },
             ),
 

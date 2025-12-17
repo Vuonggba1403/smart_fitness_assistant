@@ -52,8 +52,11 @@ Map<String, String> enUs = {
   LocaleKey.hintHeight: "Enter your height",
   LocaleKey.hintWeight: "Enter your weight",
   LocaleKey.hintWeightGoal: "Enter your weight goal",
+  LocaleKey.hintAge: "Enter your age",
   LocaleKey.textHeight1: "Your Height",
   LocaleKey.textWeight1: "Your Weight",
+  LocaleKey.textAge: "Your Age",
+
   LocaleKey.buttonNext: "Next",
   LocaleKey.whatYourGoal: "Your Goal",
   //Register-Message

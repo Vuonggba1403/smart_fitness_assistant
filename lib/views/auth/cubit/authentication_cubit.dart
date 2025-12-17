@@ -70,6 +70,18 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
   // Lưu thông tin user tạm thời
   Map<String, String> tempUserInfo = {};
 
+  // Initialize userDataModel with empty values
+  UserDataModel? userDataModel = UserDataModel(
+    userId: '',
+    username: '',
+    height: '',
+    email: '',
+    weight: '',
+    weight_goal: '',
+    your_goals: '',
+    age: '',
+  );
+
   // Lưu thông tin cơ bản (email, password, username)
   void saveBasicInfo({
     required String email,
@@ -79,6 +91,19 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
     tempUserInfo['email'] = email;
     tempUserInfo['password'] = password;
     tempUserInfo['username'] = username;
+
+    // Initialize userDataModel with basic info
+    userDataModel = UserDataModel(
+      userId: '',
+      username: username,
+      email: email,
+      height: '',
+      weight: '',
+      weight_goal: '',
+      your_goals: '',
+      age: '',
+    );
+
     emit(UserInfoSaved(Map.from(tempUserInfo)));
   }
 
@@ -87,11 +112,24 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
     required String height,
     required String weight,
     required String weightGoal,
+    required String age,
   }) {
     tempUserInfo['height'] = height;
     tempUserInfo['weight'] = weight;
     tempUserInfo['weight_goal'] = weightGoal;
+    tempUserInfo['age'] = age;
     emit(UserInfoSaved(Map.from(tempUserInfo)));
+
+    userDataModel = UserDataModel(
+      userId: userDataModel?.userId ?? '',
+      username: userDataModel?.username ?? '',
+      email: userDataModel?.email ?? '',
+      height: height,
+      weight: weight,
+      weight_goal: weightGoal,
+      your_goals: userDataModel?.your_goals ?? '',
+      age: age,
+    );
   }
 
   // Lưu goal và thực hiện đăng ký
@@ -115,6 +153,7 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
         "weight": tempUserInfo['weight']!,
         "weight_goal": tempUserInfo['weight_goal']!,
         "your_goals": tempUserInfo['your_goals']!,
+        "age": tempUserInfo['age']!,
       });
 
       // Xóa thông tin tạm
@@ -184,7 +223,6 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
   }
 
   //get User Data
-  UserDataModel? userDataModel;
   Future<void> getUserData() async {
     emit(const GetUserDataLoading());
     try {
@@ -201,11 +239,45 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
         weight: data[0]['weight'],
         weight_goal: data[0]['weight_goal'],
         your_goals: data[0]['your_goals'],
+        age: data[0]['age'],
       );
       emit(const GetUserDataSuccess());
     } catch (e) {
       log(e.toString());
       emit(const GetUserDataError());
     }
+  }
+
+  /// ✅ Tính BMR (Basal Metabolic Rate)
+  /// BMR = 10 × weight(kg) + 6.25 × height(cm) - 5 × age + 5
+  double calculateBMR({
+    required double weight,
+    required double height,
+    required int age,
+  }) {
+    return (10 * weight) + (6.25 * height) - (5 * age) + 5;
+  }
+
+  /// ✅ Tính TDEE (Total Daily Energy Expenditure)
+  /// TDEE = BMR × activity_factor
+  double calculateTDEE({required double bmr, required double activityFactor}) {
+    return bmr * activityFactor;
+  }
+
+  /// ✅ Lấy calo hàng ngày từ userModel
+  /// Returns: (bmr, tdee) tuple
+  Map<String, double> getDailyCalories({required double activityFactor}) {
+    if (userDataModel == null) {
+      return {'bmr': 0, 'tdee': 0};
+    }
+
+    final weight = double.tryParse(userDataModel!.weight) ?? 0;
+    final height = double.tryParse(userDataModel!.height) ?? 0;
+    final age = int.tryParse(userDataModel!.age) ?? 0;
+
+    final bmr = calculateBMR(weight: weight, height: height, age: age);
+    final tdee = calculateTDEE(bmr: bmr, activityFactor: activityFactor);
+
+    return {'bmr': bmr, 'tdee': tdee};
   }
 }

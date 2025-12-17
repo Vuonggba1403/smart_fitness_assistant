@@ -47,8 +47,10 @@ Map<String, String> viVN = {
   LocaleKey.hintHeight: "Nhập chiều cao của bạn",
   LocaleKey.hintWeight: "Nhập cân nặng của bạn",
   LocaleKey.hintWeightGoal: "Nhập mục tiêu cân nặng của bạn",
+  LocaleKey.hintAge: "Nhập tuổi của bạn",
   LocaleKey.textHeight1: "Chiều cao của bạn",
   LocaleKey.textWeight1: "Cân nặng của bạn",
+  LocaleKey.textAge: "Tuổi",
   LocaleKey.buttonNext: "Tiếp theo",
   //Register-Message
   LocaleKey.registerSuccess: "Đăng ký thành công",

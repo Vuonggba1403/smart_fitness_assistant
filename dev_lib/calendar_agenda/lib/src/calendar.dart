@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
-
 import 'fullcalendar.dart';
 
 class CalendarAgenda extends StatefulWidget implements PreferredSizeWidget {
@@ -179,7 +178,16 @@ class CalendarAgendaState extends State<CalendarAgenda>
                       width: MediaQuery.of(context).size.width / 5 - 10,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10.0),
-                        color: isSelected ? Colors.white : widget.dayBGColor,
+                        //mau nen khi chon va khong chon
+                        color:
+                            isSelected ? Color(0xFFE8F1FF) : widget.dayBGColor,
+                        //mau border khi chon va khong chon
+                        border: Border.all(
+                          color: isSelected
+                              ? Color(0xFF72A3FF)
+                              : Colors.transparent,
+                          width: 2.0,
+                        ),
                         boxShadow: [
                           isSelected
                               ? BoxShadow(

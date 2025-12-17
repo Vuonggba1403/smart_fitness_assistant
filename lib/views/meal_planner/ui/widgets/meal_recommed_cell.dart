@@ -1,9 +1,9 @@
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
 
-import '../../../../../core/widgets/round_button.dart';
+import '../../../../core/widgets/round_button.dart';
 
 import 'package:flutter/material.dart';
-import '../../../../../core/functions/colo_extension.dart';
+import '../../../../core/functions/colo_extension.dart';
 
 class MealRecommendCell extends StatelessWidget {
   final Map fObj;

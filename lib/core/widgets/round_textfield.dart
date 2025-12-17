@@ -79,7 +79,7 @@ class _RoundTextFieldState extends State<RoundTextField> {
               height: 20,
               fit: BoxFit.contain,
               // ignore: deprecated_member_use
-              color: textColor?.withOpacity(0.7),
+              // color: textColor?.withOpacity(0.7),
             ),
           ),
           suffixIcon: widget.isPassword

@@ -10,146 +10,215 @@ import 'package:smart_fitness_assistant/views/auth/cubit/authentication_cubit.da
 import 'package:smart_fitness_assistant/views/auth/signup/ui/widgets/what_your_goal_view.dart';
 
 void showCompleteProfileDialog(BuildContext context) {
-  final txtHeight = TextEditingController();
-  final txtWeight = TextEditingController();
-  final txtWeightGoal = TextEditingController();
-
-  final theme = Theme.of(context);
-  final textColor = theme.textTheme.bodyMedium?.color;
-  final media = MediaQuery.of(context).size;
-  final formKey = GlobalKey<FormState>();
-
   showDialog(
     context: context,
     barrierDismissible: false,
     builder: (dialogContext) {
-      return Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Container(
-          height: media.height * 0.66,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 25),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: theme.dividerColor),
-          ),
-          child: SingleChildScrollView(
-            child: Form(
-              key: formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    LocaleKey.titleCompleteProfile.tr,
-                    style: TextStyle(
-                      color: textColor,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  Text(
-                    LocaleKey.textCompleteProfile.tr,
-                    style: TextStyle(
-                      color: textColor?.withOpacity(0.7),
-                      fontSize: 12,
-                    ),
-                  ),
-                  SizedBox(height: media.width * 0.05),
-
-                  // Your Height
-                  Text(LocaleKey.textHeight1.tr),
-                  SizedBox(height: media.width * 0.02),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: RoundTextField(
-                          controller: txtHeight,
-                          hintText: LocaleKey.hintHeight.tr,
-                          keyboardType: TextInputType.number,
-                          iconPath: "assets/img/hight.png",
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      _buildUnitBox("CM"),
-                    ],
-                  ),
-
-                  SizedBox(height: media.width * 0.04),
-
-                  // Your Weight
-                  Text(LocaleKey.textWeight1.tr),
-                  SizedBox(height: media.width * 0.02),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: RoundTextField(
-                          controller: txtWeight,
-                          hintText: LocaleKey.hintWeight.tr,
-                          keyboardType: TextInputType.number,
-                          iconPath: "assets/img/weight.png",
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      _buildUnitBox("KG"),
-                    ],
-                  ),
-
-                  SizedBox(height: media.width * 0.04),
-
-                  // Goal Weight
-                  Text(LocaleKey.textWeightGoal.tr),
-                  SizedBox(height: media.width * 0.02),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: RoundTextField(
-                          controller: txtWeightGoal,
-                          hintText: LocaleKey.hintWeightGoal.tr,
-                          keyboardType: TextInputType.number,
-                          iconPath: "assets/img/weight.png",
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      _buildUnitBox("KG"),
-                    ],
-                  ),
-
-                  SizedBox(height: media.width * 0.06),
-
-                  // Button
-                  RoundButton(
-                    title: LocaleKey.buttonNext.tr,
-                    onPressed: () {
-                      if (formKey.currentState!.validate()) {
-                        // ✅ Sử dụng context gốc (không phải dialogContext)
-                        context.read<AuthenticationCubit>().saveProfileInfo(
-                          height: txtHeight.text.trim(),
-                          weight: txtWeight.text.trim(),
-                          weightGoal: txtWeightGoal.text.trim(),
-                        );
-
-                        // ✅ Đóng dialog
-                        Navigator.of(dialogContext).pop();
-
-                        // ✅ Navigate sau khi dialog đóng
-                        Future.delayed(Duration(milliseconds: 100), () {
-                          if (context.mounted) {
-                            navigateTo(context, const WhatYourGoalView());
-                          }
-                        });
-                      }
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
+      return CompleteProfileDialog(parentContext: context);
     },
   );
 }
 
-// Widget phụ: đơn vị "CM", "KG"
+class CompleteProfileDialog extends StatefulWidget {
+  final BuildContext parentContext;
+
+  const CompleteProfileDialog({Key? key, required this.parentContext})
+    : super(key: key);
+
+  @override
+  State<CompleteProfileDialog> createState() => _CompleteProfileDialogState();
+}
+
+class _CompleteProfileDialogState extends State<CompleteProfileDialog> {
+  late TextEditingController txtHeight;
+  late TextEditingController txtWeight;
+  late TextEditingController txtWeightGoal;
+  late TextEditingController txtAge;
+  late GlobalKey<FormState> formKey;
+
+  @override
+  void initState() {
+    super.initState();
+    txtHeight = TextEditingController();
+    txtWeight = TextEditingController();
+    txtWeightGoal = TextEditingController();
+    txtAge = TextEditingController();
+    formKey = GlobalKey<FormState>();
+  }
+
+  @override
+  void dispose() {
+    txtHeight.dispose();
+    txtWeight.dispose();
+    txtWeightGoal.dispose();
+    txtAge.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color;
+    final media = MediaQuery.of(context).size;
+
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Container(
+        height: media.height * 0.75,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 25),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: theme.dividerColor),
+        ),
+        child: SingleChildScrollView(
+          child: Form(
+            key: formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  LocaleKey.titleCompleteProfile.tr,
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Text(
+                  LocaleKey.textCompleteProfile.tr,
+                  style: TextStyle(
+                    color: textColor?.withOpacity(0.7),
+                    fontSize: 12,
+                  ),
+                ),
+                SizedBox(height: media.width * 0.05),
+
+                // Your Height
+                Text(LocaleKey.textHeight1.tr),
+                SizedBox(height: media.width * 0.02),
+                Row(
+                  children: [
+                    Expanded(
+                      child: RoundTextField(
+                        controller: txtHeight,
+                        hintText: LocaleKey.hintHeight.tr,
+                        keyboardType: TextInputType.number,
+                        iconPath: "assets/img/height.png",
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    _buildUnitBox("CM"),
+                  ],
+                ),
+
+                SizedBox(height: media.width * 0.04),
+
+                // Your Weight
+                Text(LocaleKey.textWeight1.tr),
+                SizedBox(height: media.width * 0.02),
+                Row(
+                  children: [
+                    Expanded(
+                      child: RoundTextField(
+                        controller: txtWeight,
+                        hintText: LocaleKey.hintWeight.tr,
+                        keyboardType: TextInputType.number,
+                        iconPath: "assets/img/weight.png",
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    _buildUnitBox("KG"),
+                  ],
+                ),
+
+                SizedBox(height: media.width * 0.04),
+
+                // Goal Weight
+                Text(LocaleKey.textWeightGoal.tr),
+                SizedBox(height: media.width * 0.02),
+                Row(
+                  children: [
+                    Expanded(
+                      child: RoundTextField(
+                        controller: txtWeightGoal,
+                        hintText: LocaleKey.hintWeightGoal.tr,
+                        keyboardType: TextInputType.number,
+                        iconPath: "assets/img/weight.png",
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    _buildUnitBox("KG"),
+                  ],
+                ),
+
+                SizedBox(height: media.width * 0.06),
+
+                // Age
+                Text(LocaleKey.textAge.tr),
+                SizedBox(height: media.width * 0.02),
+                Row(
+                  children: [
+                    Expanded(
+                      child: RoundTextField(
+                        controller: txtAge,
+                        hintText: LocaleKey.hintAge.tr,
+                        keyboardType: TextInputType.number,
+                        iconPath: "assets/img/age.png",
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    _buildUnitBox("YEARS"),
+                  ],
+                ),
+
+                SizedBox(height: media.width * 0.08),
+
+                // Button
+                RoundButton(
+                  title: LocaleKey.buttonNext.tr,
+                  onPressed: () {
+                    // Validate age
+                    final age = int.tryParse(txtAge.text.trim());
+                    if (age == null || age < 0 || age > 100) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Tuổi phải từ 0 đến 100")),
+                      );
+                      return;
+                    }
+
+                    if (formKey.currentState!.validate()) {
+                      widget.parentContext
+                          .read<AuthenticationCubit>()
+                          .saveProfileInfo(
+                            height: txtHeight.text.trim(),
+                            weight: txtWeight.text.trim(),
+                            weightGoal: txtWeightGoal.text.trim(),
+                            age: txtAge.text.trim(),
+                          );
+
+                      Navigator.of(context).pop();
+
+                      Future.delayed(const Duration(milliseconds: 100), () {
+                        if (widget.parentContext.mounted) {
+                          navigateTo(
+                            widget.parentContext,
+                            const WhatYourGoalView(),
+                          );
+                        }
+                      });
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Widget unit box
 Widget _buildUnitBox(String text) {
   return Container(
     width: 50,
@@ -159,6 +228,9 @@ Widget _buildUnitBox(String text) {
       gradient: LinearGradient(colors: TColor.secondaryG),
       borderRadius: BorderRadius.circular(15),
     ),
-    child: Text(text, style: TextStyle(color: TColor.white, fontSize: 12)),
+    child: Text(
+      text,
+      style: const TextStyle(color: Colors.white, fontSize: 12),
+    ),
   );
 }
