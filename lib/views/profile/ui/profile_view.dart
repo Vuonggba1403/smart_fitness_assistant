@@ -45,7 +45,10 @@ class ProfileView extends StatelessWidget {
               "Logout successful",
               Icon(Icons.check, color: Colors.green),
             );
-            navigateTo(context, LoginView());
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => const LoginView()),
+              (route) => false,
+            );
           }
           if (state is LoginError) {
             showCustomDelightToastBar(
@@ -54,9 +57,29 @@ class ProfileView extends StatelessWidget {
               const Icon(Icons.error, color: Colors.red),
             );
           }
+          if (state is DeleteAccountSuccess) {
+            showCustomDelightToastBar(
+              context,
+              "Tài khoản đã được xóa thành công",
+              Icon(Icons.check, color: Colors.green),
+            );
+            // Clear toàn bộ navigation stack và không cho back lại
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => const LoginView()),
+              (route) => false,
+            );
+          }
+          if (state is DeleteAccountError) {
+            showCustomDelightToastBar(
+              context,
+              state.message,
+              const Icon(Icons.error, color: Colors.red),
+            );
+          }
         },
         builder: (context, state) {
           final user = context.read<AuthenticationCubit>().userDataModel;
+          final isDeleting = state is DeleteAccountLoading;
 
           return Scaffold(
             appBar: CustomAppBar(
@@ -64,10 +87,8 @@ class ProfileView extends StatelessWidget {
               showBackButton: false,
             ),
             backgroundColor: theme.scaffoldBackgroundColor,
-            body:
-                //state is LogoutLoading || state is GetUserDataLoading
-                //     ? const CustomCircleProgIndicator()
-                //     :
+            body: Stack(
+              children: [
                 SafeArea(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(
@@ -215,12 +236,72 @@ class ProfileView extends StatelessWidget {
                             await context.read<AuthenticationCubit>().signOut();
                           },
                         ),
+
+                        const SizedBox(height: 15),
+
+                        // ----- Delete Account -----
+                        RoundButton(
+                          title: "Xóa tài khoản",
+                          type: RoundButtonType.textGradient,
+                          onPressed: isDeleting
+                              ? null
+                              : () {
+                                  _showDeleteAccountDialog(context);
+                                },
+                        ),
                       ],
                     ),
                   ),
                 ),
+
+                // Loading overlay khi đang xóa
+                if (isDeleting)
+                  Container(
+                    color: Colors.black54,
+                    child: const Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircularProgressIndicator(),
+                          SizedBox(height: 16),
+                          Text(
+                            'Đang xóa tài khoản...',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           );
         },
+      ),
+    );
+  }
+
+  void _showDeleteAccountDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text("Xác nhận xóa tài khoản"),
+        content: const Text(
+          "Bạn có chắc chắn muốn xóa tài khoản? "
+          "Hành động này không thể hoàn tác và tất cả dữ liệu của bạn sẽ bị xóa vĩnh viễn.",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text("Hủy"),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(dialogContext).pop();
+              await context.read<AuthenticationCubit>().deleteAccount();
+            },
+            child: const Text("Xóa", style: TextStyle(color: Colors.red)),
+          ),
+        ],
       ),
     );
   }

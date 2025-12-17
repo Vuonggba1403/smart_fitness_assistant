@@ -280,4 +280,37 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
 
     return {'bmr': bmr, 'tdee': tdee};
   }
+
+  /// ✅ Xóa tài khoản user và tất cả dữ liệu liên quan
+  /// Trigger sẽ tự động xóa auth.users
+  Future<void> deleteAccount() async {
+    emit(const DeleteAccountLoading());
+    try {
+      final userId = client.auth.currentUser?.id;
+
+      if (userId == null) {
+        emit(const DeleteAccountError('Bạn chưa đăng nhập'));
+        return;
+      }
+
+      log('🗑️ Deleting account for user: $userId');
+
+      // Gọi RPC function thay vì xóa trực tiếp
+      await client.rpc('delete_user_account');
+
+      log('✅ User deleted via RPC function');
+
+      // Sign out
+      await client.auth.signOut();
+
+      // Clear data
+      userDataModel = null;
+      tempUserInfo.clear();
+
+      emit(const DeleteAccountSuccess());
+    } catch (e) {
+      log('❌ Delete Account Error: $e');
+      emit(DeleteAccountError('Đã xảy ra lỗi: ${e.toString()}'));
+    }
+  }
 }

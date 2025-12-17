@@ -110,3 +110,20 @@ final class UserInfoSaved extends AuthenticationState {
   @override
   List<Object?> get props => [userInfo];
 }
+
+// Delete Account States
+final class DeleteAccountLoading extends AuthenticationState {
+  const DeleteAccountLoading();
+}
+
+final class DeleteAccountSuccess extends AuthenticationState {
+  const DeleteAccountSuccess();
+}
+
+final class DeleteAccountError extends AuthenticationState {
+  final String message;
+  const DeleteAccountError(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
