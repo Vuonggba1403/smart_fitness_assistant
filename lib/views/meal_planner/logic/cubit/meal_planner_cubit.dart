@@ -1,7 +1,9 @@
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
+import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:smart_fitness_assistant/core/models/activity_level.dart';
+import 'package:smart_fitness_assistant/core/models/meal.dart';
 
 part 'meal_planner_state.dart';
 
@@ -10,12 +12,58 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
 
   MealPlannerCubit() : super(MealPlannerInitial());
 
+  /// ⏱ DateTime hiện tại
+  DateTime _selectedDateTime = DateTime.now();
+
+  DateTime get selectedDateTime => _selectedDateTime;
+
+  /// 🔄 UPDATE DATE TIME
+  void updateDateTime(DateTime dateTime) {
+    _selectedDateTime = dateTime;
+    emit(DateTimeUpdated(dateTime));
+  }
+
   /// ✅ Lưu activity factor
   double currentActivityFactor = 1.55;
 
-  /// ✅ Load activity levels từ Supabase, sắp xếp theo number
+  /// ✅ Check nếu user đã có activity preference
+  Future<bool> checkActivityPreference() async {
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) return false;
+
+      final existing = await _supabase
+          .from('user_activity_preferences')
+          .select()
+          .eq('for_user', userId)
+          .maybeSingle();
+
+      if (existing != null) {
+        final factor = existing['activity_factor'] as double? ?? 1.55;
+        currentActivityFactor = factor;
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print('Error checking preference: $e');
+      return false;
+    }
+  }
+
+  /// ✅ Load activity levels từ Supabase
   Future<void> loadActivityLevels() async {
     try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) {
+        emit(MealPlannerError('User not authenticated'));
+        return;
+      }
+
+      final hasPreference = await checkActivityPreference();
+      if (hasPreference) {
+        return;
+      }
+
       emit(MealPlannerLoading());
 
       final response = await _supabase
@@ -52,10 +100,7 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
     }
   }
 
-  /// ✅ IMPLEMENT: Save activity preference to database
-  /// - activityLevelId: UUID string từ Supabase
-  /// - dailyCalories: TDEE tính từ BMR × activity_factor
-  /// Emit: ActivityPreferenceSaved state để UI cập nhật
+  /// ✅ Save activity preference to database
   Future<void> saveActivityPreference(
     String activityLevelId,
     int dailyCalories,
@@ -67,7 +112,6 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
         return;
       }
 
-      // Map activity id to activity factor
       final activityFactorMap = {
         'sedentary': 1.2,
         'lightly_active': 1.375,
@@ -79,7 +123,6 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
       final factor = activityFactorMap[activityLevelId] ?? 1.55;
       currentActivityFactor = factor;
 
-      // Check if preference already exists
       final existing = await _supabase
           .from('user_activity_preferences')
           .select()
@@ -87,7 +130,6 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
           .maybeSingle();
 
       if (existing != null) {
-        // Update existing
         await _supabase
             .from('user_activity_preferences')
             .update({
@@ -97,7 +139,6 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
             })
             .eq('for_user', userId);
       } else {
-        // Insert new
         await _supabase.from('user_activity_preferences').insert({
           'for_user': userId,
           'for_activity_level': activityLevelId,
@@ -113,17 +154,18 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
     }
   }
 
-  // TODO: Implement when meal_plan_items table is recreated
+  /// Load meals by date
   Future<void> loadMealsByDate(DateTime date) async {
     try {
-      // ✅ Không emit loading, emit MealsLoaded ngay
+      _selectedDateTime = date;
+
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) {
         emit(MealPlannerError('User not authenticated'));
         return;
       }
 
-      // ✅ Lấy TDEE từ user_activity_preferences
+      // ✅ Get target calories
       final pref = await _supabase
           .from('user_activity_preferences')
           .select('daily_calorie_target')
@@ -132,14 +174,19 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
 
       int targetCalories = pref?['daily_calorie_target'] ?? 2000;
 
-      // Placeholder - will implement when tables are recreated
+      // ✅ Load meals grouped by type
+      final mealsByType = await loadMealsByDateAndType(date);
+      final currentCalories = _calculateTotalCalories(mealsByType);
+
+      // ✅ Emit loaded state with meals data
       emit(
         MealsLoaded(
-          breakfast: [],
-          lunch: [],
-          dinner: [],
-          currentCalories: 0,
-          targetCalories: targetCalories, // ✅ Sử dụng TDEE thực tế
+          breakfast: mealsByType['breakfast'] ?? [],
+          lunch: mealsByType['lunch'] ?? [],
+          dinner: mealsByType['dinner'] ?? [],
+          currentCalories: currentCalories,
+          targetCalories: targetCalories,
+          selectedDateTime: date,
         ),
       );
     } catch (e) {
@@ -147,35 +194,174 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
     }
   }
 
-  // TODO: Implement when meal_plan_items table is recreated
+  /// ➕ ADD MEAL TO TYPE
   Future<void> addMealToType(String mealType, Map meal, DateTime date) async {
     try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) {
+        emit(MealPlannerError('User not authenticated'));
+        return;
+      }
+
+      // 💾 Save meal to database
+      await _supabase.from('user_meals').insert({
+        'for_user': userId,
+        'for_meal': meal['id'],
+        'meal_name': meal['name'],
+        'meal_type': mealType,
+        'calories': meal['calories'] ?? 0,
+        'protein_g': meal['protein'] ?? 0.0,
+        'carbs_g': meal['carbs'] ?? 0.0,
+        'fat_g': meal['fat'] ?? 0.0,
+        'serving_size_g': meal['serving_size'] ?? 100,
+        'meal_date': DateFormat('yyyy-MM-dd').format(date),
+        'meal_time': DateFormat('HH:mm').format(date),
+      });
+
+      // ✅ Emit success state
       emit(
         MealAdded(
           mealType: mealType,
-          message: '${meal['name']} added to $mealType',
+          mealName: meal['name'],
+          calories: meal['calories'] ?? 0,
+          dateTime: date,
+        ),
+      );
+
+      // 🔄 Load meals ngay sau khi thêm
+      await Future.delayed(const Duration(milliseconds: 300));
+      final mealsByType = await loadMealsByDateAndType(date);
+
+      // ✅ Emit state mới với dữ liệu meals đã update
+      emit(
+        MealsLoaded(
+          breakfast: mealsByType['breakfast'] ?? [],
+          lunch: mealsByType['lunch'] ?? [],
+          dinner: mealsByType['dinner'] ?? [],
+          currentCalories: _calculateTotalCalories(mealsByType),
+          targetCalories: 2000,
+          selectedDateTime: date,
         ),
       );
     } catch (e) {
       emit(MealPlannerError('Error adding meal: ${e.toString()}'));
+      print('❌ Error adding meal: $e');
     }
   }
 
-  // TODO: Implement when meal_plan_items table is recreated
-  Future<void> removeMealFromType(int mealItemId, DateTime date) async {
+  /// 🧮 Calculate total calories
+  int _calculateTotalCalories(Map<String, List<Map>> mealsByType) {
+    int total = 0;
+    mealsByType.forEach((key, meals) {
+      for (var meal in meals) {
+        total += (meal['calories'] as int? ?? 0);
+      }
+    });
+    return total;
+  }
+
+  /// 📥 LOAD MEALS BY DATE AND TYPE
+  Future<Map<String, List<Map>>> loadMealsByDateAndType(DateTime date) async {
     try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) {
+        emit(MealPlannerError('User not authenticated'));
+        return {};
+      }
+
+      final dateStr = DateFormat('yyyy-MM-dd').format(date);
+
+      final response = await _supabase
+          .from('user_meals')
+          .select()
+          .eq('for_user', userId) // ✅ Đúng với tên cột
+          .eq('meal_date', dateStr);
+
+      if (response == null || (response as List).isEmpty) {
+        return {'breakfast': [], 'lunch': [], 'dinner': []};
+      }
+
+      // Group by meal_type
+      final meals = response as List;
+      final groupedMeals = <String, List<Map>>{
+        'breakfast': [],
+        'lunch': [],
+        'dinner': [],
+      };
+
+      for (var meal in meals) {
+        final mealType = meal['meal_type'] as String;
+        if (groupedMeals.containsKey(mealType)) {
+          groupedMeals[mealType]!.add(meal as Map);
+        }
+      }
+
+      return groupedMeals;
+    } catch (e) {
+      print('Error loading meals by type: $e');
+      return {'breakfast': [], 'lunch': [], 'dinner': []};
+    }
+  }
+
+  /// 🗑️ REMOVE MEAL
+  Future<void> removeMeal(String mealId) async {
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) {
+        emit(MealPlannerError('User not authenticated'));
+        return;
+      }
+
+      await _supabase
+          .from('user_meals')
+          .delete()
+          .eq('id', mealId)
+          .eq('for_user', userId); // ✅ Đúng với tên cột
+
       emit(MealRemoved(''));
     } catch (e) {
       emit(MealPlannerError('Error removing meal: ${e.toString()}'));
     }
   }
 
-  // TODO: Implement when low_calorie_recipes table is recreated
-  Future<List<Map>> getAllRecipes() async {
+  /// 🔍 SEARCH MEALS
+  Future<List<Meal>> searchMeals(String query) async {
     try {
-      return [];
+      if (query.isEmpty) return [];
+
+      final response = await _supabase
+          .from('meals')
+          .select()
+          .ilike('name', '%$query%')
+          .limit(20);
+
+      if (response == null || (response as List).isEmpty) {
+        return [];
+      }
+
+      return (response as List)
+          .map((json) => Meal.fromJson(json as Map<String, dynamic>))
+          .toList();
     } catch (e) {
-      print('Error loading recipes: $e');
+      print('Error searching meals: $e');
+      return [];
+    }
+  }
+
+  /// 📥 GET ALL MEALS (for recent tab)
+  Future<List<Meal>> getAllMeals() async {
+    try {
+      final response = await _supabase.from('meals').select().limit(50);
+
+      if (response == null || (response as List).isEmpty) {
+        return [];
+      }
+
+      return (response as List)
+          .map((json) => Meal.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      print('Error loading meals: $e');
       return [];
     }
   }

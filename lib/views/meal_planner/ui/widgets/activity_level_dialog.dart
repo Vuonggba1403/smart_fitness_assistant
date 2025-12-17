@@ -6,7 +6,7 @@ import 'package:smart_fitness_assistant/core/functions/cache_images_view.dart';
 import 'package:smart_fitness_assistant/core/models/activity_level.dart';
 import 'package:smart_fitness_assistant/views/auth/cubit/authentication_cubit.dart';
 import 'package:smart_fitness_assistant/views/meal_planner/logic/cubit/meal_planner_cubit.dart';
-import 'package:smart_fitness_assistant/views/meal_planner/ui/widgets/components/message_bubble.dart';
+import 'package:smart_fitness_assistant/views/meal_planner/ui/widgets/message_bubble.dart';
 
 class ActivityLevelDialog extends StatefulWidget {
   final DateTime selectedDate;
