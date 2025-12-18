@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
@@ -26,7 +25,8 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this); // ✅ Lắng nghe lifecycle
+    WidgetsBinding.instance.addObserver(this);
+    _loadData();
   }
 
   @override
@@ -36,11 +36,35 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // ✅ THÊM: Auto refresh khi quay lại từ workout
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _loadData();
+      }
+    });
+  }
+
+  // ✅ THÊM: Refresh khi app resume (từ background về foreground)
+  @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // ✅ Khi app resume (quay lại từ background) → Refresh
-    if (state == AppLifecycleState.resumed && mounted) {
-      context.read<HomeCubit>().refreshWorkouts();
+    if (state == AppLifecycleState.resumed) {
+      _loadData();
     }
+  }
+
+  // ✅ Method load data - SIMPLE VERSION
+  Future<void> _loadData() async {
+    // ✅ Chỉ cần load user data và language
+    context.read<AuthenticationCubit>().getUserData();
+
+    final cubit = context.read<HomeCubit>();
+    await cubit.loadLatestWorkouts(); // ✅ Reload latest workouts
+    await cubit.loadDailyActivity(); // ✅ Reload daily stats nếu có
+
+    // ✅ HomeCubit tự động load latest workouts trong initState
+    // Không cần gọi thêm gì ở đây
   }
 
   @override
@@ -58,174 +82,152 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
           },
           child: BlocBuilder<HomeCubit, HomeState>(
             builder: (context, homeState) {
-              final theme = Theme.of(context);
               final media = MediaQuery.of(context).size;
+              final theme = Theme.of(context);
               final textColor = theme.textTheme.bodyMedium?.color;
 
               // Lấy user data từ AuthenticationCubit
               final user = context.read<AuthenticationCubit>().userDataModel;
 
+              // ✅ FIX: Check state đúng kiểu
+              if (homeState is! HomeLoaded) {
+                return const Scaffold(
+                  body: Center(child: CustomCircleProgIndicator()),
+                );
+              }
+
+              // ✅ Cast về HomeLoaded
+              final loadedState = homeState;
+              final hintText = loadedState.currentLanguage == 'vi'
+                  ? 'VI'
+                  : 'EN';
+
               return Scaffold(
                 backgroundColor: theme.scaffoldBackgroundColor,
-                body: homeState is! HomeLoaded
-                    ? const CustomCircleProgIndicator()
-                    : SafeArea(
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.symmetric(horizontal: 15),
-                          child: Builder(
-                            builder: (context) {
-                              final loadedState = homeState;
-                              final hintText =
-                                  loadedState.currentLanguage == 'vi'
-                                  ? 'VI'
-                                  : 'EN';
-
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // === Header ===
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            LocaleKey.welcomeBack.tr,
-                                            style: TextStyle(
-                                              color: textColor,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                          Text(
-                                            user?.username ?? "UserName",
-                                            style: const TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.w700,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      Row(
-                                        children: [
-                                          // --- DropDown chọn ngôn ngữ ---
-                                          CustomDropButtonUnder(
-                                            items: ["EN", "VI"],
-                                            imagePaths: [
-                                              "assets/img/english.png",
-                                              "assets/img/vietnamese.png",
-                                            ],
-                                            hint: hintText,
-                                            //  selectedValue: hintText,
-                                            selectedValue: loadedState
-                                                .currentLanguage
-                                                .toUpperCase(),
-
-                                            onChanged: (value) async {
-                                              final translationManager =
-                                                  Get.find<
-                                                    TranslationManager
-                                                  >();
-                                              final homeCubit = context
-                                                  .read<HomeCubit>();
-
-                                              final localeMap = {
-                                                "EN": TranslationManager
-                                                    .fallbackLocaleUS,
-                                                "VI": TranslationManager
-                                                    .fallbackLocaleVN,
-                                              };
-                                              final languageMap = {
-                                                "EN": "en",
-                                                "VI": "vi",
-                                              };
-
-                                              if (localeMap.containsKey(
-                                                value,
-                                              )) {
-                                                final newLang =
-                                                    languageMap[value]!;
-                                                await translationManager
-                                                    .updateLocale(
-                                                      localeMap[value]!,
-                                                    );
-                                                homeCubit.updateLanguage(
-                                                  newLang,
-                                                );
-                                              }
-                                            },
-                                          ),
-
-                                          // --- Nút Notification ---
-                                          IconButton(
-                                            onPressed: () => navigateTo(
-                                              context,
-                                              const NotificationView(),
-                                            ),
-                                            icon: Image.asset(
-                                              "assets/img/notification_active.png",
-                                              width: 25,
-                                              height: 25,
-                                              color: textColor,
-                                              fit: BoxFit.fitHeight,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
+                body: SafeArea(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // === Header ===
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  LocaleKey.welcomeBack.tr,
+                                  style: TextStyle(
+                                    color: textColor,
+                                    fontSize: 12,
                                   ),
-
-                                  SizedBox(height: media.width * 0.05),
-
-                                  // === BMI Card ===
-                                  const BMICard(),
-
-                                  SizedBox(height: media.width * 0.05),
-
-                                  SizedBox(height: media.width * 0.05),
-
-                                  // === Activity Status ===
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        LocaleKey.dailyActivity.tr,
-                                        style: TextStyle(
-                                          color: textColor,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      ),
-                                      SizedBox(height: media.width * 0.02),
-                                    ],
+                                ),
+                                Text(
+                                  user?.username ?? "UserName",
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w700,
                                   ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                // --- DropDown chọn ngôn ngữ ---
+                                CustomDropButtonUnder(
+                                  items: ["EN", "VI"],
+                                  imagePaths: [
+                                    "assets/img/english.png",
+                                    "assets/img/vietnamese.png",
+                                  ],
+                                  hint: hintText,
+                                  selectedValue: loadedState.currentLanguage
+                                      .toUpperCase(),
+                                  onChanged: (value) async {
+                                    final translationManager =
+                                        Get.find<TranslationManager>();
+                                    final homeCubit = context.read<HomeCubit>();
 
-                                  SizedBox(height: media.width * 0.05),
+                                    final localeMap = {
+                                      "EN": TranslationManager.fallbackLocaleUS,
+                                      "VI": TranslationManager.fallbackLocaleVN,
+                                    };
+                                    final languageMap = {
+                                      "EN": "en",
+                                      "VI": "vi",
+                                    };
 
-                                  // === Daily Activity ===
-                                  DailyActivitySection(mediaWidth: media.width),
+                                    if (localeMap.containsKey(value)) {
+                                      final newLang = languageMap[value]!;
+                                      await translationManager.updateLocale(
+                                        localeMap[value]!,
+                                      );
+                                      homeCubit.updateLanguage(newLang);
+                                    }
+                                  },
+                                ),
 
-                                  SizedBox(height: media.width * 0.1),
-
-                                  // === Workout Progress Chart ===
-                                  SizedBox(height: media.width * 0.05),
-
-                                  // === Latest Workout ===
-                                  LatestWorkoutView(
-                                    lastWorkoutArr: loadedState.lastWorkoutArr,
-                                    onSeeMorePressed: () {},
+                                // --- Nút Notification ---
+                                IconButton(
+                                  onPressed: () => navigateTo(
+                                    context,
+                                    const NotificationView(),
                                   ),
-
-                                  SizedBox(height: media.width * 0.1),
-                                ],
-                              );
-                            },
-                          ),
+                                  icon: Image.asset(
+                                    "assets/img/notification_active.png",
+                                    width: 25,
+                                    height: 25,
+                                    fit: BoxFit.fitHeight,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                      ),
+
+                        SizedBox(height: media.width * 0.05),
+
+                        // === BMI Card ===
+                        const BMICard(),
+
+                        SizedBox(height: media.width * 0.05),
+
+                        // === Activity Status ===
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              LocaleKey.dailyActivity.tr,
+                              style: TextStyle(
+                                color: textColor,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            SizedBox(height: media.width * 0.02),
+                          ],
+                        ),
+
+                        SizedBox(height: media.width * 0.05),
+
+                        // === Daily Activity ===
+                        DailyActivitySection(mediaWidth: media.width),
+
+                        SizedBox(height: media.width * 0.1),
+
+                        // === Latest Workout ===
+                        LatestWorkoutView(
+                          lastWorkoutArr: loadedState.lastWorkoutArr,
+                          onSeeMorePressed: () {},
+                        ),
+
+                        SizedBox(height: media.width * 0.1),
+                      ],
+                    ),
+                  ),
+                ),
               );
             },
           ),
