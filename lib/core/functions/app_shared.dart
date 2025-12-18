@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_fitness_assistant/views/chatbot/logic/models/chat_history_model.dart';
+import 'package:smart_fitness_assistant/core/models/chat_history_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AppShared {

@@ -59,6 +59,7 @@ dependencies:
   animated_text_kit: ^4.3.0
   flutter_gemini: ^3.0.0
   uuid: ^4.0.0
+  flutter_markdown: ^0.7.4
 
 dependency_overrides:
   intl: ^0.18.1 # Override intl version for compatibility

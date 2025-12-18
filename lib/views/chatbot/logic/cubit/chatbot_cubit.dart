@@ -4,7 +4,7 @@ import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:flutter_gemini/flutter_gemini.dart';
 import 'package:meta/meta.dart';
 import 'package:smart_fitness_assistant/core/functions/app_shared.dart';
-import 'package:smart_fitness_assistant/views/chatbot/logic/models/chat_history_model.dart';
+import 'package:smart_fitness_assistant/core/models/chat_history_model.dart';
 import 'package:uuid/uuid.dart';
 
 part 'chatbot_state.dart';
@@ -32,7 +32,7 @@ class ChatbotCubit extends Cubit<ChatbotState> {
     final sessions = await AppShared.getChatSessions(userId);
 
     if (sessions.isEmpty) {
-      // Chưa có session nào, tạo mới
+      // Chưa có session nào, tạo mới VÀ hiển thị welcome
       await _initializeChat(showWelcome: true);
       return;
     }
@@ -48,10 +48,10 @@ class ChatbotCubit extends Cubit<ChatbotState> {
         today.day == sessionDate.day;
 
     if (isSameDay) {
-      // Load session hiện tại
+      // ✅ Load session hiện tại KHÔNG hiển thị welcome
       await loadChatSession(latestSession.id, keepHistory: true);
     } else {
-      // Qua ngày mới, tạo session mới
+      // ✅ Qua ngày mới, tạo session mới VÀ hiển thị welcome
       await _initializeChat(showWelcome: true);
     }
   }
@@ -80,6 +80,7 @@ class ChatbotCubit extends Cubit<ChatbotState> {
       _messages = [welcomeMessage];
       emit(ChatbotLoaded(_messages));
     } else {
+      // ✅ Không hiển thị welcome, chat trống
       _messages = [];
       emit(ChatbotLoaded(_messages));
     }
@@ -120,9 +121,51 @@ class ChatbotCubit extends Cubit<ChatbotState> {
     try {
       StringBuffer responseBuffer = StringBuffer();
 
+      // Prompt với format SIÊU STRICT
+      final enhancedPrompt =
+          '''
+You are a fitness assistant. FOLLOW THIS EXACT FORMAT - NO EXCEPTIONS:
+
+RULES (MANDATORY):
+1. Start with **Title:** (bold using double asterisks)
+2. Add ONE blank line after title
+3. Use bullet points: • (bullet character, NOT dash or asterisk)
+4. Each bullet on NEW LINE with blank line after
+5. Max 5 items only
+6. Keep info SHORT: [item name] - [1 benefit], [1 number]
+
+EXACT TEMPLATE (COPY THIS):
+**[Category Name]:**
+
+• [Item 1] - [brief info]
+
+• [Item 2] - [brief info]
+
+• [Item 3] - [brief info]
+
+• [Item 4] - [brief info]
+
+• [Item 5] - [brief info]
+
+EXAMPLE for "5 món ăn ngon":
+**Món Ăn Ngon:**
+
+• Gà kho gừng - 200 cal/100g, giàu protein
+
+• Cá hồi nướng - 180 cal/100g, omega-3 cao
+
+• Đậu hũ sốt cà - 120 cal/100g, ít béo
+
+• Bún chả Hà Nội - 450 cal/phần
+
+• Gỏi cuốn tôm - 150 cal/phần, tươi mát
+
+NOW answer: $userMessage
+''';
+
       // Stream phản hồi từ Gemini
       _gemini
-          .streamGenerateContent(userMessage)
+          .streamGenerateContent(enhancedPrompt)
           .listen(
             (event) {
               final response = event.output ?? "";
@@ -175,7 +218,9 @@ class ChatbotCubit extends Cubit<ChatbotState> {
             : firstUserMessage;
       }
 
-      // Chuyển đổi ChatMessage sang ChatMessageData
+      // ✅ FIX: Chuyển đổi ChatMessage sang ChatMessageData - GIỮ NGUYÊN THỨ TỰ
+      // _messages đã ở dạng reversed (mới nhất ở đầu)
+      // Khi save, reverse lại để lưu theo thứ tự thời gian tăng dần
       final messageDataList = _messages.reversed.map((msg) {
         return ChatMessageData(
           userId: msg.user.id,
@@ -195,7 +240,7 @@ class ChatbotCubit extends Cubit<ChatbotState> {
       if (existingSession != null) {
         // Cập nhật session hiện có
         final updatedSession = existingSession.copyWith(
-          title: title, // Cập nhật title mới nhất
+          title: title,
           lastMessageAt: DateTime.now(),
           messages: messageDataList,
         );
@@ -225,6 +270,7 @@ class ChatbotCubit extends Cubit<ChatbotState> {
         await AppShared.deleteChatSession(userId, _currentSessionId!);
         log('🗑️ Deleted current chat session: $_currentSessionId');
       }
+      // ✅ Sau khi xóa, tạo chat mới VÀ hiển thị welcome
       await _initializeChat(showWelcome: true);
     } catch (e) {
       log('❌ Error clearing current chat: $e');
@@ -265,8 +311,10 @@ class ChatbotCubit extends Cubit<ChatbotState> {
       _currentSessionId = sessionId;
       _sessionCreatedDate = session.createdAt;
 
-      // Chuyển đổi ChatMessageData sang ChatMessage
-      _messages = session.messages.map((msgData) {
+      // ✅ FIX: Chuyển đổi ChatMessageData sang ChatMessage
+      // session.messages đã lưu theo thứ tự tăng dần (cũ → mới)
+      // Cần reverse lại để DashChat hiển thị đúng (mới nhất ở đầu)
+      _messages = session.messages.reversed.map((msgData) {
         return ChatMessage(
           user: msgData.isBot ? botUser : currentUser,
           createdAt: msgData.createdAt,
@@ -275,7 +323,7 @@ class ChatbotCubit extends Cubit<ChatbotState> {
       }).toList();
 
       emit(ChatbotLoaded(_messages));
-      log('✅ Loaded chat session: $sessionId');
+      log('✅ Loaded chat session: $sessionId (${_messages.length} messages)');
     } catch (e) {
       log('❌ Error loading chat session: $e');
       emit(ChatbotError("Không thể tải phiên chat", _messages));
@@ -289,8 +337,9 @@ class ChatbotCubit extends Cubit<ChatbotState> {
       await _saveChatSession();
     }
 
+    // ✅ Tạo chat mới VÀ hiển thị welcome message
     await _initializeChat(showWelcome: true);
-    log('🆕 Created new chat session');
+    log('🆕 Created new chat session with welcome message');
   }
 
   /// Kiểm tra nếu session hiện tại đã qua ngày

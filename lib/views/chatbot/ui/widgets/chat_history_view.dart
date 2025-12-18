@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:smart_fitness_assistant/core/functions/app_shared.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/views/chatbot/logic/cubit/chatbot_cubit.dart';
-import 'package:smart_fitness_assistant/views/chatbot/logic/models/chat_history_model.dart';
+import 'package:smart_fitness_assistant/core/models/chat_history_model.dart';
 
 class ChatHistoryView extends StatelessWidget {
   const ChatHistoryView({super.key});

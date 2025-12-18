@@ -1,9 +1,11 @@
 import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/views/auth/cubit/authentication_cubit.dart';
 import 'package:smart_fitness_assistant/views/chatbot/ui/widgets/chat_history_view.dart';
+import 'package:smart_fitness_assistant/views/chatbot/ui/widgets/chatbot_markdown_style.dart';
 import '../logic/cubit/chatbot_cubit.dart';
 
 class ChatBot extends StatefulWidget {
@@ -246,7 +248,6 @@ class _ChatBotView extends StatelessWidget {
       textColor: Colors.white,
       currentUserTextColor: Colors.black,
       borderRadius: 18,
-      // Custom builder cho từng tin nhắn
       messageRowBuilder: (message, previous, next, isAfterDate, isBeforeDate) {
         final isBot = message.user.id == botUser.id;
         final displayName = isBot ? botUser.firstName : currentUser.firstName;
@@ -321,13 +322,9 @@ class _ChatBotView extends StatelessWidget {
                           bottomRight: Radius.circular(isBot ? 18 : 4),
                         ),
                       ),
-                      child: Text(
-                        message.text,
-                        style: TextStyle(
-                          color: isBot ? Colors.white : Colors.black87,
-                          fontSize: 14,
-                        ),
-                      ),
+                      child: isBot
+                          ? _buildBotMessage(message.text)
+                          : _buildUserMessage(message.text),
                     ),
                   ],
                 ),
@@ -353,6 +350,21 @@ class _ChatBotView extends StatelessWidget {
         );
       },
     );
+  }
+
+  /// Widget hiển thị tin nhắn bot với Markdown
+  Widget _buildBotMessage(String text) {
+    return MarkdownBody(
+      data: text,
+      selectable: true,
+      shrinkWrap: true,
+      styleSheet: ChatbotMarkdownStyle.botMessageStyle(),
+    );
+  }
+
+  /// Widget hiển thị tin nhắn user
+  Widget _buildUserMessage(String text) {
+    return Text(text, style: ChatbotMarkdownStyle.userMessageStyle());
   }
 
   /// Cấu hình input field
