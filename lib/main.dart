@@ -19,7 +19,7 @@ import 'package:timezone/data/latest_all.dart' as tz;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  Gemini.init(apiKey: ApiKey);
+  Gemini.init(apiKey: apiKey);
 
   // Timezones
   tz.initializeTimeZones();

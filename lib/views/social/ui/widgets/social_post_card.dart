@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_showdialog.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/models/content_post.dart';
@@ -120,22 +121,6 @@ class _SocialPostCardState extends State<SocialPostCard> {
                         editController.dispose();
                         Navigator.pop(context);
                       }
-
-                      // // ✅ Show snackbar after dialog closes
-                      // Future.delayed(const Duration(milliseconds: 300), () {
-                      //   if (mounted) {
-                      //     ScaffoldMessenger.of(context).showSnackBar(
-                      //       SnackBar(
-                      //         content: Text(
-                      //           success
-                      //               ? '✅ Cập nhật thành công'
-                      //               : '❌ Cập nhật thất bại',
-                      //         ),
-                      //         duration: const Duration(seconds: 2),
-                      //       ),
-                      //     );
-                      //   }
-                      // });
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: TColor.primaryColor2,
@@ -151,42 +136,25 @@ class _SocialPostCardState extends State<SocialPostCard> {
   }
 
   void _showDeleteDialog() {
-    showDialog(
+    AppConfirmDialog.show(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Xoá bài đăng'),
-        content: const Text(
+      title: 'Xoá bài đăng',
+      content:
           'Bạn có chắc muốn xoá bài đăng này? Hành động này không thể hoàn tác.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Huỷ'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context);
+      onYes: () async {
+        final success = await context.read<SocialFeedCubit>().deletePost(
+          widget.post.id ?? '',
+        );
 
-              final success = await context.read<SocialFeedCubit>().deletePost(
-                widget.post.id ?? '',
-              );
+        if (!mounted) return;
 
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      success ? '✅ Xoá thành công' : '❌ Xoá thất bại',
-                    ),
-                    duration: const Duration(seconds: 2),
-                  ),
-                );
-              }
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Xoá', style: TextStyle(color: Colors.white)),
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(success ? '✅ Xoá thành công' : '❌ Xoá thất bại'),
+            duration: const Duration(seconds: 2),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -247,6 +215,7 @@ class _SocialPostCardState extends State<SocialPostCard> {
                       ),
                       PopupMenuItem(
                         onTap: _showDeleteDialog,
+
                         child: Row(
                           children: const [
                             Icon(Icons.delete, size: 18, color: Colors.red),

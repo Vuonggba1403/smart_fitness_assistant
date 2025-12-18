@@ -30,7 +30,7 @@ void showCustomDelightToastBar(
             Text(
               message,
               style: TextStyle(
-                fontFamily: "OpenSans",
+                fontFamily: "Poppins",
                 fontWeight: FontWeight.bold,
                 color: textColor,
                 fontSize: 16,

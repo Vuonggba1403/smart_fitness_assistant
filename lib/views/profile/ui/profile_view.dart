@@ -6,6 +6,7 @@ import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/theme/logic/cubit/theme_cubit.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_alertdialog.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_derlight_bar.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_showdialog.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_toggle_switch.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
@@ -244,7 +245,17 @@ class ProfileView extends StatelessWidget {
                           onPressed: isDeleting
                               ? null
                               : () {
-                                  _showDeleteAccountDialog(context);
+                                  AppConfirmDialog.show(
+                                    context: context,
+                                    title: "Xác nhận xóa tài khoản",
+                                    content:
+                                        "Bạn có chắc chắn muốn xóa tài khoản? Hành động này không thể hoàn tác và tất cả dữ liệu của bạn sẽ bị xóa vĩnh viễn.",
+                                    onYes: () async {
+                                      await context
+                                          .read<AuthenticationCubit>()
+                                          .deleteAccount();
+                                    },
+                                  );
                                 },
                         ),
                       ],
@@ -274,32 +285,6 @@ class ProfileView extends StatelessWidget {
             ),
           );
         },
-      ),
-    );
-  }
-
-  void _showDeleteAccountDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text("Xác nhận xóa tài khoản"),
-        content: const Text(
-          "Bạn có chắc chắn muốn xóa tài khoản? "
-          "Hành động này không thể hoàn tác và tất cả dữ liệu của bạn sẽ bị xóa vĩnh viễn.",
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text("Hủy"),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.of(dialogContext).pop();
-              await context.read<AuthenticationCubit>().deleteAccount();
-            },
-            child: const Text("Xóa", style: TextStyle(color: Colors.red)),
-          ),
-        ],
       ),
     );
   }

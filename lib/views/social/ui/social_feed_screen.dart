@@ -102,13 +102,13 @@ class _SocialFeedScreenState extends State<SocialFeedScreen> {
 
         // 1️⃣ UPLOAD FILE LÊN STORAGE BUCKET
         await _supabase.storage
-            .from('fitness_posts')  // Tên bucket
-            .upload(fileName, cubitState.selectedImage!);  // Upload file thực
+            .from('fitness_posts') // Tên bucket
+            .upload(fileName, cubitState.selectedImage!); // Upload file thực
 
         // 2️⃣ LẤY PUBLIC URL
         imageUrl = _supabase.storage
             .from('fitness_posts')
-            .getPublicUrl(fileName);  // Lấy URL công khai: https://...
+            .getPublicUrl(fileName); // Lấy URL công khai: https://...
       }
 
       // ignore: use_build_context_synchronously
@@ -137,17 +137,6 @@ class _SocialFeedScreenState extends State<SocialFeedScreen> {
       backgroundColor: theme.scaffoldBackgroundColor,
       body: BlocBuilder<SocialFeedCubit, SocialFeedState>(
         builder: (context, state) {
-          // /// LOADING
-          // if (state is SocialFeedLoading) {
-          //   return const Center(child: CustomCircleProgIndicator());
-          // }
-
-          // /// ERROR
-          // if (state is SocialFeedError) {
-          //   return Center(child: Text(state.message));
-          // }
-
-          /// LOADED
           if (state is SocialFeedLoaded) {
             final posts = state.posts;
 

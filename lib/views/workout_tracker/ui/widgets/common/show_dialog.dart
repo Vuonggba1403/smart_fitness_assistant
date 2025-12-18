@@ -36,7 +36,7 @@ class CustomDialog extends StatelessWidget {
                 "Huỷ",
                 style: TextStyle(
                   color: Colors.red,
-                  fontFamily: "OpenSans",
+                  fontFamily: "Poppins",
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
                 ),

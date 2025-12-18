@@ -93,16 +93,22 @@ class ChatbotCubit extends Cubit<ChatbotState> {
       _messages = [message, ..._messages];
       emit(ChatbotResponding(_messages));
 
-      // Tạo tin nhắn bot trống ngay lập tức
+      // ✅ Delay ngắn để tạo cảm giác tự nhiên
+      await Future.delayed(const Duration(milliseconds: 300));
+
+      // ✅ Tạo tin nhắn bot với typing indicator
       final botMessage = ChatMessage(
         user: botUser,
         createdAt: DateTime.now(),
-        text: "",
+        text: "...", // ✅ Typing indicator
       );
 
-      // Thêm tin nhắn bot trống vào danh sách
+      // Thêm tin nhắn bot với "..." vào danh sách
       _messages = [botMessage, ..._messages];
       emit(ChatbotResponding(_messages));
+
+      // ✅ Delay thêm 800ms để user thấy "..."
+      await Future.delayed(const Duration(milliseconds: 800));
 
       // Gọi API Gemini để lấy phản hồi
       await _getGeminiResponse(message.text);
@@ -163,12 +169,22 @@ EXAMPLE for "5 món ăn ngon":
 NOW answer: $userMessage
 ''';
 
+      // ✅ Flag để check lần đầu nhận response
+      bool isFirstChunk = true;
+
       // Stream phản hồi từ Gemini
       _gemini
           .streamGenerateContent(enhancedPrompt)
           .listen(
             (event) {
               final response = event.output ?? "";
+
+              // ✅ Lần đầu nhận response, xóa "..." typing indicator
+              if (isFirstChunk) {
+                responseBuffer.clear();
+                isFirstChunk = false;
+              }
+
               responseBuffer.write(response);
 
               // Cập nhật tin nhắn bot đầu tiên (tin nhắn mới nhất)

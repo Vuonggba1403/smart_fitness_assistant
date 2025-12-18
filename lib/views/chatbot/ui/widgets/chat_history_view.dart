@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:smart_fitness_assistant/core/functions/app_shared.dart';
+import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/views/chatbot/logic/cubit/chatbot_cubit.dart';
 import 'package:smart_fitness_assistant/core/models/chat_history_model.dart';
@@ -12,18 +13,7 @@ class ChatHistoryView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 1,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: const Text(
-          "Chat History",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-        ),
-      ),
+      appBar: CustomAppBar(title: 'Chat History'),
       body: BlocBuilder<ChatbotCubit, ChatbotState>(
         builder: (context, state) {
           if (state is ChatHistoryLoading) {
@@ -89,15 +79,27 @@ class ChatHistoryView extends StatelessWidget {
   Widget _buildSessionCard(BuildContext context, ChatSession session) {
     final cubit = context.read<ChatbotCubit>();
     final isCurrentSession = cubit.currentSessionId == session.id;
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color ?? Colors.black;
 
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: isCurrentSession
-            ? BorderSide(color: TColor.primaryColor2, width: 2)
-            : BorderSide.none,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(12),
+          topRight: Radius.circular(12),
+        ),
+        border: Border.all(
+          color: isCurrentSession ? TColor.primaryColor1 : Colors.transparent,
+          width: isCurrentSession ? 2 : 0,
+        ),
+        gradient: isCurrentSession
+            ? LinearGradient(colors: [Color(0xFF2193b0), Color(0xFF6dd5ed)])
+            : LinearGradient(
+                colors: [Color.fromARGB(255, 189, 163, 122), Color(0xFF19547b)],
+              ),
       ),
+
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () async {
@@ -145,11 +147,11 @@ class ChatHistoryView extends StatelessWidget {
                           child: Text(
                             session.title,
                             style: TextStyle(
-                              fontSize: 15,
+                              fontSize: 13,
                               fontWeight: FontWeight.w600,
                               color: isCurrentSession
                                   ? TColor.primaryColor2
-                                  : Colors.black87,
+                                  : textColor,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -181,21 +183,12 @@ class ChatHistoryView extends StatelessWidget {
                       children: [
                         Text(
                           '${session.messages.length} messages',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey.shade600,
-                          ),
+                          style: TextStyle(fontSize: 12, color: textColor),
                         ),
-                        Text(
-                          ' • ',
-                          style: TextStyle(color: Colors.grey.shade400),
-                        ),
+                        Text(' • ', style: TextStyle(color: textColor)),
                         Text(
                           _formatDate(session.lastMessageAt),
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey.shade600,
-                          ),
+                          style: TextStyle(fontSize: 12, color: textColor),
                         ),
                       ],
                     ),

@@ -56,7 +56,7 @@ class ChatbotMarkdownStyle {
       code: TextStyle(
         backgroundColor: Colors.white.withOpacity(0.2),
         color: Colors.white,
-        fontFamily: 'monospace',
+        fontFamily: 'Poppins',
         fontSize: 13,
       ),
 
@@ -88,6 +88,16 @@ class ChatbotMarkdownStyle {
       fontSize: 14,
       height: 1.4,
       letterSpacing: 0.3,
+    );
+  }
+
+  /// ✅ Style cho typing indicator "..."
+  static TextStyle typingIndicatorStyle() {
+    return const TextStyle(
+      color: Colors.white70,
+      fontSize: 18,
+      fontWeight: FontWeight.bold,
+      letterSpacing: 2.0, // Spacing giữa các dấu chấm
     );
   }
 }

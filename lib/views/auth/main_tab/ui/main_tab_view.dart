@@ -7,7 +7,7 @@ import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
 import 'package:smart_fitness_assistant/views/auth/cubit/authentication_cubit.dart';
 import 'package:smart_fitness_assistant/views/auth/main_tab/ui/widgets/tab_button.dart';
 import 'package:smart_fitness_assistant/views/auth/main_tab/logic/cubit/main_tab_cubit.dart';
-import 'package:smart_fitness_assistant/views/chatbot/ui/chatbot.dart';
+import 'package:smart_fitness_assistant/views/chatbot/ui/chatbot_view.dart';
 import 'package:smart_fitness_assistant/views/social/ui/social_feed_screen.dart';
 import '../../../home/ui/home_view.dart';
 import '../../../profile/ui/profile_view.dart';
