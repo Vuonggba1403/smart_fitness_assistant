@@ -247,34 +247,24 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                "Water Intake",
-                style: TextStyle(
-                  color: textColor,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                ),
+              _gradientText(
+                "${(_totalWaterMl / 1000).toStringAsFixed(1)}L",
+                TColor.primaryG,
+                fontSize: 14,
               ),
-              Row(
-                children: [
-                  _gradientText(
-                    "${(_totalWaterMl / 1000).toStringAsFixed(1)}L",
-                    TColor.primaryG,
-                    fontSize: 14,
-                  ),
-                  Text(
-                    " / ${(_goalMl / 1000).toStringAsFixed(1)}L",
-                    style: TextStyle(
-                      color: textColor?.withOpacity(0.6),
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
+              Text(
+                " / ${(_goalMl / 1000).toStringAsFixed(1)}L",
+                style: TextStyle(
+                  color: textColor?.withOpacity(0.6),
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
+
           const SizedBox(height: 10),
           Expanded(child: _waterProgressBar(media)),
         ],
@@ -442,7 +432,7 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
 
   Widget _buildExercisesCard(Size media, ThemeData theme) {
     return _baseCard(
-      height: media.width * 0.45,
+      height: media.width * 0.5,
       theme: theme,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

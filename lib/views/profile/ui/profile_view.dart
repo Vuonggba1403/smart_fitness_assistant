@@ -40,22 +40,22 @@ class ProfileView extends StatelessWidget {
       child: BlocConsumer<AuthenticationCubit, AuthenticationState>(
         listener: (context, state) {
           if (state is LogoutSuccess) {
-            showCustomDelightToastBar(
-              context,
-              "Logout successful",
-              Icon(Icons.check, color: Colors.green),
-            );
+            // showCustomDelightToastBar(
+            //   context,
+            //   "Logout successful",
+            //   Icon(Icons.check, color: Colors.green),
+            // );
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (context) => const LoginView()),
               (route) => false,
             );
           }
           if (state is LoginError) {
-            showCustomDelightToastBar(
-              context,
-              "Logout failed",
-              const Icon(Icons.error, color: Colors.red),
-            );
+            // showCustomDelightToastBar(
+            //   context,
+            //   "Logout failed",
+            //   const Icon(Icons.error, color: Colors.red),
+            // );
           }
           if (state is DeleteAccountSuccess) {
             // ✅ XÓA: Không hiển thị toast trước khi navigate
