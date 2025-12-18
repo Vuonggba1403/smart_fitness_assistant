@@ -58,12 +58,10 @@ class ProfileView extends StatelessWidget {
             );
           }
           if (state is DeleteAccountSuccess) {
-            showCustomDelightToastBar(
-              context,
-              "Tài khoản đã được xóa thành công",
-              Icon(Icons.check, color: Colors.green),
-            );
-            // Clear toàn bộ navigation stack và không cho back lại
+            // ✅ XÓA: Không hiển thị toast trước khi navigate
+            // showCustomDelightToastBar sẽ dùng context đã bị dispose
+
+            // ✅ NGAY LẬP TỨC navigate và xóa toàn bộ stack
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (context) => const LoginView()),
               (route) => false,

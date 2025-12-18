@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get_utils/src/extensions/internacionalization.dart';
 import 'package:calendar_agenda/calendar_agenda.dart';
+import 'dart:developer' as developer;
 
 import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
@@ -33,18 +34,50 @@ class _MealPlannerViewState extends State<MealPlannerView> {
     super.initState();
     _selectedDate = DateTime.now();
 
-    context.read<MealPlannerCubit>().loadMealsByDate(_selectedDate);
+    developer.log('🟢 MealPlannerView initState', name: 'MealPlannerView');
+
+    // ❌ XÓA: KHÔNG load meals ngay, chờ sau khi check activity
+    // context.read<MealPlannerCubit>().loadMealsByDate(_selectedDate);
+
     context.read<MealPlannerCubit>().loadActivityLevels();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (!_activityDialogShown) {
+      developer.log('⏳ PostFrameCallback started', name: 'MealPlannerView');
+
+      if (!_activityDialogShown && mounted) {
+        developer.log(
+          '🔍 Checking activity preference',
+          name: 'MealPlannerView',
+        );
+
         final hasPreference = await context
             .read<MealPlannerCubit>()
             .checkActivityPreference();
+
+        developer.log(
+          'Has preference: $hasPreference',
+          name: 'MealPlannerView',
+        );
+
         if (!hasPreference && mounted) {
+          developer.log(
+            '📱 Showing activity level dialog',
+            name: 'MealPlannerView',
+          );
           _showActivityLevelDialog();
+          _activityDialogShown = true;
+        } else {
+          developer.log('✅ Skip showing dialog', name: 'MealPlannerView');
+          // ✅ THÊM: Load meals chỉ KHI ĐÃ CÓ preference
+          if (mounted) {
+            context.read<MealPlannerCubit>().loadMealsByDate(_selectedDate);
+          }
         }
-        _activityDialogShown = true;
+      } else {
+        developer.log(
+          '⚠️ Skip: dialogShown=$_activityDialogShown, mounted=$mounted',
+          name: 'MealPlannerView',
+        );
       }
     });
   }
@@ -52,20 +85,30 @@ class _MealPlannerViewState extends State<MealPlannerView> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        context.read<MealPlannerCubit>().loadMealsByDate(_selectedDate);
-      }
-    });
+    // ❌ XÓA: Tránh reload meals nhiều lần
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   if (mounted) {
+    //     context.read<MealPlannerCubit>().loadMealsByDate(_selectedDate);
+    //   }
+    // });
   }
 
   void _showActivityLevelDialog() {
+    developer.log(
+      '🎯 _showActivityLevelDialog called',
+      name: 'MealPlannerView',
+    );
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (_) => ActivityLevelDialog(
         selectedDate: _selectedDate,
         onActivitySelected: (date) {
+          developer.log(
+            '✅ Activity selected callback',
+            name: 'MealPlannerView',
+          );
           context.read<MealPlannerCubit>().loadMealsByDate(date);
         },
       ),

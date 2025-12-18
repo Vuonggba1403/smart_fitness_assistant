@@ -1,3 +1,4 @@
+import 'dart:developer' as developer; // ✅ THÊM
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:intl/intl.dart';
@@ -30,62 +31,157 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
   /// ✅ Lưu activity factor
   double currentActivityFactor = 1.55;
 
-  /// ✅ Check nếu user đã có activity preference
-  Future<bool> checkActivityPreference() async {
+  /// ✅ Save activity preference to database
+  Future<void> saveActivityPreference(
+    String activityLevelId,
+    int dailyCalories,
+  ) async {
     try {
-      final userId = _supabase.auth.currentUser?.id;
-      if (userId == null) return false;
+      developer.log(
+        '🟢 START: saveActivityPreference',
+        name: 'MealPlannerCubit',
+      );
 
-      final existing = await _supabase
-          .from('user_activity_preferences')
-          .select()
-          .eq('for_user', userId)
-          .maybeSingle();
-
-      if (existing != null) {
-        final factor = existing['activity_factor'] as double? ?? 1.55;
-        currentActivityFactor = factor;
-        return true;
-      }
-      return false;
-    } catch (e) {
-      print('Error checking preference: $e');
-      return false;
-    }
-  }
-
-  /// ✅ Load activity levels từ Supabase
-  Future<void> loadActivityLevels() async {
-    try {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) {
         emit(MealPlannerError('User not authenticated'));
         return;
       }
 
-      final hasPreference = await checkActivityPreference();
-      if (hasPreference) {
+      // ✅ XÓA: Map activity_factor (không cần nữa)
+      // final activityFactorMap = { ... };
+      // final factor = activityFactorMap[activityLevelId] ?? 1.55;
+
+      // ✅ Xóa preferences cũ
+      await _supabase
+          .from('user_activity_preferences')
+          .delete()
+          .eq('for_user', userId);
+
+      // ✅ INSERT: KHÔNG CÓ activity_factor column
+      final insertData = {
+        'for_user': userId,
+        'for_activity_level': activityLevelId,
+        'daily_calorie_target': dailyCalories,
+        // ✅ XÓA: 'activity_factor': factor,
+        'created_at': DateTime.now().toIso8601String(),
+        'updated_at': DateTime.now().toIso8601String(),
+      };
+
+      await _supabase.from('user_activity_preferences').insert(insertData);
+
+      // ✅ Load activity_factor từ activity_levels
+      await _loadCurrentActivityFactor(activityLevelId);
+
+      await loadMealsByDate(_selectedDateTime);
+
+      debugPrint('✅ Activity preference saved successfully');
+    } catch (e, stackTrace) {
+      developer.log(
+        '❌ ERROR in saveActivityPreference',
+        name: 'MealPlannerCubit',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      emit(MealPlannerError('Error saving activity preference: $e'));
+      rethrow;
+    }
+  }
+
+  /// ✅ THÊM: Helper method để load activity_factor từ activity_levels
+  Future<void> _loadCurrentActivityFactor(String activityLevelId) async {
+    try {
+      final level = await _supabase
+          .from('activity_levels')
+          .select('activity_factor')
+          .eq('id', activityLevelId)
+          .single();
+
+      currentActivityFactor = level['activity_factor'] as double? ?? 1.55;
+    } catch (e) {
+      developer.log(
+        '⚠️ Failed to load activity_factor, using default',
+        name: 'MealPlannerCubit',
+      );
+      currentActivityFactor = 1.55;
+    }
+  }
+
+  /// ✅ Load activity levels từ Supabase
+  Future<void> loadActivityLevels() async {
+    try {
+      developer.log('🟢 START: loadActivityLevels', name: 'MealPlannerCubit');
+
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) {
+        developer.log('❌ User not authenticated', name: 'MealPlannerCubit');
+        emit(MealPlannerError('User not authenticated'));
         return;
       }
 
+      developer.log('User ID: $userId', name: 'MealPlannerCubit');
+
+      // ✅ CHECK: Có preference chưa
+      developer.log(
+        '🔍 Checking existing preference',
+        name: 'MealPlannerCubit',
+      );
+      final hasPreference = await checkActivityPreference();
+
+      developer.log('Has preference: $hasPreference', name: 'MealPlannerCubit');
+
+      if (hasPreference) {
+        developer.log(
+          '✅ User has preference, skip dialog',
+          name: 'MealPlannerCubit',
+        );
+        return; // ✅ KHÔNG emit state → dialog không hiện
+      }
+
+      // ✅ Emit loading TRƯỚC KHI query
+      developer.log('⏳ Emitting MealPlannerLoading', name: 'MealPlannerCubit');
       emit(MealPlannerLoading());
 
+      // ✅ Query activity levels
+      developer.log(
+        '📥 Fetching activity levels from DB',
+        name: 'MealPlannerCubit',
+      );
       final response = await _supabase
           .from('activity_levels')
           .select()
           .order('number', ascending: true);
 
+      developer.log('Response: $response', name: 'MealPlannerCubit');
+
       if (response == null || (response as List).isEmpty) {
+        developer.log('❌ No activity levels found', name: 'MealPlannerCubit');
         emit(MealPlannerError('Không có dữ liệu mức độ hoạt động'));
         return;
       }
 
+      developer.log(
+        'Found ${(response as List).length} activity levels',
+        name: 'MealPlannerCubit',
+      );
+
+      // ✅ Parse activity levels
       final levels = (response as List)
           .map((json) {
             try {
-              return ActivityLevel.fromJson(json as Map<String, dynamic>);
+              final level = ActivityLevel.fromJson(
+                json as Map<String, dynamic>,
+              );
+              developer.log(
+                'Parsed level: ${level.title}',
+                name: 'MealPlannerCubit',
+              );
+              return level;
             } catch (e) {
-              print('❌ Lỗi parse activity level: $e');
+              developer.log(
+                '❌ Failed to parse level: $e',
+                name: 'MealPlannerCubit',
+              );
               return null;
             }
           })
@@ -93,71 +189,73 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
           .toList();
 
       if (levels.isEmpty) {
+        developer.log(
+          '❌ No valid levels after parsing',
+          name: 'MealPlannerCubit',
+        );
         emit(MealPlannerError('Lỗi load dữ liệu mức độ hoạt động'));
         return;
       }
 
+      developer.log(
+        '✅ Emitting ActivityLevelsLoaded with ${levels.length} levels',
+        name: 'MealPlannerCubit',
+      );
       emit(ActivityLevelsLoaded(levels));
-    } catch (e) {
+
+      developer.log(
+        '🎉 loadActivityLevels completed successfully',
+        name: 'MealPlannerCubit',
+      );
+    } catch (e, stackTrace) {
+      developer.log(
+        '❌ ERROR in loadActivityLevels',
+        name: 'MealPlannerCubit',
+        error: e,
+        stackTrace: stackTrace,
+      );
+
       emit(MealPlannerError('Error loading activity levels: ${e.toString()}'));
       print('❌ Error loading activity levels: $e');
+      print('Stack trace: $stackTrace');
     }
   }
 
-  /// ✅ Save activity preference to database
-  Future<void> saveActivityPreference(
-    String activityLevelId,
-    int dailyCalories,
-  ) async {
+  /// ✅ Check nếu user đã có activity preference
+  Future<bool> checkActivityPreference() async {
     try {
       final userId = _supabase.auth.currentUser?.id;
-      if (userId == null) {
-        emit(MealPlannerError('User not authenticated'));
-        return;
-      }
+      if (userId == null) return false;
 
-      final activityFactorMap = {
-        'sedentary': 1.2,
-        'lightly_active': 1.375,
-        'moderately_active': 1.55,
-        'very_active': 1.725,
-        'extremely_active': 1.9,
-      };
-
-      final factor = activityFactorMap[activityLevelId] ?? 1.55;
-      currentActivityFactor = factor;
-
+      // ✅ JOIN với activity_levels để lấy activity_factor
       final existing = await _supabase
           .from('user_activity_preferences')
-          .select()
+          .select('for_activity_level, activity_levels!inner(activity_factor)')
           .eq('for_user', userId)
           .maybeSingle();
 
       if (existing != null) {
-        await _supabase
-            .from('user_activity_preferences')
-            .update({
-              'for_activity_level': activityLevelId,
-              'daily_calorie_target': dailyCalories,
-              'updated_at': DateTime.now().toIso8601String(),
-            })
-            .eq('for_user', userId);
-      } else {
-        await _supabase.from('user_activity_preferences').insert({
-          'for_user': userId,
-          'for_activity_level': activityLevelId,
-          'daily_calorie_target': dailyCalories,
-          'created_at': DateTime.now().toIso8601String(),
-          'updated_at': DateTime.now().toIso8601String(),
-        });
+        // ✅ Lấy activity_factor từ JOIN
+        final activityLevels = existing['activity_levels'] as Map?;
+        final factor = activityLevels?['activity_factor'] as double? ?? 1.55;
+        currentActivityFactor = factor;
+
+        developer.log(
+          '✅ Found preference with factor: $factor',
+          name: 'MealPlannerCubit',
+        );
+        return true;
       }
 
-      // ✅ NGAY SAU KHI LƯU → LOAD LẠI MEALS ĐỂ CẬP NHẬT TARGET
-      await loadMealsByDate(_selectedDateTime);
-
-      debugPrint('✅ Activity preference saved and meals reloaded');
-    } catch (e) {
-      emit(MealPlannerError('Error saving activity preference: $e'));
+      return false;
+    } catch (e, stackTrace) {
+      developer.log(
+        '❌ ERROR in checkActivityPreference',
+        name: 'MealPlannerCubit',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return false;
     }
   }
 

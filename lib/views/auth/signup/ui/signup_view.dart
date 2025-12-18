@@ -45,33 +45,36 @@ class _SignUpFormState extends State<_SignUpForm> {
     return BlocConsumer<AuthenticationCubit, AuthenticationState>(
       listener: (context, state) {
         if (state is SignUpSuccess) {
+          // ✅ CHECK: Đảm bảo widget chưa bị dispose
           if (!mounted) return;
 
           log('✅ SignUp Success - Navigating to LoginView');
 
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted && context.mounted) {
-              // Navigator.of(context).pushReplacement(
-              //   MaterialPageRoute(builder: (_) => const LoginView()),
-              // );
-              navigateTo(context, const LoginView());
-            }
+            // ✅ DOUBLE CHECK: Context vẫn còn valid
+            if (!mounted) return;
+            if (!context.mounted) return;
+
+            navigateTo(context, const LoginView());
           });
         }
 
         if (state is SignUpError) {
+          // ✅ CHECK: Đảm bảo widget chưa bị dispose
           if (!mounted) return;
 
           log('❌ SignUp Error: ${state.message}');
 
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted && context.mounted) {
-              showCustomDelightToastBar(
-                context,
-                state.message,
-                const Icon(Icons.error, color: Colors.red),
-              );
-            }
+            // ✅ DOUBLE CHECK: Context vẫn còn valid
+            if (!mounted) return;
+            if (!context.mounted) return;
+
+            showCustomDelightToastBar(
+              context,
+              state.message,
+              const Icon(Icons.error, color: Colors.red),
+            );
           });
         }
       },
@@ -130,13 +133,17 @@ class _SignUpFormState extends State<_SignUpForm> {
                         title: LocaleKey.buttonRegis.tr,
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
-                            // Lưu thông tin cơ bản
+                            // ✅ CHECK: Context vẫn valid trước khi gọi cubit
+                            if (!mounted) return;
+
                             context.read<AuthenticationCubit>().saveBasicInfo(
                               email: _emailController.text.trim(),
                               password: _passwordController.text,
                               username: _usernameController.text.trim(),
                             );
-                            // Hiển thị dialog complete profile
+
+                            // ✅ CHECK: Context vẫn valid trước khi show dialog
+                            if (!mounted) return;
                             showCompleteProfileDialog(context);
                           }
                         },

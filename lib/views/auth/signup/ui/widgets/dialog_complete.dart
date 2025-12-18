@@ -9,13 +9,17 @@ import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/views/auth/cubit/authentication_cubit.dart';
 import 'package:smart_fitness_assistant/views/auth/signup/ui/widgets/what_your_goal_view.dart';
 
+// ✅ THÊM: Check context trước khi show dialog
 void showCompleteProfileDialog(BuildContext context) {
+  // ✅ CHECK: Context còn mounted
+  if (!context.mounted) return;
+
   showDialog(
     context: context,
     barrierDismissible: false,
-    builder: (dialogContext) {
-      return CompleteProfileDialog(parentContext: context);
-    },
+    builder: (dialogContext) => CompleteProfileDialog(
+      parentContext: context, // ✅ THÊM: Pass parent context
+    ),
   );
 }
 
