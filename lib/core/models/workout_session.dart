@@ -2,7 +2,6 @@ class WorkoutSession {
   final String? id;
   final String forUser;
   final String categoryId;
-  final String categoryName;
   final int totalExercises;
   final int completedExercises;
   final int totalSets;
@@ -15,7 +14,6 @@ class WorkoutSession {
     this.id,
     required this.forUser,
     required this.categoryId,
-    required this.categoryName,
     required this.totalExercises,
     required this.completedExercises,
     required this.totalSets,
@@ -30,7 +28,6 @@ class WorkoutSession {
       id: json['id'],
       forUser: json['for_user'],
       categoryId: json['category_id'],
-      categoryName: json['category_name'],
       totalExercises: json['total_exercises'],
       completedExercises: json['completed_exercises'],
       totalSets: json['total_sets'],
@@ -51,7 +48,6 @@ class WorkoutSession {
     return {
       'for_user': forUser,
       'category_id': categoryId,
-      'category_name': categoryName,
       'total_exercises': totalExercises,
       'completed_exercises': completedExercises,
       'total_sets': totalSets,

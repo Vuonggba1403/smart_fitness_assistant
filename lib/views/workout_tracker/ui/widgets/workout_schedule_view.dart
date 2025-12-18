@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get_utils/src/extensions/internacionalization.dart';
 import 'package:intl/intl.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
@@ -101,12 +102,7 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
       _loadSchedules(); // ✅ Reload local
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('✅ Đã đánh dấu hoàn thành'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        AppSnackBar.success(context, '✅ Đã đánh dấu hoàn thành');
       }
     } catch (e) {
       print('❌ Error marking completed: $e');

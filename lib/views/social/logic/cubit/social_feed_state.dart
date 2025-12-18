@@ -9,14 +9,12 @@ class SocialFeedLoaded extends SocialFeedState {
   final List<ContentPost> posts;
   final File? selectedImage;
   final ExerciseCategory? selectedCategory;
-  final bool showEmojiPicker;
   final List<Map<String, dynamic>>? comments;
 
   SocialFeedLoaded({
     required this.posts,
     this.selectedImage,
     this.selectedCategory,
-    this.showEmojiPicker = false,
     this.comments,
   });
 
@@ -25,7 +23,6 @@ class SocialFeedLoaded extends SocialFeedState {
     List<ContentPost>? posts,
     File? selectedImage,
     ExerciseCategory? selectedCategory,
-    bool? showEmojiPicker,
     List<Map<String, dynamic>>? comments,
     bool clearImage = false,
   }) {
@@ -33,7 +30,6 @@ class SocialFeedLoaded extends SocialFeedState {
       posts: posts ?? this.posts,
       selectedImage: clearImage ? null : (selectedImage ?? this.selectedImage),
       selectedCategory: selectedCategory ?? this.selectedCategory,
-      showEmojiPicker: showEmojiPicker ?? this.showEmojiPicker,
       comments: comments ?? this.comments,
     );
   }
@@ -44,7 +40,6 @@ class SocialFeedLoaded extends SocialFeedState {
       posts: posts,
       selectedImage: null,
       selectedCategory: null,
-      showEmojiPicker: false,
       comments: comments,
     );
   }

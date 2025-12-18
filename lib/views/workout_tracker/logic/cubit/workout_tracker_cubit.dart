@@ -564,10 +564,8 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
 
         List<WorkoutSet> sets;
         if (i == currentState.currentExerciseIndex) {
-          // ✅ FIX: Lấy sets thực tế từ state
           sets = currentState.sets;
         } else if (i < currentState.currentExerciseIndex) {
-          // ✅ FIX: Bài đã hoàn thành → giả sử 4 sets
           sets = List.generate(
             4,
             (index) => WorkoutSet(
@@ -578,7 +576,6 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
             ),
           );
         } else {
-          // Bài chưa làm
           sets = List.generate(
             4,
             (index) => WorkoutSet(
@@ -604,7 +601,6 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
         totalSets += setDetails.length;
         completedSets += setDetails.where((s) => s.isCompleted).length;
 
-        // ✅ FIX: Chỉ đếm exercise hoàn thành khi TẤT CẢ sets đều completed
         if (setDetails.isNotEmpty && setDetails.every((s) => s.isCompleted)) {
           completedExercises++;
         }
@@ -618,24 +614,25 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
         );
       }
 
-      final session = WorkoutSession(
-        forUser: userId,
-        categoryId: currentState.categoryId,
-        categoryName: currentState.categoryName,
-        totalExercises: currentState.exercises.length,
-        completedExercises: completedExercises,
-        totalSets: totalSets,
-        completedSets: completedSets,
-        durationSeconds: currentState.elapsedSeconds,
-        exerciseDetails: exerciseDetails,
-      );
+      // ✅ FIX: BỎ category_name, CHỈ GỬI category_id
+      final sessionData = {
+        'for_user': userId,
+        'category_id': currentState.categoryId, // ✅ CHỈ GỬI ID
+        // ❌ BỎ: 'category_name': currentState.categoryName,
+        'total_exercises': currentState.exercises.length,
+        'completed_exercises': completedExercises,
+        'total_sets': totalSets,
+        'completed_sets': completedSets,
+        'duration_seconds': currentState.elapsedSeconds,
+        'exercise_details': exerciseDetails.map((e) => e.toJson()).toList(),
+      };
 
       print('📦 Session data to save:');
-      print(session.toJson());
+      print(sessionData);
 
       final response = await _supabase
           .from('history_workout')
-          .insert(session.toJson())
+          .insert(sessionData)
           .select();
 
       print('✅ Insert successful: $response');

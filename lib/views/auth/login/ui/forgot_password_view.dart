@@ -5,7 +5,7 @@ import 'package:lottie/lottie.dart';
 import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
-import 'package:smart_fitness_assistant/core/widgets/custom_derlight_bar.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_textfield.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
@@ -30,19 +30,11 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
     return BlocConsumer<AuthenticationCubit, AuthenticationState>(
       listener: (context, state) {
         if (state is PasswordResetSuccess) {
-          showCustomDelightToastBar(
-            context,
-            "Password reset email sent",
-            Icon(Icons.check, color: Colors.green),
-          );
+          AppSnackBar.success(context, LocaleKey.passwordResetSuccess.tr);
           navigateTo(context, LoginView());
         }
         if (state is PasswordResetError) {
-          showCustomDelightToastBar(
-            context,
-            LocaleKey.passwordResetError.tr,
-            const Icon(Icons.error, color: Colors.red),
-          );
+          AppSnackBar.error(context, LocaleKey.passwordResetError.tr);
         }
       },
       builder: (context, state) {

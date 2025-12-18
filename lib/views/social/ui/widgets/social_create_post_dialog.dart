@@ -1,43 +1,39 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' as foundation;
-import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/models/exercise_category.dart';
-import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'dart:io';
+
+import '../../../../locale/locale_key.dart';
 
 /// ✅ Widget: Create Post Bottom Sheet Dialog
 class SocialCreatePostDialog extends StatelessWidget {
   final File? selectedImage;
   final TextEditingController captionController;
-  final bool showEmojiPicker;
   final List<ExerciseCategory>? categories;
   final ExerciseCategory? selectedCategory;
   final VoidCallback onImagePickerTap;
   final VoidCallback? onImageRemove;
   final Function(ExerciseCategory?) onCategoryChanged;
-  final VoidCallback onEmojiToggle;
   final VoidCallback onPostPressed;
-  final Function(bool) onShowEmojiPickerChanged;
 
   const SocialCreatePostDialog({
     super.key,
     required this.selectedImage,
     required this.captionController,
-    required this.showEmojiPicker,
     required this.categories,
     required this.selectedCategory,
     required this.onImagePickerTap,
     this.onImageRemove,
     required this.onCategoryChanged,
-    required this.onEmojiToggle,
     required this.onPostPressed,
-    required this.onShowEmojiPickerChanged,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color;
+    final cardColor = theme.cardColor;
 
     return DraggableScrollableSheet(
       initialChildSize: 0.9,
@@ -45,7 +41,7 @@ class SocialCreatePostDialog extends StatelessWidget {
       maxChildSize: 0.95,
       builder: (context, scrollController) => Container(
         decoration: BoxDecoration(
-          color: theme.scaffoldBackgroundColor,
+          color: cardColor,
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(25),
             topRight: Radius.circular(25),
@@ -66,7 +62,7 @@ class SocialCreatePostDialog extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Text(
-                'Tạo bài đăng',
+                LocaleKey.createPost.tr,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
@@ -106,7 +102,7 @@ class SocialCreatePostDialog extends StatelessWidget {
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
-                                    'Chọn ảnh từ thư viện',
+                                    LocaleKey.choiceImg.tr,
                                     style: TextStyle(
                                       color: TColor.primaryColor1,
                                       fontSize: 14,
@@ -127,11 +123,11 @@ class SocialCreatePostDialog extends StatelessWidget {
 
                     // ✅ Category Tag Section
                     Text(
-                      'Gắn thẻ bài tập (tuỳ chọn)',
+                      LocaleKey.tagWork.tr,
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: theme.textTheme.bodyMedium?.color,
+                        color: textColor,
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -143,15 +139,11 @@ class SocialCreatePostDialog extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color: selectedCategory != null
-                              ? TColor.primaryColor1
-                              : TColor.gray.withOpacity(0.3),
-                          width: selectedCategory != null ? 2 : 1,
+                          color: TColor.primaryColor2,
+                          width: 1,
                         ),
                         borderRadius: BorderRadius.circular(10),
-                        color: selectedCategory != null
-                            ? TColor.primaryColor1.withOpacity(0.05)
-                            : Colors.transparent,
+                        color: cardColor,
                       ),
                       child: categories == null
                           ? Padding(
@@ -169,13 +161,13 @@ class SocialCreatePostDialog extends StatelessWidget {
                                         Icon(
                                           Icons.fitness_center,
                                           size: 18,
-                                          color: TColor.gray,
+                                          color: textColor,
                                         ),
                                         const SizedBox(width: 8),
                                         Text(
-                                          'Chọn bài tập...',
+                                          LocaleKey.chooseWork.tr,
                                           style: TextStyle(
-                                            color: TColor.gray,
+                                            color: textColor,
                                             fontSize: 14,
                                           ),
                                         ),
@@ -186,14 +178,14 @@ class SocialCreatePostDialog extends StatelessWidget {
                                         Icon(
                                           Icons.fitness_center,
                                           size: 18,
-                                          color: TColor.primaryColor1,
+                                          color: textColor,
                                         ),
                                         const SizedBox(width: 8),
                                         Expanded(
                                           child: Text(
                                             selectedCategory!.titleEx ?? 'N/A',
                                             style: TextStyle(
-                                              color: TColor.primaryColor1,
+                                              color: textColor,
                                               fontSize: 14,
                                               fontWeight: FontWeight.w600,
                                             ),
@@ -209,16 +201,17 @@ class SocialCreatePostDialog extends StatelessWidget {
                                   value: category,
                                   child: Text(
                                     category.titleEx ?? 'N/A',
-                                    style: const TextStyle(
-                                      color: Colors.black87,
+                                    style: TextStyle(
+                                      color: textColor,
                                       fontSize: 14,
                                     ),
                                   ),
                                 );
                               }).toList(),
                               onChanged: onCategoryChanged,
-                              dropdownColor: theme.scaffoldBackgroundColor,
+                              dropdownColor: textColor,
                               borderRadius: BorderRadius.circular(10),
+
                               icon: Icon(
                                 Icons.expand_more,
                                 color: selectedCategory != null
@@ -236,11 +229,11 @@ class SocialCreatePostDialog extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Ảnh đã chọn',
+                            LocaleKey.submitPic.tr,
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
-                              color: theme.textTheme.bodyMedium?.color,
+                              color: textColor,
                             ),
                           ),
                           const SizedBox(height: 10),
@@ -290,7 +283,7 @@ class SocialCreatePostDialog extends StatelessWidget {
                             child: OutlinedButton.icon(
                               onPressed: onImagePickerTap,
                               icon: Icon(Icons.edit, size: 18),
-                              label: const Text('Thay đổi ảnh'),
+                              label: Text(LocaleKey.changePic.tr),
                               style: OutlinedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 12,
@@ -303,16 +296,16 @@ class SocialCreatePostDialog extends StatelessWidget {
                         ],
                       ),
 
-                    // ✅ Caption Input
+                    // ✅ Caption Input (removed emoji picker)
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Caption',
+                          LocaleKey.caption.tr,
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: theme.textTheme.bodyMedium?.color,
+                            color: textColor,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -324,79 +317,19 @@ class SocialCreatePostDialog extends StatelessWidget {
                             borderRadius: BorderRadius.circular(15),
                             color: TColor.gray.withOpacity(0.05),
                           ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  controller: captionController,
-                                  maxLines: 5,
-                                  decoration: InputDecoration(
-                                    hintText: 'Viết caption...*',
-                                    hintStyle: TextStyle(
-                                      color: TColor.gray.withOpacity(0.6),
-                                    ),
-                                    border: InputBorder.none,
-                                    contentPadding: const EdgeInsets.all(16),
-                                  ),
-                                ),
+                          child: TextField(
+                            controller: captionController,
+                            maxLines: 5,
+                            decoration: InputDecoration(
+                              hintText: LocaleKey.writeCap.tr,
+                              hintStyle: TextStyle(
+                                color: TColor.gray.withOpacity(0.6),
                               ),
-                              IconButton(
-                                onPressed: onEmojiToggle,
-                                icon: Icon(
-                                  Icons.emoji_emotions_outlined,
-                                  color: showEmojiPicker
-                                      ? TColor.primaryColor1
-                                      : TColor.gray,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        // ✅ Emoji Picker
-                        if (showEmojiPicker)
-                          SizedBox(
-                            height: 256,
-                            child: EmojiPicker(
-                              onEmojiSelected:
-                                  (Category? category, Emoji emoji) {
-                                    captionController.text += emoji.emoji;
-                                  },
-                              onBackspacePressed: () {
-                                if (captionController.text.isNotEmpty) {
-                                  captionController.text = captionController
-                                      .text
-                                      .substring(
-                                        0,
-                                        captionController.text.length - 1,
-                                      );
-                                }
-                              },
-                              textEditingController: captionController,
-                              config: Config(
-                                height: 256,
-                                checkPlatformCompatibility: true,
-                                emojiViewConfig: EmojiViewConfig(
-                                  emojiSizeMax:
-                                      28 *
-                                      (foundation.defaultTargetPlatform ==
-                                              TargetPlatform.iOS
-                                          ? 1.20
-                                          : 1.0),
-                                ),
-                                viewOrderConfig: const ViewOrderConfig(
-                                  top: EmojiPickerItem.categoryBar,
-                                  middle: EmojiPickerItem.emojiView,
-                                  bottom: EmojiPickerItem.searchBar,
-                                ),
-                                skinToneConfig: const SkinToneConfig(),
-                                categoryViewConfig: const CategoryViewConfig(),
-                                bottomActionBarConfig:
-                                    const BottomActionBarConfig(),
-                                searchViewConfig: const SearchViewConfig(),
-                              ),
+                              border: InputBorder.none,
+                              contentPadding: const EdgeInsets.all(16),
                             ),
                           ),
+                        ),
                       ],
                     ),
 
@@ -414,10 +347,11 @@ class SocialCreatePostDialog extends StatelessWidget {
                             borderRadius: BorderRadius.circular(15),
                           ),
                         ),
-                        child: const Text(
-                          'Đăng bài',
+                        child: Text(
+                          LocaleKey.postNew.tr,
                           style: TextStyle(
                             fontSize: 16,
+                            color: textColor,
                             fontWeight: FontWeight.w600,
                           ),
                         ),

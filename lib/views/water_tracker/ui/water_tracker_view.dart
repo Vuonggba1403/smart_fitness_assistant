@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/models/water_intake.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
 import 'package:smart_fitness_assistant/views/water_tracker/logic/cubit/water_tracker_cubit.dart';
 import 'package:smart_fitness_assistant/views/water_tracker/ui/widgets/water_congratulations_dialog.dart'; // ✅ THÊM
 import 'dart:math' as math;
@@ -107,11 +108,9 @@ class _WaterTrackerContentState extends State<_WaterTrackerContent> {
 
                   // ✅ Show success message
                   if (widgetContext.mounted) {
-                    ScaffoldMessenger.of(widgetContext).showSnackBar(
-                      SnackBar(
-                        content: Text('✅ Đã cập nhật mục tiêu: ${tempGoal}ml'),
-                        backgroundColor: Colors.green,
-                      ),
+                    AppSnackBar.success(
+                      widgetContext,
+                      'Đã cập nhật mục tiêu: ${tempGoal}ml',
                     );
                   }
                 },
@@ -254,13 +253,9 @@ class _WaterTrackerContentState extends State<_WaterTrackerContent> {
 
                   // ✅ Show success message
                   if (widgetContext.mounted) {
-                    ScaffoldMessenger.of(widgetContext).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          '✅ Đã cập nhật nhắc nhở: ${updatedSettings.reminderIntervalMinutes} phút',
-                        ),
-                        backgroundColor: Colors.green,
-                      ),
+                    AppSnackBar.success(
+                      widgetContext,
+                      'Đã cập nhật nhắc nhở: ${updatedSettings.reminderIntervalMinutes} phút',
                     );
                   }
                 },

@@ -1,3 +1,5 @@
+import 'package:intl/locale.dart';
+
 import 'locale_key.dart';
 
 Map<String, String> viVN = {
@@ -62,6 +64,7 @@ Map<String, String> viVN = {
       "Vui lòng nhập địa chỉ email của bạn để nhận liên kết đặt lại mật khẩu.",
   LocaleKey.buttonSend: "Gửi",
   LocaleKey.passwordResetError: "Lỗi đặt lại mật khẩu",
+  LocaleKey.passwordResetSuccess: "Email đặt lại mật khẩu đã được gửi",
 
   //Home View
   LocaleKey.welcomeBack: 'Chào mừng trở lại',
@@ -104,6 +107,8 @@ Map<String, String> viVN = {
   LocaleKey.otherArr2: "Chính sách quyền riêng tư",
   LocaleKey.otherArr3: "Cài đặt",
   LocaleKey.logout: "Đăng xuất",
+  LocaleKey.logoutSuccess: "Đăng xuất thành công",
+  LocaleKey.logoutError: "Đăng xuất thất bại",
 
   //Work Tracker View
   LocaleKey.gymEx: "Bài tập tại phòng gym",
@@ -138,4 +143,23 @@ Map<String, String> viVN = {
   LocaleKey.nextReminder: "Nhắc nhở tiếp theo",
   LocaleKey.addWater: "Thêm nước",
   LocaleKey.waterIntake: "Ghi nước một chạm",
+
+  //Social View
+  LocaleKey.postImg: "Chụp ảnh",
+  LocaleKey.choiceImg: "Chọn từ thư viện",
+  LocaleKey.titleSocial: "Diễn Đàn Fitness",
+  LocaleKey.noPost: "Chưa có bài đăng",
+  LocaleKey.newThing: "Có gì mới không? 💭",
+  LocaleKey.buttonPost: "Ảnh/Video",
+  LocaleKey.createPost: "Tạo bài đăng",
+  LocaleKey.tagWork: "Gắn thẻ bài tập (tuỳ chọn)",
+  LocaleKey.chooseWork: "Chọn bài tập",
+  LocaleKey.submitPic: "Ảnh đã chọn",
+  LocaleKey.changePic: "Thay đổi ảnh",
+  LocaleKey.caption: "Chú thích",
+  LocaleKey.writeCap: "Viết chú thích...*",
+  LocaleKey.postNew: "Đăng bài",
+  LocaleKey.comments: "Bình luận",
+  LocaleKey.noComments: "Chưa có bình luận nào",
+  LocaleKey.writeComments: "Viết bình luận...",
 };

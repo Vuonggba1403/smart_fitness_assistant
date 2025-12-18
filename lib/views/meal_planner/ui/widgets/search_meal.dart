@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/models/meal.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
 import 'package:smart_fitness_assistant/views/meal_planner/ui/widgets/food_details.dart';
 import 'package:smart_fitness_assistant/views/meal_planner/logic/cubit/meal_planner_cubit.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'; // ✅ THÊM import
@@ -207,12 +208,8 @@ class _SearchMealState extends State<SearchMeal>
     }, _selectedDateTime);
 
     // ✅ Hiển thị snackbar
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${meal.name} được thêm vào bữa ăn'),
-        duration: const Duration(seconds: 2),
-      ),
-    );
+
+    AppSnackBar.success(context, '${meal.name} được thêm vào bữa ăn');
 
     /// 🔙 Quay lại meal planner view
     Navigator.pop(context);
@@ -630,25 +627,14 @@ class _SearchMealState extends State<SearchMeal>
       }, DateTime.now());
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '✅ Đã thêm: ${meal['meal_name']} vào ${_getMealTypeName(mealType)}',
-            ),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 2),
-          ),
+        AppSnackBar.success(
+          context,
+          '${meal['meal_name']} được thêm vào ${_getMealTypeName(mealType)}',
         );
       }
     } else {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('❌ Không tìm thấy thực phẩm với mã vạch này'),
-            backgroundColor: Colors.red,
-            duration: Duration(seconds: 2),
-          ),
-        );
+        AppSnackBar.error(context, 'Không tìm thấy thực phẩm với mã vạch này');
       }
     }
   }

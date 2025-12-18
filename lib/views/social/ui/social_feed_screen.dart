@@ -1,12 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get_utils/src/extensions/internacionalization.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
-import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'package:smart_fitness_assistant/core/models/exercise_category.dart';
-import 'package:smart_fitness_assistant/core/models/content_post.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/views/social/logic/cubit/social_feed_cubit.dart';
 import 'package:smart_fitness_assistant/views/social/ui/widgets/social_post_card.dart';
 import 'package:smart_fitness_assistant/views/social/ui/widgets/social_post_creation_card.dart';
@@ -64,7 +64,7 @@ class _SocialFeedScreenState extends State<SocialFeedScreen> {
           children: [
             ListTile(
               leading: Icon(Icons.camera_alt, color: TColor.primaryColor1),
-              title: const Text("Chụp ảnh"),
+              title: Text(LocaleKey.postImg.tr),
               onTap: () {
                 Navigator.pop(context);
                 _pickImage(ImageSource.camera);
@@ -72,7 +72,7 @@ class _SocialFeedScreenState extends State<SocialFeedScreen> {
             ),
             ListTile(
               leading: Icon(Icons.photo_library, color: TColor.primaryColor1),
-              title: const Text("Chọn từ thư viện"),
+              title: Text(LocaleKey.choiceImg.tr),
               onTap: () {
                 Navigator.pop(context);
                 _pickImage(ImageSource.gallery);
@@ -133,7 +133,10 @@ class _SocialFeedScreenState extends State<SocialFeedScreen> {
     final textColor = theme.textTheme.bodyMedium?.color;
 
     return Scaffold(
-      appBar: CustomAppBar(title: "Diễn đàn Fitness", showBackButton: false),
+      appBar: CustomAppBar(
+        title: LocaleKey.titleSocial.tr,
+        showBackButton: false,
+      ),
       backgroundColor: theme.scaffoldBackgroundColor,
       body: BlocBuilder<SocialFeedCubit, SocialFeedState>(
         builder: (context, state) {
@@ -152,7 +155,7 @@ class _SocialFeedScreenState extends State<SocialFeedScreen> {
                     padding: const EdgeInsets.all(50),
                     child: Center(
                       child: Text(
-                        "Chưa có bài đăng",
+                        LocaleKey.noPost.tr,
                         style: TextStyle(color: textColor),
                       ),
                     ),
@@ -198,20 +201,13 @@ class _SocialFeedScreenState extends State<SocialFeedScreen> {
             selectedImage: state.selectedImage,
             categories: _categories,
             selectedCategory: state.selectedCategory,
-            showEmojiPicker: state.showEmojiPicker,
             onImagePickerTap: _showImageSourceDialog,
             onPostPressed: _postContent,
-            onEmojiToggle: () {
-              context.read<SocialFeedCubit>().toggleEmojiPicker();
-            },
             onCategoryChanged: (c) {
               context.read<SocialFeedCubit>().setSelectedCategory(c);
             },
             onImageRemove: () {
               context.read<SocialFeedCubit>().clearSelectedImage();
-            },
-            onShowEmojiPickerChanged: (v) {
-              context.read<SocialFeedCubit>().setShowEmojiPicker(v);
             },
           );
         },

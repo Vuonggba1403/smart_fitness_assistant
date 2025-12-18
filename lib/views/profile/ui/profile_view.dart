@@ -5,7 +5,7 @@ import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/theme/logic/cubit/theme_cubit.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_alertdialog.dart';
-import 'package:smart_fitness_assistant/core/widgets/custom_derlight_bar.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_showdialog.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_toggle_switch.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
@@ -41,39 +41,24 @@ class ProfileView extends StatelessWidget {
       child: BlocConsumer<AuthenticationCubit, AuthenticationState>(
         listener: (context, state) {
           if (state is LogoutSuccess) {
-            // showCustomDelightToastBar(
-            //   context,
-            //   "Logout successful",
-            //   Icon(Icons.check, color: Colors.green),
-            // );
+            AppSnackBar.success(context, LocaleKey.logoutSuccess.tr);
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (context) => const LoginView()),
               (route) => false,
             );
           }
           if (state is LoginError) {
-            // showCustomDelightToastBar(
-            //   context,
-            //   "Logout failed",
-            //   const Icon(Icons.error, color: Colors.red),
-            // );
+            AppSnackBar.error(context, LocaleKey.logoutError.tr);
           }
           if (state is DeleteAccountSuccess) {
-            // ✅ XÓA: Không hiển thị toast trước khi navigate
-            // showCustomDelightToastBar sẽ dùng context đã bị dispose
-
-            // ✅ NGAY LẬP TỨC navigate và xóa toàn bộ stack
+            AppSnackBar.success(context, "Tài khoản đã được xóa thành công.");
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (context) => const LoginView()),
               (route) => false,
             );
           }
           if (state is DeleteAccountError) {
-            showCustomDelightToastBar(
-              context,
-              state.message,
-              const Icon(Icons.error, color: Colors.red),
-            );
+            AppSnackBar.error(context, state.message);
           }
         },
         builder: (context, state) {

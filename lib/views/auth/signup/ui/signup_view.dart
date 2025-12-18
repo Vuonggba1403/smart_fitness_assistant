@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
-import 'package:smart_fitness_assistant/core/widgets/custom_derlight_bar.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_textfield.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
@@ -70,11 +70,7 @@ class _SignUpFormState extends State<_SignUpForm> {
             if (!mounted) return;
             if (!context.mounted) return;
 
-            showCustomDelightToastBar(
-              context,
-              state.message,
-              const Icon(Icons.error, color: Colors.red),
-            );
+            AppSnackBar.error(context, state.message);
           });
         }
       },

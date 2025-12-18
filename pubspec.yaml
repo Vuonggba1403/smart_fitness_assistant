@@ -37,7 +37,6 @@ dependencies:
   timezone: ^0.10.1
   flutter_local_notifications: ^19.5.0
   cupertino_icons: ^1.0.8
-  delightful_toast: ^1.1.0
   dotted_dashed_line: ^0.0.3
   dropdown_button2: ^2.3.8
   fl_chart: ^1.1.1
@@ -53,8 +52,6 @@ dependencies:
   simple_circular_progress_bar: ^1.0.2
   supabase_flutter: ^2.10.3
   image_picker: ^1.2.1
-  emoji_picker_flutter: ^4.4.0
-  mobile_scanner: ^7.1.4
   dash_chat_2: ^0.0.21
   animated_text_kit: ^4.3.0
   flutter_gemini: ^3.0.0

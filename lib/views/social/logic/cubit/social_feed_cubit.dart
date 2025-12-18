@@ -28,12 +28,10 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
           .order('created_at', ascending: false);
 
       // 🔥 Check if current user has liked each post
-      List<ContentPost> posts = response
-          .map((e) {
-            final post = ContentPost.fromJson(e);
-            return post;
-          })
-          .toList();
+      List<ContentPost> posts = response.map((e) {
+        final post = ContentPost.fromJson(e);
+        return post;
+      }).toList();
 
       // 🔥 If user is logged in, check likes for each post
       if (userId != null) {
@@ -61,11 +59,7 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
         }).toList();
       }
 
-      emit(
-        SocialFeedLoaded(
-          posts: posts,
-        ),
-      );
+      emit(SocialFeedLoaded(posts: posts));
     } catch (e) {
       print('❌ Error loading feed: $e');
       emit(SocialFeedError('Không thể tải bài viết'));
@@ -91,10 +85,9 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
   void setSelectedImage(File? image) {
     if (state is SocialFeedLoaded) {
       final currentState = state as SocialFeedLoaded;
-      emit(currentState.copyWith(
-        selectedImage: image,
-        clearImage: image == null,
-      ));
+      emit(
+        currentState.copyWith(selectedImage: image, clearImage: image == null),
+      );
     }
   }
 
@@ -106,34 +99,17 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
     }
   }
 
-  /// ✅ TOGGLE EMOJI PICKER
-  void toggleEmojiPicker() {
-    if (state is SocialFeedLoaded) {
-      final currentState = state as SocialFeedLoaded;
-      emit(currentState.copyWith(
-        showEmojiPicker: !currentState.showEmojiPicker,
-      ));
-    }
-  }
-
-  /// ✅ SET EMOJI PICKER
-  void setShowEmojiPicker(bool value) {
-    if (state is SocialFeedLoaded) {
-      final currentState = state as SocialFeedLoaded;
-      emit(currentState.copyWith(showEmojiPicker: value));
-    }
-  }
-
   /// ✅ CLEAR SELECTED IMAGE
   void clearSelectedImage() {
     if (state is SocialFeedLoaded) {
       final currentState = state as SocialFeedLoaded;
-      emit(SocialFeedLoaded(
-        posts: currentState.posts,
-        selectedImage: null,
-        selectedCategory: currentState.selectedCategory,
-        showEmojiPicker: currentState.showEmojiPicker,
-      ));
+      emit(
+        SocialFeedLoaded(
+          posts: currentState.posts,
+          selectedImage: null,
+          selectedCategory: currentState.selectedCategory,
+        ),
+      );
     }
   }
 
@@ -231,7 +207,7 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
         await _supabase.rpc('increment_likes', params: {'post_id': postId});
       }
 
-      await loadFeed();
+      // ❌ REMOVED: await loadFeed() - không cần reload vì đã có optimistic update
     } catch (e) {
       print('❌ Error like: $e');
       emit(currentState); // Revert optimistic update on error
@@ -253,12 +229,14 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
       if (state is SocialFeedLoaded) {
         final currentState = state as SocialFeedLoaded;
         final mappedComments = comments
-            .map((e) => {
-              'id': e['id'],
-              'content': e['content'],
-              'username': e['user']?['username'] ?? 'Anonymous',
-              'created_at': e['created_at'],
-            })
+            .map(
+              (e) => {
+                'id': e['id'],
+                'content': e['content'],
+                'username': e['user']?['username'] ?? 'Anonymous',
+                'created_at': e['created_at'],
+              },
+            )
             .toList();
 
         emit(currentState.copyWith(comments: mappedComments));
@@ -355,7 +333,9 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
             taggedCategoryId: updatedPost.taggedCategoryId,
             taggedCategoryName: updatedPost.taggedCategoryName,
             likesCount: updatedPost.likesCount,
-            commentsCount: (updatedPost.commentsCount ?? 0) - 1 < 0 ? 0 : (updatedPost.commentsCount ?? 0) - 1,
+            commentsCount: (updatedPost.commentsCount ?? 0) - 1 < 0
+                ? 0
+                : (updatedPost.commentsCount ?? 0) - 1,
             createdAt: updatedPost.createdAt,
             updatedAt: updatedPost.updatedAt,
             imageUrl: updatedPost.imageUrl,
@@ -443,16 +423,10 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
 
       // 🔥 Delete from database in background
       // Delete all comments first
-      await _supabase
-          .from('post_comments')
-          .delete()
-          .eq('for_post', postId);
+      await _supabase.from('post_comments').delete().eq('for_post', postId);
 
       // Delete all likes
-      await _supabase
-          .from('post_favorites')
-          .delete()
-          .eq('for_post', postId);
+      await _supabase.from('post_favorites').delete().eq('for_post', postId);
 
       // Delete the post
       await _supabase
@@ -467,7 +441,7 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
       return true;
     } catch (e) {
       print('❌ Error deleting post: $e');
-      
+
       // ❌ Revert local state on error
       loadFeed();
       return false;

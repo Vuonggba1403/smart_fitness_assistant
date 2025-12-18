@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_showdialog.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
@@ -148,11 +149,9 @@ class _SocialPostCardState extends State<SocialPostCard> {
 
         if (!mounted) return;
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(success ? '✅ Xoá thành công' : '❌ Xoá thất bại'),
-            duration: const Duration(seconds: 2),
-          ),
+        AppSnackBar.success(
+          context,
+          success ? 'Đã xoá bài đăng' : 'Xoá bài đăng thất bại',
         );
       },
     );
@@ -364,7 +363,7 @@ class _SocialPostCardState extends State<SocialPostCard> {
                         widget.post.isLikedByMe
                             ? Icons.favorite
                             : Icons.favorite_border,
-                        color: TColor.primaryColor1,
+                        color: Colors.red,
                         size: 20,
                       ),
                       const SizedBox(width: 4),

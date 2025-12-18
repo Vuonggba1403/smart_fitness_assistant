@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
-import 'package:smart_fitness_assistant/core/widgets/custom_derlight_bar.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/views/auth/cubit/authentication_cubit.dart';
 import 'package:smart_fitness_assistant/views/auth/login/ui/login_view.dart';
@@ -61,12 +61,7 @@ class _WhatYourGoalViewState extends State<WhatYourGoalView> {
       listener: (context, state) {
         if (state is SignUpSuccess) {
           if (!mounted) return;
-
-          showCustomDelightToastBar(
-            context,
-            LocaleKey.registerSuccess.tr,
-            const Icon(Icons.check, color: Colors.green),
-          );
+          AppSnackBar.success(context, LocaleKey.registerSuccess.tr);
 
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted && context.mounted) {
@@ -79,11 +74,7 @@ class _WhatYourGoalViewState extends State<WhatYourGoalView> {
         if (state is SignUpError) {
           if (!mounted) return;
 
-          showCustomDelightToastBar(
-            context,
-            state.message,
-            const Icon(Icons.error, color: Colors.red),
-          );
+          AppSnackBar.error(context, state.message);
         }
       },
       builder: (context, state) {

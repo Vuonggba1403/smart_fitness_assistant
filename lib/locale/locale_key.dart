@@ -41,6 +41,7 @@ class LocaleKey {
   static const String textForgotPassword = "text_forgot_password";
   static const String buttonSend = "button_send";
   static const String passwordResetError = "password_reset_error";
+  static const String passwordResetSuccess = "password_reset_success";
 
   //Register View
   static const String textRegister = "text_register";
@@ -98,6 +99,8 @@ class LocaleKey {
   static const String otherArr2 = "other_arr2";
   static const String otherArr3 = "other_arr3";
   static const String logout = "logout";
+  static const String logoutSuccess = "logout_success";
+  static const String logoutError = "logout_error";
 
   //Work Tracker View
   static const String gymEx = "gym_ex";
@@ -132,4 +135,23 @@ class LocaleKey {
   static const String nextReminder = "next_reminder";
   static const String addWater = "add_water";
   static const String waterIntake = "water_intake";
+
+  //Social View
+  static const String postImg = "post_img";
+  static const String choiceImg = "choice_img";
+  static const String titleSocial = "title_social";
+  static const String noPost = "no_post";
+  static const String newThing = "new_thing";
+  static const String buttonPost = "button_post";
+  static const String createPost = "create_post";
+  static const String tagWork = "tag_work";
+  static const String chooseWork = "choose_work";
+  static const String submitPic = "submit_pic";
+  static const String changePic = "change_pic";
+  static const String caption = "caption";
+  static const String writeCap = "write_cap";
+  static const String postNew = "post_new";
+  static const String comments = "comments";
+  static const String noComments = "no_comments";
+  static const String writeComments = "write_comments";
 }

@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get_utils/src/extensions/internacionalization.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'package:smart_fitness_assistant/views/social/logic/cubit/social_feed_cubit.dart';
+
+import '../../../../locale/locale_key.dart';
 
 class SocialCommentBottomSheet extends StatefulWidget {
   final String postId;
@@ -57,13 +61,16 @@ class _SocialCommentBottomSheetState extends State<SocialCommentBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color;
+    final cardColor = theme.cardColor;
     return DraggableScrollableSheet(
       initialChildSize: 0.7,
       minChildSize: 0.5,
       maxChildSize: 0.95,
       builder: (context, scrollController) => Container(
         decoration: BoxDecoration(
-          color: widget.theme.scaffoldBackgroundColor,
+          color: cardColor,
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(25),
             topRight: Radius.circular(25),
@@ -86,7 +93,7 @@ class _SocialCommentBottomSheetState extends State<SocialCommentBottomSheet> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Bình luận',
+                    LocaleKey.comments.tr,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
@@ -114,10 +121,8 @@ class _SocialCommentBottomSheetState extends State<SocialCommentBottomSheet> {
                   if (comments.isEmpty) {
                     return Center(
                       child: Text(
-                        'Chưa có bình luận',
-                        style: TextStyle(
-                          color: widget.textColor?.withOpacity(0.6),
-                        ),
+                        LocaleKey.noComments.tr,
+                        style: TextStyle(color: textColor),
                       ),
                     );
                   }
@@ -135,10 +140,12 @@ class _SocialCommentBottomSheetState extends State<SocialCommentBottomSheet> {
                           children: [
                             CircleAvatar(
                               radius: 18,
-                              backgroundImage:
-                                  const AssetImage('assets/img/u1.png'),
-                              backgroundColor:
-                                  TColor.primaryColor1.withOpacity(0.3),
+                              backgroundImage: const AssetImage(
+                                'assets/img/u1.png',
+                              ),
+                              backgroundColor: TColor.primaryColor1.withOpacity(
+                                0.3,
+                              ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
@@ -148,7 +155,7 @@ class _SocialCommentBottomSheetState extends State<SocialCommentBottomSheet> {
                                   Container(
                                     padding: const EdgeInsets.all(12),
                                     decoration: BoxDecoration(
-                                      color: widget.theme.cardColor,
+                                      color: cardColor,
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Column(
@@ -156,10 +163,9 @@ class _SocialCommentBottomSheetState extends State<SocialCommentBottomSheet> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          comment['username'] ??
-                                              'Anonymous',
+                                          comment['username'] ?? 'Anonymous',
                                           style: TextStyle(
-                                            color: widget.textColor,
+                                            color: textColor,
                                             fontSize: 13,
                                             fontWeight: FontWeight.w600,
                                           ),
@@ -168,8 +174,7 @@ class _SocialCommentBottomSheetState extends State<SocialCommentBottomSheet> {
                                         Text(
                                           comment['content'] ?? '',
                                           style: TextStyle(
-                                            color: widget.textColor
-                                                ?.withOpacity(0.8),
+                                            color: textColor?.withOpacity(0.8),
                                             fontSize: 13,
                                             height: 1.4,
                                           ),
@@ -184,12 +189,12 @@ class _SocialCommentBottomSheetState extends State<SocialCommentBottomSheet> {
                                         _formatTimeAgo(
                                           DateTime.parse(
                                             comment['created_at'] ??
-                                                DateTime.now().toIso8601String(),
+                                                DateTime.now()
+                                                    .toIso8601String(),
                                           ),
                                         ),
                                         style: TextStyle(
-                                          color: widget.textColor
-                                              ?.withOpacity(0.5),
+                                          color: textColor?.withOpacity(0.5),
                                           fontSize: 11,
                                         ),
                                       ),
@@ -197,8 +202,7 @@ class _SocialCommentBottomSheetState extends State<SocialCommentBottomSheet> {
                                       Text(
                                         'Thích',
                                         style: TextStyle(
-                                          color: widget.textColor
-                                              ?.withOpacity(0.5),
+                                          color: textColor?.withOpacity(0.5),
                                           fontSize: 11,
                                           fontWeight: FontWeight.w600,
                                         ),
@@ -236,11 +240,9 @@ class _SocialCommentBottomSheetState extends State<SocialCommentBottomSheet> {
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
-                        color: widget.theme.cardColor,
+                        color: cardColor,
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: TColor.gray.withOpacity(0.2),
-                        ),
+                        border: Border.all(color: TColor.gray.withOpacity(0.2)),
                       ),
                       child: Row(
                         children: [
@@ -248,9 +250,9 @@ class _SocialCommentBottomSheetState extends State<SocialCommentBottomSheet> {
                             child: TextField(
                               controller: _commentController,
                               decoration: InputDecoration(
-                                hintText: 'Viết bình luận...',
+                                hintText: LocaleKey.writeComments.tr,
                                 hintStyle: TextStyle(
-                                  color: TColor.gray.withOpacity(0.5),
+                                  color: textColor?.withOpacity(0.5),
                                 ),
                                 border: InputBorder.none,
                                 contentPadding: const EdgeInsets.symmetric(
@@ -259,7 +261,7 @@ class _SocialCommentBottomSheetState extends State<SocialCommentBottomSheet> {
                                 ),
                               ),
                               maxLines: null,
-                              style: TextStyle(color: widget.textColor),
+                              style: TextStyle(color: textColor),
                             ),
                           ),
                           _isLoading
@@ -268,19 +270,14 @@ class _SocialCommentBottomSheetState extends State<SocialCommentBottomSheet> {
                                   child: SizedBox(
                                     width: 20,
                                     height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        TColor.primaryColor1,
-                                      ),
-                                    ),
+                                    child: CustomCircleProgIndicator(),
                                   ),
                                 )
                               : IconButton(
                                   onPressed: _submitComment,
                                   icon: Icon(
                                     Icons.send,
-                                    color: TColor.primaryColor1,
+                                    color: textColor,
                                     size: 20,
                                   ),
                                 ),

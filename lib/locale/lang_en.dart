@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import 'locale_key.dart';
 
 Map<String, String> enUs = {
@@ -68,6 +70,7 @@ Map<String, String> enUs = {
       "Please enter your email address to receive a password reset link.",
   LocaleKey.buttonSend: "Send",
   LocaleKey.passwordResetError: "Password reset error",
+  LocaleKey.passwordResetSuccess: "Password reset email sent",
 
   //Home View
   LocaleKey.welcomeBack: 'Welcome Back',
@@ -104,6 +107,8 @@ Map<String, String> enUs = {
   LocaleKey.otherArr2: "Privacy Policy",
   LocaleKey.otherArr3: "Setting",
   LocaleKey.logout: "Log Out",
+  LocaleKey.logoutSuccess: "Logout successful",
+  LocaleKey.logoutError: "Logout failed",
 
   //Work Tracker View
   LocaleKey.gymEx: "Gym Exercises",
@@ -138,4 +143,23 @@ Map<String, String> enUs = {
   LocaleKey.nextReminder: "Next reminder",
   LocaleKey.addWater: "Add Water",
   LocaleKey.waterIntake: "Track Water Intake",
+
+  //Social View
+  LocaleKey.postImg: "Take Photo",
+  LocaleKey.choiceImg: "Choose from Library",
+  LocaleKey.titleSocial: "Fitness Forum",
+  LocaleKey.noPost: "No posts yet",
+  LocaleKey.newThing: "What's new? 💭",
+  LocaleKey.buttonPost: "Photo/Video",
+  LocaleKey.createPost: "Create Post",
+  LocaleKey.tagWork: "Tag workout (optional)",
+  LocaleKey.chooseWork: "Choose workout",
+  LocaleKey.submitPic: "Selected Photo",
+  LocaleKey.changePic: "Change Photo",
+  LocaleKey.caption: "Caption",
+  LocaleKey.writeCap: "Write a caption...*",
+  LocaleKey.postNew: "Post",
+  LocaleKey.comments: "Comments",
+  LocaleKey.noComments: "No comments yet",
+  LocaleKey.writeComments: "Write a comment...",
 };

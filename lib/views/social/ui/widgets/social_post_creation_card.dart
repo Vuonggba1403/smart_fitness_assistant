@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_utils/src/extensions/internacionalization.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 
 /// ✅ Widget: Post Creation Card (phần đầu để user tạo post)
 class SocialPostCreationCard extends StatelessWidget {
@@ -55,7 +57,7 @@ class SocialPostCreationCard extends StatelessWidget {
                       border: Border.all(color: TColor.gray.withOpacity(0.2)),
                     ),
                     child: Text(
-                      'Bạn có gì mới? 💭',
+                      LocaleKey.newThing.tr,
                       style: TextStyle(
                         color: textColor?.withOpacity(0.6),
                         fontSize: 14,
@@ -91,7 +93,7 @@ class SocialPostCreationCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          'Ảnh/Video',
+                          LocaleKey.buttonPost.tr,
                           style: TextStyle(
                             color: TColor.primaryColor1,
                             fontSize: 13,

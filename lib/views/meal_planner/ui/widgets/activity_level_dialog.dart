@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:developer' as developer; // ✅ THÊM: Import dart:developer
 
@@ -321,16 +322,9 @@ class _ActivityLevelDialogState extends State<ActivityLevelDialog> {
 
                               /// ✅ Success message
                               if (mounted) {
-                                ScaffoldMessenger.of(
+                                AppSnackBar.success(
                                   dialogContext,
-                                ).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      '✅ Đã lưu: Mục tiêu $dailyCalories kcal/ngày',
-                                    ),
-                                    backgroundColor: Colors.green,
-                                    duration: const Duration(seconds: 2),
-                                  ),
+                                  'Đã lưu: Mục tiêu $dailyCalories kcal/ngày',
                                 );
                               }
 
@@ -380,15 +374,7 @@ class _ActivityLevelDialogState extends State<ActivityLevelDialog> {
                                   );
                                 }
 
-                                ScaffoldMessenger.of(
-                                  dialogContext,
-                                ).showSnackBar(
-                                  SnackBar(
-                                    content: Text('❌ Lỗi: $e'),
-                                    backgroundColor: Colors.red,
-                                    duration: const Duration(seconds: 3),
-                                  ),
-                                );
+                                AppSnackBar.error(dialogContext, 'Lỗi: $e');
                               }
                             } finally {
                               if (mounted) {

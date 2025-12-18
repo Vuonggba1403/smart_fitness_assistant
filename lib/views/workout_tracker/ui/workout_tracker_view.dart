@@ -1,10 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'; // ✅ THÊM import
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_container_check.dart';
-import 'package:smart_fitness_assistant/core/widgets/custom_derlight_bar.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_sliverbar.dart';
 import 'package:smart_fitness_assistant/core/models/exercise_category.dart';
 import 'package:smart_fitness_assistant/core/models/workout_progress.dart'; // ✅ Thêm import
@@ -97,14 +97,9 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
 
       if (scheduledTime.isBefore(minScheduledTime)) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Vui lòng chọn thời gian ít nhất sau ${_formatTime(minScheduledTime)}',
-              ),
-              backgroundColor: Colors.red,
-              duration: const Duration(seconds: 3),
-            ),
+          AppSnackBar.error(
+            context,
+            'Vui lòng chọn thời gian ít nhất sau ${_formatTime(minScheduledTime)}',
           );
         }
         return;
@@ -127,14 +122,9 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
       if (mounted) {
         await cubit.loadUpcomingWorkouts(forceRefresh: true);
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '✅ Đã đặt nhắc nhở lúc ${_formatTime(scheduledTime)}',
-            ),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 3),
-          ),
+        AppSnackBar.success(
+          context,
+          'Đã đặt nhắc nhở lúc ${_formatTime(scheduledTime)}',
         );
       }
     } else {
@@ -150,11 +140,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
       if (mounted) {
         await cubit.loadUpcomingWorkouts(forceRefresh: true);
 
-        showCustomDelightToastBar(
-          context,
-          'Đã hủy nhắc nhở',
-          Icon(Icons.notifications_off, color: TColor.white),
-        );
+        AppSnackBar.success(context, 'Đã hủy nhắc nhở');
       }
     }
   }
@@ -212,11 +198,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
           forceRefresh: true,
         );
 
-        showCustomDelightToastBar(
-          context,
-          'Đã xóa lịch tập',
-          Icon(Icons.delete, color: TColor.white),
-        );
+        AppSnackBar.success(context, 'Đã xóa lịch tập');
       }
     } catch (e) {
       print('❌ Error deleting schedule: $e');

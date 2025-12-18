@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/models/scheduled_workout.dart';
@@ -66,9 +67,8 @@ class _AddScheduleViewState extends State<AddScheduleView> {
 
   Future<void> _save() async {
     if (_selectedCategory == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Vui lòng chọn bài tập')));
+      AppSnackBar.error(context, 'Vui lòng chọn bài tập');
+
       return;
     }
 
@@ -85,12 +85,7 @@ class _AddScheduleViewState extends State<AddScheduleView> {
 
     // ✅ Check thời gian phải trong tương lai
     if (scheduledTime.isBefore(DateTime.now())) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Vui lòng chọn thời gian trong tương lai'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      AppSnackBar.error(context, 'Vui lòng chọn thời gian trong tương lai');
       return;
     }
 
@@ -132,19 +127,12 @@ class _AddScheduleViewState extends State<AddScheduleView> {
         // ✅ Pop với result = true
         Navigator.pop(context, true);
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('✅ Đã thêm lịch tập'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        AppSnackBar.success(context, '✅ Đã thêm lịch tập');
       }
     } catch (e) {
       print('❌ Error adding schedule: $e');
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Lỗi: $e')));
+        AppSnackBar.error(context, '❌ Thêm lịch tập thất bại');
       }
     }
   }

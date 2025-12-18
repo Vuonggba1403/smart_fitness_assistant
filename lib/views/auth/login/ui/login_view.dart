@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
-import 'package:smart_fitness_assistant/core/widgets/custom_derlight_bar.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_textfield.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/views/auth/cubit/authentication_cubit.dart';
@@ -38,11 +38,7 @@ class _LoginViewState extends State<LoginView> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
 
-        showCustomDelightToastBar(
-          context,
-          'Registration successful! Please login.',
-          Icon(Icons.check_circle, color: Colors.green),
-        );
+        AppSnackBar.success(context, LocaleKey.registerSuccess.tr);
       });
     }
   }
@@ -66,11 +62,7 @@ class _LoginViewState extends State<LoginView> {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!mounted) return;
 
-            showCustomDelightToastBar(
-              context,
-              state.message,
-              Icon(Icons.error, color: Colors.red),
-            );
+            AppSnackBar.error(context, state.message);
           });
         }
 
