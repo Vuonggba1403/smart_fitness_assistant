@@ -25,28 +25,42 @@ class UpcomingWorkout {
   bool get isCompleted => completedExercises >= totalExercises;
   bool get isInProgress =>
       completedExercises > 0 && completedExercises < totalExercises;
-  bool get isToday => _isToday(scheduledTime);
 
-  static bool _isToday(DateTime date) {
-    final now = DateTime.now();
-    return date.year == now.year &&
-        date.month == now.month &&
-        date.day == now.day;
-  }
+  // ✅ FIX: Format thời gian relative to selectedDate
+  String getFormattedTime({DateTime? referenceDate}) {
+    final reference = referenceDate ?? DateTime.now();
+    final referenceDay = DateTime(
+      reference.year,
+      reference.month,
+      reference.day,
+    );
+    final scheduledDay = DateTime(
+      scheduledTime.year,
+      scheduledTime.month,
+      scheduledTime.day,
+    );
 
-  // ✅ FIX: Format thời gian hiển thị đúng theo giờ đã chọn
-  String get formattedTime {
     final hour = scheduledTime.hour.toString().padLeft(2, '0');
     final minute = scheduledTime.minute.toString().padLeft(2, '0');
 
-    if (isToday) {
+    // Check if same day
+    if (scheduledDay == referenceDay) {
       return 'Hôm nay, $hour:$minute';
     }
 
+    // Check if tomorrow
+    if (scheduledDay == referenceDay.add(const Duration(days: 1))) {
+      return 'Ngày mai, $hour:$minute';
+    }
+
+    // Otherwise show date
     final day = scheduledTime.day.toString().padLeft(2, '0');
     final month = scheduledTime.month.toString().padLeft(2, '0');
     return '$day/$month, $hour:$minute';
   }
+
+  // ✅ ADD: Backward compatibility
+  String get formattedTime => getFormattedTime();
 
   // ✅ FIX: copyWith hỗ trợ cập nhật scheduledTime
   UpcomingWorkout copyWith({

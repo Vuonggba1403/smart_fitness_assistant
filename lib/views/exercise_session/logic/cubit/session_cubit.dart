@@ -139,7 +139,7 @@ class SessionCubit extends Cubit<SessionState> {
     return currentState.isExerciseExpanded(exerciseId);
   }
 
-  /// Lưu phiên tập luyện - ✅ FIX: Clear cache của WorkoutTrackerCubit
+  /// Lưu phiên tập luyện
   Future<bool> saveWorkoutSession() async {
     final currentState = state;
     if (currentState is! SessionActive) {
@@ -163,6 +163,8 @@ class SessionCubit extends Cubit<SessionState> {
           .select();
 
       print('✅ Insert successful: $response');
+
+      // ✅ FIX: Emit SessionSaved
       emit(SessionSaved());
 
       return true;

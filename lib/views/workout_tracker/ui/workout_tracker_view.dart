@@ -43,15 +43,16 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
   void initState() {
     super.initState();
     _initializeNotifications();
+    // ✅ FIX: Load data ngay khi mount
     _loadInitialData();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _refreshData();
-    });
+
+    // ✅ FIX: Chỉ refresh khi thực sự cần (khi back từ detail screen)
+    // Không refresh liên tục để giữ cache
   }
 
   /// Khởi tạo notification service
@@ -62,13 +63,19 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
 
   /// Load dữ liệu ban đầu khi mở màn hình
   void _loadInitialData() {
+    print('🔄 Loading initial data in WorkoutTrackerView');
+
     final cubit = context.read<WorkoutTrackerCubit>();
-    cubit.loadWeeklyWorkoutStats();
-    cubit.loadUpcomingWorkouts();
+
+    // ✅ FIX: Load từ cache trước (forceRefresh: false)
+    cubit.loadWeeklyWorkoutStats(forceRefresh: false);
+    cubit.loadUpcomingWorkouts(forceRefresh: false);
   }
 
-  /// Refresh toàn bộ dữ liệu
+  /// Refresh toàn bộ dữ liệu - ✅ Chỉ gọi khi thực sự cần
   Future<void> _refreshData() async {
+    print('🔄 Manual refresh data');
+
     final cubit = context.read<WorkoutTrackerCubit>();
     await cubit.loadWeeklyWorkoutStats(forceRefresh: true);
     await cubit.loadUpcomingWorkouts(forceRefresh: true);
@@ -123,9 +130,10 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
     );
 
     if (mounted) {
-      await context.read<WorkoutTrackerCubit>().loadUpcomingWorkouts(
-        forceRefresh: true,
-      );
+      final cubit = context.read<WorkoutTrackerCubit>();
+      await cubit.loadUpcomingWorkouts(forceRefresh: true);
+      cubit.emit(DataRefreshed());
+
       AppSnackBar.success(
         context,
         'Đã đặt nhắc nhở lúc ${_formatTime(scheduledTime)}',
@@ -142,9 +150,10 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
     await _notificationService.cancelNotification(notificationId);
 
     if (mounted) {
-      await context.read<WorkoutTrackerCubit>().loadUpcomingWorkouts(
-        forceRefresh: true,
-      );
+      final cubit = context.read<WorkoutTrackerCubit>();
+      await cubit.loadUpcomingWorkouts(forceRefresh: true);
+      cubit.emit(DataRefreshed());
+
       AppSnackBar.success(context, 'Đã hủy nhắc nhở');
     }
   }
@@ -163,12 +172,13 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
     return '$hour:$minute';
   }
 
-  /// Xóa lịch tập đã scheduled
+  /// Xóa lịch tập đã scheduled - ✅ FIX: Query đơn giản hơn
   Future<void> _deleteScheduledWorkout(String categoryId) async {
     try {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) return;
 
+      // ✅ FIX: Query với join để lấy schedule info
       final scheduleResponse = await _supabase
           .from('scheduled_workouts')
           .select('id')
@@ -182,9 +192,10 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
       await scheduleCubit.deleteSchedule(scheduleId);
 
       if (mounted) {
-        await context.read<WorkoutTrackerCubit>().loadUpcomingWorkouts(
-          forceRefresh: true,
-        );
+        final cubit = context.read<WorkoutTrackerCubit>();
+        await cubit.loadUpcomingWorkouts(forceRefresh: true);
+        cubit.emit(DataRefreshed());
+
         AppSnackBar.success(context, 'Đã xóa lịch tập');
       }
     } catch (e) {
@@ -325,16 +336,21 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
     );
   }
 
-  /// Build nút Daily Workout Schedule
+  /// Build nút Daily Workout Schedule - ✅ FIX: Chỉ refresh khi back
   Widget _buildDailyWorkoutButton(WorkoutTrackerCubit cubit) {
     return CustomContainerCheck(
       name: LocaleKey.dailyWorkoutSchedule.tr,
       title: LocaleKey.check.tr,
       onPressed: () async {
         await navigateTo(context, ScheduleView());
+
+        // ✅ FIX: Chỉ refresh khi back từ schedule view
         if (mounted) {
-          cubit.loadWeeklyWorkoutStats(forceRefresh: true);
-          cubit.loadUpcomingWorkouts(forceRefresh: true);
+          print('⬅️ Back from ScheduleView - refreshing data');
+
+          await cubit.loadWeeklyWorkoutStats(forceRefresh: true);
+          await cubit.loadUpcomingWorkouts(forceRefresh: true);
+          cubit.emit(DataRefreshed());
         }
       },
     );
@@ -343,7 +359,6 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
   /// Build danh sách upcoming workouts
   Widget _buildUpcomingWorkouts(WorkoutTrackerCubit cubit, Color? textColor) {
     return BlocBuilder<WorkoutTrackerCubit, WorkoutTrackerState>(
-      // ✅ FIX: Rebuild khi upcoming workouts thay đổi
       buildWhen: (previous, current) {
         return current is UpcomingWorkoutsUpdated || current is DataRefreshed;
       },
@@ -351,15 +366,44 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
         final upcomingWorkouts = cubit.cachedUpcomingWorkouts ?? [];
 
         if (upcomingWorkouts.isEmpty) {
-          return Padding(
+          return Container(
             padding: const EdgeInsets.all(20),
-            child: Text(
-              "Chưa có lịch tập nào! ✨\nThêm lịch tại Daily Workout Schedule",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: textColor?.withOpacity(0.6),
-                fontSize: 14,
+            margin: const EdgeInsets.symmetric(vertical: 10),
+            decoration: BoxDecoration(
+              color: TColor.primaryColor1.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(15),
+              border: Border.all(
+                color: TColor.primaryColor1.withOpacity(0.3),
+                width: 1,
               ),
+            ),
+            child: Column(
+              children: [
+                Icon(
+                  Icons.calendar_today_outlined,
+                  size: 40,
+                  color: TColor.primaryColor1.withOpacity(0.5),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  "Chưa có lịch tập nào! ✨",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "Nhấn vào 'Daily Workout Schedule'\nđể thêm lịch tập mới",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: textColor?.withOpacity(0.6),
+                    fontSize: 14,
+                  ),
+                ),
+              ],
             ),
           );
         }
@@ -475,9 +519,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
             final category = categories[index];
 
             return InkWell(
-              key: ValueKey(
-                'category_${category.id}_${state.hashCode}',
-              ), // ✅ Force rebuild
+              key: ValueKey('category_${category.id}_${state.hashCode}'),
               onTap: () => _navigateToWorkoutDetail(category, cubit),
               child: FutureBuilder<List<dynamic>>(
                 // ✅ FIX: Rebuild future mỗi khi state changes

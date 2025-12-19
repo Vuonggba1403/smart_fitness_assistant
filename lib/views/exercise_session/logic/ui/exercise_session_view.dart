@@ -75,12 +75,13 @@ class ExerciseSessionView extends StatelessWidget {
       await WorkoutCongratulationsScreen.show(context, state);
 
       if (context.mounted) {
-        // ✅ FIX: Emit refresh signal trước khi pop
-        Navigator.pop(context, true); // ✅ Return true để signal refresh
+        // ✅ FIX: Pop với result = true
+        Navigator.pop(context, true);
 
         await Future.delayed(const Duration(milliseconds: 100));
+
         if (context.mounted) {
-          Navigator.pop(context, true); // ✅ Return true
+          Navigator.pop(context, true);
         }
       }
     }

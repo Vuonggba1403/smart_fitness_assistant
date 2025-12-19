@@ -68,7 +68,7 @@ class _AddScheduleViewState extends State<AddScheduleView> {
     }
   }
 
-  /// Lưu lịch tập mới
+  /// Lưu lịch tập mới - ✅ FIX: Chỉ lưu category_id
   Future<void> _save() async {
     if (_selectedCategory == null) {
       AppSnackBar.error(context, 'Vui lòng chọn bài tập');
@@ -86,22 +86,19 @@ class _AddScheduleViewState extends State<AddScheduleView> {
       _selectedTime.minute,
     );
 
-    /// Kiểm tra thời gian phải trong tương lai
     if (scheduledTime.isBefore(DateTime.now())) {
       AppSnackBar.error(context, 'Vui lòng chọn thời gian trong tương lai');
       return;
     }
 
+    // ✅ FIX: Chỉ truyền category_id
     final schedule = ScheduledWorkout(
       forUser: userId,
       categoryId: _selectedCategory!.id!,
-      categoryName: _selectedCategory!.titleEx!,
-      imageUrl: _selectedCategory!.imgUrl ?? '',
       scheduledTime: scheduledTime,
       hasNotification: _hasNotification,
     );
 
-    /// ✅ FIX: Lưu qua ScheduleCubit
     final success = await context.read<ScheduleCubit>().addSchedule(schedule);
 
     if (success && mounted) {

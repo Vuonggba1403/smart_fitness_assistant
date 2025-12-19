@@ -107,53 +107,96 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
   Future<void> _loadDailyExerciseStats() async {
     try {
       final userId = _supabase.auth.currentUser?.id;
-      if (userId == null) return;
+      if (userId == null) {
+        debugPrint('❌ No user logged in');
+        return;
+      }
 
-      final totalExercisesResponse = await _supabase
-          .from('exercise_items')
-          .select('id');
-
-      final totalExercisesCount = totalExercisesResponse.length;
-
-      final now = DateTime.now();
-      final startOfDay = DateTime(now.year, now.month, now.day);
+      // ✅ FIX: Sử dụng UTC thay vì local timezone
+      final now = DateTime.now().toUtc();
+      final startOfDay = DateTime.utc(now.year, now.month, now.day);
       final endOfDay = startOfDay.add(const Duration(days: 1));
 
+      debugPrint('📅 Loading exercise stats for:');
+      debugPrint('   User ID: $userId');
+      debugPrint('   Current UTC: ${now.toIso8601String()}');
+      debugPrint(
+        '   Date range (UTC): ${startOfDay.toIso8601String()} to ${endOfDay.toIso8601String()}',
+      );
+
+      // ✅ Query history_workout với UTC timestamps
       final response = await _supabase
           .from('history_workout')
-          .select('completed_exercises, total_exercises')
+          .select('id, completed_exercises, total_exercises, created_at')
           .eq('for_user', userId)
           .gte('created_at', startOfDay.toIso8601String())
-          .lt('created_at', endOfDay.toIso8601String());
+          .lt('created_at', endOfDay.toIso8601String())
+          .order('created_at', ascending: false);
 
-      int completedToday = 0;
+      debugPrint('📊 Query result: ${response.length} workout sessions found');
+
+      if (response.isEmpty) {
+        debugPrint('⚠️ No workout sessions found for today');
+        if (mounted) {
+          setState(() {
+            _completedExercises = 0;
+            _totalExercises = 0;
+          });
+          _exerciseProgressNotifier.value = 0.0;
+        }
+        return;
+      }
+
+      // ✅ Tính tổng từ tất cả sessions hôm nay
+      int totalCompletedToday = 0;
+      int totalExercisesToday = 0;
 
       for (var workout in response) {
         final completed = (workout['completed_exercises'] ?? 0) as int;
-        completedToday += completed;
+        final total = (workout['total_exercises'] ?? 0) as int;
+
+        totalCompletedToday += completed;
+        totalExercisesToday += total;
+
+        debugPrint('  ✅ Session ${workout['id']}:');
+        debugPrint('     - Completed: $completed');
+        debugPrint('     - Total: $total');
+        debugPrint('     - Created: ${workout['created_at']}');
       }
 
-      debugPrint('📊 Exercise stats loaded:');
-      debugPrint('   Completed today: $completedToday');
-      debugPrint('   Total exercises in system: $totalExercisesCount');
-      debugPrint('   Workouts today: ${response.length}');
+      debugPrint('');
+      debugPrint('📊 Daily Summary:');
+      debugPrint('   Total completed: $totalCompletedToday');
+      debugPrint('   Total exercises: $totalExercisesToday');
+      debugPrint('   Sessions: ${response.length}');
 
       if (mounted) {
-        // ✅ Tính percentage
-        final percentage = totalExercisesCount > 0
-            ? (completedToday / totalExercisesCount).clamp(0.0, 1.0) * 100
+        final percentage = totalExercisesToday > 0
+            ? (totalCompletedToday / totalExercisesToday).clamp(0.0, 1.0) * 100
             : 0.0;
 
         setState(() {
-          _completedExercises = completedToday;
-          _totalExercises = totalExercisesCount;
+          _completedExercises = totalCompletedToday;
+          _totalExercises = totalExercisesToday;
         });
 
-        // ✅ UPDATE ValueNotifier thay vì tạo mới
         _exerciseProgressNotifier.value = percentage;
+
+        debugPrint('✅ UI Updated:');
+        debugPrint('   Display: $_completedExercises/$_totalExercises');
+        debugPrint('   Progress: ${percentage.toStringAsFixed(1)}%');
       }
-    } catch (e) {
-      debugPrint('Error loading exercise stats: $e');
+    } catch (e, stackTrace) {
+      debugPrint('❌ Error loading exercise stats: $e');
+      debugPrint('Stack trace: $stackTrace');
+
+      if (mounted) {
+        setState(() {
+          _completedExercises = 0;
+          _totalExercises = 0;
+        });
+        _exerciseProgressNotifier.value = 0.0;
+      }
     }
   }
 

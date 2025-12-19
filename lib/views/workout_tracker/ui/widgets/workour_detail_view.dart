@@ -221,7 +221,6 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
                           return RoundButton(
                             title: LocaleKey.startWorkout.tr,
                             onPressed: () async {
-                              // ✅ FIX: Async để await result
                               if (state is WorkoutDetailLoaded) {
                                 final categoryId =
                                     widget.dObj['id']?.toString() ?? '';
@@ -229,7 +228,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
                                     widget.dObj['title_ex']?.toString() ??
                                     'Workout';
 
-                                // ✅ FIX: Await result từ session
+                                // ✅ Await result
                                 final result = await Navigator.push<bool>(
                                   context,
                                   MaterialPageRoute(
@@ -245,8 +244,26 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
                                   ),
                                 );
 
-                                // ✅ FIX: Reload nếu có result = true
+                                // ✅ FIX: Reload progress và emit state
                                 if (result == true && mounted) {
+                                  final cubit = context
+                                      .read<WorkoutTrackerCubit>();
+
+                                  // Reload progress với emit state
+                                  await cubit.loadProgress(
+                                    categoryId,
+                                    emitState: true,
+                                  );
+
+                                  // Reload weekly stats
+                                  await cubit.loadWeeklyWorkoutStats(
+                                    forceRefresh: true,
+                                  );
+
+                                  // Emit DataRefreshed
+                                  cubit.emit(DataRefreshed());
+
+                                  // Reload exercises
                                   _loadData();
                                 }
                               }

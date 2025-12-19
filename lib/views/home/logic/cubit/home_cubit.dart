@@ -114,8 +114,17 @@ class HomeCubit extends Cubit<HomeState> {
 
   // ✅ THÊM: Dummy method loadDailyActivity (nếu cần)
   Future<void> loadDailyActivity() async {
-    // TODO: Implement nếu cần load daily activity stats
-    print('📊 Loading daily activity...');
+    print('📊 HomeCubit: Loading daily activity...');
+    try {
+      // Force trigger để DailyActivitySection tự refresh
+      if (state is HomeLoaded) {
+        final currentState = state as HomeLoaded;
+        emit(currentState.copyWith()); // Trigger rebuild
+      }
+      print('✅ HomeCubit: Daily activity loaded');
+    } catch (e) {
+      print('❌ HomeCubit: Error loading daily activity: $e');
+    }
   }
 
   // Refresh workout history
