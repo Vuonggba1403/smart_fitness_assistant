@@ -149,7 +149,7 @@ class SocialCreatePostDialog extends StatelessWidget {
                           ? Padding(
                               padding: const EdgeInsets.all(12),
                               child: Text(
-                                'Đang tải...',
+                               LocaleKey.loading.tr,
                                 style: TextStyle(color: TColor.gray),
                               ),
                             )
@@ -209,7 +209,8 @@ class SocialCreatePostDialog extends StatelessWidget {
                                 );
                               }).toList(),
                               onChanged: onCategoryChanged,
-                              dropdownColor: textColor,
+                              //COlor dropmenu
+                              dropdownColor: Colors.blueGrey,
                               borderRadius: BorderRadius.circular(10),
 
                               icon: Icon(

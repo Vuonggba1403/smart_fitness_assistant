@@ -57,6 +57,7 @@ class LocaleKey {
   static const String textWeight1 = "text_weight1";
   static const String textAge = "text_age";
   static const String buttonNext = "button_next";
+
   //Register-Message
   //Login View - Message
   static const String registerSuccess = "register_success";
@@ -101,6 +102,13 @@ class LocaleKey {
   static const String logout = "logout";
   static const String logoutSuccess = "logout_success";
   static const String logoutError = "logout_error";
+  static const String deleteAcc = "delete_acc";
+  static const String yearOld = "year_old";
+  static const String titleAlog = "title_alog";
+  static const String contentAlog = "content_alog";
+  static const String buttonNo = "button_no";
+  static const String buttonYes = "button_yes";
+  static const String buttonStart = "button_start";
 
   //Work Tracker View
   static const String gymEx = "gym_ex";
@@ -122,7 +130,7 @@ class LocaleKey {
   static const String reps = "reps";
   static const String titleDialog = "title_dialog";
   static const String contentDialog = "content_dialog";
-  static const String buttonStart = "button_start";
+  static const delAcc = "del_acc";
 
   static const String justNow = "just_now";
   static const String minutesAgo = "minutes_ago";
@@ -154,4 +162,5 @@ class LocaleKey {
   static const String comments = "comments";
   static const String noComments = "no_comments";
   static const String writeComments = "write_comments";
+  static const String loading = "loading";
 }

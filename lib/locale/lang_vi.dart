@@ -109,7 +109,14 @@ Map<String, String> viVN = {
   LocaleKey.logout: "Đăng xuất",
   LocaleKey.logoutSuccess: "Đăng xuất thành công",
   LocaleKey.logoutError: "Đăng xuất thất bại",
-
+  LocaleKey.deleteAcc: "Tài khoản đã được xóa thành công.",
+  LocaleKey.yearOld: "Tuổi",
+  LocaleKey.titleAlog: "Xác nhận xóa tài khoản",
+  LocaleKey.contentAlog:
+      "Hành động này không thể hoàn tác và tất cả dữ liệu sẽ bị xóa vĩnh viễn.",
+  LocaleKey.buttonNo: "Hủy",
+  LocaleKey.buttonYes: "Có",
+  LocaleKey.delAcc: "Xóa tài khoản",
   //Work Tracker View
   LocaleKey.gymEx: "Bài tập tại phòng gym",
   LocaleKey.homeEx: "Bài tập tại nhà", // ✅ THÊM TRANSLATION
@@ -162,4 +169,5 @@ Map<String, String> viVN = {
   LocaleKey.comments: "Bình luận",
   LocaleKey.noComments: "Chưa có bình luận nào",
   LocaleKey.writeComments: "Viết bình luận...",
+  LocaleKey.loading: "Đang tải...",
 };

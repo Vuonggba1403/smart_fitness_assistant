@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
-import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/theme/logic/cubit/theme_cubit.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_alertdialog.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
@@ -20,47 +19,10 @@ class ProfileView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textColor = theme.textTheme.bodyMedium?.color;
-
-    final accountArr = [
-      {"image": "assets/img/p_personal.png", "name": LocaleKey.accountArr1.tr},
-      {"image": "assets/img/p_achi.png", "name": LocaleKey.accountArr2.tr},
-      {"image": "assets/img/p_activity.png", "name": LocaleKey.accountArr3.tr},
-      {"image": "assets/img/p_workout.png", "name": LocaleKey.accountArr4.tr},
-    ];
-
-    final otherArr = [
-      {"image": "assets/img/p_contact.png", "name": LocaleKey.otherArr1.tr},
-      {"image": "assets/img/p_privacy.png", "name": LocaleKey.otherArr2.tr},
-      {"image": "assets/img/p_setting.png", "name": LocaleKey.otherArr3.tr},
-    ];
-
     return BlocProvider(
       create: (context) => AuthenticationCubit()..getUserData(),
       child: BlocConsumer<AuthenticationCubit, AuthenticationState>(
-        listener: (context, state) {
-          if (state is LogoutSuccess) {
-            AppSnackBar.success(context, LocaleKey.logoutSuccess.tr);
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (context) => const LoginView()),
-              (route) => false,
-            );
-          }
-          if (state is LoginError) {
-            AppSnackBar.error(context, LocaleKey.logoutError.tr);
-          }
-          if (state is DeleteAccountSuccess) {
-            AppSnackBar.success(context, "Tài khoản đã được xóa thành công.");
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (context) => const LoginView()),
-              (route) => false,
-            );
-          }
-          if (state is DeleteAccountError) {
-            AppSnackBar.error(context, state.message);
-          }
-        },
+        listener: _handleStateListener,
         builder: (context, state) {
           final user = context.read<AuthenticationCubit>().userDataModel;
           final isDeleting = state is DeleteAccountLoading;
@@ -70,202 +32,46 @@ class ProfileView extends StatelessWidget {
               title: LocaleKey.profile.tr,
               showBackButton: false,
             ),
-            backgroundColor: theme.scaffoldBackgroundColor,
             body: Stack(
               children: [
                 SafeArea(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 15,
-                      horizontal: 25,
-                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 25),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // ----- Header -----
-                        Row(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(30),
-                              child: Image.asset(
-                                "assets/img/u1.png",
-                                width: 50,
-                                height: 50,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                            const SizedBox(width: 15),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Text(
-                                        user?.username ?? "",
-                                        style: TextStyle(
-                                          color: textColor,
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                      SizedBox(width: 5),
-                                      Text(
-                                        "(${user?.age ?? ""} tuổi)",
-                                        style: TextStyle(
-                                          color: textColor,
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Text(
-                                    user?.your_goals ?? "",
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: theme.textTheme.bodySmall?.color,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            SizedBox(
-                              width: 100,
-                              height: 25,
-                              child: RoundButton(
-                                title: LocaleKey.editProfile.tr,
-                                type: RoundButtonType.bgGradient,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w400,
-                                onPressed: () {},
-                              ),
-                            ),
-                          ],
-                        ),
-
+                        _ProfileHeader(user: user),
                         const SizedBox(height: 15),
-
-                        // ---- Height / Weight / Goal ----
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TitleSubtitleCell(
-                                title: "${user?.height ?? "--"} cm",
-                                subtitle: LocaleKey.textHeight.tr,
-                              ),
-                            ),
-                            const SizedBox(width: 15),
-                            Expanded(
-                              child: TitleSubtitleCell(
-                                title: "${user?.weight ?? "--"} kg",
-                                subtitle: LocaleKey.textWeight.tr,
-                              ),
-                            ),
-                            const SizedBox(width: 15),
-                            Expanded(
-                              child: TitleSubtitleCell(
-                                title: "${user?.weight_goal ?? "--"} kg",
-                                subtitle: LocaleKey.textWeightGoal.tr,
-                              ),
-                            ),
-                          ],
-                        ),
-
+                        _UserStatsRow(user: user),
                         const SizedBox(height: 25),
-
-                        // ----- ACCOUNT SECTION -----
-                        _buildSection(
-                          theme,
+                        _SectionCard(
                           title: LocaleKey.account.tr,
-                          items: accountArr,
+                          items: [
+                            {"image": "assets/img/p_personal.png", "name": LocaleKey.accountArr1.tr},
+                            {"image": "assets/img/p_achi.png", "name": LocaleKey.accountArr2.tr},
+                            {"image": "assets/img/p_activity.png", "name": LocaleKey.accountArr3.tr},
+                            {"image": "assets/img/p_workout.png", "name": LocaleKey.accountArr4.tr},
+                          ],
                         ),
-
                         const SizedBox(height: 25),
-
-                        // ----- DARK MODE -----
-                        BlocBuilder<ThemeCubit, ThemeState>(
-                          builder: (context, themeState) {
-                            final themeCubit = context.read<ThemeCubit>();
-                            return _buildDarkModeRow(
-                              theme,
-                              textColor,
-                              isDark: themeState.isDarkMode,
-                              onChanged: (value) {
-                                themeCubit.toggleTheme(value);
-                                CustomDialog.show(
-                                  context,
-                                  message: LocaleKey.changeDarkMode.tr,
-                                );
-                              },
-                            );
-                          },
-                        ),
-
+                        const _DarkModeRow(),
                         const SizedBox(height: 25),
-
-                        // ----- OTHER SECTION -----
-                        _buildSection(
-                          theme,
+                        _SectionCard(
                           title: LocaleKey.other.tr,
-                          items: otherArr,
+                          items: [
+                            {"image": "assets/img/p_contact.png", "name": LocaleKey.otherArr1.tr},
+                            {"image": "assets/img/p_privacy.png", "name": LocaleKey.otherArr2.tr},
+                            {"image": "assets/img/p_setting.png", "name": LocaleKey.otherArr3.tr},
+                          ],
                         ),
-
                         const SizedBox(height: 25),
-
-                        // ----- Logout -----
-                        RoundButton(
-                          title: LocaleKey.logout.tr,
-                          onPressed: () async {
-                            await context.read<AuthenticationCubit>().signOut();
-                          },
-                        ),
-
-                        const SizedBox(height: 15),
-
-                        // ----- Delete Account -----
-                        RoundButton(
-                          title: "Xóa tài khoản",
-                          type: RoundButtonType.textGradient,
-                          onPressed: isDeleting
-                              ? null
-                              : () {
-                                  AppConfirmDialog.show(
-                                    context: context,
-                                    title: "Xác nhận xóa tài khoản",
-                                    content:
-                                        "Bạn có chắc chắn muốn xóa tài khoản? Hành động này không thể hoàn tác và tất cả dữ liệu của bạn sẽ bị xóa vĩnh viễn.",
-                                    onYes: () async {
-                                      await context
-                                          .read<AuthenticationCubit>()
-                                          .deleteAccount();
-                                    },
-                                  );
-                                },
-                        ),
+                        _ActionButtons(isDeleting: isDeleting),
+                        const SizedBox(height: 30),
                       ],
                     ),
                   ),
                 ),
-
-                // Loading overlay khi đang xóa
-                if (isDeleting)
-                  Container(
-                    color: Colors.black54,
-                    child: const Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CircularProgressIndicator(),
-                          SizedBox(height: 16),
-                          Text(
-                            'Đang xóa tài khoản...',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                if (isDeleting) const _LoadingOverlay(),
               ],
             ),
           );
@@ -274,11 +80,92 @@ class ProfileView extends StatelessWidget {
     );
   }
 
-  Widget _buildSection(
-    ThemeData theme, {
-    required String title,
-    required List<Map<String, dynamic>> items,
-  }) {
+  void _handleStateListener(BuildContext context, AuthenticationState state) {
+    if (state is LogoutSuccess || state is DeleteAccountSuccess) {
+      final message = state is LogoutSuccess ? LocaleKey.logoutSuccess.tr : LocaleKey.deleteAcc.tr;
+      AppSnackBar.success(context, message);
+      Get.offAll(() => const LoginView());
+    }
+    if (state is LoginError) AppSnackBar.error(context, LocaleKey.logoutError.tr);
+    if (state is DeleteAccountError) AppSnackBar.error(context, state.message);
+  }
+}
+
+// --- PRIVATE WIDGETS ---
+
+class _ProfileHeader extends StatelessWidget {
+  final dynamic user;
+  const _ProfileHeader({this.user});
+
+  @override
+  Widget build(BuildContext context) {
+    final textColor = Theme.of(context).textTheme.bodyMedium?.color;
+    return Row(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(30),
+          child: Image.asset("assets/img/u1.png", width: 50, height: 50, fit: BoxFit.cover),
+        ),
+        const SizedBox(width: 15),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "${user?.username ?? ""} (${user?.age ?? ""} ${LocaleKey.yearOld.tr})",
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: textColor, fontWeight: FontWeight.w500, fontSize: 14),
+              ),
+              Text(
+                user?.your_goals ?? "",
+                style: TextStyle(fontSize: 12, color: textColor),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          width: 80,
+          height: 25,
+          child: RoundButton(
+            title: LocaleKey.editProfile.tr,
+            type: RoundButtonType.bgGradient,
+            fontSize: 12,
+            onPressed: () {},
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _UserStatsRow extends StatelessWidget {
+  final dynamic user;
+  const _UserStatsRow({this.user});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(child: TitleSubtitleCell(title: "${user?.height ?? "--"} cm", subtitle: LocaleKey.textHeight.tr)),
+        const SizedBox(width: 15),
+        Expanded(child: TitleSubtitleCell(title: "${user?.weight ?? "--"} kg", subtitle: LocaleKey.textWeight.tr)),
+        const SizedBox(width: 15),
+        Expanded(child: TitleSubtitleCell(title: "${user?.weight_goal ?? "--"} kg", subtitle: LocaleKey.textWeightGoal.tr)),
+      ],
+    );
+  }
+}
+
+class _SectionCard extends StatelessWidget {
+  final String title;
+  final List<Map<String, dynamic>> items;
+
+  const _SectionCard({required this.title, required this.items});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final textColor = theme.textTheme.bodyMedium?.color;
 
     return Container(
@@ -291,36 +178,27 @@ class ProfileView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: TextStyle(
-              color: textColor,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
+          Text(title, style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
-          Column(
-            children: List.generate(
-              items.length,
-              (index) => SettingRow(
-                icon: items[index]["image"],
-                title: items[index]["name"],
-                onPressed: () {},
-              ),
-            ),
-          ),
+          ...items.map((item) => SettingRow(
+            icon: item["image"],
+            title: item["name"],
+            onPressed: () {},
+          )),
         ],
       ),
     );
   }
+}
 
-  Widget _buildDarkModeRow(
-    ThemeData theme,
-    Color? textColor, {
-    required bool isDark,
-    required Function(bool) onChanged,
-  }) {
+class _DarkModeRow extends StatelessWidget {
+  const _DarkModeRow();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color;
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
       decoration: BoxDecoration(
@@ -330,21 +208,75 @@ class ProfileView extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Image.asset(
-            "assets/img/darkmode.png",
-            height: 15,
-            width: 15,
-            color: textColor,
-          ),
+          Image.asset("assets/img/darkmode.png", height: 15, width: 15, color: textColor),
           const SizedBox(width: 15),
-          Expanded(
-            child: Text(
-              LocaleKey.darkMode.tr,
-              style: TextStyle(fontSize: 12, color: textColor),
+          Expanded(child: Text(LocaleKey.darkMode.tr, style: TextStyle(fontSize: 12, color: textColor))),
+          BlocBuilder<ThemeCubit, ThemeState>(
+            builder: (context, state) => CustomToggleSwitch(
+              value: state.isDarkMode,
+              onChanged: (v) {
+                context.read<ThemeCubit>().toggleTheme(v);
+                CustomDialog.show(context, message: LocaleKey.changeDarkMode.tr);
+              },
             ),
           ),
-          CustomToggleSwitch(value: isDark, onChanged: onChanged),
         ],
+      ),
+    );
+  }
+}
+
+class _ActionButtons extends StatelessWidget {
+  final bool isDeleting;
+  const _ActionButtons({required this.isDeleting});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+          onPressed: () => context.read<AuthenticationCubit>().signOut(),
+          icon: const Icon(Icons.logout, color: Colors.white),
+          label: Text(LocaleKey.logout.tr, style: const TextStyle(color: Colors.white)),
+        ),
+        OutlinedButton.icon(
+          style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.red)),
+          onPressed: isDeleting ? null : () => _confirmDelete(context),
+          icon: const Icon(Icons.delete, color: Colors.red),
+          label:  Text(LocaleKey.delAcc.tr, style: TextStyle(color: Colors.red)),
+        ),
+      ],
+    );
+  }
+
+  void _confirmDelete(BuildContext context) {
+    AppConfirmDialog.show(
+      context: context,
+      title: LocaleKey.titleAlog.tr,
+      content: LocaleKey.contentAlog.tr,
+      onYes: () => context.read<AuthenticationCubit>().deleteAccount(),
+    );
+  }
+}
+
+class _LoadingOverlay extends StatelessWidget {
+  const _LoadingOverlay();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.black54,
+      child:  Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text(LocaleKey.loading.tr, style: TextStyle(color: Colors.white)),
+          ],
+        ),
       ),
     );
   }

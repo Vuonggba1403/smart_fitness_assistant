@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_utils/src/extensions/internacionalization.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 
 class AppConfirmDialog {
   static void show({
@@ -16,14 +18,14 @@ class AppConfirmDialog {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Cancel'),
+            child:  Text(LocaleKey.buttonNo.tr),
           ),
           TextButton(
             onPressed: () {
               Navigator.of(dialogContext).pop();
               onYes();
             },
-            child: const Text('Yes', style: TextStyle(color: Colors.red)),
+            child:  Text(LocaleKey.buttonYes.tr, style: TextStyle(color: Colors.red)),
           ),
         ],
       ),

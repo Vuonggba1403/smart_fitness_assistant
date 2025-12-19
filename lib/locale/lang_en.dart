@@ -109,6 +109,14 @@ Map<String, String> enUs = {
   LocaleKey.logout: "Log Out",
   LocaleKey.logoutSuccess: "Logout successful",
   LocaleKey.logoutError: "Logout failed",
+  LocaleKey.deleteAcc: "Account has been successfully deleted.",
+  LocaleKey.yearOld: "years old",
+  LocaleKey.titleAlog: "Confirm Account Deletion",
+  LocaleKey.contentAlog:
+      "This action cannot be undone and all data will be permanently deleted.",
+  LocaleKey.buttonNo: "No",
+  LocaleKey.buttonYes: "Yes",
+  LocaleKey.delAcc: "Delete Account",
 
   //Work Tracker View
   LocaleKey.gymEx: "Gym Exercises",
@@ -162,4 +170,5 @@ Map<String, String> enUs = {
   LocaleKey.comments: "Comments",
   LocaleKey.noComments: "No comments yet",
   LocaleKey.writeComments: "Write a comment...",
+  LocaleKey.loading: "Loading...",
 };
