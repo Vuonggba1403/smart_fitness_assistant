@@ -12,7 +12,6 @@ import 'package:smart_fitness_assistant/views/home/logic/cubit/home_cubit.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/bmi_card.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/daily_activity_section.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/lastest_workout_view.dart';
-import '../../notifications/ui/notification_view.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -114,24 +113,28 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  LocaleKey.welcomeBack.tr,
-                                  style: TextStyle(
-                                    color: textColor,
-                                    fontSize: 12,
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    LocaleKey.welcomeBack.tr,
+                                    style: TextStyle(
+                                      color: textColor,
+                                      fontSize: 12,
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  user?.username ?? "UserName",
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w700,
+                                  Text(
+                                    user?.username ?? "UserName",
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w700,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                             Row(
                               children: [
@@ -167,20 +170,6 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
                                       homeCubit.updateLanguage(newLang);
                                     }
                                   },
-                                ),
-
-                                // --- Nút Notification ---
-                                IconButton(
-                                  onPressed: () => navigateTo(
-                                    context,
-                                    const NotificationView(),
-                                  ),
-                                  icon: Image.asset(
-                                    "assets/img/notification_active.png",
-                                    width: 25,
-                                    height: 25,
-                                    fit: BoxFit.fitHeight,
-                                  ),
                                 ),
                               ],
                             ),

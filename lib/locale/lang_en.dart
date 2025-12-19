@@ -185,4 +185,17 @@ Map<String, String> enUs = {
   LocaleKey.noComments: "No comments yet",
   LocaleKey.writeComments: "Write a comment...",
   LocaleKey.loading: "Loading...",
+
+  // // ✅ THÊM: Keys cho workout completion
+  // LocaleKey.finishEarly: "Finish Early?",
+  // LocaleKey.continueWorkout: "Continue",
+  // LocaleKey.finishWorkout: "Finish",
+  // LocaleKey.workoutWillBeSaved:
+  //     "The workout will be saved with current progress",
+  // LocaleKey.congratulations: "Congratulations!",
+  // LocaleKey.workoutCompleted: "WORKOUT\nCOMPLETED!",
+  // LocaleKey.duration: "Duration",
+  // LocaleKey.date: "Date",
+  // LocaleKey.completed: "Completed",
+  // LocaleKey.goodJob: "Great job! You have completed your workout.",
 };

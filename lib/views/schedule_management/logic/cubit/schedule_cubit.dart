@@ -6,25 +6,26 @@ import 'package:smart_fitness_assistant/core/services/notification_service.dart'
 
 part 'schedule_state.dart';
 
+/// Cubit quản lý lịch tập luyện
 class ScheduleCubit extends Cubit<ScheduleState> {
-  final _supabase = Supabase.instance.client;
-  final _notificationService = NotificationService();
-
   ScheduleCubit() : super(ScheduleInitial());
 
-  /// Load lịch tập theo ngày
+  final _supabase = Supabase.instance.client;
+  final _notificationService = NotificationService();
+  final Map<String, int> _scheduledWorkoutReminderIds = {};
+
+  /// Tải danh sách lịch tập theo ngày
   Future<void> loadSchedulesByDate(DateTime date) async {
     emit(ScheduleLoading());
 
     try {
-      final userId = _supabase.auth.currentUser?.id;
+      final userId = _getUserId();
       if (userId == null) {
         emit(ScheduleError('User not authenticated'));
         return;
       }
 
-      final startOfDay = DateTime(date.year, date.month, date.day);
-      final endOfDay = startOfDay.add(const Duration(days: 1));
+      final (startOfDay, endOfDay) = _getDateRange(date);
 
       final response = await _supabase
           .from('scheduled_workouts')
@@ -44,7 +45,7 @@ class ScheduleCubit extends Cubit<ScheduleState> {
     }
   }
 
-  /// Thêm lịch tập mới
+  /// Thêm lịch tập mới - ✅ FIX: Reload ngay sau khi thêm
   Future<bool> addSchedule(ScheduledWorkout schedule) async {
     try {
       final response = await _supabase
@@ -55,16 +56,12 @@ class ScheduleCubit extends Cubit<ScheduleState> {
 
       final newSchedule = ScheduledWorkout.fromJson(response);
 
-      // ✅ Lên lịch notification nếu cần
       if (schedule.hasNotification) {
         await _scheduleNotification(newSchedule);
       }
 
-      // Reload lại list
-      if (state is ScheduleLoaded) {
-        final currentState = state as ScheduleLoaded;
-        await loadSchedulesByDate(currentState.selectedDate);
-      }
+      // ✅ FIX: Reload ngay lập tức
+      await _reloadCurrentScheduleDate();
 
       return true;
     } catch (e) {
@@ -73,19 +70,14 @@ class ScheduleCubit extends Cubit<ScheduleState> {
     }
   }
 
-  /// Xóa lịch tập
+  /// Xóa lịch tập - ✅ FIX: Reload ngay sau khi xóa
   Future<bool> deleteSchedule(String scheduleId) async {
     try {
       await _supabase.from('scheduled_workouts').delete().eq('id', scheduleId);
-
-      // ✅ Hủy notification
       await _notificationService.cancelNotification(scheduleId.hashCode);
 
-      // Reload
-      if (state is ScheduleLoaded) {
-        final currentState = state as ScheduleLoaded;
-        await loadSchedulesByDate(currentState.selectedDate);
-      }
+      // ✅ FIX: Reload ngay lập tức
+      await _reloadCurrentScheduleDate();
 
       return true;
     } catch (e) {
@@ -94,50 +86,18 @@ class ScheduleCubit extends Cubit<ScheduleState> {
     }
   }
 
-  /// Cập nhật lịch tập
-  Future<bool> updateSchedule(ScheduledWorkout schedule) async {
-    try {
-      await _supabase
-          .from('scheduled_workouts')
-          .update(schedule.toJson())
-          .eq('id', schedule.id!);
-
-      // ✅ Cập nhật notification
-      await _notificationService.cancelNotification(schedule.id.hashCode);
-
-      if (schedule.hasNotification && !schedule.isCompleted) {
-        await _scheduleNotification(schedule);
-      }
-
-      // Reload
-      if (state is ScheduleLoaded) {
-        final currentState = state as ScheduleLoaded;
-        await loadSchedulesByDate(currentState.selectedDate);
-      }
-
-      return true;
-    } catch (e) {
-      print('❌ Error updating schedule: $e');
-      return false;
-    }
-  }
-
-  /// Đánh dấu hoàn thành
-  Future<bool> markAsCompleted(String scheduleId) async {
+  /// Đánh dấu hoàn thành lịch tập - ✅ FIX: Reload ngay sau khi mark
+  Future<bool> markScheduleAsCompleted(String scheduleId) async {
     try {
       await _supabase
           .from('scheduled_workouts')
           .update({'is_completed': true})
           .eq('id', scheduleId);
 
-      // Hủy notification
       await _notificationService.cancelNotification(scheduleId.hashCode);
 
-      // Reload
-      if (state is ScheduleLoaded) {
-        final currentState = state as ScheduleLoaded;
-        await loadSchedulesByDate(currentState.selectedDate);
-      }
+      // ✅ FIX: Reload ngay lập tức
+      await _reloadCurrentScheduleDate();
 
       return true;
     } catch (e) {
@@ -146,42 +106,62 @@ class ScheduleCubit extends Cubit<ScheduleState> {
     }
   }
 
-  /// Toggle notification
-  Future<bool> toggleNotification(ScheduledWorkout schedule) async {
-    try {
-      final newValue = !schedule.hasNotification;
+  // ============ Private Helpers ============
 
-      await _supabase
-          .from('scheduled_workouts')
-          .update({'has_notification': newValue})
-          .eq('id', schedule.id!);
+  String? _getUserId() => _supabase.auth.currentUser?.id;
 
-      if (newValue) {
-        await _scheduleNotification(schedule.copyWith(hasNotification: true));
-      } else {
-        await _notificationService.cancelNotification(schedule.id.hashCode);
-      }
+  (DateTime, DateTime) _getDateRange(DateTime date) {
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+    return (startOfDay, endOfDay);
+  }
 
-      // Reload
-      if (state is ScheduleLoaded) {
-        final currentState = state as ScheduleLoaded;
-        await loadSchedulesByDate(currentState.selectedDate);
-      }
-
-      return true;
-    } catch (e) {
-      print('❌ Error toggling notification: $e');
-      return false;
+  Future<void> _reloadCurrentScheduleDate() async {
+    if (state is ScheduleLoaded) {
+      final currentState = state as ScheduleLoaded;
+      await loadSchedulesByDate(currentState.selectedDate);
     }
   }
 
-  /// Private: Lên lịch notification
   Future<void> _scheduleNotification(ScheduledWorkout schedule) async {
+    final userId = _getUserId();
+    if (userId == null) return;
+
+    final notificationId = _generateWorkoutNotificationId(userId, schedule.id!);
+    _scheduledWorkoutReminderIds[schedule.id!] = notificationId;
+
     await _notificationService.scheduleWorkoutNotification(
-      id: schedule.id.hashCode,
+      id: notificationId,
       title: '⏰ Đã đến giờ tập luyện!',
       body: '${schedule.categoryName} - Bắt đầu ngay thôi! 💪',
       scheduledTime: schedule.scheduledTime,
     );
+  }
+
+  int _generateWorkoutNotificationId(String userId, String scheduleId) {
+    final userHash = userId.hashCode.abs() % 10000;
+    final scheduleHash = scheduleId.hashCode.abs() % 10000;
+    return 200000 + userHash + scheduleHash;
+  }
+
+  @override
+  Future<void> close() async {
+    final userId = _getUserId();
+    if (userId != null) {
+      await _cancelUserWorkoutReminders(userId);
+    }
+    return super.close();
+  }
+
+  Future<void> _cancelUserWorkoutReminders(String userId) async {
+    try {
+      for (final scheduleId in _scheduledWorkoutReminderIds.keys) {
+        final notificationId = _scheduledWorkoutReminderIds[scheduleId]!;
+        await _notificationService.cancelNotification(notificationId);
+      }
+      _scheduledWorkoutReminderIds.clear();
+    } catch (e) {
+      print('❌ Error cancelling workout reminders: $e');
+    }
   }
 }

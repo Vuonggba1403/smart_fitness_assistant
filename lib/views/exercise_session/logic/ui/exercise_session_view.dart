@@ -6,12 +6,11 @@ import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
-import 'package:smart_fitness_assistant/views/workout_tracker/logic/cubit/workout_tracker_cubit.dart';
-// ❌ XÓA: import 'package:smart_fitness_assistant/views/workout_tracker/logic/cubit/exercise_item_cubit.dart';
+import 'package:smart_fitness_assistant/views/exercise_session/logic/cubit/session_cubit.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/common/bottom_sheet_details.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/common/show_dialog.dart';
-import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/common/workout_completion_bottom_sheet.dart';
-import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/common/workout_congratulations_screen.dart'; // ✅ Import màn hình mới
+import 'package:smart_fitness_assistant/views/exercise_session/logic/ui/widgets/workout_completion_bottom_sheet.dart';
+import 'package:smart_fitness_assistant/views/exercise_session/logic/ui/widgets/workout_congratulations_screen.dart'; // ✅ Import màn hình mới
 
 class ExerciseSessionView extends StatelessWidget {
   const ExerciseSessionView({super.key});
@@ -36,8 +35,8 @@ class ExerciseSessionView extends StatelessWidget {
   }
 
   Future<void> _showCompletionBottomSheet(BuildContext context) async {
-    final state = context.read<WorkoutTrackerCubit>().state;
-    if (state is! ExerciseSessionActive) return;
+    final state = context.read<SessionCubit>().state; // ✅ FIX
+    if (state is! SessionActive) return;
 
     final shouldFinish = await WorkoutCompletionBottomSheet.show(
       context,
@@ -46,26 +45,42 @@ class ExerciseSessionView extends StatelessWidget {
     );
 
     if (shouldFinish == true && context.mounted) {
-      // ✅ Lưu workout
       final saved = await context
-          .read<WorkoutTrackerCubit>()
-          .saveWorkoutSession();
+          .read<SessionCubit>()
+          .saveWorkoutSession(); // ✅ FIX
 
       if (saved && context.mounted) {
-        context.read<WorkoutTrackerCubit>().stopWorkoutSession();
+        context.read<SessionCubit>().stopWorkoutSession(); // ✅ FIX
 
-        // ✅ Hiển thị congratulations
         await WorkoutCongratulationsScreen.show(context, state);
 
         if (context.mounted) {
-          // ✅ Pop về màn hình trước (workout_detail_view)
           Navigator.pop(context);
-
-          // ✅ Sau 100ms, pop tiếp về workout_tracker_view để force refresh
           await Future.delayed(const Duration(milliseconds: 100));
           if (context.mounted) {
             Navigator.pop(context);
           }
+        }
+      }
+    }
+  }
+
+  /// Hoàn thành workout và invalidate cache
+  Future<void> _finishWorkout(BuildContext context, SessionActive state) async {
+    final saved = await context.read<SessionCubit>().saveWorkoutSession();
+
+    if (saved && context.mounted) {
+      context.read<SessionCubit>().stopWorkoutSession();
+
+      await WorkoutCongratulationsScreen.show(context, state);
+
+      if (context.mounted) {
+        // ✅ FIX: Emit refresh signal trước khi pop
+        Navigator.pop(context, true); // ✅ Return true để signal refresh
+
+        await Future.delayed(const Duration(milliseconds: 100));
+        if (context.mounted) {
+          Navigator.pop(context, true); // ✅ Return true
         }
       }
     }
@@ -84,7 +99,7 @@ class ExerciseSessionView extends StatelessWidget {
 
         final shouldExit = await _showExitDialog(context);
         if (shouldExit && context.mounted) {
-          context.read<WorkoutTrackerCubit>().stopWorkoutSession();
+          context.read<SessionCubit>().stopWorkoutSession(); // ✅ FIX
           Navigator.of(context).pop();
         }
       },
@@ -98,14 +113,15 @@ class ExerciseSessionView extends StatelessWidget {
             onPressed: () async {
               final shouldExit = await _showExitDialog(context);
               if (shouldExit && context.mounted) {
-                context.read<WorkoutTrackerCubit>().stopWorkoutSession();
+                context.read<SessionCubit>().stopWorkoutSession(); // ✅ FIX
                 Navigator.pop(context);
               }
             },
           ),
-          title: BlocBuilder<WorkoutTrackerCubit, WorkoutTrackerState>(
+          title: BlocBuilder<SessionCubit, SessionState>(
+            // ✅ FIX
             builder: (context, state) {
-              final title = state is ExerciseSessionActive
+              final title = state is SessionActive
                   ? state.categoryName
                   : 'Workout';
               return Text(
@@ -115,9 +131,10 @@ class ExerciseSessionView extends StatelessWidget {
             },
           ),
         ),
-        body: BlocBuilder<WorkoutTrackerCubit, WorkoutTrackerState>(
+        body: BlocBuilder<SessionCubit, SessionState>(
+          // ✅ FIX
           builder: (context, state) {
-            if (state is! ExerciseSessionActive) {
+            if (state is! SessionActive) {
               return Center(child: Text('No active session'));
             }
 
@@ -141,7 +158,7 @@ class ExerciseSessionView extends StatelessWidget {
 
   Widget _buildTimerSection(
     BuildContext context,
-    ExerciseSessionActive state,
+    SessionActive state, // ✅ FIX: Đổi type
     Color cardColor,
     Color? textColor,
   ) {
@@ -192,7 +209,7 @@ class ExerciseSessionView extends StatelessWidget {
 
   Widget _buildBottomButtons(
     BuildContext context,
-    ExerciseSessionActive state,
+    SessionActive state,
     Color? textColor,
   ) {
     String buttonText;
@@ -212,9 +229,9 @@ class ExerciseSessionView extends StatelessWidget {
             InkWell(
               onTap: () {
                 if (state.isFinishMode) {
-                  context.read<WorkoutTrackerCubit>().disableFinishMode();
+                  context.read<SessionCubit>().disableFinishMode();
                 } else {
-                  context.read<WorkoutTrackerCubit>().enableFinishMode();
+                  context.read<SessionCubit>().enableFinishMode();
                 }
               },
               child: Container(
@@ -244,30 +261,10 @@ class ExerciseSessionView extends StatelessWidget {
                 title: buttonText,
                 onPressed: () async {
                   if (state.isWorkoutCompleted) {
-                    // ✅ Lưu workout
-                    final saved = await context
-                        .read<WorkoutTrackerCubit>()
-                        .saveWorkoutSession();
-
-                    if (saved && context.mounted) {
-                      context.read<WorkoutTrackerCubit>().stopWorkoutSession();
-
-                      // ✅ Hiển thị congratulations
-                      await WorkoutCongratulationsScreen.show(context, state);
-
-                      if (context.mounted) {
-                        // ✅ Pop về workout_detail_view
-                        Navigator.pop(context);
-
-                        // ✅ Sau 100ms, pop tiếp về workout_tracker_view
-                        await Future.delayed(const Duration(milliseconds: 100));
-                        if (context.mounted) {
-                          Navigator.pop(context);
-                        }
-                      }
-                    }
+                    // ✅ FIX: Call helper method
+                    await _finishWorkout(context, state);
                   } else {
-                    context.read<WorkoutTrackerCubit>().nextSet();
+                    context.read<SessionCubit>().nextSet();
                   }
                 },
               ),
@@ -281,7 +278,7 @@ class ExerciseSessionView extends StatelessWidget {
   //Exercise
   Widget _buildExpandedCard(
     BuildContext context,
-    ExerciseSessionActive state,
+    SessionActive state, // ✅ FIX: Đổi type
     Color? textColor,
     Color cardColor,
   ) {
@@ -335,7 +332,7 @@ class ExerciseSessionView extends StatelessWidget {
               IconButton(
                 icon: Icon(Icons.keyboard_arrow_up, color: textColor),
                 onPressed: () {
-                  context.read<WorkoutTrackerCubit>().toggleExpanded();
+                  context.read<SessionCubit>().toggleExpanded();
                 },
               ),
             ],
@@ -374,7 +371,7 @@ class ExerciseSessionView extends StatelessWidget {
               Expanded(
                 child: ElevatedButton.icon(
                   onPressed: () {
-                    context.read<WorkoutTrackerCubit>().addSet();
+                    context.read<SessionCubit>().addSet();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: TColor.black,
@@ -396,7 +393,7 @@ class ExerciseSessionView extends StatelessWidget {
 
   Widget _buildCollapsedList(
     BuildContext context,
-    ExerciseSessionActive state,
+    SessionActive state, // ✅ FIX: Đổi type
     Color? textColor,
     Color cardColor,
   ) {
@@ -411,7 +408,7 @@ class ExerciseSessionView extends StatelessWidget {
           final totalSets = 4;
 
           // ✅ Dùng WorkoutTrackerCubit thay vì ExerciseItemCubit
-          final cubit = context.read<WorkoutTrackerCubit>();
+          final cubit = context.read<SessionCubit>(); // ✅ FIX
           final isExpanded = cubit.isExerciseItemExpanded(exercise.id);
 
           return GestureDetector(
@@ -549,7 +546,7 @@ class ExerciseSessionView extends StatelessWidget {
                                   child: ElevatedButton.icon(
                                     onPressed: () {
                                       context
-                                          .read<WorkoutTrackerCubit>()
+                                          .read<SessionCubit>() // ✅ FIX
                                           .addSet();
                                     },
                                     style: ElevatedButton.styleFrom(
@@ -593,7 +590,7 @@ class ExerciseSessionView extends StatelessWidget {
 
   /// ✅ Method helper: Tính số sets đã hoàn thành cho TỪNG exercise
   int _getCompletedSetsForExercise(
-    ExerciseSessionActive state,
+    SessionActive state, // ✅ FIX: Đổi type
     int exerciseIndex,
   ) {
     if (exerciseIndex < state.currentExerciseIndex) {
@@ -683,7 +680,8 @@ class _EditableSetRowState extends State<_EditableSetRow> {
           // Checkbox
           InkWell(
             onTap: () {
-              context.read<WorkoutTrackerCubit>().toggleSetCompletion(
+              context.read<SessionCubit>().toggleSetCompletion(
+                // ✅ FIX
                 widget.index,
               );
             },
@@ -748,7 +746,8 @@ class _EditableSetRowState extends State<_EditableSetRow> {
               onChanged: (value) {
                 final number = int.tryParse(value);
                 if (number != null && number > 0) {
-                  context.read<WorkoutTrackerCubit>().updateSetWeight(
+                  context.read<SessionCubit>().updateSetWeight(
+                    // ✅ FIX
                     widget.index,
                     number.toDouble(),
                   );
@@ -787,7 +786,8 @@ class _EditableSetRowState extends State<_EditableSetRow> {
               onChanged: (value) {
                 final number = int.tryParse(value);
                 if (number != null && number > 0) {
-                  context.read<WorkoutTrackerCubit>().updateSetReps(
+                  context.read<SessionCubit>().updateSetReps(
+                    // ✅ FIX
                     widget.index,
                     number,
                   );

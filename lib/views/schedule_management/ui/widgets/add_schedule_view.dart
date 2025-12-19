@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/models/scheduled_workout.dart';
 import 'package:smart_fitness_assistant/core/models/exercise_category.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
-import 'package:smart_fitness_assistant/core/services/notification_service.dart';
+import 'package:smart_fitness_assistant/views/schedule_management/logic/cubit/schedule_cubit.dart';
 
 class AddScheduleView extends StatefulWidget {
   final DateTime date;
@@ -18,7 +19,6 @@ class AddScheduleView extends StatefulWidget {
 
 class _AddScheduleViewState extends State<AddScheduleView> {
   final _supabase = Supabase.instance.client;
-  final _notificationService = NotificationService();
 
   List<ExerciseCategory> _categories = [];
   ExerciseCategory? _selectedCategory;
@@ -36,6 +36,7 @@ class _AddScheduleViewState extends State<AddScheduleView> {
     _loadCategories();
   }
 
+  /// Tải danh sách categories từ database
   Future<void> _loadCategories() async {
     try {
       final response = await _supabase
@@ -43,17 +44,19 @@ class _AddScheduleViewState extends State<AddScheduleView> {
           .select()
           .order('title_ex');
 
-      _categories = response
-          .map((json) => ExerciseCategory.fromJson(json))
-          .toList();
-
-      setState(() => _isLoading = false);
+      setState(() {
+        _categories = response
+            .map((json) => ExerciseCategory.fromJson(json))
+            .toList();
+        _isLoading = false;
+      });
     } catch (e) {
       print('❌ Error loading categories: $e');
       setState(() => _isLoading = false);
     }
   }
 
+  /// Hiển thị time picker
   Future<void> _selectTime() async {
     final time = await showTimePicker(
       context: context,
@@ -65,10 +68,10 @@ class _AddScheduleViewState extends State<AddScheduleView> {
     }
   }
 
+  /// Lưu lịch tập mới
   Future<void> _save() async {
     if (_selectedCategory == null) {
       AppSnackBar.error(context, 'Vui lòng chọn bài tập');
-
       return;
     }
 
@@ -83,7 +86,7 @@ class _AddScheduleViewState extends State<AddScheduleView> {
       _selectedTime.minute,
     );
 
-    // ✅ Check thời gian phải trong tương lai
+    /// Kiểm tra thời gian phải trong tương lai
     if (scheduledTime.isBefore(DateTime.now())) {
       AppSnackBar.error(context, 'Vui lòng chọn thời gian trong tương lai');
       return;
@@ -98,42 +101,14 @@ class _AddScheduleViewState extends State<AddScheduleView> {
       hasNotification: _hasNotification,
     );
 
-    try {
-      final response = await _supabase
-          .from('scheduled_workouts')
-          .insert(schedule.toJson())
-          .select()
-          .single();
+    /// ✅ FIX: Lưu qua ScheduleCubit
+    final success = await context.read<ScheduleCubit>().addSchedule(schedule);
 
-      final newSchedule = ScheduledWorkout.fromJson(response);
-
-      print('✅ Schedule inserted: ${newSchedule.id}');
-      print('   Category: ${newSchedule.categoryName}');
-      print('   Time: ${newSchedule.scheduledTime}');
-      print('   Notification: ${newSchedule.hasNotification}');
-
-      // ✅ Lên lịch notification nếu cần
-      if (_hasNotification) {
-        await _notificationService.scheduleWorkoutNotification(
-          id: newSchedule.id.hashCode,
-          title: '⏰ Đã đến giờ tập luyện!',
-          body: '${newSchedule.categoryName} - Bắt đầu ngay thôi! 💪',
-          scheduledTime: scheduledTime,
-        );
-        print('✅ Notification scheduled');
-      }
-
-      if (mounted) {
-        // ✅ Pop với result = true
-        Navigator.pop(context, true);
-
-        AppSnackBar.success(context, '✅ Đã thêm lịch tập');
-      }
-    } catch (e) {
-      print('❌ Error adding schedule: $e');
-      if (mounted) {
-        AppSnackBar.error(context, '❌ Thêm lịch tập thất bại');
-      }
+    if (success && mounted) {
+      Navigator.pop(context, true);
+      AppSnackBar.success(context, '✅ Đã thêm lịch tập');
+    } else if (mounted) {
+      AppSnackBar.error(context, '❌ Thêm lịch tập thất bại');
     }
   }
 
@@ -151,6 +126,7 @@ class _AddScheduleViewState extends State<AddScheduleView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  /// Chọn bài tập
                   Text(
                     'Chọn bài tập',
                     style: TextStyle(
@@ -188,6 +164,7 @@ class _AddScheduleViewState extends State<AddScheduleView> {
 
                   const SizedBox(height: 24),
 
+                  /// Chọn thời gian
                   Text(
                     'Thời gian',
                     style: TextStyle(
@@ -226,6 +203,7 @@ class _AddScheduleViewState extends State<AddScheduleView> {
 
                   const SizedBox(height: 24),
 
+                  /// Switch bật/tắt thông báo
                   Container(
                     padding: const EdgeInsets.all(15),
                     decoration: BoxDecoration(
@@ -256,6 +234,7 @@ class _AddScheduleViewState extends State<AddScheduleView> {
 
                   const SizedBox(height: 40),
 
+                  /// Nút thêm lịch
                   RoundButton(title: 'Thêm lịch', onPressed: _save),
                 ],
               ),

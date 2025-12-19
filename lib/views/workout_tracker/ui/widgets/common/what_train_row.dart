@@ -8,40 +8,38 @@ import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
 import '../../../../../core/functions/colo_extension.dart';
 
-/// Widget hiển thị một row của workout/exercise
-/// Sử dụng ExerciseCategory model từ Supabase
+/// Widget hiển thị một row workout với progress
 class WhatTrainRow extends StatelessWidget {
   final ExerciseCategory category;
   final int? exerciseCount;
-  final int? durationMins; // ✅ Giữ lại để tương thích nhưng không dùng
-  final Map<String, WorkoutProgress>? progressMap; // ✅ Thêm progress
+  final Map<String, WorkoutProgress>? progressMap;
 
   const WhatTrainRow({
     super.key,
     required this.category,
     this.exerciseCount,
-    this.durationMins,
     this.progressMap,
   });
+
+  /// Tính phần trăm hoàn thành từ progress map
+  double _calculateCompletionPercent() {
+    if (progressMap == null || progressMap!.isEmpty) return 0.0;
+
+    final totalExercises = exerciseCount ?? 0;
+    final completedExercises = progressMap!.values
+        .where((p) => p.isFullyCompleted)
+        .length;
+
+    return totalExercises > 0
+        ? (completedExercises / totalExercises).clamp(0.0, 1.0)
+        : 0.0;
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final cardColor = theme.cardColor;
-
+    final completionPercent = _calculateCompletionPercent();
     final displayExerciseCount = exerciseCount ?? 0;
-
-    // ✅ Tính % hoàn thành từ progress thực tế
-    double completionPercent = 0.0;
-    if (progressMap != null && progressMap!.isNotEmpty) {
-      final totalExercises = displayExerciseCount;
-      final completedExercises = progressMap!.values
-          .where((p) => p.isFullyCompleted)
-          .length;
-      completionPercent = totalExercises > 0
-          ? (completedExercises / totalExercises).clamp(0.0, 1.0)
-          : 0.0;
-    }
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
@@ -57,109 +55,114 @@ class WhatTrainRow extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // ✅ FIX: Bỏ Hero widget để tránh conflict
-            Stack(
-              children: [
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    color: cardColor.withOpacity(0.54),
-                    borderRadius: BorderRadius.circular(40),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(40),
-                    child: CachedNetworkImage(
-                      imageUrl: category.imgUrl ?? '',
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) =>
-                          CustomCircleProgIndicator(),
-                      errorWidget: (context, url, error) => Icon(
-                        Icons.fitness_center,
-                        size: 40,
-                        color: TColor.gray,
-                      ),
-                    ),
-                  ),
-                ),
-                if (completionPercent == 1.0)
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: Container(
-                      width: 24,
-                      height: 24,
-                      decoration: BoxDecoration(
-                        color: Colors.green,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2),
-                      ),
-                      child: Icon(Icons.check, color: Colors.white, size: 14),
-                    ),
-                  ),
-              ],
-            ),
+            _buildCategoryImage(completionPercent, theme.cardColor),
             const SizedBox(width: 15),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Tên bài tập từ database
-                  Text(
-                    category.titleEx ?? 'Workout',
-                    style: TextStyle(
-                      color: TColor.black,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  // ✅ Chỉ hiển thị số bài tập
-                  Text(
-                    "$displayExerciseCount ${LocaleKey.exercises.tr}",
-                    style: TextStyle(color: TColor.gray, fontSize: 12),
-                  ),
-                  const SizedBox(height: 10),
-
-                  // Progress bar
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: LinearProgressIndicator(
-                            value: completionPercent,
-                            minHeight: 6,
-                            backgroundColor: TColor.gray.withOpacity(0.3),
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              completionPercent == 1.0
-                                  ? Colors.green
-                                  : TColor.primaryColor1,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      // ✅ Hiển thị % chính xác (không làm tròn)
-                      Text(
-                        "${(completionPercent * 100).toStringAsFixed(0)}%",
-                        style: TextStyle(
-                          color: TColor.black,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+              child: _buildCategoryInfo(
+                displayExerciseCount,
+                completionPercent,
               ),
             ),
             const SizedBox(width: 10),
-            // Icon mũi tên để chỉ ra có thể click
             Icon(Icons.arrow_circle_right_rounded, color: TColor.black),
           ],
         ),
       ),
+    );
+  }
+
+  /// Build hình ảnh category với check mark nếu hoàn thành
+  Widget _buildCategoryImage(double completionPercent, Color cardColor) {
+    return Stack(
+      children: [
+        Container(
+          width: 80,
+          height: 80,
+          decoration: BoxDecoration(
+            color: cardColor.withOpacity(0.54),
+            borderRadius: BorderRadius.circular(40),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(40),
+            child: CachedNetworkImage(
+              imageUrl: category.imgUrl ?? '',
+              fit: BoxFit.cover,
+              placeholder: (context, url) => CustomCircleProgIndicator(),
+              errorWidget: (context, url, error) =>
+                  Icon(Icons.fitness_center, size: 40, color: TColor.gray),
+            ),
+          ),
+        ),
+        if (completionPercent == 1.0)
+          Positioned(
+            top: 0,
+            right: 0,
+            child: Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                color: Colors.green,
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 2),
+              ),
+              child: Icon(Icons.check, color: Colors.white, size: 14),
+            ),
+          ),
+      ],
+    );
+  }
+
+  /// Build thông tin category (tên, số bài tập, progress bar)
+  Widget _buildCategoryInfo(int exerciseCount, double completionPercent) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          category.titleEx ?? 'Workout',
+          style: TextStyle(
+            color: TColor.black,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          "$exerciseCount ${LocaleKey.exercises.tr}",
+          style: TextStyle(color: TColor.gray, fontSize: 12),
+        ),
+        const SizedBox(height: 10),
+        _buildProgressBar(completionPercent),
+      ],
+    );
+  }
+
+  /// Build progress bar với phần trăm
+  Widget _buildProgressBar(double completionPercent) {
+    return Row(
+      children: [
+        Expanded(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: LinearProgressIndicator(
+              value: completionPercent,
+              minHeight: 6,
+              backgroundColor: TColor.gray.withOpacity(0.3),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                completionPercent == 1.0 ? Colors.green : TColor.primaryColor1,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Text(
+          "${(completionPercent * 100).toStringAsFixed(0)}%",
+          style: TextStyle(
+            color: TColor.black,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
     );
   }
 }

@@ -185,4 +185,15 @@ Map<String, String> viVN = {
   LocaleKey.noComments: "Chưa có bình luận nào",
   LocaleKey.writeComments: "Viết bình luận...",
   LocaleKey.loading: "Đang tải...",
+  // // ✅ THÊM: Keys cho workout completion
+  // LocaleKey.finishEarly: "Kết thúc sớm?",
+  // LocaleKey.continueWorkout: "Tiếp tục",
+  // LocaleKey.finishWorkout: "Kết thúc",
+  // LocaleKey.workoutWillBeSaved: "Bài tập sẽ được lưu lại với tiến độ hiện tại",
+  // LocaleKey.congratulations: "Chúc mừng!",
+  // LocaleKey.workoutCompleted: "BÀI TẬP\nHOÀN THÀNH!",
+  // LocaleKey.duration: "Thời lượng",
+  // LocaleKey.date: "Ngày",
+  // LocaleKey.completed: "Hoàn thành",
+  // LocaleKey.goodJob: "Tuyệt vời! Bạn đã hoàn thành bài tập của mình.",
 };

@@ -145,3 +145,19 @@ final class ExerciseItemExpanded extends WorkoutTrackerState {
 
   ExerciseItemExpanded(this.exerciseId, this.isExpanded);
 }
+
+// ✅ THÊM: State cho việc update data
+final class DataRefreshed extends WorkoutTrackerState {
+  final DateTime timestamp;
+  DataRefreshed() : timestamp = DateTime.now();
+}
+
+final class UpcomingWorkoutsUpdated extends WorkoutTrackerState {
+  final List<UpcomingWorkout> workouts;
+  UpcomingWorkoutsUpdated(this.workouts);
+}
+
+final class WeeklyStatsUpdated extends WorkoutTrackerState {
+  final List<double> stats;
+  WeeklyStatsUpdated(this.stats);
+}

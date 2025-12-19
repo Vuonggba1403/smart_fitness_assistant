@@ -177,4 +177,18 @@ class LocaleKey {
   static const String noComments = "no_comments";
   static const String writeComments = "write_comments";
   static const String loading = "loading";
+
+  // // ✅ THÊM: Keys cho workout completion
+  // static const String titleDialogWorkout = "title_dialog_workout";
+  // static const String contentDialogWorkout = "content_dialog_workout";
+  // static const String finishEarly = "finish_early";
+  // static const String continueWorkout = "continue_workout";
+  // static const String finishWorkout = "finish_workout";
+  // static const String workoutWillBeSaved = "workout_will_be_saved";
+  // static const String congratulations = "congratulations";
+  // static const String workoutCompleted = "workout_completed";
+  // static const String duration = "duration";
+  // static const String date = "date";
+  // static const String completed = "completed";
+  // static const String goodJob = "good_job";
 }

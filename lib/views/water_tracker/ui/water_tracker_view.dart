@@ -1,4 +1,3 @@
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -63,7 +62,7 @@ class _WaterTrackerContentState extends State<_WaterTrackerContent> {
       if (mounted) {
         AppSnackBar.success(
           context,
-            '${LocaleKey.reminder.tr} : ${newSettings.reminderIntervalMinutes} ${LocaleKey.mins.tr}',
+          '${LocaleKey.reminder.tr} : ${newSettings.reminderIntervalMinutes} ${LocaleKey.mins.tr}',
         );
       }
     }
@@ -72,7 +71,6 @@ class _WaterTrackerContentState extends State<_WaterTrackerContent> {
   @override
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context).size;
-
 
     return Scaffold(
       backgroundColor: TColor.primaryColor1,
@@ -105,7 +103,6 @@ class _WaterTrackerContentState extends State<_WaterTrackerContent> {
             }
 
             return SafeArea(
-
               child: Column(
                 children: [
                   // Header
@@ -141,7 +138,7 @@ class _WaterTrackerContentState extends State<_WaterTrackerContent> {
                   Expanded(
                     child: Center(
                       child: WaterProgressDisplay(
-                        onTap: (){},
+                        onTap: () {},
                         totalMl: state.totalMl,
                         goalMl: state.goalMl,
                         progress: state.progress,

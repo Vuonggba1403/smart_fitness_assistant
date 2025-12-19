@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 typedef DialogCallback = Future<void> Function();
 
+/// Custom dialog với style nhất quán
 class CustomDialog extends StatelessWidget {
   final String title;
   final String content;
@@ -27,37 +28,42 @@ class CustomDialog extends StatelessWidget {
       actions: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(
-                "Huỷ",
-                style: TextStyle(
-                  color: Colors.red,
-                  fontFamily: "Poppins",
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            TextButton(
-              onPressed: () async {
-                if (onOk != null) await onOk!();
-                Navigator.pop(context, true);
-              },
-              child: Text(
-                okText,
-                style: TextStyle(
-                  color: okColor ?? Colors.blue,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
+          children: [_buildCancelButton(context), _buildConfirmButton(context)],
         ),
       ],
+    );
+  }
+
+  /// Build nút Hủy
+  Widget _buildCancelButton(BuildContext context) {
+    return TextButton(
+      onPressed: () => Navigator.of(context).pop(),
+      child: Text(
+        "Huỷ",
+        style: TextStyle(
+          color: Colors.red,
+          fontFamily: "Poppins",
+          fontSize: 15,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  /// Build nút Xác nhận
+  Widget _buildConfirmButton(BuildContext context) {
+    return TextButton(
+      onPressed: () async {
+        if (onOk != null) await onOk!();
+        Navigator.pop(context, true);
+      },
+      child: Text(
+        okText,
+        style: TextStyle(
+          color: okColor ?? Colors.blue,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 }

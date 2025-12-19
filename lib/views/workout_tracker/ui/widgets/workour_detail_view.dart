@@ -9,9 +9,11 @@ import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/core/models/exercise_item.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/logic/cubit/workout_tracker_cubit.dart';
+import 'package:smart_fitness_assistant/views/exercise_session/logic/cubit/session_cubit.dart';
+import 'package:smart_fitness_assistant/views/exercise_session/logic/ui/exercise_session_view.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/common/bottom_sheet_details.dart';
-import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/exercise_session_view.dart';
 
+/// Màn hình hiển thị chi tiết workout category với danh sách exercises
 class WorkoutDetailView extends StatefulWidget {
   final Map dObj;
   const WorkoutDetailView({super.key, required this.dObj});
@@ -44,6 +46,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
     }
   }
 
+  /// Tải dữ liệu exercises từ category
   void _loadData() {
     final categoryId = widget.dObj['id'] ?? widget.dObj['for_cate'];
     if (categoryId != null) {
@@ -53,6 +56,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
     }
   }
 
+  /// Pre-cache tất cả hình ảnh để tối ưu performance
   Future<void> _preCacheExerciseImages(List<ExerciseItem> exercises) async {
     if (_isImagesCached) return;
 
@@ -216,7 +220,8 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
                         builder: (context, state) {
                           return RoundButton(
                             title: LocaleKey.startWorkout.tr,
-                            onPressed: () {
+                            onPressed: () async {
+                              // ✅ FIX: Async để await result
                               if (state is WorkoutDetailLoaded) {
                                 final categoryId =
                                     widget.dObj['id']?.toString() ?? '';
@@ -224,25 +229,26 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
                                     widget.dObj['title_ex']?.toString() ??
                                     'Workout';
 
-                                context
-                                    .read<WorkoutTrackerCubit>()
-                                    .startWorkoutSession(
-                                      state.exercises,
-                                      categoryId,
-                                      categoryName,
-                                    );
-                                Navigator.push(
+                                // ✅ FIX: Await result từ session
+                                final result = await Navigator.push<bool>(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) => BlocProvider.value(
-                                      value: context
-                                          .read<WorkoutTrackerCubit>(),
+                                    builder: (_) => BlocProvider(
+                                      create: (_) => SessionCubit()
+                                        ..startWorkoutSession(
+                                          state.exercises,
+                                          categoryId,
+                                          categoryName,
+                                        ),
                                       child: const ExerciseSessionView(),
                                     ),
                                   ),
-                                ).then((_) {
+                                );
+
+                                // ✅ FIX: Reload nếu có result = true
+                                if (result == true && mounted) {
                                   _loadData();
-                                });
+                                }
                               }
                             },
                           );
@@ -259,6 +265,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
     );
   }
 
+  /// Build header hiển thị tên category và số lượng exercises
   Widget _buildHeader(Color? textColor) {
     return BlocBuilder<WorkoutTrackerCubit, WorkoutTrackerState>(
       builder: (context, state) {
@@ -299,6 +306,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
     );
   }
 
+  /// Build section hiển thị danh sách thiết bị cần dùng
   Widget _buildDevicesSection(Size media, Color? textColor, Color cardColor) {
     return BlocBuilder<WorkoutTrackerCubit, WorkoutTrackerState>(
       builder: (context, state) {
@@ -321,6 +329,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
     );
   }
 
+  /// Build header của devices section
   Widget _buildDevicesHeader(
     BuildContext context,
     WorkoutTrackerState state,
@@ -356,6 +365,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
     );
   }
 
+  /// Build danh sách thiết bị dạng horizontal scroll
   Widget _buildDevicesList(
     BuildContext context,
     WorkoutTrackerState state,
@@ -423,6 +433,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
     return const SizedBox.shrink();
   }
 
+  /// Build card cho từng thiết bị
   Widget _buildDeviceCard(
     String deviceName,
     String imageUrl,
@@ -477,6 +488,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
     );
   }
 
+  /// Build section danh sách exercises
   Widget _buildExercisesSection(Color? textColor, Color cardColor) {
     return BlocBuilder<WorkoutTrackerCubit, WorkoutTrackerState>(
       builder: (context, state) {
@@ -490,6 +502,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
     );
   }
 
+  /// Build header của exercises section
   Widget _buildExercisesHeader(WorkoutTrackerState state, Color? textColor) {
     int exerciseCount = 0;
     if (state is WorkoutDetailLoaded) {
@@ -518,6 +531,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
     );
   }
 
+  /// Build danh sách exercises dạng vertical list
   Widget _buildExercisesList(
     WorkoutTrackerState state,
     Color? textColor,
@@ -578,6 +592,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
     return const SizedBox.shrink();
   }
 
+  /// Build card cho từng exercise
   Widget _buildExerciseCard(
     ExerciseItem exercise,
     Color? textColor,
