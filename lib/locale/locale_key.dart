@@ -6,7 +6,7 @@ class LocaleKey {
   //Select view
   static const String workoutTracker = 'workout_tracker';
   static const String mealPlanner = 'meal_planner';
-  static const String drinkwater = 'drinkwater';
+  static const String drinkWater = 'drink_water';
   static const String changeLanguage = 'change_language';
 
   //Onboarding view
@@ -143,6 +143,20 @@ class LocaleKey {
   static const String nextReminder = "next_reminder";
   static const String addWater = "add_water";
   static const String waterIntake = "water_intake";
+  static const String snackBar = "snack_bar";
+  static const String reminder = "reminder";
+  static const String texttitlewater = "text_title_water";
+  static const String reminderWater = "reminder_water";
+  static const String startWater = "start_water";
+  static const String remin = "reminder";
+  static const String endWater = "end_water";
+  static const String nhac = "nhac";
+  static const String khoangtime = "khoang_time";
+  static const String buttonSave = "button_save";
+  static const String titleDialogWater = "title_dialog_water";
+  static const String contentDialogWater = "content_dialog_water";
+  static const String textDialog = "text_dialog";
+  static const String buttonCon = "button_continue";
 
   //Social View
   static const String postImg = "post_img";

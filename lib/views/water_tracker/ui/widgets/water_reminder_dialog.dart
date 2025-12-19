@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_utils/src/extensions/internacionalization.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/models/water_intake.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 
 class WaterReminderDialog {
   static Future<WaterGoalSettings?> show(
@@ -14,7 +16,9 @@ class WaterReminderDialog {
       builder: (dialogContext) => StatefulBuilder(
         builder: (builderContext, setDialogState) {
           return AlertDialog(
-            title: const Text('Nhắc nhở uống nước'),
+            // shape: const RoundedRectangleBorder(),
+            backgroundColor: Colors.grey.shade800,
+            title:  Center(child: Text(LocaleKey.reminderWater.tr)),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -30,7 +34,7 @@ class WaterReminderDialog {
                     },
                   ),
                   _TimeTile(
-                    title: 'Bắt đầu từ',
+                    title: LocaleKey.reminderWater.tr,
                     time: tempSettings.reminderStartTime,
                     onTimeChanged: (time) {
                       setDialogState(() {
@@ -41,7 +45,7 @@ class WaterReminderDialog {
                     },
                   ),
                   _TimeTile(
-                    title: 'Kết thúc lúc',
+                    title: LocaleKey.endWater.tr,
                     time: tempSettings.reminderEndTime,
                     onTimeChanged: (time) {
                       setDialogState(() {
@@ -57,7 +61,7 @@ class WaterReminderDialog {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext),
-                child: const Text('Hủy'),
+                child:  Text(LocaleKey.buttonNo.tr,style: TextStyle(color: Colors.red,),),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -69,7 +73,7 @@ class WaterReminderDialog {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: TColor.primaryColor1,
                 ),
-                child: const Text('Lưu'),
+                child: Text(LocaleKey.buttonYes.tr,style: TextStyle(color: Colors.white),),
               ),
             ],
           );
@@ -91,18 +95,18 @@ class _IntervalTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: const Text('Nhắc mỗi'),
-      subtitle: Text('$currentInterval phút'),
+      title: Text(LocaleKey.nhac.tr),
+      subtitle: Text('$currentInterval ${LocaleKey.mins.tr}'),
       trailing: const Icon(Icons.chevron_right),
       onTap: () async {
         final intervals = [30, 60, 90, 120, 180];
         final selected = await showDialog<int>(
           context: context,
           builder: (ctx) => SimpleDialog(
-            title: const Text('Chọn khoảng thời gian'),
+            title:  Text(LocaleKey.khoangtime.tr),
             children: intervals.map((interval) {
               return SimpleDialogOption(
-                child: Text('$interval phút'),
+                child: Text('$interval ${LocaleKey.mins.tr}'),
                 onPressed: () => Navigator.pop(ctx, interval),
               );
             }).toList(),

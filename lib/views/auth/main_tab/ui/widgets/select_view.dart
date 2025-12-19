@@ -42,7 +42,7 @@ class SelectView extends StatelessWidget {
             const SizedBox(height: 15),
 
             RoundButton(
-              title: LocaleKey.drinkwater.tr,
+              title: LocaleKey.drinkWater.tr,
               onPressed: () {
                 navigateTo(context, WaterTrackerView());
               },

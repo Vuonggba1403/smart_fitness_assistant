@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_utils/src/extensions/internacionalization.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
-import 'package:smart_fitness_assistant/views/water_tracker/ui/widgets/water_progress_painter.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
+import 'package:smart_fitness_assistant/views/water_tracker/ui/widgets/components/water_progress_painter.dart';
 
 class WaterProgressDisplay extends StatelessWidget {
   final int totalMl;
@@ -32,7 +34,7 @@ class WaterProgressDisplay extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Daily goal',
+              LocaleKey.dailyGoal.tr,
               style: TextStyle(color: TColor.white, fontSize: 16),
             ),
             const SizedBox(height: 10),

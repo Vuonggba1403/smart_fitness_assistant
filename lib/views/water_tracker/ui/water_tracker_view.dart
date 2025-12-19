@@ -1,15 +1,19 @@
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get_utils/src/extensions/internacionalization.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/views/water_tracker/logic/cubit/water_tracker_cubit.dart';
 import 'package:smart_fitness_assistant/views/water_tracker/logic/water_tracker_helper.dart';
 import 'package:smart_fitness_assistant/views/water_tracker/ui/widgets/water_congratulations_dialog.dart';
 import 'package:smart_fitness_assistant/views/water_tracker/ui/widgets/water_goal_dialog.dart';
 import 'package:smart_fitness_assistant/views/water_tracker/ui/widgets/water_reminder_dialog.dart';
 import 'package:smart_fitness_assistant/views/water_tracker/ui/widgets/water_progress_display.dart';
-import 'package:smart_fitness_assistant/views/water_tracker/ui/widgets/water_amount_selector.dart';
+import 'package:smart_fitness_assistant/views/water_tracker/ui/widgets/components/water_amount_selector.dart';
 
 class WaterTrackerView extends StatelessWidget {
   const WaterTrackerView({super.key});
@@ -40,7 +44,7 @@ class _WaterTrackerContentState extends State<_WaterTrackerContent> {
       await context.read<WaterTrackerCubit>().updateGoal(newGoal);
 
       if (mounted) {
-        AppSnackBar.success(context, 'Đã cập nhật mục tiêu: ${newGoal}ml');
+        AppSnackBar.success(context, '${LocaleKey.snackBar.tr} ${newGoal}ml');
       }
     }
   }
@@ -59,7 +63,7 @@ class _WaterTrackerContentState extends State<_WaterTrackerContent> {
       if (mounted) {
         AppSnackBar.success(
           context,
-          'Đã cập nhật nhắc nhở: ${newSettings.reminderIntervalMinutes} phút',
+            '${LocaleKey.reminder.tr} : ${newSettings.reminderIntervalMinutes} ${LocaleKey.mins.tr}',
         );
       }
     }
@@ -68,6 +72,7 @@ class _WaterTrackerContentState extends State<_WaterTrackerContent> {
   @override
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context).size;
+
 
     return Scaffold(
       backgroundColor: TColor.primaryColor1,
@@ -84,7 +89,7 @@ class _WaterTrackerContentState extends State<_WaterTrackerContent> {
         child: BlocBuilder<WaterTrackerCubit, WaterTrackerState>(
           builder: (context, state) {
             if (state is WaterTrackerLoading) {
-              return const Center(child: CustomCircleProgIndicator());
+              return const CustomCircleProgIndicator();
             }
 
             if (state is WaterTrackerError) {
@@ -92,7 +97,7 @@ class _WaterTrackerContentState extends State<_WaterTrackerContent> {
             }
 
             if (state is WaterGoalAchieved) {
-              return const Center(child: CustomCircleProgIndicator());
+              return const CustomCircleProgIndicator();
             }
 
             if (state is! WaterTrackerLoaded) {
@@ -100,6 +105,7 @@ class _WaterTrackerContentState extends State<_WaterTrackerContent> {
             }
 
             return SafeArea(
+
               child: Column(
                 children: [
                   // Header
@@ -113,7 +119,7 @@ class _WaterTrackerContentState extends State<_WaterTrackerContent> {
                         ),
                         Expanded(
                           child: Text(
-                            'Ghi nước\nmột chạm',
+                            LocaleKey.texttitlewater.tr,
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: TColor.white,
@@ -135,10 +141,11 @@ class _WaterTrackerContentState extends State<_WaterTrackerContent> {
                   Expanded(
                     child: Center(
                       child: WaterProgressDisplay(
+                        onTap: (){},
                         totalMl: state.totalMl,
                         goalMl: state.goalMl,
                         progress: state.progress,
-                        onTap: () => _handleGoalUpdate(state.goalMl),
+                        // onTap: () => _handleGoalUpdate(state.goalMl),
                       ),
                     ),
                   ),

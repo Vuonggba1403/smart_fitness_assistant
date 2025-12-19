@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_utils/src/extensions/internacionalization.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+
+import '../../../../core/widgets/custom_showdialog.dart';
+import '../../../../locale/locale_key.dart';
 
 class WaterGoalDialog {
   static Future<int?> show(BuildContext context, int currentGoal) {
@@ -10,7 +14,8 @@ class WaterGoalDialog {
       builder: (dialogContext) => StatefulBuilder(
         builder: (builderContext, setDialogState) {
           return AlertDialog(
-            title: const Text('Mục tiêu hàng ngày'),
+            title:  Text(LocaleKey.dailyGoal.tr),
+            backgroundColor: Colors.grey.shade800,
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -42,11 +47,11 @@ class WaterGoalDialog {
                   children: [
                     Text(
                       '500ml',
-                      style: TextStyle(fontSize: 12, color: TColor.gray),
+                      style: TextStyle(fontSize: 12, color: TColor.white),
                     ),
                     Text(
                       '5000ml',
-                      style: TextStyle(fontSize: 12, color: TColor.gray),
+                      style: TextStyle(fontSize: 12, color: TColor.white),
                     ),
                   ],
                 ),
@@ -55,18 +60,19 @@ class WaterGoalDialog {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext),
-                child: const Text('Hủy'),
+                child: Text(LocaleKey.buttonNo.tr,style: TextStyle(color: Colors.red),),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.pop(dialogContext, tempGoal),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: TColor.primaryColor1,
                 ),
-                child: const Text('Lưu'),
+                child: Text(LocaleKey.buttonSave.tr, style: TextStyle(color: Colors.white),),
               ),
             ],
           );
-        },
+
+          },
       ),
     );
   }

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:intl/locale.dart';
 
 import 'locale_key.dart';
@@ -87,7 +88,7 @@ Map<String, String> viVN = {
   //Select view
   LocaleKey.workoutTracker: 'Theo dõi Tập Luyện',
   LocaleKey.mealPlanner: 'Kế Hoạch Ăn Uống',
-  LocaleKey.drinkwater: 'Theo dõi Uống Nước',
+  LocaleKey.drinkWater: 'Theo dõi Uống Nước',
   LocaleKey.changeLanguage: 'Thay đổi Ngôn ngữ',
 
   //Profile View
@@ -150,6 +151,20 @@ Map<String, String> viVN = {
   LocaleKey.nextReminder: "Nhắc nhở tiếp theo",
   LocaleKey.addWater: "Thêm nước",
   LocaleKey.waterIntake: "Ghi nước một chạm",
+  LocaleKey.snackBar: "Cập nhật cài đặt nhắc nhở thành công!",
+  LocaleKey.reminder: "Đã cập nhật nhắc nhở",
+  LocaleKey.texttitlewater: "Ghi nước\nmột chạm",
+  LocaleKey.reminderWater: "Nhắc nhở uống nước",
+  LocaleKey.startWater: "Bắt đầu từ",
+  LocaleKey.endWater: "Kết thúc lúc",
+  LocaleKey.nhac: "Nhắc mỗi",
+  LocaleKey.khoangtime: "Chọn khoảng thời gian",
+  LocaleKey.buttonSave: "Lưu",
+  LocaleKey.titleDialogWater: "Xuất sắc! 🎉",
+  LocaleKey.contentDialogWater: "ĐÃ HOÀN THÀNH\nMỤC TIÊU UỐNG NƯỚC!",
+  LocaleKey.textDialog:
+      "Tuyệt vời! Bạn đã hoàn thành mục tiêu uống nước hôm nay.",
+  LocaleKey.buttonCon: "Tiếp tục",
 
   //Social View
   LocaleKey.postImg: "Chụp ảnh",

@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_utils/src/extensions/internacionalization.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+
+import '../../../../locale/locale_key.dart';
 
 class WaterCongratulationsDialog {
   static Future<void> show(BuildContext context, int totalMl, int goalMl) {
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color;
+    final cardColor = theme.cardColor;
+
+
     return showDialog(
       context: context,
       barrierDismissible: false,
@@ -12,7 +20,7 @@ class WaterCongratulationsDialog {
         child: Container(
           padding: const EdgeInsets.all(30),
           decoration: BoxDecoration(
-            color: TColor.white,
+            color: cardColor,
             borderRadius: BorderRadius.circular(25),
           ),
           child: Column(
@@ -42,9 +50,9 @@ class WaterCongratulationsDialog {
 
               // Title
               Text(
-                'Xuất sắc! 🎉',
+                LocaleKey.titleDialogWater.tr,
                 style: TextStyle(
-                  color: TColor.black,
+                  color: textColor,
                   fontSize: 28,
                   fontWeight: FontWeight.w700,
                 ),
@@ -54,10 +62,10 @@ class WaterCongratulationsDialog {
 
               // Subtitle
               Text(
-                'ĐÃ HOÀN THÀNH\nMỤC TIÊU UỐNG NƯỚC!',
+                LocaleKey.contentDialogWater.tr,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: TColor.black,
+                  color: textColor,
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                   height: 1.4,
@@ -88,7 +96,7 @@ class WaterCongratulationsDialog {
                         Text(
                           '${totalMl}ml / ${goalMl}ml',
                           style: TextStyle(
-                            color: TColor.black,
+                            color: textColor,
                             fontSize: 24,
                             fontWeight: FontWeight.w700,
                           ),
@@ -97,7 +105,7 @@ class WaterCongratulationsDialog {
                     ),
                     const SizedBox(height: 15),
                     Text(
-                      'Tuyệt vời! Bạn đã hoàn thành mục tiêu uống nước hôm nay.',
+                      LocaleKey.textDialog.tr,
                       textAlign: TextAlign.center,
                       style: TextStyle(color: TColor.gray, fontSize: 14),
                     ),
@@ -120,7 +128,7 @@ class WaterCongratulationsDialog {
                     ),
                   ),
                   child: Text(
-                    'Tiếp tục',
+                    LocaleKey.buttonCon.tr,
                     style: TextStyle(
                       color: TColor.white,
                       fontSize: 16,

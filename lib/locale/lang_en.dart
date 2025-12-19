@@ -9,7 +9,7 @@ Map<String, String> enUs = {
   //Select view
   LocaleKey.workoutTracker: 'Workout Tracker',
   LocaleKey.mealPlanner: 'Meal Planner',
-  LocaleKey.drinkwater: 'Drink Water',
+  LocaleKey.drinkWater: 'Water Tracker',
 
   //Onboarding view
   LocaleKey.textOnboarding: 'Everybody Can Train',
@@ -151,6 +151,20 @@ Map<String, String> enUs = {
   LocaleKey.nextReminder: "Next reminder",
   LocaleKey.addWater: "Add Water",
   LocaleKey.waterIntake: "Track Water Intake",
+  LocaleKey.snackBar: "Reminder settings updated successfully!",
+  LocaleKey.reminder: "Reminder updated",
+  LocaleKey.texttitlewater: "Track Water\nIntake",
+  LocaleKey.reminderWater: "Water Reminder",
+  LocaleKey.startWater: "Start From",
+  LocaleKey.endWater: "End At",
+  LocaleKey.nhac: "Remind every",
+  LocaleKey.khoangtime: "Choose time interval",
+  LocaleKey.buttonSave: "Save",
+  LocaleKey.titleDialogWater: "Excellent! 🎉",
+  LocaleKey.contentDialogWater: "WATER INTAKE GOAL\nCOMPLETED!",
+  LocaleKey.textDialog:
+      "Great job! You have completed your water intake goal for today.",
+  LocaleKey.buttonCon: "Continue",
 
   //Social View
   LocaleKey.postImg: "Take Photo",
