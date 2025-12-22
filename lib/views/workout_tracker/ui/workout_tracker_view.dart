@@ -38,6 +38,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
   late Stream<List<ExerciseCategory>> _categoriesStream;
   late Stream<List<ExerciseCategory>> _gymCategoriesStream;
   late Stream<List<ExerciseCategory>> _homeCategoriesStream;
+  late Stream<List<UpcomingWorkout>> _upcomingWorkoutsStream; // ✅ ADD
 
   @override
   void initState() {
@@ -129,10 +130,27 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
       scheduledTime: scheduledTime,
     );
 
+    print('🔔 Enabling notification for: ${workout.categoryName}');
+
+    // ✅ FIX: Update database trước
+    await _supabase
+        .from('scheduled_workouts')
+        .update({'has_notification': true})
+        .eq('for_user', userId)
+        .eq('category_id', workout.categoryId);
+
     if (mounted) {
       final cubit = context.read<WorkoutTrackerCubit>();
+
+      print('🔄 Reloading after notification toggle...');
+
+      // ✅ Force reload và emit state
       await cubit.loadUpcomingWorkouts(forceRefresh: true);
-      cubit.emit(DataRefreshed());
+
+      // ✅ Trigger manual setState
+      if (mounted) {
+        setState(() {});
+      }
 
       AppSnackBar.success(
         context,
@@ -149,11 +167,16 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
     final notificationId = _generateNotificationId(userId, workout.categoryId);
     await _notificationService.cancelNotification(notificationId);
 
-    if (mounted) {
-      final cubit = context.read<WorkoutTrackerCubit>();
-      await cubit.loadUpcomingWorkouts(forceRefresh: true);
-      cubit.emit(DataRefreshed());
+    print('🔔 Disabling notification for: ${workout.categoryName}');
 
+    // ✅ Chỉ cần update database - Stream sẽ tự động update UI
+    await _supabase
+        .from('scheduled_workouts')
+        .update({'has_notification': false})
+        .eq('for_user', userId)
+        .eq('category_id', workout.categoryId);
+
+    if (mounted) {
       AppSnackBar.success(context, 'Đã hủy nhắc nhở');
     }
   }
@@ -172,13 +195,36 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
     return '$hour:$minute';
   }
 
-  /// Xóa lịch tập đã scheduled - ✅ FIX: Query đơn giản hơn
+  /// Xóa lịch tập đã scheduled - ✅ FIX: Proper state emission
   Future<void> _deleteScheduledWorkout(String categoryId) async {
     try {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) return;
 
-      // ✅ FIX: Query với join để lấy schedule info
+      // ✅ Show confirmation dialog trước
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Xác nhận xóa'),
+          content: const Text('Bạn có chắc muốn xóa lịch tập này?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Hủy'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Xóa', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed != true) return;
+
+      print('🗑️ Deleting workout for category: $categoryId');
+
+      // ✅ Delete from database - Stream sẽ tự động update UI
       final scheduleResponse = await _supabase
           .from('scheduled_workouts')
           .select('id')
@@ -191,15 +237,19 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
       final scheduleCubit = context.read<ScheduleCubit>();
       await scheduleCubit.deleteSchedule(scheduleId);
 
-      if (mounted) {
-        final cubit = context.read<WorkoutTrackerCubit>();
-        await cubit.loadUpcomingWorkouts(forceRefresh: true);
-        cubit.emit(DataRefreshed());
+      print(
+        '✅ Deleted schedule: $scheduleId - Stream will update UI automatically',
+      );
 
+      if (mounted) {
         AppSnackBar.success(context, 'Đã xóa lịch tập');
       }
     } catch (e) {
       print('❌ Error deleting schedule: $e');
+
+      if (mounted) {
+        AppSnackBar.error(context, 'Không thể xóa lịch tập');
+      }
     }
   }
 
@@ -221,6 +271,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
           _categoriesStream = cubit.streamExerciseCategoriesWithCount();
           _gymCategoriesStream = cubit.streamGymCategories();
           _homeCategoriesStream = cubit.streamHomeCategories();
+          _upcomingWorkoutsStream = cubit.streamUpcomingWorkouts(); // ✅ ADD
 
           return Container(
             decoration: BoxDecoration(
@@ -356,15 +407,33 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
     );
   }
 
-  /// Build danh sách upcoming workouts
+  /// ✅ Build danh sách upcoming workouts - DÙNG STREAM
   Widget _buildUpcomingWorkouts(WorkoutTrackerCubit cubit, Color? textColor) {
-    return BlocBuilder<WorkoutTrackerCubit, WorkoutTrackerState>(
-      buildWhen: (previous, current) {
-        return current is UpcomingWorkoutsUpdated || current is DataRefreshed;
-      },
-      builder: (context, state) {
-        final upcomingWorkouts = cubit.cachedUpcomingWorkouts ?? [];
+    return StreamBuilder<List<UpcomingWorkout>>(
+      stream: _upcomingWorkoutsStream, // ✅ Dùng stream thay vì BlocBuilder
+      builder: (context, snapshot) {
+        // Loading state
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Container(
+            padding: const EdgeInsets.all(20),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
 
+        // Error state
+        if (snapshot.hasError) {
+          print('❌ Stream error: ${snapshot.error}');
+          return Container(
+            padding: const EdgeInsets.all(20),
+            child: Text('Lỗi tải dữ liệu', style: TextStyle(color: textColor)),
+          );
+        }
+
+        final upcomingWorkouts = snapshot.data ?? [];
+
+        print('📋 Stream emitted ${upcomingWorkouts.length} workouts');
+
+        // Empty state
         if (upcomingWorkouts.isEmpty) {
           return Container(
             padding: const EdgeInsets.all(20),
@@ -408,6 +477,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
           );
         }
 
+        // ✅ Build list with stream data
         return ListView.builder(
           padding: EdgeInsets.zero,
           physics: const NeverScrollableScrollPhysics(),
@@ -417,7 +487,9 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
             final workout = upcomingWorkouts[index];
 
             return UpcomingWorkoutRow(
-              key: ValueKey('upcoming_${workout.categoryId}_$index'),
+              key: ValueKey(
+                'upcoming_${workout.categoryId}_${workout.scheduledTime.millisecondsSinceEpoch}',
+              ),
               workout: workout,
               onNotificationToggle: (enabled) {
                 _toggleNotification(index, enabled);

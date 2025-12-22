@@ -10,16 +10,8 @@ import 'package:smart_fitness_assistant/core/models/upcoming_workout.dart';
 
 part 'workout_tracker_state.dart';
 
-/// Cubit quản lý workout tracking
-///
-/// Chỉ tập trung vào:
-/// - Categories (Gym/Home)
-/// - Exercise Detail
-/// - Progress Tracking
-/// - Statistics (Weekly chart, Upcoming workouts)
 class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
   WorkoutTrackerCubit() : super(WorkoutTrackerInitial()) {
-    // ✅ FIX: Auto-load data khi cubit được khởi tạo
     _autoLoadInitialData();
   }
 
@@ -34,30 +26,19 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
   List<UpcomingWorkout>? get cachedUpcomingWorkouts => _cachedUpcomingWorkouts;
   List<double>? get cachedWeeklyStats => _cachedWeeklyStats;
 
-  // ✅ ADD: Auto-load data khi cubit mount
   Future<void> _autoLoadInitialData() async {
-    print('🔄 Auto-loading initial data...');
-
-    // Load parallel để tăng tốc
     await Future.wait([
       loadUpcomingWorkouts(forceRefresh: false),
       loadWeeklyWorkoutStats(forceRefresh: false),
     ]);
-
-    print('✅ Initial data loaded');
   }
 
-  // ✅ FIX: Không clear cache khi close
   @override
   Future<void> close() async {
-    print('🔒 Closing WorkoutTrackerCubit (keeping cache)');
-    // ❌ REMOVED: clearCache() - giữ cache để persist data
     return super.close();
   }
 
-  // ✅ ADD: Method để manual clear cache nếu cần
   void forceCleanCache() {
-    print('🧹 Force cleaning cache');
     _cachedUpcomingWorkouts = null;
     _cachedWeeklyStats = null;
     _cachedProgress = {};
@@ -95,7 +76,6 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
 
       return progressMap;
     } catch (e) {
-      print('❌ Error loading progress: $e');
       return {};
     }
   }
@@ -215,28 +195,55 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
   }
 
   // ============================================================
-  // STATISTICS
+  // STATISTICS - STREAM VERSION
   // ============================================================
+
+  Stream<List<UpcomingWorkout>> streamUpcomingWorkouts() {
+    final userId = _getUserId();
+    if (userId == null) {
+      return Stream.value([]);
+    }
+
+    // ✅ Đổi từ 5 giây thành:
+    // - 2 giây: real-time hơn nhưng tốn tài nguyên
+    // - 10 giây: tiết kiệm hơn nhưng chậm hơn
+    return Stream.periodic(const Duration(seconds: 1)).asyncMap((_) async {
+      return await _fetchUpcomingWorkouts(userId);
+    });
+  }
+
+  Future<List<UpcomingWorkout>> _fetchUpcomingWorkouts(String userId) async {
+    final now = DateTime.now();
+
+    final response = await _supabase
+        .from('scheduled_workouts')
+        .select('''
+          *,
+          exercise_categories!inner(
+            title_ex,
+            img_url
+          )
+        ''')
+        .eq('for_user', userId)
+        .eq('is_completed', false)
+        .gte('scheduled_time', now.toIso8601String())
+        .order('scheduled_time')
+        .limit(3);
+
+    return await _buildUpcomingWorkoutsList(response);
+  }
 
   Future<List<UpcomingWorkout>> loadUpcomingWorkouts({
     bool forceRefresh = false,
   }) async {
-    print('📅 Loading upcoming workouts (force: $forceRefresh)');
-
-    // ✅ FIX: Return cache nếu có và không force refresh
     if (!forceRefresh && _cachedUpcomingWorkouts != null) {
-      print('✅ Using cached data: ${_cachedUpcomingWorkouts!.length} workouts');
-
-      // ✅ Emit state để trigger UI update
       emit(UpcomingWorkoutsUpdated(_cachedUpcomingWorkouts!));
-
       return _cachedUpcomingWorkouts!;
     }
 
     try {
       final userId = _getUserId();
       if (userId == null) {
-        print('❌ User not authenticated');
         return [];
       }
 
@@ -259,22 +266,13 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
 
       final upcomingList = await _buildUpcomingWorkoutsList(response);
 
-      // ✅ Save cache
       _cachedUpcomingWorkouts = upcomingList;
 
-      print('✅ Loaded ${upcomingList.length} upcoming workouts');
-
-      // ✅ Emit state
       emit(UpcomingWorkoutsUpdated(upcomingList));
 
       return upcomingList;
     } catch (e, stackTrace) {
-      print('❌ Error loading upcoming workouts: $e');
-      print('StackTrace: $stackTrace');
-
-      // ✅ Return cached data nếu có lỗi
       if (_cachedUpcomingWorkouts != null) {
-        print('⚠️ Using stale cache due to error');
         return _cachedUpcomingWorkouts!;
       }
 
@@ -286,29 +284,23 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
     bool forceRefresh = false,
   }) async {
     if (!forceRefresh && _cachedWeeklyStats != null) {
-      print('✅ Using cached stats');
       return _cachedWeeklyStats!;
     }
 
     try {
       final userId = _getUserId();
       if (userId == null) {
-        print('❌ User not authenticated');
         return List.filled(7, 0.0);
       }
 
       final now = DateTime.now();
 
-      // ✅ FIX: Tính start of week (Sunday = 0)
       final startOfWeek = DateTime(
         now.year,
         now.month,
         now.day - (now.weekday % 7),
       );
 
-      print('📅 Querying history from: ${startOfWeek.toIso8601String()}');
-
-      // ✅ FIX: Query đúng tên cột
       final response = await _supabase
           .from('history_workout')
           .select('created_at, completed_exercises, total_exercises')
@@ -317,8 +309,6 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
           .lte('created_at', now.toIso8601String())
           .order('created_at');
 
-      print('📊 Found ${response.length} workout records');
-
       final stats = _calculateWeeklyStats(response);
       _cachedWeeklyStats = stats;
 
@@ -326,8 +316,6 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
 
       return stats;
     } catch (e, stackTrace) {
-      print('❌ Error loading weekly stats: $e');
-      print('StackTrace: $stackTrace');
       return List.filled(7, 0.0);
     }
   }
@@ -421,13 +409,9 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
     return upcomingList;
   }
 
-  /// Tính weekly stats từ history_workout
   List<double> _calculateWeeklyStats(List<dynamic> response) {
-    // ✅ stats[0] = Sunday, stats[1] = Monday, ..., stats[6] = Saturday
     final stats = List<double>.filled(7, 0.0);
     final counts = List<int>.filled(7, 0);
-
-    print('📊 Calculating stats for ${response.length} records');
 
     for (var record in response) {
       try {
@@ -435,8 +419,6 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
         if (createdAtStr == null) continue;
 
         final createdAt = DateTime.parse(createdAtStr);
-
-        // ✅ FIX: weekday % 7 → 0=Sunday, 1=Monday, ..., 6=Saturday
         final dayIndex = createdAt.weekday % 7;
 
         final completed = (record['completed_exercises'] ?? 0) as int;
@@ -448,24 +430,15 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
 
         stats[dayIndex] += percent;
         counts[dayIndex]++;
-
-        print(
-          '  ✓ Day $dayIndex: $completed/$total = ${percent.toStringAsFixed(1)}%',
-        );
       } catch (e) {
-        print('  ⚠️ Error processing record: $e');
         continue;
       }
     }
 
-    // Tính trung bình cho mỗi ngày
     for (int i = 0; i < 7; i++) {
       if (counts[i] > 0) {
         stats[i] = (stats[i] / counts[i]).clamp(0.0, 100.0);
       }
-      print(
-        '  → Day $i: ${stats[i].toStringAsFixed(1)}% (${counts[i]} sessions)',
-      );
     }
 
     return stats;

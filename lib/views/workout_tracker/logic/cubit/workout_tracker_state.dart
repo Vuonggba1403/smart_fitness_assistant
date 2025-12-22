@@ -48,7 +48,9 @@ final class DataRefreshed extends WorkoutTrackerState {
 
 final class UpcomingWorkoutsUpdated extends WorkoutTrackerState {
   final List<UpcomingWorkout> workouts;
-  UpcomingWorkoutsUpdated(this.workouts);
+  final DateTime timestamp;
+
+  UpcomingWorkoutsUpdated(this.workouts) : timestamp = DateTime.now();
 }
 
 final class WeeklyStatsUpdated extends WorkoutTrackerState {
