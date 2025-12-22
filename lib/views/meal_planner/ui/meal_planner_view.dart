@@ -10,8 +10,9 @@ import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/views/meal_planner/logic/cubit/meal_planner_cubit.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_calendar_agenda.dart';
-import 'package:smart_fitness_assistant/views/meal_planner/ui/widgets/activity_level_dialog.dart';
+import 'package:smart_fitness_assistant/views/activity_level/ui/activity_level_dialog.dart';
 import 'package:smart_fitness_assistant/views/meal_planner/ui/widgets/search_meal.dart';
+import 'package:smart_fitness_assistant/views/activity_level/logic/cubit/activity_level_cubit.dart';
 
 class MealPlannerView extends StatefulWidget {
   final Map eObj;
@@ -36,10 +37,8 @@ class _MealPlannerViewState extends State<MealPlannerView> {
 
     developer.log('🟢 MealPlannerView initState', name: 'MealPlannerView');
 
-    // ❌ XÓA: KHÔNG load meals ngay, chờ sau khi check activity
-    // context.read<MealPlannerCubit>().loadMealsByDate(_selectedDate);
-
-    context.read<MealPlannerCubit>().loadActivityLevels();
+    // Load activity levels qua ActivityLevelCubit
+    context.read<ActivityLevelCubit>().loadActivityLevels();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       developer.log('⏳ PostFrameCallback started', name: 'MealPlannerView');
@@ -50,8 +49,9 @@ class _MealPlannerViewState extends State<MealPlannerView> {
           name: 'MealPlannerView',
         );
 
+        // Check preference qua ActivityLevelCubit
         final hasPreference = await context
-            .read<MealPlannerCubit>()
+            .read<ActivityLevelCubit>()
             .checkActivityPreference();
 
         developer.log(
@@ -68,16 +68,10 @@ class _MealPlannerViewState extends State<MealPlannerView> {
           _activityDialogShown = true;
         } else {
           developer.log('✅ Skip showing dialog', name: 'MealPlannerView');
-          // ✅ THÊM: Load meals chỉ KHI ĐÃ CÓ preference
           if (mounted) {
             context.read<MealPlannerCubit>().loadMealsByDate(_selectedDate);
           }
         }
-      } else {
-        developer.log(
-          '⚠️ Skip: dialogShown=$_activityDialogShown, mounted=$mounted',
-          name: 'MealPlannerView',
-        );
       }
     });
   }
@@ -85,14 +79,10 @@ class _MealPlannerViewState extends State<MealPlannerView> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // ❌ XÓA: Tránh reload meals nhiều lần
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   if (mounted) {
-    //     context.read<MealPlannerCubit>().loadMealsByDate(_selectedDate);
-    //   }
-    // });
+    // ✅ Clean: Không cần code ở đây
   }
 
+  /// 📱 Hiển thị activity level dialog
   void _showActivityLevelDialog() {
     developer.log(
       '🎯 _showActivityLevelDialog called',
@@ -102,15 +92,19 @@ class _MealPlannerViewState extends State<MealPlannerView> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => ActivityLevelDialog(
-        selectedDate: _selectedDate,
-        onActivitySelected: (date) {
-          developer.log(
-            '✅ Activity selected callback',
-            name: 'MealPlannerView',
-          );
-          context.read<MealPlannerCubit>().loadMealsByDate(date);
-        },
+      builder: (_) => BlocProvider.value(
+        value: context.read<ActivityLevelCubit>(),
+        child: ActivityLevelDialog(
+          onActivitySaved: (activityId, dailyCalories) {
+            developer.log(
+              '✅ Activity selected callback',
+              name: 'MealPlannerView',
+            );
+            context.read<MealPlannerCubit>().updateTargetCalories(
+              dailyCalories,
+            );
+          },
+        ),
       ),
     );
   }
@@ -242,20 +236,6 @@ class _MealPlannerViewState extends State<MealPlannerView> {
         },
       ),
     );
-  }
-
-  /// 📝 GET MEAL TYPE NAME
-  String _getMealTypeName(String mealType) {
-    switch (mealType) {
-      case 'breakfast':
-        return 'Bữa sáng';
-      case 'lunch':
-        return 'Bữa trưa';
-      case 'dinner':
-        return 'Bữa tối';
-      default:
-        return 'Bữa ăn';
-    }
   }
 
   /// 🔥 DAILY CALORIE CARD

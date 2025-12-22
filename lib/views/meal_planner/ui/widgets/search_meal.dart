@@ -1,15 +1,12 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
-import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
 import 'package:smart_fitness_assistant/core/models/meal.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
 import 'package:smart_fitness_assistant/views/meal_planner/ui/widgets/food_details.dart';
 import 'package:smart_fitness_assistant/views/meal_planner/logic/cubit/meal_planner_cubit.dart';
-import 'package:supabase_flutter/supabase_flutter.dart'; // ✅ THÊM import
 
+/// 🔍 Màn hình tìm kiếm món ăn
 class SearchMeal extends StatefulWidget {
   const SearchMeal({super.key});
 
@@ -20,509 +17,144 @@ class SearchMeal extends StatefulWidget {
 class _SearchMealState extends State<SearchMeal>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  DateTime _selectedDateTime = DateTime.now();
-  List<Meal> searchResults = [];
-  List<Meal> recentMeals = [];
-  bool _hasSearched = false; // ✅ Track nếu user đã nhập search
+  final TextEditingController _searchController = TextEditingController();
 
-  final TextEditingController txtSearch = TextEditingController();
+  List<Meal> _searchResults = [];
+  bool _hasSearched = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    txtSearch.addListener(_onSearchChanged);
+    _searchController.addListener(_onSearchChanged);
   }
 
+  /// 🔄 Xử lý khi text search thay đổi
   void _onSearchChanged() {
-    if (txtSearch.text.isEmpty) {
+    final query = _searchController.text.trim();
+
+    if (query.isEmpty) {
       setState(() {
-        searchResults = [];
-        _hasSearched = false; // ✅ Reset flag khi xóa search
+        _searchResults = [];
+        _hasSearched = false;
       });
     } else {
-      setState(() => _hasSearched = true); // ✅ Set flag khi có search
-      _searchMeals(txtSearch.text);
+      setState(() => _hasSearched = true);
+      _performSearch(query);
     }
   }
 
-  Future<void> _searchMeals(String query) async {
+  /// 🔍 Thực hiện search
+  Future<void> _performSearch(String query) async {
+    setState(() => _isLoading = true);
+
     final results = await context.read<MealPlannerCubit>().searchMeals(query);
-    setState(() => searchResults = results);
-  }
 
-  Future<void> _loadRecentMeals() async {
-    final meals = await context.read<MealPlannerCubit>().getAllMeals();
-    setState(() => recentMeals = meals);
-  }
-
-  // 📌 Format hiển thị AppBar
-  String get formattedDateTime {
-    final now = DateTime.now();
-    final isToday = DateUtils.isSameDay(now, _selectedDateTime);
-
-    final dateText = isToday
-        ? 'Hôm nay'
-        : DateFormat('dd/MM').format(_selectedDateTime);
-
-    final timeText = DateFormat('HH:mm').format(_selectedDateTime);
-
-    return '$dateText • $timeText';
+    if (mounted) {
+      setState(() {
+        _searchResults = results;
+        _isLoading = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final media = MediaQuery.of(context).size;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Tìm kiếm thực phẩm'), actions: [
-       
-        ],
-      ),
+      appBar: AppBar(title: const Text('Tìm kiếm thực phẩm')),
       body: Column(
         children: [
-          // ✅ Search TextField
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: TextField(
-              controller: txtSearch,
-              decoration: InputDecoration(
-                hintText: 'Tìm kiếm thực phẩm...',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: txtSearch.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          txtSearch.clear();
-                          setState(() {});
-                        },
-                      )
-                    : null,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              onChanged: (value) => setState(() {}),
-            ),
-          ),
-
-          /// 📑 TABS (ẩn khi có search)
-          if (!_hasSearched)
-            TabBar(
-              controller: _tabController,
-              indicatorColor: theme.primaryColor,
-              tabs: const [
-                Tab(text: 'Gần đây'),
-                Tab(text: 'Tạo bởi tôi'),
-              ],
-            ),
-
-          /// 📄 CONTENT
-          Expanded(
-            child: _hasSearched
-                ? _buildSearchResults(context, theme)
-                : TabBarView(
-                    controller: _tabController,
-                    children: [
-                      _buildRecentTab(context, theme),
-                      _buildEmptyState(context, title: 'Chưa có công thức'),
-                    ],
-                  ),
-          ),
+          _buildSearchField(theme),
+          if (!_hasSearched) _buildTabs(theme),
+          Expanded(child: _buildContent(theme)),
         ],
       ),
     );
   }
 
-  /// 🔍 SEARCH RESULTS
-  Widget _buildSearchResults(BuildContext context, ThemeData theme) {
-    if (searchResults.isEmpty) {
-      return _buildEmptyState(context, title: 'Không tìm thấy kết quả');
-    }
-
-    return ListView.builder(
+  /// 🔍 Ô search
+  Widget _buildSearchField(ThemeData theme) {
+    return Padding(
       padding: const EdgeInsets.all(16),
-      itemCount: searchResults.length,
-      itemBuilder: (context, index) {
-        final meal = searchResults[index];
-        return _buildMealCard(context, theme, meal);
-      },
+      child: TextField(
+        controller: _searchController,
+        decoration: InputDecoration(
+          hintText: 'Tìm kiếm thực phẩm...',
+          prefixIcon: const Icon(Icons.search),
+          suffixIcon: _searchController.text.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() {});
+                  },
+                )
+              : null,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      ),
     );
   }
 
-  /// 🕘 TAB GẦN ĐÂY
-  Widget _buildRecentTab(BuildContext context, ThemeData theme) {
-    return Column(
-      children: [
-        /// 🎯 ACTION CARDS
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          child: Row(
-            children: [
-              _actionCard(
-                icon: Icons.qr_code_scanner,
-                label: 'Quét mã vạch',
-                color: Colors.blue,
-              ),
-              const SizedBox(width: 12),
-              _actionCard(
-                icon: Icons.mic,
-                label: 'Ghi bằng giọng nói',
-                color: Colors.orange,
-              ),
-            ],
-          ),
-        ),
-
-        /// EMPTY STATE (không load meals khi chưa search)
-        Expanded(child: _buildEmptyState(context, title: 'Chưa có thông tin')),
+  /// 📑 Tabs
+  Widget _buildTabs(ThemeData theme) {
+    return TabBar(
+      controller: _tabController,
+      indicatorColor: theme.primaryColor,
+      tabs: const [
+        Tab(text: 'Gần đây'),
+        Tab(text: 'Tạo bởi tôi'),
       ],
     );
   }
 
-  /// ➕ ADD BUTTON
-  void _addMealToPlanner(Meal meal) {
-    final hour = _selectedDateTime.hour;
-    String mealType = '';
-
-    // 🕐 Xác định bữa ăn dựa vào giờ
-    if (hour >= 6 && hour < 10) {
-      mealType = 'breakfast';
-    } else if (hour >= 10 && hour < 14) {
-      mealType = 'lunch';
-    } else if (hour >= 14 && hour <= 22) {
-      mealType = 'dinner';
-    } else {
-      mealType = 'snack';
+  /// 📄 Nội dung chính
+  Widget _buildContent(ThemeData theme) {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
     }
 
-    // 📡 Gọi Cubit để add meal
-    context.read<MealPlannerCubit>().addMealToType(mealType, {
-      'id': meal.id,
-      'name': meal.name,
-      'calories': meal.calories,
-      'protein': meal.proteinG,
-      'carbs': meal.carbsG,
-      'fat': meal.fatG,
-    }, _selectedDateTime);
+    if (_hasSearched) {
+      return _buildSearchResults(theme);
+    }
 
-    // ✅ Hiển thị snackbar
-
-    AppSnackBar.success(context, '${meal.name} được thêm vào bữa ăn');
-
-    /// 🔙 Quay lại meal planner view
-    Navigator.pop(context);
-  }
-
-  /// 🍽️ MEAL CARD (TAP ANYWHERE GOES TO DETAILS)
-  Widget _buildMealCard(BuildContext context, ThemeData theme, Meal meal) {
-    return GestureDetector(
-      onTap: () {
-        /// ✅ Navigate to food details khi nhấn vào card
-        navigateTo(context, FoodDetails(meal: meal));
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: theme.cardColor,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            /// 🖼️ IMAGE
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: meal.imageUrl != null
-                  ? Image.network(
-                      meal.imageUrl!,
-                      width: 80,
-                      height: 80,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return _buildImagePlaceholder();
-                      },
-                    )
-                  : _buildImagePlaceholder(),
-            ),
-
-            const SizedBox(width: 12),
-
-            /// 📝 INFO
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          meal.name,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      if (meal.isVerified)
-                        const Icon(
-                          Icons.verified,
-                          size: 16,
-                          color: Colors.blue,
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${meal.servingSizeG}g • ${meal.calories} cal',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: Colors.grey,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-
-                  /// 🍯 NUTRIENT BADGES
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 4,
-                    children: [
-                      _nutrientBadge(
-                        '⚡ ${meal.proteinG.toStringAsFixed(1)}g',
-                        Colors.red,
-                      ),
-                      _nutrientBadge(
-                        '🌾 ${meal.carbsG.toStringAsFixed(1)}g',
-                        Colors.blue,
-                      ),
-                      _nutrientBadge(
-                        '🍯 ${meal.fatG.toStringAsFixed(1)}g',
-                        Colors.amber,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            /// ➕ ADD BUTTON (STOP PROPAGATION)
-            GestureDetector(
-              onTap: () {
-                _addMealToPlanner(meal);
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: theme.primaryColor.withOpacity(0.1),
-                ),
-                padding: const EdgeInsets.all(8),
-                child: Icon(Icons.add, color: theme.primaryColor, size: 20),
-              ),
-            ),
-          ],
-        ),
-      ),
+    return TabBarView(
+      controller: _tabController,
+      children: [_buildRecentTab(theme), _buildEmptyState('Chưa có công thức')],
     );
   }
 
-  /// 📦 IMAGE PLACEHOLDER
-  Widget _buildImagePlaceholder() {
-    return Container(
-      width: 80,
-      height: 80,
-      color: Colors.grey.shade700,
-      child: const Icon(Icons.image_not_supported),
-    );
-  }
+  /// 🔍 Kết quả search
+  Widget _buildSearchResults(ThemeData theme) {
+    if (_searchResults.isEmpty) {
+      return _buildEmptyState('Không tìm thấy kết quả');
+    }
 
-  Widget _nutrientBadge(String text, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-      ),
-    );
-  }
-
-  /// ⏰ BOTTOM SHEET PICKER
-  Future<void> _openDateTimePicker() async {
-    DateTime tempDate = _selectedDateTime;
-    int tempHour = _selectedDateTime.hour;
-
-    await showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Container(
-              color: Theme.of(context).scaffoldBackgroundColor,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  /// 🧭 HEADER
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 16,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Lựa chọn ngày & giờ',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () => Navigator.pop(context),
-                          child: const Icon(Icons.close, size: 28),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  /// 📅 DATE + TIME PICKER
-                  Expanded(
-                    child: Row(
-                      children: [
-                        /// 📅 DATE PICKER
-                        Expanded(
-                          child: CupertinoPicker(
-                            itemExtent: 40,
-                            scrollController: FixedExtentScrollController(
-                              initialItem: _getDayDifference(tempDate),
-                            ),
-                            onSelectedItemChanged: (index) {
-                              setModalState(() {
-                                tempDate = DateTime.now().add(
-                                  Duration(days: index),
-                                );
-                              });
-                            },
-                            children: List.generate(
-                              30,
-                              (i) => Center(
-                                child: Text(
-                                  i == 0
-                                      ? 'Hôm nay'
-                                      : DateFormat('dd/MM').format(
-                                          DateTime.now().add(Duration(days: i)),
-                                        ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        /// ⏰ TIME PICKER
-                        Expanded(
-                          child: CupertinoPicker(
-                            itemExtent: 40,
-                            scrollController: FixedExtentScrollController(
-                              initialItem: tempHour,
-                            ),
-                            onSelectedItemChanged: (index) {
-                              setModalState(() {
-                                tempHour = index;
-                              });
-                            },
-                            children: List.generate(
-                              24,
-                              (i) => Center(
-                                child: Text(
-                                  '${i.toString().padLeft(2, '0')}:00',
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  /// ✅ CONFIRM BUTTON
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            _selectedDateTime = DateTime(
-                              tempDate.year,
-                              tempDate.month,
-                              tempDate.day,
-                              tempHour,
-                              0,
-                            );
-                          });
-                          Navigator.pop(context);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          backgroundColor: Theme.of(context).primaryColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: const Text(
-                          'Lựa chọn',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: _searchResults.length,
+      itemBuilder: (context, index) {
+        return _MealCard(
+          meal: _searchResults[index],
+          onTap: () => _navigateToDetails(_searchResults[index]),
+          onAdd: () => _addMealToPlanner(_searchResults[index]),
         );
       },
     );
   }
 
-  Widget _actionCard({
-    required IconData icon,
-    required String label,
-    required Color color,
-  }) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 18),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 32),
-            const SizedBox(height: 8),
-            Text(label, textAlign: TextAlign.center),
-          ],
-        ),
-      ),
+  /// 🕘 Tab gần đây
+  Widget _buildRecentTab(ThemeData theme) {
+    return Column(
+      children: [Expanded(child: _buildEmptyState('Chưa có thông tin'))],
     );
   }
 
-  /// 📦 EMPTY STATE
-  Widget _buildEmptyState(BuildContext context, {required String title}) {
-    final theme = Theme.of(context);
-
+  /// 📦 Empty state
+  Widget _buildEmptyState(String title) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -533,7 +165,7 @@ class _SearchMealState extends State<SearchMeal>
             color: Colors.grey.shade500,
           ),
           const SizedBox(height: 16),
-          Text(title, style: theme.textTheme.titleMedium),
+          Text(title, style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
           const Text(
             'Hệ thống chưa ghi nhận thông tin bạn\nđã nhập gần đây',
@@ -545,153 +177,195 @@ class _SearchMealState extends State<SearchMeal>
     );
   }
 
-  /// 📌 Tính số ngày từ hôm nay
-  int _getDayDifference(DateTime dateTime) {
-    final today = DateTime.now();
-    final difference = dateTime
-        .difference(DateTime(today.year, today.month, today.day))
-        .inDays;
-    return difference.clamp(0, 29);
+  /// 🔀 Navigate to details
+  void _navigateToDetails(Meal meal) {
+    navigateTo(context, FoodDetails(meal: meal));
   }
 
-  /// ✅ Search meals theo tên, category, keywords, ingredients
-  List<Map> _filterMeals(String query, List<Map> meals) {
-    if (query.isEmpty) {
-      return meals;
-    }
+  /// ➕ Thêm meal vào planner
+  void _addMealToPlanner(Meal meal) {
+    final hour = DateTime.now().hour;
+    final mealType = _determineMealType(hour);
 
-    final queryLower = query.toLowerCase().trim();
+    context.read<MealPlannerCubit>().addMealToType(mealType, {
+      'id': meal.id,
+      'name': meal.name,
+      'calories': meal.calories,
+      'protein': meal.proteinG,
+      'carbs': meal.carbsG,
+      'fat': meal.fatG,
+    }, DateTime.now());
 
-    return meals.where((meal) {
-      // ✅ 1. Tìm theo tên món ăn
-      final mealName = (meal['meal_name'] ?? '').toString().toLowerCase();
-      if (mealName.contains(queryLower)) {
-        return true;
-      }
-
-      // ✅ 2. Tìm theo category (ngành hàng)
-      final category = (meal['category'] ?? '').toString().toLowerCase();
-      if (category.contains(queryLower)) {
-        return true;
-      }
-
-      // ✅ 3. Tìm theo ingredients (thành phần)
-      final ingredients = (meal['ingredients'] ?? '').toString().toLowerCase();
-      if (ingredients.contains(queryLower)) {
-        return true;
-      }
-
-      // ✅ 4. Tìm theo keywords
-      final keywords = (meal['keywords'] ?? '').toString().toLowerCase();
-      if (keywords.contains(queryLower)) {
-        return true;
-      }
-
-      return false;
-    }).toList();
+    AppSnackBar.success(context, '${meal.name} được thêm vào bữa ăn');
+    Navigator.pop(context);
   }
 
-  /// ✅ Handle barcode scanned - FIX
-  Future<void> _handleBarcodeScanned(String barcode) async {
-    print('📦 Barcode received: $barcode');
-
-    // ✅ Search meal by barcode in your database
-    final meals = await _searchMealByBarcode(barcode);
-
-    if (meals.isNotEmpty) {
-      // ✅ Add first meal found
-      final meal = meals.first;
-
-      // ✅ Xác định bữa ăn dựa vào giờ hiện tại
-      final hour = DateTime.now().hour;
-      String mealType = '';
-
-      if (hour >= 6 && hour < 10) {
-        mealType = 'breakfast';
-      } else if (hour >= 10 && hour < 14) {
-        mealType = 'lunch';
-      } else if (hour >= 14 && hour <= 22) {
-        mealType = 'dinner';
-      } else {
-        mealType = 'snack';
-      }
-
-      // ✅ Call addMealToType (đúng với API)
-      context.read<MealPlannerCubit>().addMealToType(mealType, {
-        'id': meal['id'],
-        'meal_name': meal['meal_name'],
-        'calories': meal['calories'] ?? 0,
-        'protein': meal['protein'] ?? 0.0,
-        'carbs': meal['carbs'] ?? 0.0,
-        'fat': meal['fat'] ?? 0.0,
-      }, DateTime.now());
-
-      if (mounted) {
-        AppSnackBar.success(
-          context,
-          '${meal['meal_name']} được thêm vào ${_getMealTypeName(mealType)}',
-        );
-      }
-    } else {
-      if (mounted) {
-        AppSnackBar.error(context, 'Không tìm thấy thực phẩm với mã vạch này');
-      }
-    }
-  }
-
-  /// ✅ Helper: Lấy tên bữa ăn
-  String _getMealTypeName(String mealType) {
-    switch (mealType) {
-      case 'breakfast':
-        return 'Bữa sáng';
-      case 'lunch':
-        return 'Bữa trưa';
-      case 'dinner':
-        return 'Bữa tối';
-      case 'snack':
-        return 'Bữa phụ';
-      default:
-        return 'Bữa ăn';
-    }
-  }
-
-  /// ✅ Search meal by barcode
-  Future<List<Map>> _searchMealByBarcode(String barcode) async {
-    try {
-      final _supabase = Supabase.instance.client;
-      final response = await _supabase
-          .from('meals')
-          .select()
-          .eq('barcode', barcode)
-          .limit(1);
-
-      return List<Map>.from(response);
-    } catch (e) {
-      print('❌ Error searching by barcode: $e');
-      return [];
-    }
-  }
-
-  /// ✅ Add meal to date
-  void _addMealToDate(Map meal) {
-    context.read<MealPlannerCubit>().addMealToType(
-      'lunch', // ✅ mealType: lunch
-      {
-        'id': meal['id'],
-        'meal_name': meal['meal_name'],
-        'calories': meal['calories'],
-        'protein': meal['protein'] ?? 0.0,
-        'carbs': meal['carbs'] ?? 0.0,
-        'fat': meal['fat'] ?? 0.0,
-      },
-      DateTime.now(), // ✅ selectedDate
-    );
+  /// 🕐 Xác định loại bữa ăn theo giờ
+  String _determineMealType(int hour) {
+    if (hour >= 6 && hour < 10) return 'breakfast';
+    if (hour >= 10 && hour < 14) return 'lunch';
+    if (hour >= 14 && hour <= 22) return 'dinner';
+    return 'snack';
   }
 
   @override
   void dispose() {
     _tabController.dispose();
-    txtSearch.dispose();
+    _searchController.dispose();
     super.dispose();
+  }
+}
+
+// =====================================================
+// 📦 HELPER WIDGETS
+// =====================================================
+
+/// 🍽️ Card hiển thị meal
+class _MealCard extends StatelessWidget {
+  final Meal meal;
+  final VoidCallback onTap;
+  final VoidCallback onAdd;
+
+  const _MealCard({
+    required this.meal,
+    required this.onTap,
+    required this.onAdd,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: theme.cardColor,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            _buildImage(),
+            const SizedBox(width: 12),
+            Expanded(child: _buildInfo(theme)),
+            _buildAddButton(theme),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 🖼️ Ảnh món ăn
+  Widget _buildImage() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: meal.imageUrl != null
+          ? Image.network(
+              meal.imageUrl!,
+              width: 80,
+              height: 80,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => _buildPlaceholder(),
+            )
+          : _buildPlaceholder(),
+    );
+  }
+
+  Widget _buildPlaceholder() {
+    return Container(
+      width: 80,
+      height: 80,
+      color: Colors.grey.shade700,
+      child: const Icon(Icons.image_not_supported),
+    );
+  }
+
+  /// 📝 Thông tin món ăn
+  Widget _buildInfo(ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                meal.name,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (meal.isVerified)
+              const Icon(Icons.verified, size: 16, color: Colors.blue),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '${meal.servingSizeG}g • ${meal.calories} cal',
+          style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 6,
+          runSpacing: 4,
+          children: [
+            _NutrientBadge(
+              label: '⚡ ${meal.proteinG.toStringAsFixed(1)}g',
+              color: Colors.red,
+            ),
+            _NutrientBadge(
+              label: '🌾 ${meal.carbsG.toStringAsFixed(1)}g',
+              color: Colors.blue,
+            ),
+            _NutrientBadge(
+              label: '🍯 ${meal.fatG.toStringAsFixed(1)}g',
+              color: Colors.amber,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  /// ➕ Nút thêm
+  Widget _buildAddButton(ThemeData theme) {
+    return GestureDetector(
+      onTap: onAdd,
+      child: Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: theme.primaryColor.withOpacity(0.1),
+        ),
+        padding: const EdgeInsets.all(8),
+        child: Icon(Icons.add, color: theme.primaryColor, size: 20),
+      ),
+    );
+  }
+}
+
+/// 🏷️ Badge hiển thị nutrient
+class _NutrientBadge extends StatelessWidget {
+  final String label;
+  final Color color;
+
+  const _NutrientBadge({required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+      ),
+    );
   }
 }

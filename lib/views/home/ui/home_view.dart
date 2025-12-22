@@ -53,22 +53,17 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
     }
   }
 
-  // ✅ Method load data - Enhanced version
+  // ✅ Method load data - SIMPLE VERSION
   Future<void> _loadData() async {
-    debugPrint('🔄 HomeView: Loading data...');
-
+    // ✅ Chỉ cần load user data và language
     context.read<AuthenticationCubit>().getUserData();
 
     final cubit = context.read<HomeCubit>();
-    await cubit.loadLatestWorkouts();
-    await cubit.loadDailyActivity();
+    await cubit.loadLatestWorkouts(); // ✅ Reload latest workouts
+    await cubit.loadDailyActivity(); // ✅ Reload daily stats nếu có
 
-    // ✅ Force rebuild DailyActivitySection
-    if (mounted) {
-      setState(() {});
-    }
-
-    debugPrint('✅ HomeView: Data loaded');
+    // ✅ HomeCubit tự động load latest workouts trong initState
+    // Không cần gọi thêm gì ở đây
   }
 
   @override

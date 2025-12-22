@@ -107,96 +107,68 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
   Future<void> _loadDailyExerciseStats() async {
     try {
       final userId = _supabase.auth.currentUser?.id;
-      if (userId == null) {
-        debugPrint('❌ No user logged in');
-        return;
-      }
+      if (userId == null) return;
 
-      // ✅ FIX: Sử dụng UTC thay vì local timezone
-      final now = DateTime.now().toUtc();
-      final startOfDay = DateTime.utc(now.year, now.month, now.day);
+      // ✅ BƯỚC 1: Đếm TỔNG SỐ exercises trong toàn bộ hệ thống
+      final totalExercisesResponse = await _supabase
+          .from('exercise_items')
+          .select('id')
+          .count(CountOption.exact);
+
+      final totalExercisesInSystem = totalExercisesResponse.count;
+
+      debugPrint('📊 Total exercises in system: $totalExercisesInSystem');
+
+      // ✅ BƯỚC 2: Đếm exercises ĐÃ HOÀN THÀNH hôm nay
+      final now = DateTime.now();
+      final startOfDay = DateTime(now.year, now.month, now.day);
       final endOfDay = startOfDay.add(const Duration(days: 1));
 
-      debugPrint('📅 Loading exercise stats for:');
-      debugPrint('   User ID: $userId');
-      debugPrint('   Current UTC: ${now.toIso8601String()}');
-      debugPrint(
-        '   Date range (UTC): ${startOfDay.toIso8601String()} to ${endOfDay.toIso8601String()}',
-      );
-
-      // ✅ Query history_workout với UTC timestamps
       final response = await _supabase
           .from('history_workout')
-          .select('id, completed_exercises, total_exercises, created_at')
+          .select('completed_exercises')
           .eq('for_user', userId)
           .gte('created_at', startOfDay.toIso8601String())
-          .lt('created_at', endOfDay.toIso8601String())
-          .order('created_at', ascending: false);
+          .lt('created_at', endOfDay.toIso8601String());
 
-      debugPrint('📊 Query result: ${response.length} workout sessions found');
+      debugPrint('📊 Found ${response.length} workout sessions today');
 
-      if (response.isEmpty) {
-        debugPrint('⚠️ No workout sessions found for today');
-        if (mounted) {
-          setState(() {
-            _completedExercises = 0;
-            _totalExercises = 0;
-          });
-          _exerciseProgressNotifier.value = 0.0;
-        }
-        return;
-      }
-
-      // ✅ Tính tổng từ tất cả sessions hôm nay
+      // ✅ BƯỚC 3: Tính tổng exercises hoàn thành hôm nay
       int totalCompletedToday = 0;
-      int totalExercisesToday = 0;
 
       for (var workout in response) {
         final completed = (workout['completed_exercises'] ?? 0) as int;
-        final total = (workout['total_exercises'] ?? 0) as int;
-
         totalCompletedToday += completed;
-        totalExercisesToday += total;
-
-        debugPrint('  ✅ Session ${workout['id']}:');
-        debugPrint('     - Completed: $completed');
-        debugPrint('     - Total: $total');
-        debugPrint('     - Created: ${workout['created_at']}');
+        debugPrint('  - Session completed: $completed exercises');
       }
 
-      debugPrint('');
-      debugPrint('📊 Daily Summary:');
-      debugPrint('   Total completed: $totalCompletedToday');
-      debugPrint('   Total exercises: $totalExercisesToday');
-      debugPrint('   Sessions: ${response.length}');
+      debugPrint('📊 Daily stats:');
+      debugPrint('   Completed today: $totalCompletedToday');
+      debugPrint('   Total in system: $totalExercisesInSystem');
+      debugPrint('   Sessions today: ${response.length}');
 
       if (mounted) {
-        final percentage = totalExercisesToday > 0
-            ? (totalCompletedToday / totalExercisesToday).clamp(0.0, 1.0) * 100
+        // ✅ BƯỚC 4: Tính % dựa trên TỔNG SỐ exercises trong hệ thống
+        final percentage = totalExercisesInSystem > 0
+            ? (totalCompletedToday / totalExercisesInSystem).clamp(0.0, 1.0) *
+                  100
             : 0.0;
 
         setState(() {
           _completedExercises = totalCompletedToday;
-          _totalExercises = totalExercisesToday;
+          _totalExercises =
+              totalExercisesInSystem; // ✅ Tổng trong hệ thống (12)
         });
 
+        // ✅ UPDATE ValueNotifier
         _exerciseProgressNotifier.value = percentage;
 
-        debugPrint('✅ UI Updated:');
-        debugPrint('   Display: $_completedExercises/$_totalExercises');
-        debugPrint('   Progress: ${percentage.toStringAsFixed(1)}%');
+        debugPrint(
+          '✅ Updated UI: $_completedExercises/$_totalExercises (${percentage.toStringAsFixed(1)}%)',
+        );
       }
-    } catch (e, stackTrace) {
+    } catch (e) {
       debugPrint('❌ Error loading exercise stats: $e');
-      debugPrint('Stack trace: $stackTrace');
-
-      if (mounted) {
-        setState(() {
-          _completedExercises = 0;
-          _totalExercises = 0;
-        });
-        _exerciseProgressNotifier.value = 0.0;
-      }
     }
   }
 
