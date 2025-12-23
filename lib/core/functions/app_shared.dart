@@ -7,6 +7,7 @@ class AppShared {
   static late SharedPreferences _prefs;
   static const String _languageKey = 'language_code';
   static const String _chatHistoryPrefix = 'chat_history_';
+  static const String _workoutPlanPrefix = 'workout_plan_';
 
   static final _supabase = Supabase.instance.client;
 
@@ -147,5 +148,74 @@ class AppShared {
         messages: messages,
       );
     }).toList();
+  }
+
+  // ==================== WORKOUT PLAN ====================
+
+  /// Lấy key cho workout plan của user
+  static String _getWorkoutPlanKey(String userId) {
+    return '$_workoutPlanPrefix$userId';
+  }
+
+  /// Lưu workout plan của user
+  static Future<void> saveWorkoutPlan(
+    String userId,
+    Map<String, dynamic> planJson,
+  ) async {
+    final key = _getWorkoutPlanKey(userId);
+    await _prefs.setString(key, jsonEncode(planJson));
+  }
+
+  /// Lấy workout plan của user
+  static Future<Map<String, dynamic>?> getWorkoutPlan(String userId) async {
+    final key = _getWorkoutPlanKey(userId);
+    final jsonString = _prefs.getString(key);
+
+    if (jsonString == null) return null;
+
+    try {
+      return jsonDecode(jsonString) as Map<String, dynamic>;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Xóa workout plan của user
+  static Future<void> deleteWorkoutPlan(String userId) async {
+    final key = _getWorkoutPlanKey(userId);
+    await _prefs.remove(key);
+  }
+
+  /// Kiểm tra user có workout plan hay không
+  static Future<bool> hasWorkoutPlan(String userId) async {
+    final plan = await getWorkoutPlan(userId);
+    return plan != null;
+  }
+
+  /// Lưu workout plan lên Supabase (cloud sync - optional)
+  static Future<void> saveWorkoutPlanToCloud(
+    String userId,
+    Map<String, dynamic> planJson,
+  ) async {
+    await _supabase.from('workout_plans').upsert({
+      'user_id': userId,
+      'plan_data': planJson,
+      'created_at': DateTime.now().toIso8601String(),
+      'updated_at': DateTime.now().toIso8601String(),
+    });
+  }
+
+  /// Load workout plan từ Supabase (cloud sync - optional)
+  static Future<Map<String, dynamic>?> getWorkoutPlanFromCloud(
+    String userId,
+  ) async {
+    final response = await _supabase
+        .from('workout_plans')
+        .select()
+        .eq('user_id', userId)
+        .maybeSingle();
+
+    if (response == null) return null;
+    return response['plan_data'] as Map<String, dynamic>?;
   }
 }

@@ -5,12 +5,14 @@ import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/sensitive_data.dart';
 import 'package:smart_fitness_assistant/core/theme/logic/cubit/theme_cubit.dart';
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
+import 'package:smart_fitness_assistant/views/activity_level/logic/cubit/activity_level_cubit.dart';
 import 'package:smart_fitness_assistant/views/auth/cubit/authentication_cubit.dart';
 import 'package:smart_fitness_assistant/views/home/logic/cubit/home_cubit.dart';
 import 'package:smart_fitness_assistant/views/meal_planner/logic/cubit/meal_planner_cubit.dart';
 import 'package:smart_fitness_assistant/views/onboarding/ui/started_view.dart';
 import 'package:smart_fitness_assistant/views/schedule_management/logic/cubit/schedule_cubit.dart';
 import 'package:smart_fitness_assistant/views/social/logic/cubit/social_feed_cubit.dart';
+import 'package:smart_fitness_assistant/views/workout_plan/logic/cubit/workout_plan_cubit.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/logic/cubit/workout_tracker_cubit.dart';
 import 'package:smart_fitness_assistant/core/functions/app_shared.dart';
 import 'package:smart_fitness_assistant/locale/translation_manager.dart';
@@ -51,8 +53,10 @@ Future<void> main() async {
         BlocProvider(create: (_) => AuthenticationCubit()),
         BlocProvider(create: (_) => WorkoutTrackerCubit()),
         BlocProvider(create: (_) => SocialFeedCubit()..loadFeed()),
-        BlocProvider(create: (_) => MealPlannerCubit()),
+        BlocProvider(create: (_) => ActivityLevelCubit()),
         BlocProvider(create: (_) => ScheduleCubit()),
+        BlocProvider(create: (_) => MealPlannerCubit()),
+        BlocProvider(create: (_) => WorkoutPlanCubit()), // ✅ Thêm dòng này
       ],
       child: const MyApp(),
     ),

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_alertdialog.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_container_check.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_drop_but.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/locale/translation_manager.dart';
@@ -12,6 +13,7 @@ import 'package:smart_fitness_assistant/views/home/logic/cubit/home_cubit.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/bmi_card.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/daily_activity_section.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/lastest_workout_view.dart';
+import 'package:smart_fitness_assistant/views/workout_plan/ui/workout_plan_view.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -182,6 +184,13 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
                         const BMICard(),
 
                         SizedBox(height: media.width * 0.05),
+                        CustomContainerCheck(
+                          name: "🏋️By Yourself",
+                          title: "Check",
+                          onPressed: () {
+                            navigateTo(context, WorkoutPlanView());
+                          },
+                        ),
 
                         // === Activity Status ===
                         Column(

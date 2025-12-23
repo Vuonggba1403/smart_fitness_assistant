@@ -1,0 +1,161 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../logic/cubit/multi_step_dialog_cubit.dart';
+
+/// Widget cho Step 5: Chọn food allergies
+class StepFoodAllergies extends StatelessWidget {
+  const StepFoodAllergies({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<MultiStepDialogCubit, MultiStepDialogState>(
+      builder: (context, state) {
+        if (state.isLoadingData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final cubit = context.read<MultiStepDialogCubit>();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Chọn các món ăn bạn dị ứng hoặc không ăn được:',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 12),
+            _buildSearchField(cubit),
+            const SizedBox(height: 12),
+            if (state.selectedFoodAllergies.isNotEmpty)
+              _buildSelectedChips(state, cubit),
+            const Text(
+              'Danh sách món ăn:',
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 8),
+            _buildMealsList(state, cubit),
+            if (state.selectedFoodAllergies.isNotEmpty)
+              TextButton.icon(
+                onPressed: cubit.clearFoodAllergies,
+                icon: const Icon(Icons.clear_all, size: 18),
+                label: const Text('Xóa tất cả'),
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.red.shade600,
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Build search field
+  Widget _buildSearchField(MultiStepDialogCubit cubit) {
+    return TextField(
+      decoration: InputDecoration(
+        hintText: 'Tìm món ăn...',
+        prefixIcon: const Icon(Icons.search),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
+      ),
+      onChanged: cubit.filterMeals,
+    );
+  }
+
+  /// Build selected chips
+  Widget _buildSelectedChips(
+    MultiStepDialogState state,
+    MultiStepDialogCubit cubit,
+  ) {
+    return Column(
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: state.selectedFoodAllergies.map((meal) {
+            return Chip(
+              avatar: CircleAvatar(
+                backgroundColor: Colors.red.shade100,
+                child: const Icon(Icons.close, size: 16, color: Colors.red),
+              ),
+              label: Text(meal.name),
+              deleteIcon: const Icon(Icons.close, size: 18),
+              onDeleted: () => cubit.toggleFoodAllergy(meal),
+            );
+          }).toList(),
+        ),
+        const Divider(height: 24),
+      ],
+    );
+  }
+
+  /// Build meals list
+  Widget _buildMealsList(
+    MultiStepDialogState state,
+    MultiStepDialogCubit cubit,
+  ) {
+    return Container(
+      constraints: const BoxConstraints(maxHeight: 300),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: state.filteredMeals.isEmpty
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Text(
+                  'Không tìm thấy món ăn',
+                  style: TextStyle(color: Colors.grey.shade600),
+                ),
+              ),
+            )
+          : ListView.builder(
+              shrinkWrap: true,
+              itemCount: state.filteredMeals.length,
+              itemBuilder: (_, index) {
+                final meal = state.filteredMeals[index];
+                final isSelected = state.selectedFoodAllergies.contains(meal);
+
+                return ListTile(
+                  dense: true,
+                  leading: meal.imageUrl != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.network(
+                            meal.imageUrl!,
+                            width: 40,
+                            height: 40,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade200,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(Icons.restaurant, size: 20),
+                        ),
+                  title: Text(meal.name, style: const TextStyle(fontSize: 13)),
+                  subtitle: Text(
+                    '${meal.calories} cal • ${meal.category ?? "Món ăn"}',
+                    style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                  ),
+                  trailing: Icon(
+                    isSelected ? Icons.check_circle : Icons.circle_outlined,
+                    color: isSelected ? Colors.red.shade600 : Colors.grey,
+                  ),
+                  selected: isSelected,
+                  selectedTileColor: Colors.red.shade50,
+                  onTap: () => cubit.toggleFoodAllergy(meal),
+                );
+              },
+            ),
+    );
+  }
+}

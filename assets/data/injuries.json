@@ -1,0 +1,250 @@
+[
+  {
+    "id": "back_pain_lower",
+    "name": "Đau lưng dưới",
+    "name_en": "Lower Back Pain",
+    "category": "Lưng",
+    "severity": "common",
+    "description": "Đau vùng thắt lưng, thường do tư thế ngồi sai hoặc nâng vật nặng"
+  },
+  {
+    "id": "back_pain_upper",
+    "name": "Đau lưng trên",
+    "name_en": "Upper Back Pain",
+    "category": "Lưng",
+    "severity": "moderate",
+    "description": "Đau vùng vai gáy, thường do ngồi máy tính lâu"
+  },
+  {
+    "id": "herniated_disc",
+    "name": "Thoát vị đĩa đệm",
+    "name_en": "Herniated Disc",
+    "category": "Lưng",
+    "severity": "severe",
+    "description": "Thoát vị đĩa đệm cột sống thắt lưng hoặc cổ"
+  },
+  {
+    "id": "knee_arthritis",
+    "name": "Viêm khớp gối",
+    "name_en": "Knee Arthritis",
+    "category": "Đầu gối",
+    "severity": "moderate",
+    "description": "Viêm và thoái hóa khớp gối"
+  },
+  {
+    "id": "knee_ligament",
+    "name": "Chấn thương dây chằng gối",
+    "name_en": "Knee Ligament Injury",
+    "category": "Đầu gối",
+    "severity": "severe",
+    "description": "Rách dây chằng chéo trước (ACL), sau (PCL), hoặc bên"
+  },
+  {
+    "id": "knee_meniscus",
+    "name": "Rách sụn chêm gối",
+    "name_en": "Meniscus Tear",
+    "category": "Đầu gối",
+    "severity": "moderate",
+    "description": "Tổn thương sụn chêm trong hoặc ngoài"
+  },
+  {
+    "id": "patellofemoral_syndrome",
+    "name": "Hội chứng đau bánh chè",
+    "name_en": "Patellofemoral Pain Syndrome",
+    "category": "Đầu gối",
+    "severity": "common",
+    "description": "Đau xung quanh xương bánh chè khi hoạt động"
+  },
+  {
+    "id": "shoulder_impingement",
+    "name": "Hội chứng va đập vai",
+    "name_en": "Shoulder Impingement",
+    "category": "Vai",
+    "severity": "common",
+    "description": "Đau khi giơ tay cao, thường gặp ở người tập gym"
+  },
+  {
+    "id": "rotator_cuff",
+    "name": "Chấn thương cơ chóp xoay",
+    "name_en": "Rotator Cuff Injury",
+    "category": "Vai",
+    "severity": "moderate",
+    "description": "Rách hoặc viêm các cơ xung quanh khớp vai"
+  },
+  {
+    "id": "frozen_shoulder",
+    "name": "Vai đông cứng",
+    "name_en": "Frozen Shoulder",
+    "category": "Vai",
+    "severity": "moderate",
+    "description": "Giảm biên độ chuyển động vai, đau và cứng khớp"
+  },
+  {
+    "id": "shoulder_dislocation",
+    "name": "Trật khớp vai",
+    "name_en": "Shoulder Dislocation",
+    "category": "Vai",
+    "severity": "severe",
+    "description": "Xương cánh tay bị trật khỏi hốc khớp vai"
+  },
+  {
+    "id": "wrist_sprain",
+    "name": "Bong gân cổ tay",
+    "name_en": "Wrist Sprain",
+    "category": "Cổ tay",
+    "severity": "common",
+    "description": "Giãn hoặc rách dây chằng cổ tay"
+  },
+  {
+    "id": "carpal_tunnel",
+    "name": "Hội chứng ống cổ tay",
+    "name_en": "Carpal Tunnel Syndrome",
+    "category": "Cổ tay",
+    "severity": "moderate",
+    "description": "Tê, tức và đau do chèn ép dây thần kinh giữa"
+  },
+  {
+    "id": "wrist_tendonitis",
+    "name": "Viêm gân cổ tay",
+    "name_en": "Wrist Tendonitis",
+    "category": "Cổ tay",
+    "severity": "common",
+    "description": "Viêm gân quanh cổ tay, thường do động tác lặp lại"
+  },
+  {
+    "id": "ankle_sprain",
+    "name": "Bong gân mắt cá chân",
+    "name_en": "Ankle Sprain",
+    "category": "Mắt cá chân",
+    "severity": "common",
+    "description": "Giãn hoặc rách dây chằng mắt cá"
+  },
+  {
+    "id": "ankle_instability",
+    "name": "Mất ổn định mắt cá",
+    "name_en": "Ankle Instability",
+    "category": "Mắt cá chân",
+    "severity": "moderate",
+    "description": "Mắt cá yếu, dễ bị bong gân tái phát"
+  },
+  {
+    "id": "achilles_tendonitis",
+    "name": "Viêm gân Achilles",
+    "name_en": "Achilles Tendonitis",
+    "category": "Mắt cá chân",
+    "severity": "moderate",
+    "description": "Viêm gân gót, đau sau gót chân"
+  },
+  {
+    "id": "neck_strain",
+    "name": "Căng cơ cổ",
+    "name_en": "Neck Strain",
+    "category": "Cổ",
+    "severity": "common",
+    "description": "Đau cứng cơ vùng cổ"
+  },
+  {
+    "id": "cervical_disc",
+    "name": "Thoát vị đĩa đệm cổ",
+    "name_en": "Cervical Disc Herniation",
+    "category": "Cổ",
+    "severity": "severe",
+    "description": "Thoát vị đĩa đệm cột sống cổ"
+  },
+  {
+    "id": "whiplash",
+    "name": "Chấn thương cổ do va đập",
+    "name_en": "Whiplash",
+    "category": "Cổ",
+    "severity": "moderate",
+    "description": "Chấn thương cổ do lực tác động đột ngột"
+  },
+  {
+    "id": "elbow_tendonitis",
+    "name": "Viêm gân khuỷu tay",
+    "name_en": "Tennis/Golfer's Elbow",
+    "category": "Khuỷu tay",
+    "severity": "common",
+    "description": "Đau bên trong hoặc bên ngoài khuỷu tay"
+  },
+  {
+    "id": "elbow_bursitis",
+    "name": "Viêm bao hoạt dịch khuỷu",
+    "name_en": "Elbow Bursitis",
+    "category": "Khuỷu tay",
+    "severity": "moderate",
+    "description": "Sưng và đau ở mỏm khuỷu tay"
+  },
+  {
+    "id": "hip_impingement",
+    "name": "Va đập khớp háng",
+    "name_en": "Hip Impingement",
+    "category": "Hông",
+    "severity": "moderate",
+    "description": "Đau háng khi ngồi xổm hoặc gập người"
+  },
+  {
+    "id": "hip_bursitis",
+    "name": "Viêm bao hoạt dịch háng",
+    "name_en": "Hip Bursitis",
+    "category": "Hông",
+    "severity": "common",
+    "description": "Đau bên ngoài háng, đặc biệt khi nằm nghiêng"
+  },
+  {
+    "id": "plantar_fasciitis",
+    "name": "Viêm cân gan chân",
+    "name_en": "Plantar Fasciitis",
+    "category": "Bàn chân",
+    "severity": "common",
+    "description": "Đau gót chân, đặc biệt vào buổi sáng"
+  },
+  {
+    "id": "shin_splints",
+    "name": "Đau ống quyển",
+    "name_en": "Shin Splints",
+    "category": "Chân",
+    "severity": "common",
+    "description": "Đau dọc xương chày, thường do chạy bộ nhiều"
+  },
+  {
+    "id": "hamstring_strain",
+    "name": "Căng cơ sau đùi",
+    "name_en": "Hamstring Strain",
+    "category": "Đùi",
+    "severity": "moderate",
+    "description": "Căng hoặc rách cơ sau đùi"
+  },
+  {
+    "id": "quad_strain",
+    "name": "Căng cơ tứ đầu đùi",
+    "name_en": "Quadriceps Strain",
+    "category": "Đùi",
+    "severity": "moderate",
+    "description": "Căng hoặc rách cơ trước đùi"
+  },
+  {
+    "id": "groin_strain",
+    "name": "Căng cơ háng",
+    "name_en": "Groin Strain",
+    "category": "Háng",
+    "severity": "moderate",
+    "description": "Đau vùng háng, thường do động tác giạng chân"
+  },
+  {
+    "id": "rib_injury",
+    "name": "Chấn thương sườn",
+    "name_en": "Rib Injury",
+    "category": "Ngực",
+    "severity": "moderate",
+    "description": "Gãy hoặc bầm sườn, đau khi hít thở sâu"
+  },
+  {
+    "id": "sciatica",
+    "name": "Đau dây thần kinh tọa",
+    "name_en": "Sciatica",
+    "category": "Lưng",
+    "severity": "moderate",
+    "description": "Đau lan từ lưng xuống chân theo dây thần kinh tọa"
+  }
+]

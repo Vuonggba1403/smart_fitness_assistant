@@ -31,8 +31,8 @@ class _ActivityLevelDialogState extends State<ActivityLevelDialog> {
     super.initState();
     _usernameFuture = _fetchUsername();
 
-    // Timeout sau 10 giây để tránh loading vô tận
-    Future.delayed(const Duration(seconds: 10), () {
+    // Timeout sau 5 giây để tránh loading vô tận
+    Future.delayed(const Duration(seconds: 5), () {
       if (mounted && !_hasTimeout && _cachedLevels == null) {
         developer.log(
           '⏰ TIMEOUT: Dialog loading too long',
