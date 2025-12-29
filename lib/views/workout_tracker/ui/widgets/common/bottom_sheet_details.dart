@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/functions/color_extension.dart';
 import 'package:smart_fitness_assistant/core/models/exercise_item.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
@@ -273,7 +273,7 @@ class ExerciseDetailBottomSheet extends StatelessWidget {
                   Icon(Icons.broken_image, size: 60, color: TColor.gray),
                   const SizedBox(height: 8),
                   Text(
-                    'Không tìm thấy ảnh',
+                    LocaleKey.imageNotFound.tr,
                     style: TextStyle(color: TColor.gray, fontSize: 14),
                   ),
                 ],

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/functions/color_extension.dart';
 import 'package:smart_fitness_assistant/core/models/scheduled_workout.dart';
 import 'package:smart_fitness_assistant/core/models/exercise_category.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
@@ -115,7 +117,7 @@ class _AddScheduleViewState extends State<AddScheduleView> {
     final textColor = theme.textTheme.bodyMedium?.color;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Thêm lịch tập')),
+      appBar: AppBar(title: Text(LocaleKey.addScheduleTitle.tr)),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -145,7 +147,7 @@ class _AddScheduleViewState extends State<AddScheduleView> {
                       child: DropdownButton<ExerciseCategory>(
                         value: _selectedCategory,
                         isExpanded: true,
-                        hint: const Text('Chọn bài tập'),
+                        hint: Text(LocaleKey.selectExerciseHint.tr),
                         items: _categories.map((category) {
                           return DropdownMenuItem(
                             value: category,

@@ -6,7 +6,7 @@ import 'package:smart_fitness_assistant/core/models/workout_progress.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
-import '../../../../../core/functions/colo_extension.dart';
+import '../../../../../core/functions/color_extension.dart';
 
 /// Widget hiển thị một row workout với progress
 class WhatTrainRow extends StatelessWidget {

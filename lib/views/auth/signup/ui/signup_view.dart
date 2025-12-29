@@ -3,11 +3,11 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
+import 'package:smart_fitness_assistant/core/functions/navigate_to.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_textfield.dart';
-import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/functions/color_extension.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/views/auth/cubit/authentication_cubit.dart';
 import 'package:smart_fitness_assistant/views/auth/login/ui/login_view.dart';
@@ -104,20 +104,20 @@ class _SignUpFormState extends State<_SignUpForm> {
                       SizedBox(height: media.width * 0.05),
 
                       RoundTextField(
-                        hintText: "UserName",
+                        hintText: LocaleKey.username.tr,
                         iconPath: "assets/img/user_text.png",
                         controller: _usernameController,
                       ),
                       SizedBox(height: media.width * 0.04),
                       RoundTextField(
-                        hintText: "Email",
+                        hintText: LocaleKey.email.tr,
                         iconPath: "assets/img/email.png",
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
                       ),
                       SizedBox(height: media.width * 0.04),
                       RoundTextField(
-                        hintText: "Password",
+                        hintText: LocaleKey.password.tr,
                         iconPath: "assets/img/lock.png",
                         isPassword: true,
                         controller: _passwordController,

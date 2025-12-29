@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_utils/src/extensions/internacionalization.dart';
-import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/functions/color_extension.dart';
 
 import '../../../../core/widgets/custom_showdialog.dart';
 import '../../../../locale/locale_key.dart';
@@ -14,7 +14,7 @@ class WaterGoalDialog {
       builder: (dialogContext) => StatefulBuilder(
         builder: (builderContext, setDialogState) {
           return AlertDialog(
-            title:  Text(LocaleKey.dailyGoal.tr),
+            title: Text(LocaleKey.dailyGoal.tr),
             backgroundColor: Colors.grey.shade800,
             content: Column(
               mainAxisSize: MainAxisSize.min,
@@ -60,19 +60,24 @@ class WaterGoalDialog {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext),
-                child: Text(LocaleKey.buttonNo.tr,style: TextStyle(color: Colors.red),),
+                child: Text(
+                  LocaleKey.buttonNo.tr,
+                  style: TextStyle(color: Colors.red),
+                ),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.pop(dialogContext, tempGoal),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: TColor.primaryColor1,
                 ),
-                child: Text(LocaleKey.buttonSave.tr, style: TextStyle(color: Colors.white),),
+                child: Text(
+                  LocaleKey.buttonSave.tr,
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ],
           );
-
-          },
+        },
       ),
     );
   }

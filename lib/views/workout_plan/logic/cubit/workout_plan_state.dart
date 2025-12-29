@@ -20,6 +20,12 @@ final class WorkoutPlanError extends WorkoutPlanState {
   WorkoutPlanError(this.message);
 }
 
+/// ✅ State mới: Plan đã hết hạn
+final class WorkoutPlanExpired extends WorkoutPlanState {
+  final String message;
+  WorkoutPlanExpired(this.message);
+}
+
 final class ActivityLevelsLoading extends WorkoutPlanState {}
 
 final class ActivityLevelsLoaded extends WorkoutPlanState {

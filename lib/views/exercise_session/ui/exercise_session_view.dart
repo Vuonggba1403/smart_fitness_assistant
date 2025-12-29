@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/functions/color_extension.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/views/exercise_session/logic/cubit/session_cubit.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/common/bottom_sheet_details.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/common/show_dialog.dart';
-import 'package:smart_fitness_assistant/views/exercise_session/logic/ui/widgets/workout_completion_bottom_sheet.dart';
-import 'package:smart_fitness_assistant/views/exercise_session/logic/ui/widgets/workout_congratulations_screen.dart'; // ✅ Import màn hình mới
+import 'package:smart_fitness_assistant/views/exercise_session/ui/widgets/workout_completion_bottom_sheet.dart';
+import 'package:smart_fitness_assistant/views/exercise_session/ui/widgets/workout_congratulations_screen.dart';
 
 class ExerciseSessionView extends StatelessWidget {
   const ExerciseSessionView({super.key});
@@ -65,25 +65,22 @@ class ExerciseSessionView extends StatelessWidget {
     }
   }
 
-  /// Hoàn thành workout và invalidate cache
+  /// ✅ Hoàn thành workout và hiển thị congratulations screen
   Future<void> _finishWorkout(BuildContext context, SessionActive state) async {
+    // 1️⃣ Save workout session
     final saved = await context.read<SessionCubit>().saveWorkoutSession();
 
-    if (saved && context.mounted) {
-      context.read<SessionCubit>().stopWorkoutSession();
+    if (!saved || !context.mounted) return;
 
-      await WorkoutCongratulationsScreen.show(context, state);
+    // 2️⃣ Stop session
+    context.read<SessionCubit>().stopWorkoutSession();
 
-      if (context.mounted) {
-        // ✅ FIX: Pop với result = true
-        Navigator.pop(context, true);
+    // 3️⃣ ✅ Navigate to Congratulations Screen - sử dụng static method
+    await WorkoutCongratulationsScreen.show(context, state);
 
-        await Future.delayed(const Duration(milliseconds: 100));
-
-        if (context.mounted) {
-          Navigator.pop(context, true);
-        }
-      }
+    // 4️⃣ Pop back với result = true
+    if (context.mounted) {
+      Navigator.pop(context, true);
     }
   }
 
@@ -136,7 +133,7 @@ class ExerciseSessionView extends StatelessWidget {
           // ✅ FIX
           builder: (context, state) {
             if (state is! SessionActive) {
-              return Center(child: Text('No active session'));
+              return Center(child: Text(LocaleKey.noActiveSession.tr));
             }
 
             return Column(
@@ -201,7 +198,10 @@ class ExerciseSessionView extends StatelessWidget {
                   borderRadius: BorderRadius.circular(25),
                 ),
               ),
-              child: Text('Kết thúc', style: TextStyle(color: TColor.white)),
+              child: Text(
+                LocaleKey.finish.tr,
+                style: TextStyle(color: TColor.white),
+              ),
             ),
         ],
       ),
@@ -262,7 +262,7 @@ class ExerciseSessionView extends StatelessWidget {
                 title: buttonText,
                 onPressed: () async {
                   if (state.isWorkoutCompleted) {
-                    // ✅ FIX: Call helper method
+                    // ✅ FIX: Gọi helper method đúng
                     await _finishWorkout(context, state);
                   } else {
                     context.read<SessionCubit>().nextSet();
@@ -365,7 +365,10 @@ class ExerciseSessionView extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 15),
                     side: BorderSide(color: TColor.gray),
                   ),
-                  child: Text('Chi tiết', style: TextStyle(color: textColor)),
+                  child: Text(
+                    LocaleKey.details.tr,
+                    style: TextStyle(color: textColor),
+                  ),
                 ),
               ),
               const SizedBox(width: 10),
@@ -759,7 +762,10 @@ class _EditableSetRowState extends State<_EditableSetRow> {
 
           const SizedBox(width: 10),
 
-          Text('kg', style: TextStyle(color: widget.textColor, fontSize: 14)),
+          Text(
+            LocaleKey.kg.tr,
+            style: TextStyle(color: widget.textColor, fontSize: 14),
+          ),
 
           const SizedBox(width: 20),
 
@@ -800,7 +806,7 @@ class _EditableSetRowState extends State<_EditableSetRow> {
           const SizedBox(width: 10),
 
           Text(
-            'Số lần',
+            LocaleKey.repetitions.tr,
             style: TextStyle(color: widget.textColor, fontSize: 14),
           ),
         ],

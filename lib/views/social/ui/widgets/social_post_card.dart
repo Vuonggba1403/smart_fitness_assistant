@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_showdialog.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/functions/color_extension.dart';
 import 'package:smart_fitness_assistant/core/models/content_post.dart';
 import 'package:smart_fitness_assistant/core/functions/cache_images_view.dart';
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
@@ -76,21 +78,21 @@ class _SocialPostCardState extends State<SocialPostCard> {
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          title: const Text('Chỉnh sửa bài đăng'),
+          title: Text(LocaleKey.editPost.tr),
           content: isLoading
               ? Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const CircularProgressIndicator(),
                     const SizedBox(height: 16),
-                    const Text('Đang cập nhật...'),
+                    Text(LocaleKey.updating.tr),
                   ],
                 )
               : TextField(
                   controller: editController,
                   maxLines: 5,
                   decoration: InputDecoration(
-                    hintText: 'Chỉnh sửa caption...',
+                    hintText: LocaleKey.editCaption.tr,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -104,18 +106,16 @@ class _SocialPostCardState extends State<SocialPostCard> {
                       editController.dispose();
                       Navigator.pop(context);
                     },
-                    child: const Text('Huỷ'),
+                    child: Text(LocaleKey.cancel.tr),
                   ),
                   ElevatedButton(
                     onPressed: () async {
                       setState(() => isLoading = true);
 
-                      final success = await context
-                          .read<SocialFeedCubit>()
-                          .updatePost(
-                            postId: widget.post.id ?? '',
-                            caption: editController.text,
-                          );
+                      await context.read<SocialFeedCubit>().updatePost(
+                        postId: widget.post.id ?? '',
+                        caption: editController.text,
+                      );
 
                       // ✅ Close dialog immediately
                       if (mounted) {
@@ -126,7 +126,7 @@ class _SocialPostCardState extends State<SocialPostCard> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: TColor.primaryColor2,
                     ),
-                    child: const Text('Lưu'),
+                    child: Text(LocaleKey.save.tr),
                   ),
                 ],
         ),
@@ -151,7 +151,7 @@ class _SocialPostCardState extends State<SocialPostCard> {
 
         AppSnackBar.success(
           context,
-          success ? 'Đã xoá bài đăng' : 'Xoá bài đăng thất bại',
+          success ? LocaleKey.deletedPost.tr : LocaleKey.deletePostFailed.tr,
         );
       },
     );
@@ -205,10 +205,10 @@ class _SocialPostCardState extends State<SocialPostCard> {
                       PopupMenuItem(
                         onTap: _showEditDialog,
                         child: Row(
-                          children: const [
+                          children: [
                             Icon(Icons.edit, size: 18),
                             SizedBox(width: 8),
-                            Text('Chỉnh sửa'),
+                            Text(LocaleKey.edit.tr),
                           ],
                         ),
                       ),
@@ -216,10 +216,13 @@ class _SocialPostCardState extends State<SocialPostCard> {
                         onTap: _showDeleteDialog,
 
                         child: Row(
-                          children: const [
+                          children: [
                             Icon(Icons.delete, size: 18, color: Colors.red),
                             SizedBox(width: 8),
-                            Text('Xoá', style: TextStyle(color: Colors.red)),
+                            Text(
+                              LocaleKey.delete.tr,
+                              style: TextStyle(color: Colors.red),
+                            ),
                           ],
                         ),
                       ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_utils/src/extensions/internacionalization.dart';
-import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/functions/color_extension.dart';
 
 import '../../../../locale/locale_key.dart';
 
@@ -9,7 +9,6 @@ class WaterCongratulationsDialog {
     final theme = Theme.of(context);
     final textColor = theme.textTheme.bodyMedium?.color;
     final cardColor = theme.cardColor;
-
 
     return showDialog(
       context: context,

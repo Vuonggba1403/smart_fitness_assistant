@@ -2,8 +2,10 @@ import 'dart:developer';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:get/get.dart';
 import 'package:meta/meta.dart';
 import 'package:smart_fitness_assistant/core/models/user_models.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 part 'authentication_state.dart';
@@ -310,7 +312,9 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
       emit(const DeleteAccountSuccess());
     } catch (e) {
       log('❌ Delete Account Error: $e');
-      emit(DeleteAccountError('Đã xảy ra lỗi: ${e.toString()}'));
+      emit(
+        DeleteAccountError('${LocaleKey.errorOccurred.tr}: ${e.toString()}'),
+      );
     }
   }
 }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../logic/cubit/multi_step_dialog_cubit.dart';
 
@@ -6,18 +8,18 @@ import '../../logic/cubit/multi_step_dialog_cubit.dart';
 class StepEquipment extends StatelessWidget {
   const StepEquipment({super.key});
 
-  static const _equipment = [
+  static final _equipment = [
     {
       'value': 'gym',
       'icon': Icons.fitness_center,
       'title': 'Phòng gym',
-      'subtitle': 'Có đầy đủ thiết bị',
+      'subtitle': LocaleKey.fullEquipment.tr,
     },
     {
       'value': 'home',
       'icon': Icons.home,
       'title': 'Tại nhà',
-      'subtitle': 'Thiết bị tối thiểu',
+      'subtitle': LocaleKey.minimalEquipment.tr,
     },
     {
       'value': 'mixed',

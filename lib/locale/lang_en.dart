@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 import 'locale_key.dart';
 
 Map<String, String> enUs = {
@@ -186,16 +184,206 @@ Map<String, String> enUs = {
   LocaleKey.writeComments: "Write a comment...",
   LocaleKey.loading: "Loading...",
 
-  // // ✅ THÊM: Keys cho workout completion
-  // LocaleKey.finishEarly: "Finish Early?",
-  // LocaleKey.continueWorkout: "Continue",
-  // LocaleKey.finishWorkout: "Finish",
-  // LocaleKey.workoutWillBeSaved:
-  //     "The workout will be saved with current progress",
-  // LocaleKey.congratulations: "Congratulations!",
-  // LocaleKey.workoutCompleted: "WORKOUT\nCOMPLETED!",
-  // LocaleKey.duration: "Duration",
-  // LocaleKey.date: "Date",
-  // LocaleKey.completed: "Completed",
-  // LocaleKey.goodJob: "Great job! You have completed your workout.",
+  // Meal Planner
+  LocaleKey.searchFood: "Search Food",
+  LocaleKey.searchFoodHint: "Search food...",
+  LocaleKey.recent: "Recent",
+  LocaleKey.createdByMe: "Created by me",
+  LocaleKey.noRecipes: "No recipes yet",
+  LocaleKey.noResults: "No results found",
+  LocaleKey.noInfo: "No information",
+  LocaleKey.noRecentRecords: "The system has not recorded your\nrecent entries",
+  LocaleKey.addedToMeal: "added to meal",
+  LocaleKey.exercises2: "Exercises",
+  LocaleKey.isThisCorrect: "Is this information correct?",
+
+  // Workout Tracker
+  LocaleKey.noGymWorkouts: "No gym workouts",
+  LocaleKey.noHomeWorkouts: "No home workouts",
+  LocaleKey.selectTimeAfter: "Please select time at least after",
+  LocaleKey.reminderSet: "Reminder set at",
+  LocaleKey.reminderCanceled: "Reminder canceled",
+  LocaleKey.confirmDelete2: "Confirm Delete",
+  LocaleKey.confirmDeleteSchedule:
+      "Are you sure you want to delete this schedule?",
+  LocaleKey.cancel: "Cancel",
+  LocaleKey.delete: "Delete",
+  LocaleKey.scheduleDeleted: "Schedule deleted",
+  LocaleKey.cannotDelete: "Cannot delete schedule",
+  LocaleKey.noSchedules: "No schedules yet! ✨",
+  LocaleKey.tapToAdd: "Tap on 'Daily Workout Schedule'\nto add new schedule",
+  LocaleKey.today: "Today",
+  LocaleKey.tomorrow: "Tomorrow",
+  LocaleKey.imageNotFound: "Image not found",
+  LocaleKey.loadError: "Load error",
+
+  // Workout Plan
+  LocaleKey.noPlan: "No workout plan",
+  LocaleKey.sevenDayPlan: "7-Day Plan",
+  LocaleKey.confirmDeletePlan: "Delete Workout Plan",
+  LocaleKey.confirmDeletePlanMessage:
+      "Are you sure you want to delete this workout plan? This action cannot be undone.",
+  LocaleKey.deletePlan: "Delete plan",
+  LocaleKey.cannotLoadData: "Cannot load data",
+  LocaleKey.close: "Close",
+  LocaleKey.retry: "Retry",
+  LocaleKey.createPlanWithAI: "Create plan with AI",
+  LocaleKey.workoutSchedule: "Workout",
+  LocaleKey.meals: "Meals",
+  LocaleKey.pleaseLogin: "Please login",
+  LocaleKey.dayNumber: "Day",
+  LocaleKey.servingSize: "Serving",
+  LocaleKey.viewDetails: "View details",
+  LocaleKey.errorLoadLevel: "Cannot load activity level",
+  LocaleKey.loadingData: "Loading data...",
+  LocaleKey.loadingExercises: "Loading exercises and meals...",
+  LocaleKey.aiCreatingPlan: "AI is creating your plan...",
+  LocaleKey.cannotCreatePlan: "Cannot create plan. Please try again.",
+  LocaleKey.cannotDeletePlan: "Cannot delete plan",
+  LocaleKey.planExpired: "Plan has expired. Please create a new plan.",
+
+  // Schedule
+  LocaleKey.scheduleAdded: "✅ Schedule added",
+  LocaleKey.scheduleAddFailed: "❌ Failed to add schedule",
+  LocaleKey.addSchedule: "Add Schedule",
+  LocaleKey.selectExercise: "Select Exercise",
+  LocaleKey.selectExerciseHint: "Select exercise",
+  LocaleKey.time: "Time",
+  LocaleKey.notifyWhenTime: "Notify when time comes",
+  LocaleKey.addScheduleButton: "Add Schedule",
+  LocaleKey.selectExerciseFirst: "Please select exercise",
+  LocaleKey.selectFutureTime: "Please select future time",
+  LocaleKey.markedComplete: "✅ Marked as complete",
+  LocaleKey.completed2: "Completed",
+  LocaleKey.deleteSchedule: "Delete schedule",
+
+  // Social
+  LocaleKey.editPost: "Edit Post",
+  LocaleKey.updating: "Updating...",
+  LocaleKey.editCaption: "Edit caption...",
+  LocaleKey.save: "Save",
+  LocaleKey.deletePost: "Delete Post",
+  LocaleKey.confirmDeletePost:
+      "Are you sure you want to delete this post? This action cannot be undone.",
+  LocaleKey.postDeleted: "Post deleted",
+  LocaleKey.deleteFailed: "Delete failed",
+  LocaleKey.edit: "Edit",
+  LocaleKey.like: "Like",
+  LocaleKey.justNow2: "Just now",
+  LocaleKey.errorLoadPosts: "Cannot load posts",
+
+  // Exercise Session
+  LocaleKey.finishEarly: "Finish Early?",
+  LocaleKey.youCompleted: "You completed",
+  LocaleKey.continueWorkout: "Continue",
+  LocaleKey.finish: "Finish",
+  LocaleKey.finishButton: "Finish",
+  LocaleKey.completeButton: "COMPLETE",
+  LocaleKey.congratulations: "🎉 Congratulations! 🎉",
+  LocaleKey.workoutType: "Workout Type",
+  LocaleKey.duration: "Duration",
+  LocaleKey.calories: "Calories",
+  LocaleKey.minting: "Minting NFT Badge...",
+  LocaleKey.shareWorkout: "Share",
+  LocaleKey.backToHome: "Back to Home",
+  LocaleKey.shareMessage: "I just completed my workout",
+
+  // Chatbot
+  LocaleKey.connectionError:
+      "Cannot connect to AI assistant. Please try again later.",
+  LocaleKey.sendError:
+      "An error occurred while sending message. Please try again.",
+  LocaleKey.responseError: "An error occurred while processing response.",
+  LocaleKey.sessionNotFound: "Session not found",
+  LocaleKey.cannotLoadSession: "Cannot load session",
+
+  // Multi-step Dialog
+  LocaleKey.completeAllSteps:
+      "Complete all steps to create the most suitable workout plan for you. Step",
+  LocaleKey.noInjuryFound: "No injury found",
+  LocaleKey.selectAllergies: "Select foods you are allergic to or cannot eat:",
+  LocaleKey.noFoodFound: "No food found",
+  LocaleKey.selectDiet: "Select suitable dietary preferences (if any):",
+  LocaleKey.hasEquipment: "Has full equipment",
+
+  // Meal Types
+  LocaleKey.breakfast: "Breakfast",
+  LocaleKey.lunch: "Lunch",
+  LocaleKey.dinner: "Dinner",
+  LocaleKey.snack: "Snack",
+
+  // Days of Week
+  LocaleKey.monday: "Monday",
+  LocaleKey.tuesday: "Tuesday",
+  LocaleKey.wednesday: "Wednesday",
+  LocaleKey.thursday: "Thursday",
+  LocaleKey.friday: "Friday",
+  LocaleKey.saturday: "Saturday",
+  LocaleKey.sunday: "Sunday",
+
+  // Common
+  LocaleKey.workoutPlan: "Workout Plan",
+  LocaleKey.error: "Error",
+  LocaleKey.continuing: "Continuing...",
+  LocaleKey.createPlan: "Create Plan",
+  LocaleKey.workoutWillBeSaved:
+      "The workout will be saved with current progress",
+  LocaleKey.nextExercise: "Next Exercise",
+  LocaleKey.addSet: "Add Set",
+  LocaleKey.repetitions: "Reps",
+
+  // Meal Planner
+  LocaleKey.confirmedByNutritionTeam: "Confirmed by nutrition team",
+  LocaleKey.nutritionValue: "Nutrition value",
+  LocaleKey.energy: "Energy",
+  LocaleKey.carbohydrate: "Carbohydrate",
+  LocaleKey.fat: "Fat",
+  LocaleKey.protein: "Protein",
+  LocaleKey.fiber: "Fiber",
+  LocaleKey.showMoreInfo: "Show more information",
+  LocaleKey.customServing: "Custom Serving",
+  LocaleKey.addTo: "Add to",
+  LocaleKey.remaining: "Remaining",
+  LocaleKey.target: "Target",
+  LocaleKey.totalCaloriesText: "Total Calories",
+  LocaleKey.food: "Food",
+
+  // Multi-step Dialog - Workout Plan
+  LocaleKey.activityLevel: "Activity Level",
+  LocaleKey.fitnessLevel: "Fitness Level",
+  LocaleKey.equipment: "Equipment",
+  LocaleKey.dietaryPreferences: "Dietary Preferences",
+  LocaleKey.allergies: "Allergies",
+  LocaleKey.injuries: "Injuries",
+  LocaleKey.clearAll: "Clear All",
+  LocaleKey.searchFoodAllergy: "Search food allergy",
+  LocaleKey.searchInjury: "Search injury",
+  LocaleKey.beginner: "Beginner",
+  LocaleKey.intermediate: "Intermediate",
+  LocaleKey.advanced: "Advanced",
+  LocaleKey.overTwoYearsExperience: "Over 2 years experience",
+  LocaleKey.vegan: "Vegan",
+  LocaleKey.vegetarian: "Vegetarian",
+  LocaleKey.halal: "Halal",
+  LocaleKey.lowCarb: "Low Carb",
+  LocaleKey.highProtein: "High Protein",
+  LocaleKey.minimalEquipment: "Minimal Equipment",
+  LocaleKey.hybrid: "Hybrid",
+  LocaleKey.selectInjuries: "Select injuries or health issues:",
+
+  // Workout Tracker
+  LocaleKey.noWorkoutsYet: "No workouts yet",
+  LocaleKey.drinkWaterReminder: "Remember to drink water!",
+
+  // Social
+  LocaleKey.notLoggedIn: "Not logged in",
+
+  // Home
+  LocaleKey.errorOccurred: "An error occurred",
+  LocaleKey.noActivityData: "No activity data",
+  LocaleKey.cannotLoadActivityLevels: "Cannot load activity levels",
+  LocaleKey.savedTarget: "Saved target",
+
+  // Pagination
+  LocaleKey.noMoreData: "No more data",
 };

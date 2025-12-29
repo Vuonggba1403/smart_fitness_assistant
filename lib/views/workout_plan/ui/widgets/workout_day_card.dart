@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/functions/color_extension.dart';
 import 'package:smart_fitness_assistant/core/models/workout_plan.dart';
 
 /// Widget hiển thị card cho mỗi ngày tập luyện

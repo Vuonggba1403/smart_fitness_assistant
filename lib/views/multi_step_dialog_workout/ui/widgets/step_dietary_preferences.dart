@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../logic/cubit/multi_step_dialog_cubit.dart';
 
@@ -6,12 +8,12 @@ import '../../logic/cubit/multi_step_dialog_cubit.dart';
 class StepDietaryPreferences extends StatelessWidget {
   const StepDietaryPreferences({super.key});
 
-  static const _preferences = [
+  static final _preferences = [
     {'value': 'vegetarian', 'label': 'Chay (Vegetarian)'},
     {'value': 'vegan', 'label': 'Thuần chay (Vegan)'},
     {'value': 'halal', 'label': 'Halal'},
     {'value': 'keto', 'label': 'Keto'},
-    {'value': 'low_carb', 'label': 'Ít tinh bột'},
+    {'value': 'low_carb', 'label': LocaleKey.starchless.tr},
     {'value': 'high_protein', 'label': 'Nhiều protein'},
   ];
 
@@ -24,7 +26,7 @@ class StepDietaryPreferences extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Chọn các chế độ ăn phù hợp (nếu có):'),
+            Text(LocaleKey.selectDietaryPreferences.tr),
             const SizedBox(height: 8),
             ..._preferences.map((pref) {
               return CheckboxListTile(
@@ -36,7 +38,7 @@ class StepDietaryPreferences extends StatelessWidget {
             TextButton.icon(
               onPressed: cubit.clearDietaryPreferences,
               icon: const Icon(Icons.clear_all, size: 18),
-              label: const Text('Xóa tất cả'),
+              label: Text(LocaleKey.clearAll.tr),
             ),
           ],
         );

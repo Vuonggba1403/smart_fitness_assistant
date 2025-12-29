@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_utils/src/extensions/internacionalization.dart';
-import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/functions/color_extension.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 
 /// ✅ Widget: Post Creation Card (phần đầu để user tạo post)
@@ -106,7 +106,6 @@ class SocialPostCreationCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              
             ],
           ),
         ],

@@ -3,8 +3,8 @@ import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
 import 'package:smart_fitness_assistant/views/schedule_management/ui/schedule_view.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
-import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
+import 'package:smart_fitness_assistant/core/functions/color_extension.dart';
+import 'package:smart_fitness_assistant/core/functions/navigate_to.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_container_check.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_sliverbar.dart';
 import 'package:smart_fitness_assistant/core/models/exercise_category.dart';
@@ -115,7 +115,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
       if (mounted) {
         AppSnackBar.error(
           context,
-          'Vui lòng chọn thời gian ít nhất sau ${_formatTime(minScheduledTime)}',
+          '${LocaleKey.selectTimeAfter.tr} ${_formatTime(minScheduledTime)}',
         );
       }
       return;
@@ -125,8 +125,8 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
 
     await _notificationService.scheduleWorkoutNotification(
       id: notificationId,
-      title: '⏰ Đã đến giờ tập luyện!',
-      body: '${workout.categoryName} - Bắt đầu ngay thôi! 💪',
+      title: LocaleKey.workoutTimeNotification.tr,
+      body: '${workout.categoryName} - ${LocaleKey.startNow.tr}',
       scheduledTime: scheduledTime,
     );
 
@@ -154,7 +154,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
 
       AppSnackBar.success(
         context,
-        'Đã đặt nhắc nhở lúc ${_formatTime(scheduledTime)}',
+        '${LocaleKey.setReminderAt.tr} ${_formatTime(scheduledTime)}',
       );
     }
   }
@@ -177,7 +177,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
         .eq('category_id', workout.categoryId);
 
     if (mounted) {
-      AppSnackBar.success(context, 'Đã hủy nhắc nhở');
+      AppSnackBar.success(context, LocaleKey.cancelledReminder.tr);
     }
   }
 
@@ -205,16 +205,19 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Xác nhận xóa'),
-          content: const Text('Bạn có chắc muốn xóa lịch tập này?'),
+          title: Text(LocaleKey.confirmDelete.tr),
+          content: Text(LocaleKey.confirmDeleteSchedule.tr),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Hủy'),
+              child: Text(LocaleKey.cancel.tr),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Xóa', style: TextStyle(color: Colors.red)),
+              child: Text(
+                LocaleKey.delete.tr,
+                style: const TextStyle(color: Colors.red),
+              ),
             ),
           ],
         ),
@@ -242,13 +245,13 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
       );
 
       if (mounted) {
-        AppSnackBar.success(context, 'Đã xóa lịch tập');
+        AppSnackBar.success(context, LocaleKey.deletedSchedule.tr);
       }
     } catch (e) {
       print('❌ Error deleting schedule: $e');
 
       if (mounted) {
-        AppSnackBar.error(context, 'Không thể xóa lịch tập');
+        AppSnackBar.error(context, LocaleKey.cannotDeleteSchedule.tr);
       }
     }
   }
@@ -425,7 +428,10 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
           print('❌ Stream error: ${snapshot.error}');
           return Container(
             padding: const EdgeInsets.all(20),
-            child: Text('Lỗi tải dữ liệu', style: TextStyle(color: textColor)),
+            child: Text(
+              LocaleKey.loadingError.tr,
+              style: TextStyle(color: textColor),
+            ),
           );
         }
 
@@ -455,7 +461,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  "Chưa có lịch tập nào! ✨",
+                  LocaleKey.noScheduleYet.tr,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: textColor,
@@ -465,7 +471,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  "Nhấn vào 'Daily Workout Schedule'\nđể thêm lịch tập mới",
+                  LocaleKey.tapToAddSchedule.tr,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: textColor?.withOpacity(0.6),
@@ -517,10 +523,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
             final categories = snapshot.data ?? [];
 
             if (categories.isEmpty) {
-              return _buildEmptyWidget(
-                "Không có bài tập tại phòng gym",
-                textColor,
-              );
+              return _buildEmptyWidget(LocaleKey.noGymWorkouts.tr, textColor);
             }
 
             return _buildCategoryList(categories, cubit);
@@ -545,7 +548,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
             final categories = snapshot.data ?? [];
 
             if (categories.isEmpty) {
-              return _buildEmptyWidget("Không có bài tập tại nhà", textColor);
+              return _buildEmptyWidget(LocaleKey.noHomeWorkouts.tr, textColor);
             }
 
             return _buildCategoryList(categories, cubit);

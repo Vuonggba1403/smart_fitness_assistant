@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
-import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
-import 'package:smart_fitness_assistant/core/widgets/custom_alertdialog.dart';
+import 'package:get/get_utils/src/extensions/internacionalization.dart';
+import 'package:smart_fitness_assistant/core/functions/custom_appbar.dart';
+import 'package:smart_fitness_assistant/core/functions/color_extension.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_showdialog.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/views/auth/cubit/authentication_cubit.dart';
 import 'package:smart_fitness_assistant/views/workout_plan/logic/cubit/workout_plan_cubit.dart';
 import 'package:smart_fitness_assistant/core/models/workout_plan.dart';
@@ -44,7 +45,7 @@ class _WorkoutPlanContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(title: "Kế Hoạch Tập Luyện"),
+      appBar: CustomAppBar(title: LocaleKey.workoutPlanTitle.tr),
       body: BlocBuilder<WorkoutPlanCubit, WorkoutPlanState>(
         builder: (context, state) {
           if (state is WorkoutPlanLoading) {
@@ -88,7 +89,7 @@ class _WorkoutPlanContent extends StatelessWidget {
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: () => _showGeneratePlanDialog(context),
-            child: const Text('Thử lại'),
+            child: Text(LocaleKey.retry.tr),
           ),
         ],
       ),
@@ -104,14 +105,14 @@ class _WorkoutPlanContent extends StatelessWidget {
           Icon(Icons.fitness_center, size: 80, color: Colors.grey.shade400),
           const SizedBox(height: 16),
           Text(
-            'Chưa có kế hoạch tập luyện',
+            LocaleKey.noWorkoutPlan.tr,
             style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: () => _showGeneratePlanDialog(context),
             icon: const Icon(Icons.auto_awesome),
-            label: const Text('Tạo kế hoạch với AI'),
+            label: Text(LocaleKey.createPlanWithAI.tr),
           ),
         ],
       ),
@@ -145,9 +146,12 @@ class _WorkoutPlanContent extends StatelessWidget {
             labelColor: TColor.primaryColor1,
             unselectedLabelColor: Colors.grey,
             indicatorColor: TColor.primaryColor1,
-            tabs: const [
-              Tab(icon: Icon(Icons.fitness_center), text: 'Lịch Tập'),
-              Tab(icon: Icon(Icons.restaurant), text: 'Ăn Uống'),
+            tabs: [
+              Tab(
+                icon: Icon(Icons.fitness_center),
+                text: LocaleKey.workoutSchedule.tr,
+              ),
+              Tab(icon: Icon(Icons.restaurant), text: LocaleKey.eating.tr),
             ],
           ),
           Padding(
@@ -156,7 +160,7 @@ class _WorkoutPlanContent extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Kế hoạch 7 ngày',
+                  LocaleKey.sevenDayPlan.tr,
                   style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                 ),
                 TextButton.icon(
@@ -172,7 +176,7 @@ class _WorkoutPlanContent extends StatelessWidget {
                     );
                   },
                   icon: const Icon(Icons.delete_outline, size: 18),
-                  label: const Text('Xóa kế hoạch'),
+                  label: Text(LocaleKey.deletePlan.tr),
                   style: TextButton.styleFrom(
                     foregroundColor: Colors.red.shade600,
                   ),
@@ -228,7 +232,7 @@ class _WorkoutPlanContent extends StatelessWidget {
     if (user == null) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Vui lòng đăng nhập')));
+      ).showSnackBar(SnackBar(content: Text(LocaleKey.pleaseLogin.tr)));
       return;
     }
 
@@ -244,13 +248,13 @@ class _WorkoutPlanContent extends StatelessWidget {
         child: BlocBuilder<WorkoutPlanCubit, WorkoutPlanState>(
           builder: (context, state) {
             if (state is ActivityLevelsLoading) {
-              return const AlertDialog(
+              return AlertDialog(
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     CircularProgressIndicator(),
                     SizedBox(height: 16),
-                    Text('Đang tải...'),
+                    Text(LocaleKey.loading.tr),
                   ],
                 ),
               );
@@ -271,12 +275,12 @@ class _WorkoutPlanContent extends StatelessWidget {
             }
 
             return AlertDialog(
-              title: const Text('Lỗi'),
-              content: const Text('Không thể tải dữ liệu'),
+              title: Text(LocaleKey.error.tr),
+              content: Text(LocaleKey.cannotLoadData.tr),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(dialogContext),
-                  child: const Text('Đóng'),
+                  child: Text(LocaleKey.close.tr),
                 ),
               ],
             );

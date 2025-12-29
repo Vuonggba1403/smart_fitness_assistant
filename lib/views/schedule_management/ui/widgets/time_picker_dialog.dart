@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/functions/color_extension.dart';
 
 class WorkoutTimePicker {
   /// Hiển thị dialog chọn giờ cho workout

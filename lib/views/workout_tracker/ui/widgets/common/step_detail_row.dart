@@ -1,6 +1,6 @@
 import 'package:dotted_dashed_line/dotted_dashed_line.dart';
 import 'package:flutter/material.dart';
-import '../../../../../core/functions/colo_extension.dart';
+import '../../../../../core/functions/color_extension.dart';
 
 /// Widget hiển thị từng bước hướng dẫn với timeline indicator
 class StepDetailRow extends StatelessWidget {

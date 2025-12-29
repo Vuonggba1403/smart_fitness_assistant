@@ -1,7 +1,7 @@
 import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/functions/color_extension.dart';
 import 'package:smart_fitness_assistant/views/chatbot/ui/widgets/chatbot_markdown_style.dart';
 import 'package:smart_fitness_assistant/views/chatbot/ui/widgets/typing_indicator.dart'
     hide TypingIndicator;

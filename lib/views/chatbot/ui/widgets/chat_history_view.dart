@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:intl/intl.dart';
 import 'package:smart_fitness_assistant/core/functions/app_shared.dart';
-import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
-import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/functions/custom_appbar.dart';
+import 'package:smart_fitness_assistant/core/functions/color_extension.dart';
 import 'package:smart_fitness_assistant/views/chatbot/logic/cubit/chatbot_cubit.dart';
 import 'package:smart_fitness_assistant/core/models/chat_history_model.dart';
 
@@ -213,12 +215,12 @@ class ChatHistoryView extends StatelessWidget {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete Chat'),
-        content: Text('Are you sure you want to delete "${session.title}"?'),
+        title: Text(LocaleKey.deleteChat.tr),
+        content: Text('${LocaleKey.deleteChatConfirm.tr} "${session.title}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Cancel'),
+            child: Text(LocaleKey.cancel.tr),
           ),
           TextButton(
             onPressed: () async {
@@ -234,7 +236,10 @@ class ChatHistoryView extends StatelessWidget {
                 Navigator.of(dialogContext).pop();
               }
             },
-            child: Text('Delete', style: TextStyle(color: Colors.red.shade600)),
+            child: Text(
+              LocaleKey.delete.tr,
+              style: TextStyle(color: Colors.red.shade600),
+            ),
           ),
         ],
       ),

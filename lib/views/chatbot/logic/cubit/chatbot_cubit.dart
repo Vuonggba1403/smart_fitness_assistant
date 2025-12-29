@@ -3,9 +3,11 @@ import 'dart:developer';
 import 'package:bloc/bloc.dart';
 import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:flutter_gemini/flutter_gemini.dart';
+import 'package:get/get.dart';
 import 'package:meta/meta.dart';
 import 'package:smart_fitness_assistant/core/functions/app_shared.dart';
 import 'package:smart_fitness_assistant/core/models/chat_history_model.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:uuid/uuid.dart';
 
 part 'chatbot_state.dart';
@@ -153,12 +155,7 @@ class ChatbotCubit extends Cubit<ChatbotState> {
       await _getGeminiResponse(message.text);
     } catch (e) {
       log('❌ Error sending message: $e');
-      emit(
-        ChatbotError(
-          "Đã xảy ra lỗi khi gửi tin nhắn. Vui lòng thử lại.",
-          _messages,
-        ),
-      );
+      emit(ChatbotError(LocaleKey.sendError.tr, _messages));
     }
   }
 
@@ -253,12 +250,7 @@ Remember:
               _currentStreamSubscription?.cancel();
               _currentStreamSubscription = null;
 
-              emit(
-                ChatbotError(
-                  "Không thể kết nối với trợ lý AI. Vui lòng thử lại sau.",
-                  _messages,
-                ),
-              );
+              emit(ChatbotError(LocaleKey.connectionError.tr, _messages));
             },
             onDone: () async {
               log('✅ Gemini stream completed');
@@ -275,7 +267,7 @@ Remember:
       _currentStreamSubscription?.cancel();
       _currentStreamSubscription = null;
 
-      emit(ChatbotError("Đã xảy ra lỗi khi xử lý phản hồi.", _messages));
+      emit(ChatbotError(LocaleKey.responseError.tr, _messages));
     }
   }
 
@@ -394,7 +386,7 @@ Remember:
       final session = await AppShared.getChatSessionById(userId, sessionId);
 
       if (session == null) {
-        emit(ChatbotError("Không tìm thấy phiên chat này", _messages));
+        emit(ChatbotError(LocaleKey.sessionNotFound.tr, _messages));
         return;
       }
 
@@ -416,7 +408,7 @@ Remember:
       log('✅ Loaded chat session: $sessionId (${_messages.length} messages)');
     } catch (e) {
       log('❌ Error loading chat session: $e');
-      emit(ChatbotError("Không thể tải phiên chat", _messages));
+      emit(ChatbotError(LocaleKey.cannotLoadSession.tr, _messages));
     }
   }
 

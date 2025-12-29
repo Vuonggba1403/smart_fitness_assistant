@@ -31,15 +31,22 @@ class WorkoutPlanRepository {
     }
   }
 
-  /// Fetch exercises từ Supabase
-  Future<List<ExerciseItem>> fetchExercises() async {
+  /// Fetch exercises từ Supabase (with optional limit for performance)
+  Future<List<ExerciseItem>> fetchExercises({int? limit}) async {
     try {
-      final response = await _supabase.from('exercise_items').select('''
+      dynamic query = _supabase.from('exercise_items').select('''
             *,
             devices:exercise_devices(
               device:devices(*)
             )
           ''');
+
+      // Add limit if specified (for better performance)
+      if (limit != null) {
+        query = query.limit(limit);
+      }
+
+      final response = await query;
 
       return (response as List).map((json) {
         if (json['devices'] != null) {
@@ -55,13 +62,17 @@ class WorkoutPlanRepository {
     }
   }
 
-  /// Fetch meals từ Supabase
-  Future<List<Meal>> fetchMeals() async {
+  /// Fetch meals từ Supabase (with optional limit for performance)
+  Future<List<Meal>> fetchMeals({int? limit}) async {
     try {
-      final response = await _supabase
-          .from('meals')
-          .select()
-          .eq('is_verified', true);
+      dynamic query = _supabase.from('meals').select().eq('is_verified', true);
+
+      // Add limit if specified (for better performance)
+      if (limit != null) {
+        query = query.limit(limit);
+      }
+
+      final response = await query;
 
       return (response as List).map((json) => Meal.fromJson(json)).toList();
     } catch (e) {

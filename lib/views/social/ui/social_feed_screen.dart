@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get_utils/src/extensions/internacionalization.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
-import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/functions/custom_appbar.dart';
+import 'package:smart_fitness_assistant/core/functions/color_extension.dart';
 import 'package:smart_fitness_assistant/core/models/exercise_category.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/views/social/logic/cubit/social_feed_cubit.dart';
@@ -22,6 +22,7 @@ class SocialFeedScreen extends StatefulWidget {
 
 class _SocialFeedScreenState extends State<SocialFeedScreen> {
   final TextEditingController _captionController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   final _supabase = Supabase.instance.client;
   List<ExerciseCategory>? _categories;
 
@@ -30,6 +31,21 @@ class _SocialFeedScreenState extends State<SocialFeedScreen> {
     super.initState();
     _loadCategories();
     context.read<SocialFeedCubit>().loadFeed();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _captionController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      context.read<SocialFeedCubit>().loadMorePosts();
+    }
   }
 
   Future<void> _loadCategories() async {
@@ -144,6 +160,8 @@ class _SocialFeedScreenState extends State<SocialFeedScreen> {
             final posts = state.posts;
 
             return ListView(
+              controller: _scrollController,
+              padding: const EdgeInsets.all(12),
               children: [
                 SocialPostCreationCard(
                   textColor: textColor,
@@ -160,7 +178,7 @@ class _SocialFeedScreenState extends State<SocialFeedScreen> {
                       ),
                     ),
                   )
-                else
+                else ...[
                   ...posts.map(
                     (post) => SocialPostCard(
                       post: post,
@@ -175,6 +193,26 @@ class _SocialFeedScreenState extends State<SocialFeedScreen> {
                       },
                     ),
                   ),
+                  if (state.isLoadingMore)
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: TColor.primaryColor1,
+                        ),
+                      ),
+                    )
+                  else if (!state.hasMore && posts.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Center(
+                        child: Text(
+                          LocaleKey.noMoreData.tr,
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ),
+                    ),
+                ],
               ],
             );
           }

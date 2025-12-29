@@ -1,6 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:intl/locale.dart';
-
 import 'locale_key.dart';
 
 Map<String, String> viVN = {
@@ -185,15 +182,213 @@ Map<String, String> viVN = {
   LocaleKey.noComments: "Chưa có bình luận nào",
   LocaleKey.writeComments: "Viết bình luận...",
   LocaleKey.loading: "Đang tải...",
-  // // ✅ THÊM: Keys cho workout completion
-  // LocaleKey.finishEarly: "Kết thúc sớm?",
-  // LocaleKey.continueWorkout: "Tiếp tục",
-  // LocaleKey.finishWorkout: "Kết thúc",
-  // LocaleKey.workoutWillBeSaved: "Bài tập sẽ được lưu lại với tiến độ hiện tại",
-  // LocaleKey.congratulations: "Chúc mừng!",
-  // LocaleKey.workoutCompleted: "BÀI TẬP\nHOÀN THÀNH!",
-  // LocaleKey.duration: "Thời lượng",
-  // LocaleKey.date: "Ngày",
-  // LocaleKey.completed: "Hoàn thành",
-  // LocaleKey.goodJob: "Tuyệt vời! Bạn đã hoàn thành bài tập của mình.",
+
+  // Meal Planner
+  LocaleKey.searchFood: "Tìm kiếm thực phẩm",
+  LocaleKey.searchFoodHint: "Tìm kiếm thực phẩm...",
+  LocaleKey.recent: "Gần đây",
+  LocaleKey.createdByMe: "Tạo bởi tôi",
+  LocaleKey.noRecipes: "Chưa có công thức",
+  LocaleKey.noResults: "Không tìm thấy kết quả",
+  LocaleKey.noInfo: "Chưa có thông tin",
+  LocaleKey.noRecentRecords:
+      "Hệ thống chưa ghi nhận thông tin bạn\nđã nhập gần đây",
+  LocaleKey.addedToMeal: "được thêm vào bữa ăn",
+  LocaleKey.exercises2: "Bài tập",
+  LocaleKey.isThisCorrect: "Thông tin này có đúng không?",
+
+  // Workout Tracker
+  LocaleKey.noGymWorkouts: "Không có bài tập tại phòng gym",
+  LocaleKey.noHomeWorkouts: "Không có bài tập tại nhà",
+  LocaleKey.selectTimeAfter: "Vui lòng chọn thời gian ít nhất sau",
+  LocaleKey.reminderSet: "Đã đặt nhắc nhở lúc",
+  LocaleKey.reminderCanceled: "Đã hủy nhắc nhở",
+  LocaleKey.confirmDelete2: "Xác nhận xóa",
+  LocaleKey.confirmDeleteSchedule: "Bạn có chắc muốn xóa lịch tập này?",
+  LocaleKey.cancel: "Hủy",
+  LocaleKey.delete: "Xóa",
+  LocaleKey.scheduleDeleted: "Đã xóa lịch tập",
+  LocaleKey.cannotDelete: "Không thể xóa lịch tập",
+  LocaleKey.noSchedules: "Chưa có lịch tập nào! ✨",
+  LocaleKey.tapToAdd: "Nhấn vào 'Daily Workout Schedule'\nđể thêm lịch tập mới",
+  LocaleKey.today: "Hôm nay",
+  LocaleKey.tomorrow: "Ngày mai",
+  LocaleKey.imageNotFound: "Không tìm thấy ảnh",
+  LocaleKey.loadError: "Lỗi tải dữ liệu",
+
+  // Workout Plan
+  LocaleKey.noPlan: "Chưa có kế hoạch tập luyện",
+  LocaleKey.sevenDayPlan: "Kế hoạch 7 ngày",
+  LocaleKey.confirmDeletePlan: "Xoá Kế Hoạch Tập Luyện",
+  LocaleKey.confirmDeletePlanMessage:
+      "Bạn có chắc chắn muốn xoá kế hoạch tập luyện này không? Hành động này không thể hoàn tác.",
+  LocaleKey.deletePlan: "Xóa kế hoạch",
+  LocaleKey.cannotLoadData: "Không thể tải dữ liệu",
+  LocaleKey.close: "Đóng",
+  LocaleKey.retry: "Thử lại",
+  LocaleKey.createPlanWithAI: "Tạo kế hoạch với AI",
+  LocaleKey.workoutSchedule: "Lịch Tập",
+  LocaleKey.meals: "Ăn Uống",
+  LocaleKey.pleaseLogin: "Vui lòng đăng nhập",
+  LocaleKey.dayNumber: "Ngày",
+  LocaleKey.servingSize: "Khẩu phần",
+  LocaleKey.viewDetails: "Xem chi tiết",
+  LocaleKey.errorLoadLevel: "Không thể tải mức độ hoạt động",
+  LocaleKey.loadingData: "Đang tải dữ liệu...",
+  LocaleKey.loadingExercises: "Đang tải bài tập và món ăn...",
+  LocaleKey.aiCreatingPlan: "AI đang tạo kế hoạch cho bạn...",
+  LocaleKey.cannotCreatePlan: "Không thể tạo kế hoạch. Vui lòng thử lại.",
+  LocaleKey.cannotDeletePlan: "Không thể xóa kế hoạch",
+  LocaleKey.planExpired: "Kế hoạch đã hết hạn. Vui lòng tạo kế hoạch mới.",
+
+  // Schedule
+  LocaleKey.scheduleAdded: "✅ Đã thêm lịch tập",
+  LocaleKey.scheduleAddFailed: "❌ Thêm lịch tập thất bại",
+  LocaleKey.addSchedule: "Thêm lịch tập",
+  LocaleKey.selectExercise: "Chọn bài tập",
+  LocaleKey.selectExerciseHint: "Chọn bài tập",
+  LocaleKey.time: "Thời gian",
+  LocaleKey.notifyWhenTime: "Nhắc nhở khi đến giờ",
+  LocaleKey.addScheduleButton: "Thêm lịch",
+  LocaleKey.selectExerciseFirst: "Vui lòng chọn bài tập",
+  LocaleKey.selectFutureTime: "Vui lòng chọn thời gian trong tương lai",
+  LocaleKey.markedComplete: "✅ Đã đánh dấu hoàn thành",
+  LocaleKey.completed2: "Hoàn thành",
+  LocaleKey.deleteSchedule: "Xóa lịch",
+
+  // Social
+  LocaleKey.editPost: "Chỉnh sửa bài đăng",
+  LocaleKey.updating: "Đang cập nhật...",
+  LocaleKey.editCaption: "Chỉnh sửa caption...",
+  LocaleKey.save: "Lưu",
+  LocaleKey.deletePost: "Xoá bài đăng",
+  LocaleKey.confirmDeletePost:
+      "Bạn có chắc muốn xoá bài đăng này? Hành động này không thể hoàn tác.",
+  LocaleKey.postDeleted: "Đã xoá bài đăng",
+  LocaleKey.deleteFailed: "Xoá bài đăng thất bại",
+  LocaleKey.edit: "Chỉnh sửa",
+  LocaleKey.like: "Thích",
+  LocaleKey.justNow2: "Vừa xong",
+  LocaleKey.errorLoadPosts: "Không thể tải bài viết",
+
+  // Exercise Session
+  LocaleKey.finishEarly: "Kết thúc sớm?",
+  LocaleKey.youCompleted: "Bạn đã hoàn thành",
+  LocaleKey.continueWorkout: "Tiếp tục",
+  LocaleKey.finish: "Kết thúc",
+  LocaleKey.finishButton: "Kết thúc",
+  LocaleKey.completeButton: "HOÀN THÀNH",
+  LocaleKey.congratulations: "🎉 Congratulations! 🎉",
+  LocaleKey.workoutType: "Workout Type",
+  LocaleKey.duration: "Duration",
+  LocaleKey.calories: "Calories",
+  LocaleKey.minting: "Đang tạo NFT Badge...",
+  LocaleKey.shareWorkout: "Chia sẻ",
+  LocaleKey.backToHome: "Về Trang Chủ",
+  LocaleKey.shareMessage: "Tôi vừa hoàn thành buổi tập",
+
+  // Chatbot
+  LocaleKey.connectionError:
+      "Không thể kết nối với trợ lý AI. Vui lòng thử lại sau.",
+  LocaleKey.sendError: "Đã xảy ra lỗi khi gửi tin nhắn. Vui lòng thử lại.",
+  LocaleKey.responseError: "Đã xảy ra lỗi khi xử lý phản hồi.",
+  LocaleKey.sessionNotFound: "Không tìm thấy phiên chat này",
+  LocaleKey.cannotLoadSession: "Không thể tải phiên chat",
+
+  // Multi-step Dialog
+  LocaleKey.completeAllSteps:
+      "Hãy hoàn thành tất cả các bước để tạo kế hoạch tập luyện phù hợp nhất với bạn. Bước",
+  LocaleKey.noInjuryFound: "Không tìm thấy chấn thương",
+  LocaleKey.selectAllergies: "Chọn các món ăn bạn dị ứng hoặc không ăn được:",
+  LocaleKey.noFoodFound: "Không tìm thấy món ăn",
+  LocaleKey.selectDiet: "Chọn các chế độ ăn phù hợp (nếu có):",
+  LocaleKey.hasEquipment: "Có đầy đủ thiết bị",
+
+  // Meal Types
+  LocaleKey.breakfast: "Bữa sáng",
+  LocaleKey.lunch: "Bữa trưa",
+  LocaleKey.dinner: "Bữa tối",
+  LocaleKey.snack: "Bữa phụ",
+
+  // Days of Week
+  LocaleKey.monday: "Thứ Hai",
+  LocaleKey.tuesday: "Thứ Ba",
+  LocaleKey.wednesday: "Thứ Tư",
+  LocaleKey.thursday: "Thứ Năm",
+  LocaleKey.friday: "Thứ Sáu",
+  LocaleKey.saturday: "Thứ Bảy",
+  LocaleKey.sunday: "Chủ Nhật",
+
+  // Common
+  LocaleKey.workoutPlan: "Kế Hoạch Tập Luyện",
+
+  // Additional keys for complete localization
+  LocaleKey.error: "Lỗi",
+  LocaleKey.continuing: "Tiếp tục",
+  LocaleKey.createPlan: "Tạo kế hoạch",
+  LocaleKey.errorMessage: "Lỗi",
+  LocaleKey.workoutWillBeSaved:
+      "Bài tập sẽ được lưu vào lịch sử với tiến độ hiện tại",
+  LocaleKey.nextExercise: "BÀI TẬP TIẾP THEO",
+  LocaleKey.addSet: "Thêm set",
+  LocaleKey.repetitions: "Số lần",
+
+  // Meal Planner Additional
+  LocaleKey.confirmedByNutritionTeam:
+      "Được xác nhận bởi đội ngũ dinh dưỡng Wao",
+  LocaleKey.nutritionValue: "Giá trị dinh dưỡng",
+  LocaleKey.energy: "Năng lượng",
+  LocaleKey.carbohydrate: "Đường bột (carb)",
+  LocaleKey.fat: "Chất béo (fat)",
+  LocaleKey.protein: "Chất đạm (protein)",
+  LocaleKey.fiber: "Chất xơ",
+  LocaleKey.showMoreInfo: "Hiển thị thêm thông tin",
+  LocaleKey.customServing: "Khẩu phần tùy chỉnh",
+  LocaleKey.addTo: "Thêm vào",
+  LocaleKey.remaining: "Còn lại",
+  LocaleKey.target: "Mục tiêu",
+  LocaleKey.totalCaloriesText: "Tổng cộng",
+  LocaleKey.food: "Món ăn",
+
+  // Multi-step Dialog Additional
+  LocaleKey.activityLevel: "Mức độ hoạt động",
+  LocaleKey.fitnessLevel: "Trình độ thể lực",
+  LocaleKey.equipment: "Thiết bị",
+  LocaleKey.dietaryPreferences: "Chế độ ăn",
+  LocaleKey.allergies: "Dị ứng",
+  LocaleKey.injuries: "Chấn thương",
+  LocaleKey.clearAll: "Xóa tất cả",
+  LocaleKey.searchFoodAllergy: "Tìm món ăn...",
+  LocaleKey.searchInjury: "Tìm chấn thương...",
+  LocaleKey.beginner: "Mới bắt đầu",
+  LocaleKey.intermediate: "Trung bình",
+  LocaleKey.advanced: "Nâng cao",
+  LocaleKey.overTwoYearsExperience: "Hơn 2 năm kinh nghiệm",
+  LocaleKey.vegan: "Thuần chay (Vegan)",
+  LocaleKey.vegetarian: "Ăn chay",
+  LocaleKey.halal: "Halal",
+  LocaleKey.lowCarb: "Ít tinh bột",
+  LocaleKey.highProtein: "Nhiều protein",
+  LocaleKey.minimalEquipment: "Thiết bị tối thiểu",
+  LocaleKey.hybrid: "Kết hợp",
+  LocaleKey.selectInjuries: "Chọn các vấn đề chấn thương bạn đang gặp phải:",
+
+  // Home Additional
+  LocaleKey.noWorkoutsYet: "Chưa có bài tập nào 📋",
+
+  // Water Tracker Additional
+  LocaleKey.drinkWaterReminder: "Hãy uống nước để giữ sức khỏe nhé! 🥤",
+
+  // Auth Additional
+  LocaleKey.notLoggedIn: "Bạn chưa đăng nhập",
+  LocaleKey.errorOccurred: "Đã xảy ra lỗi",
+
+  // Activity Level Additional
+  LocaleKey.noActivityData: "Không có dữ liệu mức độ hoạt động",
+  LocaleKey.cannotLoadActivityLevels:
+      "Không thể tải danh sách mức độ hoạt động. Vui lòng thử lại.",
+  LocaleKey.savedTarget: "Đã lưu: Mục tiêu",
+
+  // Pagination
+  LocaleKey.noMoreData: "Đã hết dữ liệu",
 };

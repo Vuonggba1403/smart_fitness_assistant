@@ -4,7 +4,6 @@ import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:smart_fitness_assistant/core/functions/app_shared.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
 part 'home_state.dart';
 
 class HomeCubit extends Cubit<HomeState> {

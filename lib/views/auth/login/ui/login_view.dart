@@ -2,8 +2,8 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
-import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
+import 'package:smart_fitness_assistant/core/functions/color_extension.dart';
+import 'package:smart_fitness_assistant/core/functions/navigate_to.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_textfield.dart';
@@ -117,12 +117,12 @@ class _LoginViewState extends State<LoginView> {
                               controller: _emailController,
                               iconPath: "assets/img/email.png",
                               keyboardType: TextInputType.emailAddress,
-                              hintText: 'Email',
+                              hintText: LocaleKey.email.tr,
                             ),
                             SizedBox(height: media.width * 0.04),
                             RoundTextField(
                               controller: _passwordController,
-                              hintText: "Password",
+                              hintText: LocaleKey.password.tr,
                               iconPath: "assets/img/lock.png",
                               isPassword: true,
                             ),

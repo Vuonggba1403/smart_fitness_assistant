@@ -1,9 +1,11 @@
 import 'dart:async'; // ✅ THÊM import
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:simple_animation_progress_bar/simple_animation_progress_bar.dart';
 import 'package:simple_circular_progress_bar/simple_circular_progress_bar.dart';
-import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/functions/color_extension.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:smart_fitness_assistant/core/models/water_intake.dart';
 
@@ -452,7 +454,7 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _title(theme, "Bài tập"),
+          _title(theme, LocaleKey.exercises.tr),
           _gradientText(
             "$_completedExercises/${_totalExercises > 0 ? _totalExercises : '0'}",
             TColor.primaryG,

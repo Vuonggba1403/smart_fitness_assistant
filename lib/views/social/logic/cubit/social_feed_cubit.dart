@@ -9,10 +9,11 @@ part 'social_feed_state.dart';
 
 class SocialFeedCubit extends Cubit<SocialFeedState> {
   final _supabase = Supabase.instance.client;
+  static const int _pageSize = 15;
 
   SocialFeedCubit() : super(SocialFeedLoading());
 
-  /// LOAD FEED
+  /// LOAD FEED (initial load)
   Future<void> loadFeed() async {
     emit(SocialFeedLoading());
     try {
@@ -25,7 +26,8 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
             user(*),
             exercise_categories!content_posts_tagged_category_id_fkey(*)
           ''')
-          .order('created_at', ascending: false);
+          .order('created_at', ascending: false)
+          .limit(_pageSize);
 
       // 🔥 Check if current user has liked each post
       List<ContentPost> posts = response.map((e) {
@@ -59,10 +61,80 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
         }).toList();
       }
 
-      emit(SocialFeedLoaded(posts: posts));
+      emit(SocialFeedLoaded(posts: posts, hasMore: posts.length >= _pageSize));
     } catch (e) {
       print('❌ Error loading feed: $e');
       emit(SocialFeedError('Không thể tải bài viết'));
+    }
+  }
+
+  /// LOAD MORE POSTS (pagination)
+  Future<void> loadMorePosts() async {
+    if (state is! SocialFeedLoaded) return;
+
+    final currentState = state as SocialFeedLoaded;
+    if (!currentState.hasMore || currentState.isLoadingMore) return;
+
+    // Set loading more flag
+    emit(currentState.copyWith(isLoadingMore: true));
+
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      final currentPosts = currentState.posts;
+
+      final response = await _supabase
+          .from('content_posts')
+          .select('''
+            *,
+            user(*),
+            exercise_categories!content_posts_tagged_category_id_fkey(*)
+          ''')
+          .order('created_at', ascending: false)
+          .range(currentPosts.length, currentPosts.length + _pageSize - 1);
+
+      List<ContentPost> newPosts = response.map((e) {
+        final post = ContentPost.fromJson(e);
+        return post;
+      }).toList();
+
+      // Check likes for new posts
+      if (userId != null && newPosts.isNotEmpty) {
+        final likedPostIds = await _getLikedPostIds(userId);
+        newPosts = newPosts.map((post) {
+          if (post.id != null && likedPostIds.contains(post.id)) {
+            return ContentPost(
+              id: post.id,
+              forUser: post.forUser,
+              caption: post.caption,
+              taggedCategoryId: post.taggedCategoryId,
+              taggedCategoryName: post.taggedCategoryName,
+              likesCount: post.likesCount,
+              commentsCount: post.commentsCount,
+              createdAt: post.createdAt,
+              updatedAt: post.updatedAt,
+              imageUrl: post.imageUrl,
+              authorName: post.authorName,
+              categoryImageUrl: post.categoryImageUrl,
+              isLikedByMe: true,
+            );
+          }
+          return post;
+        }).toList();
+      }
+
+      // Combine old and new posts
+      final allPosts = [...currentPosts, ...newPosts];
+
+      emit(
+        currentState.copyWith(
+          posts: allPosts,
+          hasMore: newPosts.length >= _pageSize,
+          isLoadingMore: false,
+        ),
+      );
+    } catch (e) {
+      print('❌ Error loading more posts: $e');
+      emit(currentState.copyWith(isLoadingMore: false));
     }
   }
 
@@ -108,6 +180,8 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
           posts: currentState.posts,
           selectedImage: null,
           selectedCategory: currentState.selectedCategory,
+          hasMore: currentState.hasMore,
+          isLoadingMore: currentState.isLoadingMore,
         ),
       );
     }

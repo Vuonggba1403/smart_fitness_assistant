@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
-import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
-import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
+import 'package:smart_fitness_assistant/core/functions/custom_appbar.dart';
+import 'package:smart_fitness_assistant/core/functions/navigate_to.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
@@ -73,7 +73,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                             controller: _emailController,
                             iconPath: "assets/img/email.png",
                             keyboardType: TextInputType.emailAddress,
-                            hintText: 'Email',
+                            hintText: LocaleKey.email.tr,
                           ),
                           SizedBox(height: size.height * 0.03),
                           RoundButton(

@@ -4,11 +4,11 @@ import 'package:get/get_utils/src/extensions/internacionalization.dart';
 import 'package:calendar_agenda/calendar_agenda.dart';
 import 'dart:developer' as developer;
 
-import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
-import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
+import 'package:smart_fitness_assistant/core/functions/custom_appbar.dart';
+import 'package:smart_fitness_assistant/core/functions/navigate_to.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/views/meal_planner/logic/cubit/meal_planner_cubit.dart';
-import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/functions/color_extension.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_calendar_agenda.dart';
 import 'package:smart_fitness_assistant/views/activity_level/ui/activity_level_dialog.dart';
 import 'package:smart_fitness_assistant/views/meal_planner/ui/widgets/search_meal.dart';
@@ -182,7 +182,7 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                                     width: 25,
                                     height: 25,
                                   ),
-                                  hintText: "Tìm thực phẩm hoặc món ăn",
+                                  hintText: LocaleKey.searchFoodOrDish.tr,
                                 ),
                               ),
                             ),
@@ -211,19 +211,19 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                   /// 🍽️ MEALS (HIỂN THỊ MEALS ĐÃ ADD)
                   _buildMealSection(
                     context: context,
-                    title: 'Bữa sáng',
+                    title: LocaleKey.breakfast.tr,
                     meals: mealsByType['breakfast'] ?? [],
                     mealType: 'breakfast',
                   ),
                   _buildMealSection(
                     context: context,
-                    title: 'Bữa trưa',
+                    title: LocaleKey.lunch.tr,
                     meals: mealsByType['lunch'] ?? [],
                     mealType: 'lunch',
                   ),
                   _buildMealSection(
                     context: context,
-                    title: 'Bữa tối',
+                    title: LocaleKey.dinner.tr,
                     meals: mealsByType['dinner'] ?? [],
                     mealType: 'dinner',
                   ),
@@ -274,9 +274,13 @@ class _MealPlannerViewState extends State<MealPlannerView> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _calorieItem('🍽️', 'Calo nhập', '$currentCalories'),
-          _calorieItem('📊', 'Còn lại', remainingText),
-          _calorieItem('🎯', 'Mục tiêu', targetText),
+          _calorieItem(
+            '🍽️',
+            LocaleKey.totalCaloriesText.tr,
+            '$currentCalories',
+          ),
+          _calorieItem('📊', LocaleKey.remaining.tr, remainingText),
+          _calorieItem('🎯', LocaleKey.target.tr, targetText),
         ],
       ),
     );
@@ -444,7 +448,7 @@ class _MealPlannerViewState extends State<MealPlannerView> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Tổng cộng: $totalCalories kcal',
+                  '${LocaleKey.totalCalories.tr}: $totalCalories kcal',
                   style: theme.textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -455,7 +459,7 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                       navigateTo(context, const SearchMeal());
                     },
                     child: Text(
-                      '+ Thêm',
+                      '+ ${LocaleKey.add.tr}',
                       style: TextStyle(
                         color: theme.primaryColor,
                         fontWeight: FontWeight.w600,

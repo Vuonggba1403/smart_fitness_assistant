@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/functions/color_extension.dart';
 import 'package:smart_fitness_assistant/core/models/exercise_category.dart';
 import 'dart:io';
 
@@ -149,7 +149,7 @@ class SocialCreatePostDialog extends StatelessWidget {
                           ? Padding(
                               padding: const EdgeInsets.all(12),
                               child: Text(
-                               LocaleKey.loading.tr,
+                                LocaleKey.loading.tr,
                                 style: TextStyle(color: TColor.gray),
                               ),
                             )

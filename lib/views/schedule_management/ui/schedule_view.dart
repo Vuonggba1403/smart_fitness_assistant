@@ -4,9 +4,9 @@ import 'package:get/get_utils/src/extensions/internacionalization.dart';
 import 'package:intl/intl.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
-import 'package:smart_fitness_assistant/core/functions/appbar_cus.dart';
-import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
-import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
+import 'package:smart_fitness_assistant/core/functions/custom_appbar.dart';
+import 'package:smart_fitness_assistant/core/functions/color_extension.dart';
+import 'package:smart_fitness_assistant/core/functions/navigate_to.dart';
 import 'package:smart_fitness_assistant/core/models/scheduled_workout.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_calendar_agenda.dart';
 import 'package:calendar_agenda/calendar_agenda.dart';
@@ -69,7 +69,7 @@ class _ScheduleViewState extends State<ScheduleView> {
     );
 
     if (success && mounted) {
-      AppSnackBar.success(context, 'Đã xóa lịch tập');
+      AppSnackBar.success(context, LocaleKey.deletedWorkout.tr);
 
       // ✅ FIX: Reload data ngay sau khi xóa
       _loadSchedulesForSelectedDate();
@@ -320,7 +320,10 @@ class _ScheduleViewState extends State<ScheduleView> {
                   Navigator.pop(context);
                   _deleteSchedule(schedule.id!);
                 },
-                child: Text('Xóa lịch', style: TextStyle(color: Colors.red)),
+                child: Text(
+                  LocaleKey.deleteScheduleButton.tr,
+                  style: TextStyle(color: Colors.red),
+                ),
               ),
             ],
           ),

@@ -1,5 +1,7 @@
 import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 
 /// Widget xử lý input field cho chat
 class ChatInputField {
@@ -19,7 +21,7 @@ class ChatInputField {
   /// Input decoration với hint text
   static InputDecoration _buildInputDecoration() {
     return InputDecoration(
-      hintText: "Chat Những Gì Bạn Muốn...",
+      hintText: LocaleKey.chatInputHint.tr,
       hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 13),
       filled: true,
       fillColor: Colors.grey.shade100,

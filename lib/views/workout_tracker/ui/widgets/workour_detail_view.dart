@@ -3,14 +3,14 @@ import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/theme/ui/app_theme.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'package:flutter/material.dart';
-import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/functions/color_extension.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/core/models/exercise_item.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/logic/cubit/workout_tracker_cubit.dart';
 import 'package:smart_fitness_assistant/views/exercise_session/logic/cubit/session_cubit.dart';
-import 'package:smart_fitness_assistant/views/exercise_session/logic/ui/exercise_session_view.dart';
+import 'package:smart_fitness_assistant/views/exercise_session/ui/exercise_session_view.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/common/bottom_sheet_details.dart';
 
 /// Màn hình hiển thị chi tiết workout category với danh sách exercises

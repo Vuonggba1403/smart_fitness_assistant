@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../logic/cubit/multi_step_dialog_cubit.dart';
 
@@ -6,21 +8,21 @@ import '../../logic/cubit/multi_step_dialog_cubit.dart';
 class StepFitnessLevel extends StatelessWidget {
   const StepFitnessLevel({super.key});
 
-  static const _levels = [
+  static final _levels = [
     {
       'value': 'beginner',
       'title': 'Mới bắt đầu',
-      'subtitle': '0-6 tháng kinh nghiệm',
+      'subtitle': LocaleKey.beginnerSubtitle.tr,
     },
     {
       'value': 'intermediate',
       'title': 'Trung bình',
-      'subtitle': '6-24 tháng kinh nghiệm',
+      'subtitle': LocaleKey.intermediateSubtitle.tr,
     },
     {
       'value': 'advanced',
       'title': 'Nâng cao',
-      'subtitle': 'Hơn 2 năm kinh nghiệm',
+      'subtitle': LocaleKey.advancedSubtitle.tr,
     },
   ];
 

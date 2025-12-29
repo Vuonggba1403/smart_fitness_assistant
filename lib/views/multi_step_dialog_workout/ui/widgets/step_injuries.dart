@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_fitness_assistant/core/models/injury.dart';
 import '../../logic/cubit/multi_step_dialog_cubit.dart';
@@ -39,7 +41,7 @@ class StepInjuries extends StatelessWidget {
               TextButton.icon(
                 onPressed: cubit.clearInjuries,
                 icon: const Icon(Icons.clear_all, size: 18),
-                label: const Text('Xóa tất cả'),
+                label: Text(LocaleKey.clearAll.tr),
                 style: TextButton.styleFrom(
                   foregroundColor: Colors.red.shade600,
                 ),
@@ -54,7 +56,7 @@ class StepInjuries extends StatelessWidget {
   Widget _buildSearchField(MultiStepDialogCubit cubit) {
     return TextField(
       decoration: InputDecoration(
-        hintText: 'Tìm chấn thương...',
+        hintText: LocaleKey.searchInjury.tr,
         prefixIcon: const Icon(Icons.search),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         contentPadding: const EdgeInsets.symmetric(

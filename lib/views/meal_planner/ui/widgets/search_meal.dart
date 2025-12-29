@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
+import 'package:get/get.dart';
+import 'package:smart_fitness_assistant/core/functions/navigate_to.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/core/models/meal.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
 import 'package:smart_fitness_assistant/views/meal_planner/ui/widgets/food_details.dart';
@@ -64,7 +66,7 @@ class _SearchMealState extends State<SearchMeal>
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Tìm kiếm thực phẩm')),
+      appBar: AppBar(title: Text(LocaleKey.searchFood.tr)),
       body: Column(
         children: [
           _buildSearchField(theme),
@@ -82,7 +84,7 @@ class _SearchMealState extends State<SearchMeal>
       child: TextField(
         controller: _searchController,
         decoration: InputDecoration(
-          hintText: 'Tìm kiếm thực phẩm...',
+          hintText: LocaleKey.searchFoodHint.tr,
           prefixIcon: const Icon(Icons.search),
           suffixIcon: _searchController.text.isNotEmpty
               ? IconButton(
@@ -104,9 +106,9 @@ class _SearchMealState extends State<SearchMeal>
     return TabBar(
       controller: _tabController,
       indicatorColor: theme.primaryColor,
-      tabs: const [
-        Tab(text: 'Gần đây'),
-        Tab(text: 'Tạo bởi tôi'),
+      tabs: [
+        Tab(text: LocaleKey.recent.tr),
+        Tab(text: LocaleKey.createdByMe.tr),
       ],
     );
   }
@@ -123,14 +125,17 @@ class _SearchMealState extends State<SearchMeal>
 
     return TabBarView(
       controller: _tabController,
-      children: [_buildRecentTab(theme), _buildEmptyState('Chưa có công thức')],
+      children: [
+        _buildRecentTab(theme),
+        _buildEmptyState(LocaleKey.noRecipes.tr),
+      ],
     );
   }
 
   /// 🔍 Kết quả search
   Widget _buildSearchResults(ThemeData theme) {
     if (_searchResults.isEmpty) {
-      return _buildEmptyState('Không tìm thấy kết quả');
+      return _buildEmptyState(LocaleKey.noResults.tr);
     }
 
     return ListView.builder(
@@ -149,7 +154,7 @@ class _SearchMealState extends State<SearchMeal>
   /// 🕘 Tab gần đây
   Widget _buildRecentTab(ThemeData theme) {
     return Column(
-      children: [Expanded(child: _buildEmptyState('Chưa có thông tin'))],
+      children: [Expanded(child: _buildEmptyState(LocaleKey.noInfoYet.tr))],
     );
   }
 
@@ -167,10 +172,10 @@ class _SearchMealState extends State<SearchMeal>
           const SizedBox(height: 16),
           Text(title, style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
-          const Text(
-            'Hệ thống chưa ghi nhận thông tin bạn\nđã nhập gần đây',
+          Text(
+            LocaleKey.noRecentDataMessage.tr,
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey),
+            style: const TextStyle(color: Colors.grey),
           ),
         ],
       ),
@@ -196,7 +201,7 @@ class _SearchMealState extends State<SearchMeal>
       'fat': meal.fatG,
     }, DateTime.now());
 
-    AppSnackBar.success(context, '${meal.name} được thêm vào bữa ăn');
+    AppSnackBar.success(context, '${meal.name} ${LocaleKey.addedToMeal.tr}');
     Navigator.pop(context);
   }
 

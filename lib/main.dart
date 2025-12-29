@@ -19,6 +19,7 @@ import 'package:smart_fitness_assistant/locale/translation_manager.dart';
 import 'package:smart_fitness_assistant/core/services/notification_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:smart_fitness_assistant/views/achievements/logic/cubit/achievement_cubit.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -56,7 +57,8 @@ Future<void> main() async {
         BlocProvider(create: (_) => ActivityLevelCubit()),
         BlocProvider(create: (_) => ScheduleCubit()),
         BlocProvider(create: (_) => MealPlannerCubit()),
-        BlocProvider(create: (_) => WorkoutPlanCubit()), // ✅ Thêm dòng này
+        BlocProvider(create: (_) => WorkoutPlanCubit()),
+        BlocProvider(create: (_) => AchievementCubit()), // ✅ Thêm dòng này
       ],
       child: const MyApp(),
     ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_utils/src/extensions/internacionalization.dart';
-import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:smart_fitness_assistant/core/functions/color_extension.dart';
 import 'package:smart_fitness_assistant/core/models/water_intake.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 
@@ -18,7 +18,7 @@ class WaterReminderDialog {
           return AlertDialog(
             // shape: const RoundedRectangleBorder(),
             backgroundColor: Colors.grey.shade800,
-            title:  Center(child: Text(LocaleKey.reminderWater.tr)),
+            title: Center(child: Text(LocaleKey.reminderWater.tr)),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -61,7 +61,10 @@ class WaterReminderDialog {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext),
-                child:  Text(LocaleKey.buttonNo.tr,style: TextStyle(color: Colors.red,),),
+                child: Text(
+                  LocaleKey.buttonNo.tr,
+                  style: TextStyle(color: Colors.red),
+                ),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -73,7 +76,10 @@ class WaterReminderDialog {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: TColor.primaryColor1,
                 ),
-                child: Text(LocaleKey.buttonYes.tr,style: TextStyle(color: Colors.white),),
+                child: Text(
+                  LocaleKey.buttonYes.tr,
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ],
           );
@@ -103,7 +109,7 @@ class _IntervalTile extends StatelessWidget {
         final selected = await showDialog<int>(
           context: context,
           builder: (ctx) => SimpleDialog(
-            title:  Text(LocaleKey.khoangtime.tr),
+            title: Text(LocaleKey.khoangtime.tr),
             children: intervals.map((interval) {
               return SimpleDialogOption(
                 child: Text('$interval ${LocaleKey.mins.tr}'),

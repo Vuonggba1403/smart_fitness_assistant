@@ -1,7 +1,7 @@
 import 'package:smart_fitness_assistant/views/water_tracker/ui/water_tracker_view.dart';
 
 import '../../../../../core/widgets/round_button.dart';
-import 'package:smart_fitness_assistant/core/functions/naviga_to.dart';
+import 'package:smart_fitness_assistant/core/functions/navigate_to.dart';
 import 'package:smart_fitness_assistant/views/meal_planner/ui/meal_planner_view.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/workout_tracker_view.dart';
 import 'package:flutter/material.dart';

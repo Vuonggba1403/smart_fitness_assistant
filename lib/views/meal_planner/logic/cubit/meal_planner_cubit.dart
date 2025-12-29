@@ -1,6 +1,5 @@
 import 'dart:developer' as developer;
 import 'package:bloc/bloc.dart';
-import 'package:meta/meta.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:smart_fitness_assistant/core/models/meal.dart';
@@ -156,9 +155,11 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
           .from('meals')
           .select()
           .ilike('name', '%$query%')
-          .limit(20);
+          .eq('is_verified', true)
+          .order('name')
+          .limit(30);
 
-      if (response == null || (response as List).isEmpty) {
+      if ((response as List).isEmpty) {
         return [];
       }
 
@@ -174,9 +175,14 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
   /// 📥 Lấy tất cả meals (cho tab recent)
   Future<List<Meal>> getAllMeals() async {
     try {
-      final response = await _supabase.from('meals').select().limit(50);
+      final response = await _supabase
+          .from('meals')
+          .select()
+          .eq('is_verified', true)
+          .order('created_at', ascending: false)
+          .limit(50);
 
-      if (response == null || (response as List).isEmpty) {
+      if ((response as List).isEmpty) {
         return [];
       }
 
@@ -204,9 +210,10 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
           .from('user_meals')
           .select()
           .eq('for_user', userId)
-          .eq('meal_date', dateStr);
+          .eq('meal_date', dateStr)
+          .order('meal_time', ascending: true);
 
-      if (response == null || (response as List).isEmpty) {
+      if ((response as List).isEmpty) {
         return {'breakfast': [], 'lunch': [], 'dinner': []};
       }
 

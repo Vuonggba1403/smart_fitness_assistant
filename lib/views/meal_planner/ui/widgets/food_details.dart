@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/core/models/meal.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
 import 'package:smart_fitness_assistant/views/meal_planner/logic/cubit/meal_planner_cubit.dart';
@@ -209,7 +211,7 @@ class _FoodDetailsState extends State<FoodDetails> {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                'Được xác nhận bởi đội ngũ dinh dưỡng Wao',
+                LocaleKey.confirmedByNutritionTeam.tr,
                 style: theme.textTheme.bodySmall?.copyWith(color: Colors.blue),
               ),
             ),
@@ -235,7 +237,7 @@ class _FoodDetailsState extends State<FoodDetails> {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                'Thông tin này có đúng không?',
+                LocaleKey.infoCorrect.tr,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: Colors.orange,
                 ),
@@ -255,29 +257,29 @@ class _FoodDetailsState extends State<FoodDetails> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Giá trị dinh dưỡng',
+            LocaleKey.nutritionValue.tr,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 16),
           _NutritionRow(
-            label: 'Năng lượng',
+            label: LocaleKey.energy.tr,
             value: '${_nutritionValues.calories} cal',
           ),
           const Divider(height: 16),
           _NutritionRow(
-            label: 'Đường bột (carb)',
+            label: LocaleKey.carbohydrate.tr,
             value: '${_nutritionValues.carbs.toStringAsFixed(1)} g',
           ),
           const Divider(height: 16),
           _NutritionRow(
-            label: 'Chất béo (fat)',
+            label: LocaleKey.fat.tr,
             value: '${_nutritionValues.fat.toStringAsFixed(1)} g',
           ),
           const Divider(height: 16),
           _NutritionRow(
-            label: 'Chất đạm (protein)',
+            label: LocaleKey.protein.tr,
             value: '${_nutritionValues.protein.toStringAsFixed(1)} g',
           ),
           const Divider(height: 16),
@@ -289,7 +291,7 @@ class _FoodDetailsState extends State<FoodDetails> {
           ),
           const Divider(height: 16),
           _NutritionRow(
-            label: 'Chất xơ',
+            label: LocaleKey.fiber.tr,
             value: widget.meal.fiberG != null
                 ? '${(widget.meal.fiberG! * _servingSize / 100).toStringAsFixed(2)} g'
                 : '--',

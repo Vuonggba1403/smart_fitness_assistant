@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:get/get.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
+import 'package:smart_fitness_assistant/core/functions/color_extension.dart';
 import 'package:smart_fitness_assistant/core/models/activity_level.dart';
 import 'package:smart_fitness_assistant/core/models/user_fitness_profile.dart';
 import 'package:smart_fitness_assistant/views/activity_level/ui/widgets/message_bubble.dart';
@@ -158,7 +160,7 @@ class _MultiStepPlanDialogState extends State<MultiStepPlanDialog> {
               if (state.currentStep > 0)
                 TextButton(
                   onPressed: _isProcessing ? null : cubit.previousStep,
-                  child: const Text('Quay lại'),
+                  child: Text(LocaleKey.back.tr),
                 ),
               if (state.currentStep < 5)
                 ElevatedButton(
@@ -176,7 +178,7 @@ class _MultiStepPlanDialogState extends State<MultiStepPlanDialog> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: const Text('Tiếp tục'),
+                  child: Text(LocaleKey.continue_.tr),
                 ),
               if (state.currentStep == 5)
                 ElevatedButton(
@@ -203,7 +205,7 @@ class _MultiStepPlanDialogState extends State<MultiStepPlanDialog> {
                             valueColor: AlwaysStoppedAnimation(Colors.white),
                           ),
                         )
-                      : const Text('Tạo kế hoạch'),
+                      : Text(LocaleKey.createPlan.tr),
                 ),
             ],
           );
@@ -247,7 +249,7 @@ class _MultiStepPlanDialogState extends State<MultiStepPlanDialog> {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Lỗi: $e')));
+      ).showSnackBar(SnackBar(content: Text('${LocaleKey.errorPrefix.tr} $e')));
     } finally {
       if (mounted) setState(() => _isProcessing = false);
     }

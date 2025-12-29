@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
+import 'package:get/get.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
+import 'package:smart_fitness_assistant/core/functions/color_extension.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_showdialog.dart';
 import 'package:smart_fitness_assistant/views/chatbot/logic/cubit/chatbot_cubit.dart';
 import 'package:smart_fitness_assistant/views/chatbot/ui/widgets/chat_history_view.dart';
@@ -82,23 +84,26 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
         icon: Icon(Icons.more_vert, color: textColor),
         onSelected: (value) => _handleMenuAction(context, value),
         itemBuilder: (context) => [
-          const PopupMenuItem(
+          PopupMenuItem(
             value: 'history',
             child: Row(
               children: [
                 Icon(Icons.history, size: 20),
                 SizedBox(width: 12),
-                Text('View All Chats'),
+                Text(LocaleKey.viewAllChats.tr),
               ],
             ),
           ),
-          const PopupMenuItem(
+          PopupMenuItem(
             value: 'clear',
             child: Row(
               children: [
                 Icon(Icons.delete_outline, size: 20, color: Colors.red),
                 SizedBox(width: 12),
-                Text('Clear Current Chat', style: TextStyle(color: Colors.red)),
+                Text(
+                  LocaleKey.clearCurrentChat.tr,
+                  style: TextStyle(color: Colors.red),
+                ),
               ],
             ),
           ),

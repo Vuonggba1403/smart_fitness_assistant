@@ -1,11 +1,13 @@
 import 'dart:developer';
 import 'package:bloc/bloc.dart';
+import 'package:get/get.dart';
 import 'package:meta/meta.dart';
 import 'package:smart_fitness_assistant/core/functions/app_shared.dart';
 import 'package:smart_fitness_assistant/core/models/activity_level.dart';
 import 'package:smart_fitness_assistant/core/models/user_models.dart';
 import 'package:smart_fitness_assistant/core/models/workout_plan.dart';
 import 'package:smart_fitness_assistant/core/models/user_fitness_profile.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/views/workout_plan/data/workout_plan_repository.dart';
 
 part 'workout_plan_state.dart';
@@ -32,6 +34,19 @@ class WorkoutPlanCubit extends Cubit<WorkoutPlanState> {
 
       if (savedPlanJson != null) {
         _currentPlan = WorkoutPlan.fromFullJson(savedPlanJson);
+
+        // ✅ Check if plan is expired (older than 7 days)
+        if (_isPlanExpired(_currentPlan!)) {
+          log('⏰ Plan expired, prompting user to create new plan');
+          await deletePlan();
+          emit(
+            WorkoutPlanExpired(
+              'Kế hoạch đã hết hạn. Vui lòng tạo kế hoạch mới.',
+            ),
+          );
+          return;
+        }
+
         emit(WorkoutPlanLoaded(_currentPlan!));
         log('✅ Loaded saved workout plan for user: $_userId');
       } else {
@@ -40,6 +55,22 @@ class WorkoutPlanCubit extends Cubit<WorkoutPlanState> {
     } catch (e) {
       log('❌ Error loading saved plan: $e');
       emit(WorkoutPlanInitial());
+    }
+  }
+
+  /// ✅ Check if plan is expired (older than 7 days)
+  bool _isPlanExpired(WorkoutPlan plan) {
+    final daysSinceCreated = DateTime.now().difference(plan.createdAt).inDays;
+    return daysSinceCreated >= 7;
+  }
+
+  /// ✅ Check current plan status (call from UI when needed)
+  void checkPlanStatus() {
+    if (_currentPlan != null && _isPlanExpired(_currentPlan!)) {
+      deletePlan();
+      emit(
+        WorkoutPlanExpired('Kế hoạch đã hết hạn. Vui lòng tạo kế hoạch mới.'),
+      );
     }
   }
 
@@ -61,11 +92,11 @@ class WorkoutPlanCubit extends Cubit<WorkoutPlanState> {
     required ActivityLevel activityLevel,
     required UserFitnessProfile fitnessProfile, // ✅ Thêm parameter
   }) async {
-    emit(WorkoutPlanLoading('Đang tải dữ liệu...'));
+    emit(WorkoutPlanLoading(LocaleKey.loadingData.tr));
 
     try {
       // Fetch exercises và meals
-      emit(WorkoutPlanLoading('Đang tải bài tập và món ăn...'));
+      emit(WorkoutPlanLoading(LocaleKey.loadingExercises.tr));
       final exercises = await _repository.fetchExercises();
       final meals = await _repository.fetchMeals();
 

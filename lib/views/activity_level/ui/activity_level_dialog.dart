@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:developer' as developer;
 
@@ -59,21 +61,19 @@ class _ActivityLevelDialogState extends State<ActivityLevelDialog> {
         /// ⏰ TIMEOUT
         if (_hasTimeout && _cachedLevels == null) {
           return AlertDialog(
-            title: const Text('⚠️ Lỗi tải dữ liệu'),
-            content: const Text(
-              'Không thể tải danh sách mức độ hoạt động. Vui lòng thử lại.',
-            ),
+            title: Text('⚠️ ${LocaleKey.errorLoadData.tr}'),
+            content: Text(LocaleKey.cannotLoadActivityLevels.tr),
             actions: [
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
                   context.read<ActivityLevelCubit>().loadActivityLevels();
                 },
-                child: const Text('Thử lại'),
+                child: Text(LocaleKey.retry.tr),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Đóng'),
+                child: Text(LocaleKey.close.tr),
               ),
             ],
           );
@@ -82,7 +82,7 @@ class _ActivityLevelDialogState extends State<ActivityLevelDialog> {
         /// ❌ ERROR
         if (state is ActivityLevelError && _cachedLevels == null) {
           return AlertDialog(
-            title: const Text('❌ Lỗi'),
+            title: Text('❌ ${LocaleKey.error.tr}'),
             content: Text(state.message),
             actions: [
               TextButton(
@@ -90,7 +90,7 @@ class _ActivityLevelDialogState extends State<ActivityLevelDialog> {
                   Navigator.pop(context);
                   context.read<ActivityLevelCubit>().loadActivityLevels();
                 },
-                child: const Text('Thử lại'),
+                child: Text(LocaleKey.retry.tr),
               ),
             ],
           );
@@ -227,7 +227,10 @@ class _ActivityLevelDialogState extends State<ActivityLevelDialog> {
 
       widget.onActivitySaved?.call(level.id, dailyCalories);
 
-      AppSnackBar.success(context, 'Đã lưu: Mục tiêu $dailyCalories kcal/ngày');
+      AppSnackBar.success(
+        context,
+        '${LocaleKey.savedTarget.tr} $dailyCalories kcal/ngày',
+      );
     } catch (e) {
       try {
         Navigator.of(context, rootNavigator: true).pop();
