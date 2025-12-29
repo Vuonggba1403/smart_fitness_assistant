@@ -263,7 +263,8 @@ Map<String, String> enUs = {
   LocaleKey.editCaption: "Edit caption...",
   LocaleKey.save: "Save",
   LocaleKey.deletePost: "Delete Post",
-  LocaleKey.confirmDeletePost:
+  LocaleKey.confirmDeletePost: "Delete Post",
+  LocaleKey.confirmDeletePostMessage:
       "Are you sure you want to delete this post? This action cannot be undone.",
   LocaleKey.postDeleted: "Post deleted",
   LocaleKey.deleteFailed: "Delete failed",
@@ -370,10 +371,30 @@ Map<String, String> enUs = {
   LocaleKey.minimalEquipment: "Minimal Equipment",
   LocaleKey.hybrid: "Hybrid",
   LocaleKey.selectInjuries: "Select injuries or health issues:",
+  LocaleKey.completeStepsInstruction:
+      "Please complete all steps to create the most suitable workout plan for you. Step",
+  LocaleKey.trainingLevel: "Training Level",
+  LocaleKey.dietaryRegime: "Dietary Regime",
+  LocaleKey.selectAllergiesInstruction:
+      "Select foods you are allergic to or cannot eat:",
+  LocaleKey.foodList: "Food List:",
+  LocaleKey.searchFoodHint2: "Search food...",
+  LocaleKey.noFoodFound2: "No food found",
+  LocaleKey.selectInjuriesInstruction:
+      "Select the injury issues you are experiencing:",
+  LocaleKey.injuryList: "Injury List:",
+  LocaleKey.searchInjuryHint: "Search injury...",
+  LocaleKey.noInjuryFound2: "No injury found",
+  LocaleKey.gym: "Gym",
+  LocaleKey.fullEquipment: "Full Equipment",
+  LocaleKey.atHome: "At Home",
+  LocaleKey.selectDietInstruction: "Select your dietary preferences (if any):",
+  LocaleKey.starchless: "Starchless",
 
   // Workout Tracker
   LocaleKey.noWorkoutsYet: "No workouts yet",
   LocaleKey.drinkWaterReminder: "Remember to drink water!",
+  LocaleKey.noExercisesYet: "No exercises yet",
 
   // Social
   LocaleKey.notLoggedIn: "Not logged in",
@@ -386,4 +407,63 @@ Map<String, String> enUs = {
 
   // Pagination
   LocaleKey.noMoreData: "No more data",
+
+  // NFT Collection
+  LocaleKey.nftBadgeCollection: "NFT Badge Collection",
+  LocaleKey.noBadgesYet: "No badges yet!",
+  LocaleKey.completeBadgesMessage: "Complete workouts to earn NFT badges",
+  LocaleKey.showcased: "Showcased",
+  LocaleKey.allBadges: "All Badges",
+  LocaleKey.collectionStats: "Collection Stats",
+  LocaleKey.common: "Common",
+  LocaleKey.rare: "Rare",
+  LocaleKey.epic: "Epic",
+  LocaleKey.legendary: "Legendary",
+  LocaleKey.workoutDetails: "Workout Details",
+  LocaleKey.type: "Type",
+  LocaleKey.minted: "Minted",
+  LocaleKey.tokenId: "Token ID",
+  LocaleKey.removeShowcase: "Remove Showcase",
+  LocaleKey.showcase: "Showcase",
+  LocaleKey.share: "Share",
+  LocaleKey.post: "Post",
+  LocaleKey.shareToSocialFeed: "Share to Social Feed",
+  LocaleKey.addCaption: "Add a caption...",
+  LocaleKey.postToFeed: "Post to Feed",
+  LocaleKey.postedToFeed: "Posted to social feed! 🎉",
+  LocaleKey.failedToPost: "Failed to post",
+
+  // Workout Congratulations
+  LocaleKey.pleaseWait: "Please wait",
+  LocaleKey.viewCollection: "View Collection",
+  LocaleKey.home: "Home",
+  LocaleKey.shareAchievement: "Share Achievement",
+  LocaleKey.minutes: "min",
+
+  // Exercise Session
+  LocaleKey.noActiveSession: "No active session",
+  LocaleKey.kg: "kg",
+  LocaleKey.recordSet: "Record Set",
+  LocaleKey.setsCompleted: "Completed",
+  LocaleKey.addAnotherSet: "Add a set",
+  LocaleKey.nextExerciseButton: "Next Exercise",
+
+  // Schedule Management
+  LocaleKey.deleteScheduleButton: "Delete Schedule",
+  LocaleKey.addScheduleTitle: "Add Schedule",
+
+  // Chatbot
+  LocaleKey.viewAllChats: "View All Chats",
+  LocaleKey.clearCurrentChat: "Clear Current Chat",
+  LocaleKey.deleteChat: "Delete Chat",
+  LocaleKey.deleteChatConfirm: "Are you sure you want to delete",
+  LocaleKey.chatInputHint: "Chat What You Want...",
+  LocaleKey.noChatHistoryYet: "No chat history yet",
+  LocaleKey.startConversationToSeeItHere: "Start a conversation to see it here",
+  LocaleKey.chatHistory: "Chat History",
+
+  // Auth
+  LocaleKey.username: "Username",
+  LocaleKey.email: "Email",
+  LocaleKey.password: "Password",
 };

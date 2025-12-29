@@ -160,6 +160,7 @@ class _SearchMealState extends State<SearchMeal>
 
   /// 📦 Empty state
   Widget _buildEmptyState(String title) {
+    final theme = Theme.of(context);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -167,7 +168,7 @@ class _SearchMealState extends State<SearchMeal>
           Icon(
             Icons.inventory_2_outlined,
             size: 80,
-            color: Colors.grey.shade500,
+            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
           ),
           const SizedBox(height: 16),
           Text(title, style: Theme.of(context).textTheme.titleMedium),
@@ -282,7 +283,7 @@ class _MealCard extends StatelessWidget {
     return Container(
       width: 80,
       height: 80,
-      color: Colors.grey.shade700,
+      color: Colors.grey.withOpacity(0.3),
       child: const Icon(Icons.image_not_supported),
     );
   }

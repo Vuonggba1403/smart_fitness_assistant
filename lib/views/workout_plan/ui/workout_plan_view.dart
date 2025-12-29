@@ -167,9 +167,8 @@ class _WorkoutPlanContent extends StatelessWidget {
                   onPressed: () {
                     AppConfirmDialog.show(
                       context: context,
-                      title: 'Xoá Kế Hoạch Tập Luyện',
-                      content:
-                          "Bạn có chắc chắn muốn xoá kế hoạch tập luyện này không? Hành động này không thể hoàn tác.",
+                      title: LocaleKey.confirmDeletePlan.tr,
+                      content: LocaleKey.confirmDeletePlanMessage.tr,
                       onYes: () {
                         context.read<WorkoutPlanCubit>().deletePlan();
                       },

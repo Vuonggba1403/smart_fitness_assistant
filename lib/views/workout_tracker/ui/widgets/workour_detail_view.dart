@@ -575,7 +575,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Text(
-            "No exercises found",
+            LocaleKey.noExercisesYet.tr,
             style: TextStyle(color: textColor?.withOpacity(0.6)),
           ),
         ),

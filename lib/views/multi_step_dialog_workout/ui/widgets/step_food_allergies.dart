@@ -21,21 +21,21 @@ class StepFoodAllergies extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Chọn các món ăn bạn dị ứng hoặc không ăn được:',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            Text(
+              LocaleKey.selectAllergiesInstruction.tr,
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 12),
             _buildSearchField(cubit),
             const SizedBox(height: 12),
             if (state.selectedFoodAllergies.isNotEmpty)
               _buildSelectedChips(state, cubit),
-            const Text(
-              'Danh sách món ăn:',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+            Text(
+              LocaleKey.foodList.tr,
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 8),
-            _buildMealsList(state, cubit),
+            _buildMealsList(context, state, cubit),
             if (state.selectedFoodAllergies.isNotEmpty)
               TextButton.icon(
                 onPressed: cubit.clearFoodAllergies,
@@ -96,13 +96,16 @@ class StepFoodAllergies extends StatelessWidget {
 
   /// Build meals list
   Widget _buildMealsList(
+    BuildContext context,
     MultiStepDialogState state,
     MultiStepDialogCubit cubit,
   ) {
     return Container(
       constraints: const BoxConstraints(maxHeight: 300),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(
+          color: Theme.of(context).dividerColor.withOpacity(0.3),
+        ),
         borderRadius: BorderRadius.circular(12),
       ),
       child: state.filteredMeals.isEmpty
@@ -110,8 +113,12 @@ class StepFoodAllergies extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(32),
                 child: Text(
-                  'Không tìm thấy món ăn',
-                  style: TextStyle(color: Colors.grey.shade600),
+                  LocaleKey.noFoodFound2.tr,
+                  style: TextStyle(
+                    color: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.color?.withOpacity(0.6),
+                  ),
                 ),
               ),
             )
@@ -138,15 +145,20 @@ class StepFoodAllergies extends StatelessWidget {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: Colors.grey.shade200,
+                            color: Colors.grey.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Icon(Icons.restaurant, size: 20),
                         ),
                   title: Text(meal.name, style: const TextStyle(fontSize: 13)),
                   subtitle: Text(
-                    '${meal.calories} cal • ${meal.category ?? "Món ăn"}',
-                    style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                    '${meal.calories} cal • ${meal.category ?? LocaleKey.food.tr}',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium?.color?.withOpacity(0.6),
+                    ),
                   ),
                   trailing: Icon(
                     isSelected ? Icons.check_circle : Icons.circle_outlined,

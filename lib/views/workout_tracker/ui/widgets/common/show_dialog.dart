@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 
 typedef DialogCallback = Future<void> Function();
 
@@ -39,7 +41,7 @@ class CustomDialog extends StatelessWidget {
     return TextButton(
       onPressed: () => Navigator.of(context).pop(),
       child: Text(
-        "Huỷ",
+        LocaleKey.cancel.tr,
         style: TextStyle(
           color: Colors.red,
           fontFamily: "Poppins",

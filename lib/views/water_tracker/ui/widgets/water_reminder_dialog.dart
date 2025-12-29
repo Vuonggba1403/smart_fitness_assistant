@@ -10,6 +10,7 @@ class WaterReminderDialog {
     WaterGoalSettings currentSettings,
   ) {
     WaterGoalSettings tempSettings = currentSettings;
+    final theme = Theme.of(context);
 
     return showDialog<WaterGoalSettings>(
       context: context,
@@ -17,7 +18,7 @@ class WaterReminderDialog {
         builder: (builderContext, setDialogState) {
           return AlertDialog(
             // shape: const RoundedRectangleBorder(),
-            backgroundColor: Colors.grey.shade800,
+            backgroundColor: theme.dialogBackgroundColor,
             title: Center(child: Text(LocaleKey.reminderWater.tr)),
             content: SingleChildScrollView(
               child: Column(
@@ -78,7 +79,7 @@ class WaterReminderDialog {
                 ),
                 child: Text(
                   LocaleKey.buttonYes.tr,
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: TColor.white),
                 ),
               ),
             ],

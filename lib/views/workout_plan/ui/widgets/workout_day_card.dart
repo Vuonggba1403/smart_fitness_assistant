@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/functions/color_extension.dart';
 import 'package:smart_fitness_assistant/core/models/workout_plan.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 
 /// Widget hiển thị card cho mỗi ngày tập luyện
 class WorkoutDayCard extends StatelessWidget {
@@ -33,7 +35,7 @@ class WorkoutDayCard extends StatelessWidget {
       child: Row(
         children: [
           Text(
-            'Ngày ${day.dayNumber}',
+            '${LocaleKey.dayNumber.tr} ${day.dayNumber}',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 18,

@@ -160,11 +160,11 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                         decoration: BoxDecoration(
                           color: cardColor,
                           borderRadius: BorderRadius.circular(15),
-                          boxShadow: const [
+                          boxShadow: [
                             BoxShadow(
-                              color: Colors.black12,
+                              color: theme.shadowColor.withOpacity(0.12),
                               blurRadius: 2,
-                              offset: Offset(0, 1),
+                              offset: const Offset(0, 1),
                             ),
                           ],
                         ),
@@ -287,21 +287,20 @@ class _MealPlannerViewState extends State<MealPlannerView> {
   }
 
   Widget _calorieItem(String icon, String title, String value) {
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color;
     return Column(
       children: [
         Text(icon, style: const TextStyle(fontSize: 26)),
         const SizedBox(height: 6),
         Text(
           title,
-          style: const TextStyle(color: Colors.white70, fontSize: 12),
+          style: TextStyle(color: textColor?.withOpacity(0.7), fontSize: 12),
         ),
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
         ),
       ],
     );
@@ -326,8 +325,12 @@ class _MealPlannerViewState extends State<MealPlannerView> {
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(14),
-        boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 2, offset: Offset(0, 1)),
+        boxShadow: [
+          BoxShadow(
+            color: theme.shadowColor.withOpacity(0.12),
+            blurRadius: 2,
+            offset: const Offset(0, 1),
+          ),
         ],
       ),
       child: Column(

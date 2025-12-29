@@ -210,6 +210,7 @@ class LocaleKey {
   static const String save = "save";
   static const String deletePost = "delete_post";
   static const String confirmDeletePost = "confirm_delete_post";
+  static const String confirmDeletePostMessage = "confirm_delete_post_message";
   static const String postDeleted = "post_deleted";
   static const String deleteFailed = "delete_failed";
   static const String edit = "edit";
@@ -519,6 +520,10 @@ class LocaleKey {
   static const String deleteChat = "delete_chat";
   static const String deleteChatConfirm = "delete_chat_confirm";
   static const String chatInputHint = "chat_input_hint";
+  static const String noChatHistoryYet = "no_chat_history_yet";
+  static const String startConversationToSeeItHere =
+      "start_conversation_to_see_it_here";
+  static const String chatHistory = "chat_history";
 
   // Auth
   static const String username = "username";

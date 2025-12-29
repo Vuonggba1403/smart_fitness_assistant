@@ -51,6 +51,7 @@ class _ActivityLevelDialogState extends State<ActivityLevelDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cardColor = theme.cardColor;
+    final textColor = theme.textTheme.bodyMedium?.color ?? Colors.black;
 
     return BlocBuilder<ActivityLevelCubit, ActivityLevelState>(
       builder: (context, state) {
@@ -138,7 +139,9 @@ class _ActivityLevelDialogState extends State<ActivityLevelDialog> {
                     decoration: BoxDecoration(
                       color: cardColor,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey.shade300),
+                      border: Border.all(
+                        color: theme.dividerColor.withOpacity(0.3),
+                      ),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(
@@ -178,7 +181,7 @@ class _ActivityLevelDialogState extends State<ActivityLevelDialog> {
                                 level.description,
                                 style: TextStyle(
                                   fontSize: 13,
-                                  color: Colors.grey.shade600,
+                                  color: textColor.withOpacity(0.6),
                                 ),
                               ),
                             ],

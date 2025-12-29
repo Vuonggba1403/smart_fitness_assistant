@@ -161,15 +161,15 @@ class BMICard extends StatelessWidget {
         radius: 55,
         badgeWidget: Text(
           bmi > 0 ? bmi.toStringAsFixed(1) : "0.0",
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: TColor.white,
             fontSize: 12,
             fontWeight: FontWeight.w700,
           ),
         ),
       ),
       PieChartSectionData(
-        color: Colors.white,
+        color: TColor.white,
         value: 100 - percentage,
         title: '',
         radius: 45,

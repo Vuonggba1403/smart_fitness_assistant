@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/models/workout_plan.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'meal_session_list_tile.dart';
 
 /// Widget nhóm các meal sessions theo loại bữa ăn
@@ -11,7 +13,12 @@ class MealSessionGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final groupedMeals = _groupMealsByType(meals);
-    final mealOrder = ['Bữa sáng', 'Bữa trưa', 'Bữa tối', 'Bữa phụ'];
+    final mealOrder = [
+      LocaleKey.breakfast.tr,
+      LocaleKey.lunch.tr,
+      LocaleKey.dinner.tr,
+      LocaleKey.snack.tr,
+    ];
 
     return Column(
       children: mealOrder
@@ -97,13 +104,13 @@ class MealSessionGroup extends StatelessWidget {
   /// Lấy màu theo loại bữa ăn
   Color _getMealTypeColor(String mealType) {
     switch (mealType) {
-      case 'Bữa sáng':
+      case String _ when mealType == LocaleKey.breakfast.tr:
         return Colors.orange;
-      case 'Bữa trưa':
+      case String _ when mealType == LocaleKey.lunch.tr:
         return Colors.green;
-      case 'Bữa tối':
+      case String _ when mealType == LocaleKey.dinner.tr:
         return Colors.blue;
-      case 'Bữa phụ':
+      case String _ when mealType == LocaleKey.snack.tr:
         return Colors.purple;
       default:
         return Colors.grey;
@@ -113,13 +120,13 @@ class MealSessionGroup extends StatelessWidget {
   /// Lấy icon theo loại bữa ăn
   IconData _getMealTypeIcon(String mealType) {
     switch (mealType) {
-      case 'Bữa sáng':
+      case String _ when mealType == LocaleKey.breakfast.tr:
         return Icons.wb_sunny;
-      case 'Bữa trưa':
+      case String _ when mealType == LocaleKey.lunch.tr:
         return Icons.restaurant;
-      case 'Bữa tối':
+      case String _ when mealType == LocaleKey.dinner.tr:
         return Icons.nightlight_round;
-      case 'Bữa phụ':
+      case String _ when mealType == LocaleKey.snack.tr:
         return Icons.local_cafe;
       default:
         return Icons.restaurant_menu;

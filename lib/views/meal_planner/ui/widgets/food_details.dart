@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/core/models/meal.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
+import 'package:smart_fitness_assistant/core/functions/color_extension.dart';
 import 'package:smart_fitness_assistant/views/meal_planner/logic/cubit/meal_planner_cubit.dart';
 
 /// 📋 Chi tiết thông tin dinh dưỡng của món ăn
@@ -112,7 +113,7 @@ class _FoodDetailsState extends State<FoodDetails> {
   Widget _buildImagePlaceholder() {
     return Container(
       height: 250,
-      color: Colors.grey.shade700,
+      color: Colors.grey.withOpacity(0.3),
       child: const Icon(Icons.image_not_supported, size: 60),
     );
   }
@@ -409,12 +410,12 @@ class _FoodDetailsState extends State<FoodDetails> {
               borderRadius: BorderRadius.circular(16),
             ),
           ),
-          child: const Text(
-            'Thêm vào',
+          child: Text(
+            LocaleKey.addTo.tr,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Colors.white,
+              color: TColor.white,
             ),
           ),
         ),
@@ -437,7 +438,10 @@ class _FoodDetailsState extends State<FoodDetails> {
       'serving_size': _servingSize,
     }, DateTime.now());
 
-    AppSnackBar.success(context, '${widget.meal.name} đã được thêm vào');
+    AppSnackBar.success(
+      context,
+      '${widget.meal.name} ${LocaleKey.addedToMeal.tr}',
+    );
     Navigator.pop(context);
   }
 
@@ -538,8 +542,8 @@ class _MacroBadge extends StatelessWidget {
             ),
             child: Text(
               '$percent%',
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: TColor.white,
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
               ),

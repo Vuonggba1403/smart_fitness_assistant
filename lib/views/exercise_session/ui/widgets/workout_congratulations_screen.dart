@@ -139,7 +139,7 @@ class _WorkoutCongratulationsScreenState
 
                   // 🎉 Congratulations Text
                   Text(
-                    '🎉 Congratulations! 🎉',
+                    LocaleKey.congratulations.tr,
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -179,14 +179,20 @@ class _WorkoutCongratulationsScreenState
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            _buildStatRow('Workout Type', widget.workoutType), // "Full Body"
-            _buildStatRow('Exercises', '${widget.totalExercises}'), // "12"
             _buildStatRow(
-              'Duration',
+              LocaleKey.workoutType.tr,
+              widget.workoutType,
+            ), // "Full Body"
+            _buildStatRow(
+              LocaleKey.exercises.tr,
+              '${widget.totalExercises}',
+            ), // "12"
+            _buildStatRow(
+              LocaleKey.duration.tr,
               '${widget.durationMinutes} min',
             ), // "45 min"
             _buildStatRow(
-              'Calories',
+              LocaleKey.calories.tr,
               '${widget.caloriesBurned.toInt()} kcal',
             ), // "350 kcal"
           ],
@@ -215,7 +221,7 @@ class _WorkoutCongratulationsScreenState
         const CircularProgressIndicator(), // ⏳ Spinner
         const SizedBox(height: 16),
         Text(
-          'Minting your NFT Badge...',
+          LocaleKey.minting.tr,
           style: Theme.of(context).textTheme.bodyLarge,
         ),
         const SizedBox(height: 8),
@@ -235,26 +241,29 @@ class _WorkoutCongratulationsScreenState
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            const Icon(Icons.workspace_premium, size: 80, color: Colors.white),
+            Icon(Icons.workspace_premium, size: 80, color: TColor.white),
             const SizedBox(height: 12),
             Text(
               _mintedBadge!.name,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: TColor.white,
               ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
               _mintedBadge!.rarity.name.toUpperCase(),
-              style: const TextStyle(color: Colors.white70),
+              style: TextStyle(color: TColor.white.withOpacity(0.7)),
             ),
             const SizedBox(height: 12),
             Text(
               'Token ID: ${_mintedBadge!.tokenId}',
-              style: const TextStyle(fontSize: 12, color: Colors.white60),
+              style: TextStyle(
+                fontSize: 12,
+                color: TColor.white.withOpacity(0.6),
+              ),
             ),
           ],
         ),
@@ -294,11 +303,11 @@ class _WorkoutCongratulationsScreenState
                   borderRadius: BorderRadius.circular(15),
                 ),
               ),
-              icon: const Icon(Icons.share, color: Colors.white),
+              icon: Icon(Icons.share, color: TColor.white),
               label: Text(
                 LocaleKey.shareAchievement.tr,
                 style: TextStyle(
-                  color: Colors.white,
+                  color: TColor.white,
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
@@ -319,11 +328,11 @@ class _WorkoutCongratulationsScreenState
                   borderRadius: BorderRadius.circular(15),
                 ),
               ),
-              icon: const Icon(Icons.group, color: Colors.white),
-              label: const Text(
-                'Post to Social Feed',
+              icon: Icon(Icons.group, color: TColor.white),
+              label: Text(
+                LocaleKey.postToFeed.tr,
                 style: TextStyle(
-                  color: Colors.white,
+                  color: TColor.white,
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
@@ -431,14 +440,14 @@ class _WorkoutCongratulationsScreenState
       );
 
       if (success && mounted) {
-        AppSnackBar.success(context, '🎉 Posted to social feed!');
+        AppSnackBar.success(context, LocaleKey.postedToFeed.tr);
       } else if (mounted) {
-        AppSnackBar.error(context, 'Failed to post');
+        AppSnackBar.error(context, LocaleKey.failedToPost.tr);
       }
     } catch (e) {
       print('❌ Share to feed error: $e');
       if (mounted) {
-        AppSnackBar.error(context, 'Error posting to feed');
+        AppSnackBar.error(context, LocaleKey.errorLoadData.tr);
       }
     }
   }

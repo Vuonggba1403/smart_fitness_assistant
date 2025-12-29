@@ -28,9 +28,9 @@ class UpcomingWorkoutRow extends StatelessWidget {
     final timeStr =
         '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
     if (scheduledDate == today) {
-      return 'Hôm nay, $timeStr';
+      return '${LocaleKey.today.tr}, $timeStr';
     } else if (scheduledDate == today.add(const Duration(days: 1))) {
-      return 'Ngày mai, $timeStr';
+      return '${LocaleKey.tomorrow.tr}, $timeStr';
     } else {
       final day = time.day.toString().padLeft(2, '0');
       final month = time.month.toString().padLeft(2, '0');
@@ -81,13 +81,13 @@ class UpcomingWorkoutRow extends StatelessWidget {
         placeholder: (context, url) => Container(
           width: 70,
           height: 70,
-          color: Colors.grey[200],
+          color: Colors.grey.withOpacity(0.2),
           child: CustomCircleProgIndicator(),
         ),
         errorWidget: (context, url, error) => Container(
           width: 70,
           height: 70,
-          color: Colors.grey[200],
+          color: Colors.grey.withOpacity(0.2),
           child: const Icon(Icons.fitness_center),
         ),
       ),

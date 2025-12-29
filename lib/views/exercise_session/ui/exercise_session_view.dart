@@ -215,11 +215,12 @@ class ExerciseSessionView extends StatelessWidget {
   ) {
     String buttonText;
     if (state.isCurrentExerciseCompleted && state.hasNextExercise) {
-      buttonText = 'BÀI TẬP TIẾP THEO';
+      buttonText = LocaleKey.nextExercise.tr.toUpperCase();
     } else if (state.isWorkoutCompleted) {
-      buttonText = 'HOÀN THÀNH';
+      buttonText = LocaleKey.completeButton.tr;
     } else {
-      buttonText = 'GHI LẠI SET ${state.completedSetsCount + 1}';
+      buttonText =
+          '${LocaleKey.recordSet.tr.toUpperCase()} ${state.completedSetsCount + 1}';
     }
 
     return SafeArea(
@@ -321,7 +322,7 @@ class ExerciseSessionView extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '${state.completedSetsCount}/${state.sets.length} Hoàn tất',
+                      '${state.completedSetsCount}/${state.sets.length} ${LocaleKey.setsCompleted.tr}',
                       style: TextStyle(
                         color: textColor?.withOpacity(0.6),
                         fontSize: 14,
@@ -383,7 +384,7 @@ class ExerciseSessionView extends StatelessWidget {
                   ),
                   icon: Icon(Icons.add, color: TColor.white),
                   label: Text(
-                    'Thêm một set',
+                    LocaleKey.addAnotherSet.tr,
                     style: TextStyle(color: TColor.white),
                   ),
                 ),
@@ -474,7 +475,7 @@ class ExerciseSessionView extends StatelessWidget {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              '$completedSets/$totalSets Hoàn tất',
+                              '$completedSets/$totalSets ${LocaleKey.setsCompleted.tr}',
                               style: TextStyle(
                                 color: textColor?.withOpacity(0.6),
                                 fontSize: 12,

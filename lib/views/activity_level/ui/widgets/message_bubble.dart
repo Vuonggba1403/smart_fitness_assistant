@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smart_fitness_assistant/core/functions/color_extension.dart';
 import 'bubble_triangle_painter.dart';
 
 class MessageBubble extends StatelessWidget {
@@ -45,8 +46,8 @@ class MessageBubble extends StatelessWidget {
                 child: Text(
                   text,
                   softWrap: true,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: TColor.white,
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
                   ),

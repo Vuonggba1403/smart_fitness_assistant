@@ -499,7 +499,7 @@ class _DailyActivitySectionState extends State<DailyActivitySection> {
               progressStrokeWidth: 12,
               backStrokeWidth: 12,
               progressColors: TColor.primaryG,
-              backColor: Colors.grey.shade100,
+              backColor: Colors.grey.withOpacity(0.1),
               valueNotifier:
                   _exerciseProgressNotifier, // ✅ Dùng persistent notifier
               startAngle: -180,

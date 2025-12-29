@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'package:bloc/bloc.dart';
+import 'package:get/get.dart';
 import 'package:meta/meta.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:smart_fitness_assistant/core/models/content_post.dart';
 import 'package:smart_fitness_assistant/core/models/exercise_category.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 
 part 'social_feed_state.dart';
 
@@ -64,7 +66,7 @@ class SocialFeedCubit extends Cubit<SocialFeedState> {
       emit(SocialFeedLoaded(posts: posts, hasMore: posts.length >= _pageSize));
     } catch (e) {
       print('❌ Error loading feed: $e');
-      emit(SocialFeedError('Không thể tải bài viết'));
+      emit(SocialFeedError(LocaleKey.errorLoadPosts.tr));
     }
   }
 

@@ -89,13 +89,9 @@ class WorkoutRow extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: Colors.green,
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
+                      border: Border.all(color: TColor.white, width: 2),
                     ),
-                    child: const Icon(
-                      Icons.check,
-                      color: Colors.white,
-                      size: 14,
-                    ),
+                    child: Icon(Icons.check, color: TColor.white, size: 14),
                   ),
                 ),
             ],

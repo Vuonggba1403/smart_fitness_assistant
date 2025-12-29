@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/models/workout_plan.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 
 /// Widget hiển thị một meal session trong list
 class MealSessionListTile extends StatelessWidget {
@@ -44,7 +46,7 @@ class MealSessionListTile extends StatelessWidget {
       width: 50,
       height: 50,
       decoration: BoxDecoration(
-        color: Colors.grey.shade200,
+        color: Colors.grey.withOpacity(0.2),
         borderRadius: BorderRadius.circular(8),
       ),
       child: const Icon(Icons.restaurant, color: Colors.grey),
@@ -58,7 +60,7 @@ class MealSessionListTile extends StatelessWidget {
       children: [
         const SizedBox(height: 4),
         Text(
-          '${mealSession.totalCalories} cal • Khẩu phần: ${mealSession.servingSize}x',
+          '${mealSession.totalCalories} ${LocaleKey.calories.tr} • ${LocaleKey.servingSize.tr}: ${mealSession.servingSize}x',
           style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
         ),
         const SizedBox(height: 2),

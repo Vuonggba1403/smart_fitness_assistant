@@ -15,7 +15,7 @@ class ChatHistoryView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(title: 'Chat History'),
+      appBar: CustomAppBar(title: LocaleKey.chatHistory.tr),
       body: BlocBuilder<ChatbotCubit, ChatbotState>(
         builder: (context, state) {
           if (state is ChatHistoryLoading) {
@@ -48,7 +48,7 @@ class ChatHistoryView extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            "No chat history yet",
+            LocaleKey.noChatHistoryYet.tr,
             style: TextStyle(
               fontSize: 18,
               color: Colors.grey.shade600,
@@ -57,7 +57,7 @@ class ChatHistoryView extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            "Start a conversation to see it here",
+            LocaleKey.startConversationToSeeItHere.tr,
             style: TextStyle(fontSize: 14, color: Colors.grey.shade400),
           ),
         ],

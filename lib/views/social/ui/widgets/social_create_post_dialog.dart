@@ -270,7 +270,7 @@ class SocialCreatePostDialog extends StatelessWidget {
                                     ),
                                     child: Icon(
                                       Icons.close,
-                                      color: Colors.white,
+                                      color: TColor.white,
                                       size: 20,
                                     ),
                                   ),

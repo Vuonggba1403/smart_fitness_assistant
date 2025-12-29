@@ -200,7 +200,7 @@ class _SocialCommentBottomSheetState extends State<SocialCommentBottomSheet> {
                                       ),
                                       const SizedBox(width: 12),
                                       Text(
-                                        'Thích',
+                                        LocaleKey.like.tr,
                                         style: TextStyle(
                                           color: textColor?.withOpacity(0.5),
                                           fontSize: 11,
@@ -299,7 +299,7 @@ class _SocialCommentBottomSheetState extends State<SocialCommentBottomSheet> {
     final difference = now.difference(dateTime);
 
     if (difference.inMinutes < 1) {
-      return 'Vừa xong';
+      return LocaleKey.justNow.tr;
     } else if (difference.inMinutes < 60) {
       return '${difference.inMinutes}m';
     } else if (difference.inHours < 24) {

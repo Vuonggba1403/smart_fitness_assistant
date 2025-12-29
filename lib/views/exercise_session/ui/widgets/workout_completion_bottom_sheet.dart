@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/functions/color_extension.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 
 class WorkoutCompletionBottomSheet {
   static Future<bool?> show(
@@ -42,7 +44,7 @@ class WorkoutCompletionBottomSheet {
 
             // Tiêu đề
             Text(
-              'Kết thúc sớm?',
+              LocaleKey.finishEarly.tr,
               style: TextStyle(
                 color: textColor,
                 fontSize: 20,
@@ -54,7 +56,7 @@ class WorkoutCompletionBottomSheet {
 
             // Thông tin số sets hoàn thành
             Text(
-              'Bạn đã hoàn thành $completedSets/$totalSets sets',
+              '${LocaleKey.youCompleted.tr} $completedSets/$totalSets sets',
               style: TextStyle(
                 color: textColor,
                 fontSize: 16,
@@ -66,7 +68,7 @@ class WorkoutCompletionBottomSheet {
 
             // Mô tả
             Text(
-              'Bài tập sẽ được lưu vào lịch sử với tiến độ hiện tại',
+              LocaleKey.workoutWillBeSaved.tr,
               style: TextStyle(
                 color: textColor?.withOpacity(0.6),
                 fontSize: 14,
@@ -90,7 +92,7 @@ class WorkoutCompletionBottomSheet {
                       ),
                     ),
                     child: Text(
-                      'Tiếp tục',
+                      LocaleKey.continueWorkout.tr,
                       style: TextStyle(
                         color: textColor,
                         fontSize: 16,
@@ -111,9 +113,9 @@ class WorkoutCompletionBottomSheet {
                       ),
                     ),
                     child: Text(
-                      'Kết thúc',
+                      LocaleKey.finish.tr,
                       style: TextStyle(
-                        color: Colors.white,
+                        color: TColor.white,
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),

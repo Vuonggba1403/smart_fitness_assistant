@@ -22,21 +22,21 @@ class StepInjuries extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Chọn các vấn đề chấn thương bạn đang gặp phải:',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            Text(
+              LocaleKey.selectInjuriesInstruction.tr,
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 12),
             _buildSearchField(cubit),
             const SizedBox(height: 12),
             if (state.selectedInjuries.isNotEmpty)
               _buildSelectedChips(state, cubit),
-            const Text(
-              'Danh sách chấn thương:',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+            Text(
+              LocaleKey.injuryList.tr,
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 8),
-            _buildInjuriesList(state, cubit),
+            _buildInjuriesList(context, state, cubit),
             if (state.selectedInjuries.isNotEmpty)
               TextButton.icon(
                 onPressed: cubit.clearInjuries,
@@ -103,13 +103,16 @@ class StepInjuries extends StatelessWidget {
 
   /// Build injuries list
   Widget _buildInjuriesList(
+    BuildContext context,
     MultiStepDialogState state,
     MultiStepDialogCubit cubit,
   ) {
     return Container(
       constraints: const BoxConstraints(maxHeight: 300),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(
+          color: Theme.of(context).dividerColor.withOpacity(0.3),
+        ),
         borderRadius: BorderRadius.circular(12),
       ),
       child: state.filteredInjuries.isEmpty
@@ -117,8 +120,12 @@ class StepInjuries extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(32),
                 child: Text(
-                  'Không tìm thấy chấn thương',
-                  style: TextStyle(color: Colors.grey.shade600),
+                  LocaleKey.noInjuryFound2.tr,
+                  style: TextStyle(
+                    color: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.color?.withOpacity(0.6),
+                  ),
                 ),
               ),
             )
@@ -143,13 +150,15 @@ class StepInjuries extends StatelessWidget {
                           horizontal: 16,
                           vertical: 8,
                         ),
-                        color: Colors.grey.shade100,
+                        color: Colors.grey.withOpacity(0.1),
                         child: Text(
                           injury.category,
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
-                            color: Colors.grey.shade700,
+                            color: Theme.of(
+                              context,
+                            ).textTheme.bodyMedium?.color?.withOpacity(0.7),
                           ),
                         ),
                       ),
@@ -185,7 +194,9 @@ class StepInjuries extends StatelessWidget {
                             injury.nameEn,
                             style: TextStyle(
                               fontSize: 11,
-                              color: Colors.grey.shade500,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium?.color?.withOpacity(0.5),
                               fontStyle: FontStyle.italic,
                             ),
                           ),

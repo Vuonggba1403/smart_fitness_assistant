@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/functions/color_extension.dart';
 import 'package:smart_fitness_assistant/core/models/workout_plan.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/common/bottom_sheet_details.dart';
 
 /// Widget hiển thị một workout session trong list
@@ -47,7 +49,7 @@ class WorkoutSessionListTile extends StatelessWidget {
       width: 50,
       height: 50,
       decoration: BoxDecoration(
-        color: Colors.grey.shade200,
+        color: Colors.grey.withOpacity(0.2),
         borderRadius: BorderRadius.circular(8),
       ),
       child: const Icon(Icons.fitness_center, color: Colors.grey),
@@ -62,7 +64,7 @@ class WorkoutSessionListTile extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           '${workout.sets} sets × ${workout.reps} reps'
-          '${workout.durationMinutes != null ? " • ${workout.durationMinutes} phút" : ""}',
+          '${workout.durationMinutes != null ? " • ${workout.durationMinutes} ${LocaleKey.minutes.tr}" : ""}',
           style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
         ),
         const SizedBox(height: 2),
@@ -83,7 +85,7 @@ class WorkoutSessionListTile extends StatelessWidget {
       onPressed: () {
         ExerciseDetailBottomSheet.show(context, workout.exercise);
       },
-      tooltip: 'Xem chi tiết',
+      tooltip: LocaleKey.viewDetails.tr,
     );
   }
 }

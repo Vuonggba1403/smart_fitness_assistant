@@ -262,7 +262,8 @@ Map<String, String> viVN = {
   LocaleKey.editCaption: "Chỉnh sửa caption...",
   LocaleKey.save: "Lưu",
   LocaleKey.deletePost: "Xoá bài đăng",
-  LocaleKey.confirmDeletePost:
+  LocaleKey.confirmDeletePost: "Xoá bài đăng",
+  LocaleKey.confirmDeletePostMessage:
       "Bạn có chắc muốn xoá bài đăng này? Hành động này không thể hoàn tác.",
   LocaleKey.postDeleted: "Đã xoá bài đăng",
   LocaleKey.deleteFailed: "Xoá bài đăng thất bại",
@@ -372,9 +373,29 @@ Map<String, String> viVN = {
   LocaleKey.minimalEquipment: "Thiết bị tối thiểu",
   LocaleKey.hybrid: "Kết hợp",
   LocaleKey.selectInjuries: "Chọn các vấn đề chấn thương bạn đang gặp phải:",
+  LocaleKey.completeStepsInstruction:
+      "Hãy hoàn thành tất cả các bước để tạo kế hoạch tập luyện phù hợp nhất với bạn. Bước",
+  LocaleKey.trainingLevel: "Trình độ tập luyện",
+  LocaleKey.dietaryRegime: "Chế độ ăn",
+  LocaleKey.selectAllergiesInstruction:
+      "Chọn các món ăn bạn dị ứng hoặc không ăn được:",
+  LocaleKey.foodList: "Danh sách món ăn:",
+  LocaleKey.searchFoodHint2: "Tìm món ăn...",
+  LocaleKey.noFoodFound2: "Không tìm thấy món ăn",
+  LocaleKey.selectInjuriesInstruction:
+      "Chọn các vấn đề chấn thương bạn đang gặp phải:",
+  LocaleKey.injuryList: "Danh sách chấn thương:",
+  LocaleKey.searchInjuryHint: "Tìm chấn thương...",
+  LocaleKey.noInjuryFound2: "Không tìm thấy chấn thương",
+  LocaleKey.gym: "Phòng gym",
+  LocaleKey.fullEquipment: "Thiết bị đầy đủ",
+  LocaleKey.atHome: "Tại nhà",
+  LocaleKey.selectDietInstruction: "Chọn các chế độ ăn phù hợp (nếu có):",
+  LocaleKey.starchless: "Không tinh bột",
 
   // Home Additional
   LocaleKey.noWorkoutsYet: "Chưa có bài tập nào 📋",
+  LocaleKey.noExercisesYet: "Chưa có bài tập nào",
 
   // Water Tracker Additional
   LocaleKey.drinkWaterReminder: "Hãy uống nước để giữ sức khỏe nhé! 🥤",
@@ -391,4 +412,63 @@ Map<String, String> viVN = {
 
   // Pagination
   LocaleKey.noMoreData: "Đã hết dữ liệu",
+
+  // NFT Collection
+  LocaleKey.nftBadgeCollection: "Bộ sưu tập NFT",
+  LocaleKey.noBadgesYet: "Chưa có huy hiệu nào!",
+  LocaleKey.completeBadgesMessage: "Hoàn thành bài tập để nhận huy hiệu NFT",
+  LocaleKey.showcased: "Đã trưng bày",
+  LocaleKey.allBadges: "Tất cả huy hiệu",
+  LocaleKey.collectionStats: "Thống kê bộ sưu tập",
+  LocaleKey.common: "Phổ biến",
+  LocaleKey.rare: "Hiếm",
+  LocaleKey.epic: "Sử thi",
+  LocaleKey.legendary: "Huyền thoại",
+  LocaleKey.workoutDetails: "Chi tiết bài tập",
+  LocaleKey.type: "Loại",
+  LocaleKey.minted: "Đúc",
+  LocaleKey.tokenId: "Token ID",
+  LocaleKey.removeShowcase: "Bỏ khỏi trưng bày",
+  LocaleKey.showcase: "Trưng bày",
+  LocaleKey.share: "Chia sẻ",
+  LocaleKey.post: "Đăng bài",
+  LocaleKey.shareToSocialFeed: "Chia sẻ lên mạng xã hội",
+  LocaleKey.addCaption: "Thêm chú thích...",
+  LocaleKey.postToFeed: "Đăng lên feed",
+  LocaleKey.postedToFeed: "Đã đăng lên feed! 🎉",
+  LocaleKey.failedToPost: "Không thể đăng bài",
+
+  // Workout Congratulations
+  LocaleKey.pleaseWait: "Vui lòng chờ",
+  LocaleKey.viewCollection: "Xem bộ sưu tập",
+  LocaleKey.home: "Trang chủ",
+  LocaleKey.shareAchievement: "Chia sẻ thành tích",
+  LocaleKey.minutes: "phút",
+
+  // Exercise Session
+  LocaleKey.noActiveSession: "Không có phiên tập nào",
+  LocaleKey.kg: "kg",
+  LocaleKey.recordSet: "Ghi lại set",
+  LocaleKey.setsCompleted: "Hoàn tất",
+  LocaleKey.addAnotherSet: "Thêm một set",
+  LocaleKey.nextExerciseButton: "Bài tập tiếp theo",
+  // Schedule Management
+  LocaleKey.deleteScheduleButton: "Xóa lịch",
+  LocaleKey.addScheduleTitle: "Thêm lịch tập",
+
+  // Chatbot
+  LocaleKey.viewAllChats: "Xem tất cả cuộc trò chuyện",
+  LocaleKey.clearCurrentChat: "Xóa cuộc trò chuyện hiện tại",
+  LocaleKey.deleteChat: "Xóa cuộc trò chuyện",
+  LocaleKey.deleteChatConfirm: "Bạn có chắc chắn muốn xóa",
+  LocaleKey.chatInputHint: "Chat Những Gì Bạn Muốn...",
+  LocaleKey.noChatHistoryYet: "Chưa có lịch sử trò chuyện",
+  LocaleKey.startConversationToSeeItHere:
+      "Bắt đầu cuộc trò chuyện để xem tại đây",
+  LocaleKey.chatHistory: "Lịch sử trò chuyện",
+
+  // Auth
+  LocaleKey.username: "Tên người dùng",
+  LocaleKey.email: "Email",
+  LocaleKey.password: "Mật khẩu",
 };

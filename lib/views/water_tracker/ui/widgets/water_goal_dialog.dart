@@ -8,6 +8,8 @@ import '../../../../locale/locale_key.dart';
 class WaterGoalDialog {
   static Future<int?> show(BuildContext context, int currentGoal) {
     int tempGoal = currentGoal;
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color;
 
     return showDialog<int>(
       context: context,
@@ -15,7 +17,7 @@ class WaterGoalDialog {
         builder: (builderContext, setDialogState) {
           return AlertDialog(
             title: Text(LocaleKey.dailyGoal.tr),
-            backgroundColor: Colors.grey.shade800,
+            backgroundColor: theme.dialogBackgroundColor,
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -47,11 +49,11 @@ class WaterGoalDialog {
                   children: [
                     Text(
                       '500ml',
-                      style: TextStyle(fontSize: 12, color: TColor.white),
+                      style: TextStyle(fontSize: 12, color: textColor),
                     ),
                     Text(
                       '5000ml',
-                      style: TextStyle(fontSize: 12, color: TColor.white),
+                      style: TextStyle(fontSize: 12, color: textColor),
                     ),
                   ],
                 ),
@@ -72,7 +74,7 @@ class WaterGoalDialog {
                 ),
                 child: Text(
                   LocaleKey.buttonSave.tr,
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: TColor.white),
                 ),
               ),
             ],

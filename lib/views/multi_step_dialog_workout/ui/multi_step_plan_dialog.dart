@@ -45,10 +45,7 @@ class _MultiStepPlanDialogState extends State<MultiStepPlanDialog> {
           return AlertDialog(
             insetPadding: const EdgeInsets.symmetric(horizontal: 16),
             contentPadding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-            title: MessageBubble(
-              text:
-                  "Hãy hoàn thành tất cả các bước để tạo kế hoạch tập luyện phù hợp nhất với bạn. Bước ${state.currentStep + 1}/6",
-            ),
+            title: MessageBubble(text: LocaleKey.completeStepsInstruction.tr),
             content: SizedBox(
               width: double.maxFinite,
               child: Column(
@@ -63,7 +60,9 @@ class _MultiStepPlanDialogState extends State<MultiStepPlanDialog> {
                     decoration: BoxDecoration(
                       color: cardColor,
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey.shade300),
+                      border: Border.all(
+                        color: theme.dividerColor.withOpacity(0.3),
+                      ),
                     ),
                     child: Row(
                       children: [
@@ -75,13 +74,13 @@ class _MultiStepPlanDialogState extends State<MultiStepPlanDialog> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            const [
-                              'Mức độ hoạt động',
-                              'Trình độ tập luyện',
-                              'Thiết bị',
-                              'Chế độ ăn',
-                              'Dị ứng',
-                              'Chấn thương',
+                            [
+                              LocaleKey.activityLevel.tr,
+                              LocaleKey.trainingLevel.tr,
+                              LocaleKey.equipment.tr,
+                              LocaleKey.dietaryRegime.tr,
+                              LocaleKey.allergies.tr,
+                              LocaleKey.injuries.tr,
                             ][state.currentStep],
                             style: const TextStyle(
                               fontSize: 15,
@@ -93,7 +92,8 @@ class _MultiStepPlanDialogState extends State<MultiStepPlanDialog> {
                           '${state.currentStep + 1}/6',
                           style: TextStyle(
                             fontSize: 13,
-                            color: Colors.grey.shade600,
+                            color: theme.textTheme.bodyMedium?.color
+                                ?.withOpacity(0.6),
                           ),
                         ),
                       ],
@@ -105,7 +105,7 @@ class _MultiStepPlanDialogState extends State<MultiStepPlanDialog> {
                     borderRadius: BorderRadius.circular(4),
                     child: LinearProgressIndicator(
                       value: (state.currentStep + 1) / 6,
-                      backgroundColor: Colors.grey.shade200,
+                      backgroundColor: Colors.grey.withOpacity(0.2),
                       valueColor: AlwaysStoppedAnimation(TColor.primaryColor1),
                       minHeight: 6,
                     ),
@@ -117,7 +117,9 @@ class _MultiStepPlanDialogState extends State<MultiStepPlanDialog> {
                       decoration: BoxDecoration(
                         color: cardColor,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey.shade300),
+                        border: Border.all(
+                          color: theme.dividerColor.withOpacity(0.3),
+                        ),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(
@@ -169,7 +171,7 @@ class _MultiStepPlanDialogState extends State<MultiStepPlanDialog> {
                       : cubit.nextStep,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: TColor.primaryColor1,
-                    foregroundColor: Colors.white,
+                    foregroundColor: TColor.white,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24,
                       vertical: 12,
@@ -187,7 +189,7 @@ class _MultiStepPlanDialogState extends State<MultiStepPlanDialog> {
                       : () => _onComplete(context, cubit, state),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: TColor.primaryColor1,
-                    foregroundColor: Colors.white,
+                    foregroundColor: TColor.white,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24,
                       vertical: 12,
@@ -197,12 +199,12 @@ class _MultiStepPlanDialogState extends State<MultiStepPlanDialog> {
                     ),
                   ),
                   child: _isProcessing
-                      ? const SizedBox(
+                      ? SizedBox(
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation(Colors.white),
+                            valueColor: AlwaysStoppedAnimation(TColor.white),
                           ),
                         )
                       : Text(LocaleKey.createPlan.tr),

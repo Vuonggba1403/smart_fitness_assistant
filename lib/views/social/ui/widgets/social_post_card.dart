@@ -45,7 +45,7 @@ class _SocialPostCardState extends State<SocialPostCard> {
     final difference = now.difference(dateTime);
 
     if (difference.inMinutes < 1) {
-      return 'Vừa xong';
+      return LocaleKey.justNow.tr;
     } else if (difference.inMinutes < 60) {
       return '${difference.inMinutes}m';
     } else if (difference.inHours < 24) {
@@ -139,9 +139,8 @@ class _SocialPostCardState extends State<SocialPostCard> {
   void _showDeleteDialog() {
     AppConfirmDialog.show(
       context: context,
-      title: 'Xoá bài đăng',
-      content:
-          'Bạn có chắc muốn xoá bài đăng này? Hành động này không thể hoàn tác.',
+      title: LocaleKey.confirmDeletePost.tr,
+      content: LocaleKey.confirmDeletePostMessage.tr,
       onYes: () async {
         final success = await context.read<SocialFeedCubit>().deletePost(
           widget.post.id ?? '',

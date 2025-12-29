@@ -12,20 +12,20 @@ class StepEquipment extends StatelessWidget {
     {
       'value': 'gym',
       'icon': Icons.fitness_center,
-      'title': 'Phòng gym',
+      'title': LocaleKey.gym.tr,
       'subtitle': LocaleKey.fullEquipment.tr,
     },
     {
       'value': 'home',
       'icon': Icons.home,
-      'title': 'Tại nhà',
+      'title': LocaleKey.atHome.tr,
       'subtitle': LocaleKey.minimalEquipment.tr,
     },
     {
       'value': 'mixed',
       'icon': Icons.loop,
-      'title': 'Kết hợp',
-      'subtitle': 'Gym + Home',
+      'title': LocaleKey.hybrid.tr,
+      'subtitle': LocaleKey.hybrid.tr,
     },
   ];
 
