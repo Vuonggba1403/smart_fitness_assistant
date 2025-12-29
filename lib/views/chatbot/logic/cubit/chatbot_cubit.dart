@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 import 'package:bloc/bloc.dart';
 import 'package:dash_chat_2/dash_chat_2.dart';
@@ -14,7 +15,10 @@ class ChatbotCubit extends Cubit<ChatbotState> {
   final String userId;
   List<ChatMessage> _messages = [];
   String? _currentSessionId;
-  DateTime? _sessionCreatedDate; // Theo dõi ngày tạo session
+  DateTime? _sessionCreatedDate;
+
+  // ✅ FIX: Đổi type thành dynamic hoặc StreamSubscription<dynamic>
+  StreamSubscription? _currentStreamSubscription;
 
   final ChatUser botUser = ChatUser(id: "bot", firstName: "Fitness Assistant");
 
@@ -23,16 +27,30 @@ class ChatbotCubit extends Cubit<ChatbotState> {
   ChatbotCubit({required this.userId, String? username})
     : super(ChatbotInitial()) {
     currentUser = ChatUser(id: "user", firstName: username ?? "You");
+    log('🆕 ChatbotCubit created for user: $userId');
     _checkAndInitializeChat();
+  }
+
+  // ✅ UPDATE: Override close để cancel stream và clear state
+  @override
+  Future<void> close() {
+    log('🗑️ ChatbotCubit disposed for user: $userId');
+    _currentStreamSubscription?.cancel(); // ✅ Cancel stream
+    _messages.clear();
+    _currentSessionId = null;
+    _sessionCreatedDate = null;
+    return super.close();
   }
 
   /// Kiểm tra và khởi tạo chat (check ngày mới)
   Future<void> _checkAndInitializeChat() async {
+    log('🔍 Checking and initializing chat for user: $userId');
+
     // Load session gần nhất
     final sessions = await AppShared.getChatSessions(userId);
 
     if (sessions.isEmpty) {
-      // Chưa có session nào, tạo mới VÀ hiển thị welcome
+      log('📝 No existing sessions, creating new chat with welcome');
       await _initializeChat(showWelcome: true);
       return;
     }
@@ -41,31 +59,45 @@ class ChatbotCubit extends Cubit<ChatbotState> {
     final today = DateTime.now();
     final sessionDate = latestSession.createdAt;
 
-    // Kiểm tra nếu session cũ là hôm nay
-    final isSameDay =
-        today.year == sessionDate.year &&
-        today.month == sessionDate.month &&
-        today.day == sessionDate.day;
+    final isSameDay = _isSameDay(today, sessionDate);
 
     if (isSameDay) {
-      // ✅ Load session hiện tại KHÔNG hiển thị welcome
+      log('✅ Loading today\'s session: ${latestSession.id}');
       await loadChatSession(latestSession.id, keepHistory: true);
     } else {
-      // ✅ Qua ngày mới, tạo session mới VÀ hiển thị welcome
+      log('📅 New day detected, creating new session with welcome');
       await _initializeChat(showWelcome: true);
     }
   }
 
+  /// ✅ NEW: Helper method để check cùng ngày
+  bool _isSameDay(DateTime date1, DateTime date2) {
+    return date1.year == date2.year &&
+        date1.month == date2.month &&
+        date1.day == date2.day;
+  }
+
   /// Khởi tạo chat với tin nhắn chào mừng (delay 1.5s)
   Future<void> _initializeChat({bool showWelcome = true}) async {
+    log('🔄 Initializing new chat (showWelcome: $showWelcome)');
+
+    // ✅ FIX: Cancel stream cũ và clear state
+    await _currentStreamSubscription?.cancel();
+    _currentStreamSubscription = null;
+
+    _messages.clear();
+    _currentSessionId = null;
+    _sessionCreatedDate = null;
+
     // Tạo session ID mới
     _currentSessionId = const Uuid().v4();
     _sessionCreatedDate = DateTime.now();
 
+    log('✨ New session ID: $_currentSessionId');
+
     if (showWelcome) {
       // Emit empty state trước
-      _messages = [];
-      emit(ChatbotLoaded(_messages));
+      emit(ChatbotLoaded([]));
 
       // Delay 1.5 giây trước khi hiển thị welcome message
       await Future.delayed(const Duration(milliseconds: 1500));
@@ -78,17 +110,24 @@ class ChatbotCubit extends Cubit<ChatbotState> {
       );
 
       _messages = [welcomeMessage];
-      emit(ChatbotLoaded(_messages));
+      emit(ChatbotLoaded(List.from(_messages))); // ✅ Tạo list mới
+      log('👋 Welcome message displayed');
     } else {
-      // ✅ Không hiển thị welcome, chat trống
       _messages = [];
-      emit(ChatbotLoaded(_messages));
+      emit(ChatbotLoaded([]));
+      log('⚪ Empty chat initialized');
     }
   }
 
   /// Gửi tin nhắn từ người dùng
   Future<void> sendMessage(ChatMessage message) async {
     try {
+      // ✅ FIX: Cancel stream cũ trước khi gửi câu mới
+      await _currentStreamSubscription?.cancel();
+      _currentStreamSubscription = null;
+
+      log('💬 Sending new message: ${message.text}');
+
       // Thêm tin nhắn người dùng vào danh sách
       _messages = [message, ..._messages];
       emit(ChatbotResponding(_messages));
@@ -113,6 +152,7 @@ class ChatbotCubit extends Cubit<ChatbotState> {
       // Gọi API Gemini để lấy phản hồi
       await _getGeminiResponse(message.text);
     } catch (e) {
+      log('❌ Error sending message: $e');
       emit(
         ChatbotError(
           "Đã xảy ra lỗi khi gửi tin nhắn. Vui lòng thử lại.",
@@ -125,22 +165,21 @@ class ChatbotCubit extends Cubit<ChatbotState> {
   /// Lấy phản hồi từ Gemini API
   Future<void> _getGeminiResponse(String userMessage) async {
     try {
+      await _currentStreamSubscription?.cancel();
+
       StringBuffer responseBuffer = StringBuffer();
 
-      // Prompt với format SIÊU STRICT
+      // ✅ FIX: Prompt linh hoạt - cho phép trả lời tự nhiên
       final enhancedPrompt =
           '''
-You are a fitness assistant. FOLLOW THIS EXACT FORMAT - NO EXCEPTIONS:
+You are a friendly fitness assistant named "Fitness Assistant".
 
-RULES (MANDATORY):
-1. Start with **Title:** (bold using double asterisks)
-2. Add ONE blank line after title
-3. Use bullet points: • (bullet character, NOT dash or asterisk)
-4. Each bullet on NEW LINE with blank line after
-5. Max 5 items only
-6. Keep info SHORT: [item name] - [1 benefit], [1 number]
+CONVERSATION RULES:
+1. For greetings (hi, hello, how are you): Reply naturally and friendly
+2. For general questions: Answer conversationally 
+3. For fitness/health/nutrition questions: Use the structured format below
 
-EXACT TEMPLATE (COPY THIS):
+STRUCTURED FORMAT (only for fitness-related questions):
 **[Category Name]:**
 
 • [Item 1] - [brief info]
@@ -153,50 +192,67 @@ EXACT TEMPLATE (COPY THIS):
 
 • [Item 5] - [brief info]
 
-EXAMPLE for "5 món ăn ngon":
-**Món Ăn Ngon:**
+EXAMPLES:
 
-• Gà kho gừng - 200 cal/100g, giàu protein
+User: "hi"
+Response: "Hello! 👋 I'm your Fitness Assistant. How can I help you with your fitness journey today?"
+
+User: "5 món ăn giảm cân"
+Response:
+**Món Ăn Giảm Cân:**
+
+• Salad ức gà - 150 cal/phần, giàu protein
 
 • Cá hồi nướng - 180 cal/100g, omega-3 cao
 
-• Đậu hũ sốt cà - 120 cal/100g, ít béo
+• Súp lơ xanh - 55 cal/100g, ít calo
 
-• Bún chả Hà Nội - 450 cal/phần
+• Trứng luộc - 155 cal/2 trứng, no lâu
 
-• Gỏi cuốn tôm - 150 cal/phần, tươi mát
+• Sữa chua Hy Lạp - 100 cal/100g, probiotic tốt
 
-NOW answer: $userMessage
+User: "how are you"
+Response: "I'm doing great, thank you! 😊 Ready to help you achieve your fitness goals. What would you like to know?"
+
+NOW RESPOND TO: $userMessage
+
+Remember: 
+- Be friendly and conversational for casual chat
+- Use structured format ONLY for fitness/nutrition questions
+- Keep responses concise and helpful
 ''';
 
-      // ✅ Flag để check lần đầu nhận response
       bool isFirstChunk = true;
 
-      // Stream phản hồi từ Gemini
-      _gemini
+      _currentStreamSubscription = _gemini
           .streamGenerateContent(enhancedPrompt)
           .listen(
             (event) {
               final response = event.output ?? "";
 
-              // ✅ Lần đầu nhận response, xóa "..." typing indicator
               if (isFirstChunk) {
                 responseBuffer.clear();
                 isFirstChunk = false;
+                log('📨 First chunk received, clearing typing indicator');
               }
 
               responseBuffer.write(response);
 
-              // Cập nhật tin nhắn bot đầu tiên (tin nhắn mới nhất)
-              _messages[0] = ChatMessage(
-                user: botUser,
-                createdAt: _messages[0].createdAt,
-                text: responseBuffer.toString(),
-              );
+              if (_messages.isNotEmpty && _messages[0].user.id == botUser.id) {
+                _messages[0] = ChatMessage(
+                  user: botUser,
+                  createdAt: _messages[0].createdAt,
+                  text: responseBuffer.toString(),
+                );
 
-              emit(ChatbotResponding(List.from(_messages)));
+                emit(ChatbotResponding(List.from(_messages)));
+              }
             },
             onError: (error) {
+              log('❌ Gemini stream error: $error');
+              _currentStreamSubscription?.cancel();
+              _currentStreamSubscription = null;
+
               emit(
                 ChatbotError(
                   "Không thể kết nối với trợ lý AI. Vui lòng thử lại sau.",
@@ -205,14 +261,20 @@ NOW answer: $userMessage
               );
             },
             onDone: () async {
-              // Hoàn thành việc nhận phản hồi
+              log('✅ Gemini stream completed');
+              _currentStreamSubscription = null;
+
               emit(ChatbotLoaded(List.from(_messages)));
 
-              // Lưu chat session sau khi có phản hồi
               await _saveChatSession();
             },
+            cancelOnError: true,
           );
     } catch (e) {
+      log('❌ Error getting Gemini response: $e');
+      _currentStreamSubscription?.cancel();
+      _currentStreamSubscription = null;
+
       emit(ChatbotError("Đã xảy ra lỗi khi xử lý phản hồi.", _messages));
     }
   }
@@ -282,11 +344,23 @@ NOW answer: $userMessage
   /// Xóa chat hiện tại
   Future<void> clearCurrentChat() async {
     try {
+      log('🗑️ Clearing current chat: $_currentSessionId');
+
+      // ✅ FIX: Cancel stream trước khi clear
+      await _currentStreamSubscription?.cancel();
+      _currentStreamSubscription = null;
+
       if (_currentSessionId != null) {
         await AppShared.deleteChatSession(userId, _currentSessionId!);
-        log('🗑️ Deleted current chat session: $_currentSessionId');
+        log('✅ Deleted current chat session: $_currentSessionId');
       }
-      // ✅ Sau khi xóa, tạo chat mới VÀ hiển thị welcome
+
+      // Clear messages trước khi tạo mới
+      _messages.clear();
+      _currentSessionId = null;
+      _sessionCreatedDate = null;
+
+      // Tạo chat mới VÀ hiển thị welcome
       await _initializeChat(showWelcome: true);
     } catch (e) {
       log('❌ Error clearing current chat: $e');
@@ -348,14 +422,25 @@ NOW answer: $userMessage
 
   /// Tạo chat mới (chỉ khi user nhấn nút)
   Future<void> createNewChat() async {
-    // Lưu session hiện tại trước khi tạo mới
-    if (_messages.length > 1) {
+    log('🆕 Creating new chat...');
+
+    // ✅ FIX: Cancel stream trước khi tạo chat mới
+    await _currentStreamSubscription?.cancel();
+    _currentStreamSubscription = null;
+
+    // Lưu session hiện tại trước khi tạo mới (nếu có messages)
+    if (_messages.length > 1 && _currentSessionId != null) {
       await _saveChatSession();
     }
 
-    // ✅ Tạo chat mới VÀ hiển thị welcome message
+    // Clear hoàn toàn state cũ
+    _messages.clear();
+    _currentSessionId = null;
+    _sessionCreatedDate = null;
+
+    // Tạo chat mới VÀ hiển thị welcome message
     await _initializeChat(showWelcome: true);
-    log('🆕 Created new chat session with welcome message');
+    log('✅ New chat created with welcome message');
   }
 
   /// Kiểm tra nếu session hiện tại đã qua ngày
@@ -363,16 +448,20 @@ NOW answer: $userMessage
     if (_sessionCreatedDate == null) return false;
 
     final now = DateTime.now();
-    return now.year != _sessionCreatedDate!.year ||
-        now.month != _sessionCreatedDate!.month ||
-        now.day != _sessionCreatedDate!.day;
+    return !_isSameDay(now, _sessionCreatedDate!);
   }
 
   /// Kiểm tra và tự động tạo session mới nếu qua ngày
   Future<void> checkAndCreateNewDaySession() async {
     if (_isSessionExpired()) {
       log('📅 New day detected, creating new session');
-      await createNewChat();
+
+      // ✅ FIX: Clear messages trước khi tạo session mới
+      _messages.clear();
+      _currentSessionId = null;
+      _sessionCreatedDate = null;
+
+      await _initializeChat(showWelcome: true);
     }
   }
 

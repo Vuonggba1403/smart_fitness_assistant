@@ -8,14 +8,32 @@ import 'package:smart_fitness_assistant/views/chatbot/ui/widgets/chat_message_bu
 import '../logic/cubit/chatbot_cubit.dart';
 
 /// Main Chatbot View - Clean và tối giản
-class ChatBot extends StatefulWidget {
+class ChatBot extends StatelessWidget {
   const ChatBot({super.key});
 
   @override
-  State<ChatBot> createState() => _ChatBotState();
+  Widget build(BuildContext context) {
+    final authCubit = context.read<AuthenticationCubit>();
+    final username = authCubit.userDataModel?.username ?? "You";
+    final userId = authCubit.userDataModel?.userId ?? "";
+
+    // ✅ FIX: Tạo BlocProvider mới mỗi lần để đảm bảo state mới hoàn toàn
+    return BlocProvider(
+      create: (context) => ChatbotCubit(userId: userId, username: username),
+      child: const _ChatBotView(),
+    );
+  }
 }
 
-class _ChatBotState extends State<ChatBot> with WidgetsBindingObserver {
+class _ChatBotView extends StatefulWidget {
+  const _ChatBotView();
+
+  @override
+  State<_ChatBotView> createState() => _ChatBotViewState();
+}
+
+class _ChatBotViewState extends State<_ChatBotView>
+    with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
@@ -30,26 +48,10 @@ class _ChatBotState extends State<ChatBot> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
+    if (state == AppLifecycleState.resumed && mounted) {
       context.read<ChatbotCubit>().checkAndCreateNewDaySession();
     }
   }
-
-  @override
-  Widget build(BuildContext context) {
-    final authCubit = context.read<AuthenticationCubit>();
-    final username = authCubit.userDataModel?.username ?? "You";
-    final userId = authCubit.userDataModel?.userId ?? "";
-
-    return BlocProvider(
-      create: (context) => ChatbotCubit(userId: userId, username: username),
-      child: const _ChatBotView(),
-    );
-  }
-}
-
-class _ChatBotView extends StatelessWidget {
-  const _ChatBotView();
 
   @override
   Widget build(BuildContext context) {

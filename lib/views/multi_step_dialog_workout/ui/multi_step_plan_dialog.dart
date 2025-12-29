@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_fitness_assistant/core/functions/colo_extension.dart';
 import 'package:smart_fitness_assistant/core/models/activity_level.dart';
 import 'package:smart_fitness_assistant/core/models/user_fitness_profile.dart';
+import 'package:smart_fitness_assistant/views/activity_level/ui/widgets/message_bubble.dart';
 import '../logic/cubit/multi_step_dialog_cubit.dart';
 import 'widgets/step_activity_level.dart';
 import 'widgets/step_fitness_level.dart';
@@ -11,8 +12,7 @@ import 'widgets/step_dietary_preferences.dart';
 import 'widgets/step_food_allergies.dart';
 import 'widgets/step_injuries.dart';
 
-/// Multi-step dialog để thu thập thông tin user cho workout plan
-class MultiStepPlanDialog extends StatelessWidget {
+class MultiStepPlanDialog extends StatefulWidget {
   final List<ActivityLevel> activityLevels;
   final Function(ActivityLevel, UserFitnessProfile) onComplete;
 
@@ -23,154 +23,233 @@ class MultiStepPlanDialog extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => MultiStepDialogCubit(),
-      child: _DialogContent(
-        activityLevels: activityLevels,
-        onComplete: onComplete,
-      ),
-    );
-  }
+  State<MultiStepPlanDialog> createState() => _MultiStepPlanDialogState();
 }
 
-/// Nội dung chính của dialog
-class _DialogContent extends StatelessWidget {
-  final List<ActivityLevel> activityLevels;
-  final Function(ActivityLevel, UserFitnessProfile) onComplete;
-
-  const _DialogContent({
-    required this.activityLevels,
-    required this.onComplete,
-  });
+class _MultiStepPlanDialogState extends State<MultiStepPlanDialog> {
+  bool _isProcessing = false;
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<MultiStepDialogCubit, MultiStepDialogState>(
-      builder: (context, state) {
-        final cubit = context.read<MultiStepDialogCubit>();
+    final theme = Theme.of(context);
+    final cardColor = theme.cardColor;
 
-        return AlertDialog(
-          title: _buildTitle(state),
-          content: _buildContent(context, state),
-          actions: _buildActions(context, state, cubit),
-        );
-      },
-    );
-  }
+    return BlocProvider(
+      create: (_) => MultiStepDialogCubit(),
+      child: BlocBuilder<MultiStepDialogCubit, MultiStepDialogState>(
+        builder: (context, state) {
+          final cubit = context.read<MultiStepDialogCubit>();
 
-  /// Build title với progress
-  Widget _buildTitle(MultiStepDialogState state) {
-    return Row(
-      children: [
-        Text('Bước ${state.currentStep + 1}/6'),
-        const Spacer(),
-        Text(
-          _getStepTitle(state.currentStep),
-          style: const TextStyle(fontSize: 16),
-        ),
-      ],
-    );
-  }
-
-  /// Lấy title cho từng bước
-  String _getStepTitle(int step) {
-    const titles = [
-      'Mức độ hoạt động',
-      'Trình độ tập luyện',
-      'Thiết bị',
-      'Chế độ ăn',
-      'Dị ứng',
-      'Chấn thương',
-    ];
-    return titles[step];
-  }
-
-  /// Build nội dung dialog
-  Widget _buildContent(BuildContext context, MultiStepDialogState state) {
-    return SizedBox(
-      width: double.maxFinite,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildProgressIndicator(state),
-          const SizedBox(height: 20),
-          Flexible(
-            child: SingleChildScrollView(
-              child: _buildStepContent(context, state),
+          return AlertDialog(
+            insetPadding: const EdgeInsets.symmetric(horizontal: 16),
+            contentPadding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+            title: MessageBubble(
+              text:
+                  "Hãy hoàn thành tất cả các bước để tạo kế hoạch tập luyện phù hợp nhất với bạn. Bước ${state.currentStep + 1}/6",
             ),
-          ),
-        ],
+            content: SizedBox(
+              width: double.maxFinite,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Step indicator với style cải thiện
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: cardColor,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          _getStepIcon(state.currentStep),
+                          size: 20,
+                          color: TColor.primaryColor1,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            const [
+                              'Mức độ hoạt động',
+                              'Trình độ tập luyện',
+                              'Thiết bị',
+                              'Chế độ ăn',
+                              'Dị ứng',
+                              'Chấn thương',
+                            ][state.currentStep],
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          '${state.currentStep + 1}/6',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  // Progress bar
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: (state.currentStep + 1) / 6,
+                      backgroundColor: Colors.grey.shade200,
+                      valueColor: AlwaysStoppedAnimation(TColor.primaryColor1),
+                      minHeight: 6,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Content với shadow
+                  Flexible(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: cardColor,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey.shade300),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(
+                              theme.brightness == Brightness.dark ? 0.25 : 0.08,
+                            ),
+                            blurRadius: 12,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(16),
+                        child: () {
+                          switch (state.currentStep) {
+                            case 0:
+                              return StepActivityLevel(
+                                activityLevels: widget.activityLevels,
+                              );
+                            case 1:
+                              return const StepFitnessLevel();
+                            case 2:
+                              return const StepEquipment();
+                            case 3:
+                              return const StepDietaryPreferences();
+                            case 4:
+                              return const StepFoodAllergies();
+                            case 5:
+                              return const StepInjuries();
+                            default:
+                              return const SizedBox();
+                          }
+                        }(),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              if (state.currentStep > 0)
+                TextButton(
+                  onPressed: _isProcessing ? null : cubit.previousStep,
+                  child: const Text('Quay lại'),
+                ),
+              if (state.currentStep < 5)
+                ElevatedButton(
+                  onPressed: (_isProcessing || !cubit.canProceed())
+                      ? null
+                      : cubit.nextStep,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: TColor.primaryColor1,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text('Tiếp tục'),
+                ),
+              if (state.currentStep == 5)
+                ElevatedButton(
+                  onPressed: (_isProcessing || !cubit.canComplete())
+                      ? null
+                      : () => _onComplete(context, cubit, state),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: TColor.primaryColor1,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: _isProcessing
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation(Colors.white),
+                          ),
+                        )
+                      : const Text('Tạo kế hoạch'),
+                ),
+            ],
+          );
+        },
       ),
     );
   }
 
-  /// Build progress indicator
-  Widget _buildProgressIndicator(MultiStepDialogState state) {
-    return LinearProgressIndicator(
-      value: (state.currentStep + 1) / 6,
-      backgroundColor: Colors.grey.shade200,
-      valueColor: AlwaysStoppedAnimation(TColor.primaryColor1),
-    );
-  }
-
-  /// Build nội dung cho từng bước
-  Widget _buildStepContent(BuildContext context, MultiStepDialogState state) {
-    switch (state.currentStep) {
+  IconData _getStepIcon(int step) {
+    switch (step) {
       case 0:
-        return StepActivityLevel(activityLevels: activityLevels);
+        return Icons.directions_run;
       case 1:
-        return const StepFitnessLevel();
+        return Icons.fitness_center;
       case 2:
-        return const StepEquipment();
+        return Icons.sports_gymnastics;
       case 3:
-        return const StepDietaryPreferences();
+        return Icons.restaurant_menu;
       case 4:
-        return const StepFoodAllergies();
+        return Icons.warning_amber_rounded;
       case 5:
-        return const StepInjuries();
+        return Icons.healing;
       default:
-        return const SizedBox();
+        return Icons.check_circle;
     }
   }
 
-  /// Build action buttons
-  List<Widget> _buildActions(
+  Future<void> _onComplete(
     BuildContext context,
-    MultiStepDialogState state,
     MultiStepDialogCubit cubit,
-  ) {
-    return [
-      if (state.currentStep > 0)
-        TextButton(
-          onPressed: cubit.previousStep,
-          child: const Text('Quay lại'),
-        ),
-      if (state.currentStep < 5)
-        ElevatedButton(
-          onPressed: cubit.canProceed() ? cubit.nextStep : null,
-          child: const Text('Tiếp tục'),
-        ),
-      if (state.currentStep == 5)
-        ElevatedButton(
-          onPressed: cubit.canComplete()
-              ? () => _handleComplete(context, state, cubit)
-              : null,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: TColor.primaryColor1,
-          ),
-          child: const Text('Tạo kế hoạch'),
-        ),
-    ];
-  }
+    MultiStepDialogState state,
+  ) async {
+    if (_isProcessing || !mounted) return;
 
-  /// Xử lý khi hoàn thành
-  void _handleComplete(
-    BuildContext context,
-    MultiStepDialogState state,
-    MultiStepDialogCubit cubit,
-  ) {
-    final profile = cubit.buildFitnessProfile();
-    onComplete(state.selectedActivityLevel!, profile);
+    setState(() => _isProcessing = true);
+
+    try {
+      final profile = cubit.buildFitnessProfile();
+      widget.onComplete(state.selectedActivityLevel!, profile);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Lỗi: $e')));
+    } finally {
+      if (mounted) setState(() => _isProcessing = false);
+    }
   }
 }
