@@ -59,3 +59,30 @@ final class MealPlannerError extends MealPlannerState {
   final String message;
   MealPlannerError(this.message);
 }
+
+// =====================================================
+// 🔍 SEARCH STATES
+// =====================================================
+
+/// 🔵 Search initial state
+final class SearchMealInitial extends MealPlannerState {}
+
+/// ⏳ Search loading state
+final class SearchMealLoading extends MealPlannerState {}
+
+/// ✅ Search loaded với kết quả
+final class SearchMealLoaded extends MealPlannerState {
+  final List<Meal> meals;
+
+  SearchMealLoaded(this.meals);
+}
+
+/// 📦 Search empty (không có kết quả)
+final class SearchMealEmpty extends MealPlannerState {}
+
+/// ❌ Search error
+final class SearchMealError extends MealPlannerState {
+  final String message;
+
+  SearchMealError(this.message);
+}

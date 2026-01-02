@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -73,7 +74,7 @@ class _AddScheduleViewState extends State<AddScheduleView> {
   /// Lưu lịch tập mới - ✅ FIX: Chỉ lưu category_id
   Future<void> _save() async {
     if (_selectedCategory == null) {
-      AppSnackBar.error(context, 'Vui lòng chọn bài tập');
+      AppSnackBar.error(context, LocaleKey.pleaseSelectExercise.tr);
       return;
     }
 
@@ -89,7 +90,7 @@ class _AddScheduleViewState extends State<AddScheduleView> {
     );
 
     if (scheduledTime.isBefore(DateTime.now())) {
-      AppSnackBar.error(context, 'Vui lòng chọn thời gian trong tương lai');
+      AppSnackBar.error(context, LocaleKey.pleaseSelectFutureTime.tr);
       return;
     }
 
@@ -105,9 +106,9 @@ class _AddScheduleViewState extends State<AddScheduleView> {
 
     if (success && mounted) {
       Navigator.pop(context, true);
-      AppSnackBar.success(context, '✅ Đã thêm lịch tập');
+      AppSnackBar.success(context, LocaleKey.scheduleAddedSuccess.tr);
     } else if (mounted) {
-      AppSnackBar.error(context, '❌ Thêm lịch tập thất bại');
+      AppSnackBar.error(context, LocaleKey.addScheduleFailed.tr);
     }
   }
 
@@ -119,7 +120,7 @@ class _AddScheduleViewState extends State<AddScheduleView> {
     return Scaffold(
       appBar: AppBar(title: Text(LocaleKey.addScheduleTitle.tr)),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? CustomCircleProgIndicator()
           : SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -127,7 +128,7 @@ class _AddScheduleViewState extends State<AddScheduleView> {
                 children: [
                   /// Chọn bài tập
                   Text(
-                    'Chọn bài tập',
+                    LocaleKey.selectWorkout.tr,
                     style: TextStyle(
                       color: textColor,
                       fontSize: 16,
@@ -165,7 +166,7 @@ class _AddScheduleViewState extends State<AddScheduleView> {
 
                   /// Chọn thời gian
                   Text(
-                    'Thời gian',
+                    LocaleKey.time.tr,
                     style: TextStyle(
                       color: textColor,
                       fontSize: 16,
@@ -216,7 +217,7 @@ class _AddScheduleViewState extends State<AddScheduleView> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
-                            'Nhắc nhở khi đến giờ',
+                            LocaleKey.reminderWhenTime.tr,
                             style: TextStyle(color: textColor, fontSize: 14),
                           ),
                         ),
@@ -234,7 +235,10 @@ class _AddScheduleViewState extends State<AddScheduleView> {
                   const SizedBox(height: 40),
 
                   /// Nút thêm lịch
-                  RoundButton(title: 'Thêm lịch', onPressed: _save),
+                  RoundButton(
+                    title: LocaleKey.addSchedule.tr,
+                    onPressed: _save,
+                  ),
                 ],
               ),
             ),

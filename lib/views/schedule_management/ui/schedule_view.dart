@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get_utils/src/extensions/internacionalization.dart';
 import 'package:intl/intl.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/core/functions/custom_appbar.dart';
@@ -130,7 +131,7 @@ class _ScheduleViewState extends State<ScheduleView> {
             child: BlocBuilder<ScheduleCubit, ScheduleState>(
               builder: (context, state) {
                 if (state is ScheduleLoading) {
-                  return const Center(child: CircularProgressIndicator());
+                  return CustomCircleProgIndicator();
                 }
 
                 List<ScheduledWorkout> schedules = [];

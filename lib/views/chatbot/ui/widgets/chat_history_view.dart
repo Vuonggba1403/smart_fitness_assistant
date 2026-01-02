@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:intl/intl.dart';
 import 'package:smart_fitness_assistant/core/functions/app_shared.dart';
@@ -19,7 +20,7 @@ class ChatHistoryView extends StatelessWidget {
       body: BlocBuilder<ChatbotCubit, ChatbotState>(
         builder: (context, state) {
           if (state is ChatHistoryLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return CustomCircleProgIndicator();
           }
 
           if (state is ChatHistoryLoaded) {

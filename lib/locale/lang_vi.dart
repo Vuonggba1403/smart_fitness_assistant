@@ -1,3 +1,5 @@
+import 'package:intl/locale.dart';
+
 import 'locale_key.dart';
 
 Map<String, String> viVN = {
@@ -343,13 +345,21 @@ Map<String, String> viVN = {
   LocaleKey.fat: "Chất béo (fat)",
   LocaleKey.protein: "Chất đạm (protein)",
   LocaleKey.fiber: "Chất xơ",
+  LocaleKey.cholesterol: "Cholesterol",
+  LocaleKey.cal: "Cal",
   LocaleKey.showMoreInfo: "Hiển thị thêm thông tin",
   LocaleKey.customServing: "Khẩu phần tùy chỉnh",
   LocaleKey.addTo: "Thêm vào",
+  LocaleKey.infoCorrect:
+      "Thông tin có thể chưa chính xác, bạn vui lòng kiểm tra lại",
   LocaleKey.remaining: "Còn lại",
   LocaleKey.target: "Mục tiêu",
   LocaleKey.totalCaloriesText: "Tổng cộng",
+  LocaleKey.totalCalories: "Tổng calories",
   LocaleKey.food: "Món ăn",
+  LocaleKey.searchFoodOrDish: "Tìm món ăn hoặc món",
+  LocaleKey.noInfoYet: "Chưa có thông tin",
+  LocaleKey.noRecentDataMessage: "Chưa có dữ liệu gần đây",
 
   // Multi-step Dialog Additional
   LocaleKey.activityLevel: "Mức độ hoạt động",
@@ -457,6 +467,10 @@ Map<String, String> viVN = {
   LocaleKey.addScheduleTitle: "Thêm lịch tập",
   LocaleKey.noScheduleYet: "Chưa có lịch tập",
   LocaleKey.tapToAddSchedule: "Nhấn để thêm lịch tập",
+  LocaleKey.selectWorkout: "Chọn bài tập",
+  LocaleKey.reminderWhenTime: "Nhắc nhở khi đến giờ",
+  LocaleKey.pleaseSelectFutureTime: "Vui lòng chọn thời gian trong tương lai",
+  LocaleKey.scheduleAddedSuccess: "Đã thêm lịch tập",
 
   // Chatbot
   LocaleKey.viewAllChats: "Xem tất cả cuộc trò chuyện",

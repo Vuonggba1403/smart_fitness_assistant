@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get_utils/src/extensions/internacionalization.dart';
 import 'package:calendar_agenda/calendar_agenda.dart';
+import 'package:intl/intl.dart';
 import 'dart:developer' as developer;
 
 import 'package:smart_fitness_assistant/core/functions/custom_appbar.dart';
@@ -69,6 +70,7 @@ class _MealPlannerViewState extends State<MealPlannerView> {
         } else {
           developer.log('✅ Skip showing dialog', name: 'MealPlannerView');
           if (mounted) {
+            // ✅ Load meals ngay lập tức
             context.read<MealPlannerCubit>().loadMealsByDate(_selectedDate);
           }
         }
@@ -79,7 +81,12 @@ class _MealPlannerViewState extends State<MealPlannerView> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // ✅ Clean: Không cần code ở đây
+    // ✅ THÊM: Reload meals mỗi khi quay lại màn hình
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<MealPlannerCubit>().refreshMealsByDate(_selectedDate);
+      }
+    });
   }
 
   /// 📱 Hiển thị activity level dialog
@@ -142,7 +149,13 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                     selectedDate: _selectedDate,
                     textColor: textColor,
                     onDateSelected: (date) {
-                      _selectedDate = date;
+                      setState(() {
+                        _selectedDate = date;
+                      });
+                      developer.log(
+                        '📅 Date selected: ${DateFormat('yyyy-MM-dd').format(date)}',
+                        name: 'MealPlannerView',
+                      );
                       context.read<MealPlannerCubit>().loadMealsByDate(date);
                     },
                   ),
@@ -314,11 +327,18 @@ class _MealPlannerViewState extends State<MealPlannerView> {
     required String mealType,
   }) {
     final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color;
     int totalCalories = 0;
 
     for (var meal in meals) {
       totalCalories += (meal['calories'] as int? ?? 0);
     }
+
+    // ✅ THÊM: Log để debug
+    developer.log(
+      '🍽️ Building $title section with ${meals.length} meals',
+      name: 'MealPlannerView',
+    );
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
@@ -364,8 +384,14 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                 ),
                 if (meals.isEmpty)
                   InkWell(
-                    onTap: () {
-                      navigateTo(context, const SearchMeal());
+                    onTap: () async {
+                      // ✅ Await navigate và reload sau khi quay lại
+                      await navigateTo(context, const SearchMeal());
+                      if (context.mounted) {
+                        context.read<MealPlannerCubit>().loadMealsByDate(
+                          _selectedDate,
+                        );
+                      }
                     },
                     borderRadius: BorderRadius.circular(20),
                     child: Container(
@@ -374,11 +400,7 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                         color: theme.primaryColor.withOpacity(0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(
-                        Icons.add,
-                        size: 20,
-                        color: theme.primaryColor,
-                      ),
+                      child: Icon(Icons.add, size: 20, color: textColor),
                     ),
                   ),
               ],
@@ -393,6 +415,12 @@ class _MealPlannerViewState extends State<MealPlannerView> {
               itemCount: meals.length,
               itemBuilder: (context, index) {
                 final meal = meals[index];
+                // ✅ Log mỗi meal
+                developer.log(
+                  '  - Meal ${index + 1}: ${meal['meal_name']} at ${meal['meal_time']}',
+                  name: 'MealPlannerView',
+                );
+
                 return Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -420,7 +448,7 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                               ),
                             ),
                             Text(
-                              '${meal['calories']} kcal',
+                              '${meal['calories']} kcal • ${meal['serving_size_g']}g',
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: Colors.grey,
                               ),
@@ -458,13 +486,19 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                 ),
                 if (meals.isNotEmpty)
                   InkWell(
-                    onTap: () {
-                      navigateTo(context, const SearchMeal());
+                    onTap: () async {
+                      // ✅ Await navigate và reload sau khi quay lại
+                      await navigateTo(context, const SearchMeal());
+                      if (context.mounted) {
+                        context.read<MealPlannerCubit>().loadMealsByDate(
+                          _selectedDate,
+                        );
+                      }
                     },
                     child: Text(
                       '+ ${LocaleKey.add.tr}',
                       style: TextStyle(
-                        color: theme.primaryColor,
+                        color: textColor,
                         fontWeight: FontWeight.w600,
                       ),
                     ),

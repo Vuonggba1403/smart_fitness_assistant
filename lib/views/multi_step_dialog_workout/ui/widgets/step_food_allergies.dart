@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../logic/cubit/multi_step_dialog_cubit.dart';
@@ -13,7 +14,7 @@ class StepFoodAllergies extends StatelessWidget {
     return BlocBuilder<MultiStepDialogCubit, MultiStepDialogState>(
       builder: (context, state) {
         if (state.isLoadingData) {
-          return const Center(child: CircularProgressIndicator());
+          return CustomCircleProgIndicator();
         }
 
         final cubit = context.read<MultiStepDialogCubit>();

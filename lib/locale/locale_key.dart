@@ -331,6 +331,8 @@ class LocaleKey {
   static const String fat = "fat";
   static const String protein = "protein";
   static const String fiber = "fiber";
+  static const String cholesterol = "cholesterol";
+  static const String cal = "cal";
   static const String showMoreInfo = "show_more_info";
   static const String customServing = "custom_serving";
   static const String addTo = "add_to";
@@ -513,6 +515,10 @@ class LocaleKey {
   // Schedule Management
   static const String deleteScheduleButton = "delete_schedule_button";
   static const String addScheduleTitle = "add_schedule_title";
+  static const String selectWorkout = "select_workout";
+  static const String reminderWhenTime = "reminder_when_time";
+  static const String pleaseSelectFutureTime = "please_select_future_time";
+  static const String scheduleAddedSuccess = "schedule_added_success";
 
   // Chatbot
   static const String viewAllChats = "view_all_chats";

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:smart_fitness_assistant/core/functions/custom_appbar.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/core/models/nft_badge.dart';
 import 'package:smart_fitness_assistant/views/achievements/logic/cubit/achievement_cubit.dart';
@@ -16,7 +17,7 @@ class NFTCollectionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(LocaleKey.nftBadgeCollection.tr)),
+      appBar: CustomAppBar(title: LocaleKey.nftBadgeCollection.tr),
       body: BlocBuilder<AchievementCubit, AchievementState>(
         builder: (context, state) {
           if (state.badges.isEmpty) {

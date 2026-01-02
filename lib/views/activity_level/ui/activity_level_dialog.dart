@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -216,7 +217,7 @@ class _ActivityLevelDialogState extends State<ActivityLevelDialog> {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (_) => const Center(child: CircularProgressIndicator()),
+        builder: (_) => CustomCircleProgIndicator(),
       );
 
       await context.read<ActivityLevelCubit>().saveActivityPreference(

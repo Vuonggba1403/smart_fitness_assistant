@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:smart_fitness_assistant/core/functions/custom_appbar.dart';
 import 'package:smart_fitness_assistant/core/functions/navigate_to.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/core/models/meal.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
@@ -19,45 +21,47 @@ class SearchMeal extends StatefulWidget {
 class _SearchMealState extends State<SearchMeal>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final TextEditingController _searchController = TextEditingController();
-
-  List<Meal> _searchResults = [];
-  bool _hasSearched = false;
-  bool _isLoading = false;
+  late TextEditingController _searchController;
+  bool _isSearching = false;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    _searchController.addListener(_onSearchChanged);
+    _searchController = TextEditingController();
+
+    _tabController.addListener(_onTabChanged);
+
+    // ✅ Load recent meals ngay khi vào màn hình
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<MealPlannerCubit>().loadRecentMeals();
+      }
+    });
   }
 
-  /// 🔄 Xử lý khi text search thay đổi
-  void _onSearchChanged() {
-    final query = _searchController.text.trim();
-
-    if (query.isEmpty) {
-      setState(() {
-        _searchResults = [];
-        _hasSearched = false;
-      });
-    } else {
-      setState(() => _hasSearched = true);
-      _performSearch(query);
+  /// 🔄 Xử lý khi chuyển tab
+  void _onTabChanged() {
+    if (!_tabController.indexIsChanging && !_isSearching) {
+      if (_tabController.index == 0) {
+        // ✅ Load lại recent meals khi quay về tab Recent
+        context.read<MealPlannerCubit>().loadRecentMeals();
+      } else if (_tabController.index == 1) {
+        // ✅ Reset về empty state cho tab Created by Me
+        context.read<MealPlannerCubit>().resetSearch();
+      }
     }
   }
 
-  /// 🔍 Thực hiện search
-  Future<void> _performSearch(String query) async {
-    setState(() => _isLoading = true);
-
-    final results = await context.read<MealPlannerCubit>().searchMeals(query);
-
-    if (mounted) {
-      setState(() {
-        _searchResults = results;
-        _isLoading = false;
-      });
+  /// 🔍 Xử lý search
+  void _onSearchChanged(String query) {
+    if (query.trim().isEmpty) {
+      setState(() => _isSearching = false);
+      // ✅ Khi clear search, load lại recent meals
+      context.read<MealPlannerCubit>().loadRecentMeals();
+    } else {
+      setState(() => _isSearching = true);
+      context.read<MealPlannerCubit>().searchMeals(query);
     }
   }
 
@@ -66,12 +70,13 @@ class _SearchMealState extends State<SearchMeal>
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text(LocaleKey.searchFood.tr)),
+      appBar: CustomAppBar(title: LocaleKey.searchFood.tr),
       body: Column(
         children: [
           _buildSearchField(theme),
-          if (!_hasSearched) _buildTabs(theme),
-          Expanded(child: _buildContent(theme)),
+          // Chỉ hiển thị tabs khi KHÔNG search
+          if (!_isSearching) _buildTabs(theme),
+          Expanded(child: _buildContent()),
         ],
       ),
     );
@@ -83,6 +88,7 @@ class _SearchMealState extends State<SearchMeal>
       padding: const EdgeInsets.all(16),
       child: TextField(
         controller: _searchController,
+        onChanged: _onSearchChanged,
         decoration: InputDecoration(
           hintText: LocaleKey.searchFoodHint.tr,
           prefixIcon: const Icon(Icons.search),
@@ -91,7 +97,9 @@ class _SearchMealState extends State<SearchMeal>
                   icon: const Icon(Icons.clear),
                   onPressed: () {
                     _searchController.clear();
-                    setState(() {});
+                    setState(() => _isSearching = false);
+                    // ✅ Load lại recent meals khi clear
+                    context.read<MealPlannerCubit>().loadRecentMeals();
                   },
                 )
               : null,
@@ -114,47 +122,87 @@ class _SearchMealState extends State<SearchMeal>
   }
 
   /// 📄 Nội dung chính
-  Widget _buildContent(ThemeData theme) {
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+  Widget _buildContent() {
+    // Nếu đang search, hiển thị kết quả search
+    if (_isSearching) {
+      return _buildSearchResults();
     }
 
-    if (_hasSearched) {
-      return _buildSearchResults(theme);
-    }
-
+    // Nếu không search, hiển thị tabs
     return TabBarView(
       controller: _tabController,
-      children: [
-        _buildRecentTab(theme),
-        _buildEmptyState(LocaleKey.noRecipes.tr),
-      ],
+      children: [_buildRecentTab(), _buildCreatedByMeTab()],
     );
   }
 
   /// 🔍 Kết quả search
-  Widget _buildSearchResults(ThemeData theme) {
-    if (_searchResults.isEmpty) {
-      return _buildEmptyState(LocaleKey.noResults.tr);
-    }
+  Widget _buildSearchResults() {
+    return BlocBuilder<MealPlannerCubit, MealPlannerState>(
+      builder: (context, state) {
+        if (state is SearchMealLoading) {
+          return CustomCircleProgIndicator();
+        }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: _searchResults.length,
-      itemBuilder: (context, index) {
-        return _MealCard(
-          meal: _searchResults[index],
-          onTap: () => _navigateToDetails(_searchResults[index]),
-          onAdd: () => _addMealToPlanner(_searchResults[index]),
-        );
+        if (state is SearchMealLoaded) {
+          return _buildMealList(state.meals);
+        }
+
+        if (state is SearchMealEmpty) {
+          return _buildEmptyState(LocaleKey.noResults.tr);
+        }
+
+        if (state is SearchMealError) {
+          return _buildEmptyState('Error: ${state.message}');
+        }
+
+        return const SizedBox.shrink();
       },
     );
   }
 
   /// 🕘 Tab gần đây
-  Widget _buildRecentTab(ThemeData theme) {
-    return Column(
-      children: [Expanded(child: _buildEmptyState(LocaleKey.noInfoYet.tr))],
+  Widget _buildRecentTab() {
+    return BlocBuilder<MealPlannerCubit, MealPlannerState>(
+      builder: (context, state) {
+        if (state is SearchMealLoading) {
+          return CustomCircleProgIndicator();
+        }
+
+        if (state is SearchMealLoaded) {
+          return _buildMealList(state.meals);
+        }
+
+        if (state is SearchMealEmpty) {
+          return _buildEmptyState(LocaleKey.noInfoYet.tr);
+        }
+
+        // ✅ Initial state - hiển thị empty với message phù hợp
+        if (state is SearchMealInitial) {
+          return _buildEmptyState(LocaleKey.noInfoYet.tr);
+        }
+
+        return _buildEmptyState(LocaleKey.noInfoYet.tr);
+      },
+    );
+  }
+
+  /// 👤 Tab created by me
+  Widget _buildCreatedByMeTab() {
+    return _buildEmptyState(LocaleKey.noRecipes.tr);
+  }
+
+  /// 📋 Danh sách meals
+  Widget _buildMealList(List<Meal> meals) {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: meals.length,
+      itemBuilder: (context, index) {
+        return _MealCard(
+          meal: meals[index],
+          onTap: () => _navigateToDetails(meals[index]),
+          onAdd: () => _addMealToPlanner(meals[index]),
+        );
+      },
     );
   }
 
@@ -171,7 +219,7 @@ class _SearchMealState extends State<SearchMeal>
             color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
           ),
           const SizedBox(height: 16),
-          Text(title, style: Theme.of(context).textTheme.titleMedium),
+          Text(title, style: theme.textTheme.titleMedium),
           const SizedBox(height: 8),
           Text(
             LocaleKey.noRecentDataMessage.tr,
@@ -203,7 +251,7 @@ class _SearchMealState extends State<SearchMeal>
     }, DateTime.now());
 
     AppSnackBar.success(context, '${meal.name} ${LocaleKey.addedToMeal.tr}');
-    Navigator.pop(context);
+    Navigator.pop(context); // ✅ Pop SearchMeal
   }
 
   /// 🕐 Xác định loại bữa ăn theo giờ
@@ -344,10 +392,10 @@ class _MealCard extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: theme.primaryColor.withOpacity(0.1),
+          color: theme.primaryColor,
         ),
         padding: const EdgeInsets.all(8),
-        child: Icon(Icons.add, color: theme.primaryColor, size: 20),
+        child: Icon(Icons.add, color: Colors.white, size: 20),
       ),
     );
   }

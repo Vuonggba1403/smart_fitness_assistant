@@ -341,13 +341,20 @@ Map<String, String> enUs = {
   LocaleKey.fat: "Fat",
   LocaleKey.protein: "Protein",
   LocaleKey.fiber: "Fiber",
+  LocaleKey.cholesterol: "Cholesterol",
+  LocaleKey.cal: "Cal",
   LocaleKey.showMoreInfo: "Show more information",
   LocaleKey.customServing: "Custom Serving",
   LocaleKey.addTo: "Add to",
+  LocaleKey.infoCorrect: "Information may not be accurate",
   LocaleKey.remaining: "Remaining",
   LocaleKey.target: "Target",
   LocaleKey.totalCaloriesText: "Total Calories",
+  LocaleKey.totalCalories: "Total Calories",
   LocaleKey.food: "Food",
+  LocaleKey.searchFoodOrDish: "Search food or dish",
+  LocaleKey.noInfoYet: "No information yet",
+  LocaleKey.noRecentDataMessage: "No recent data available",
 
   // Multi-step Dialog - Workout Plan
   LocaleKey.activityLevel: "Activity Level",
@@ -453,6 +460,10 @@ Map<String, String> enUs = {
   LocaleKey.addScheduleTitle: "Add Schedule",
   LocaleKey.noScheduleYet: "No schedule yet",
   LocaleKey.tapToAddSchedule: "Tap to add schedule",
+  LocaleKey.selectWorkout: "Select workout",
+  LocaleKey.reminderWhenTime: "Reminder when time comes",
+  LocaleKey.pleaseSelectFutureTime: "Please select a future time",
+  LocaleKey.scheduleAddedSuccess: "Schedule added successfully",
 
   // Chatbot
   LocaleKey.viewAllChats: "View All Chats",

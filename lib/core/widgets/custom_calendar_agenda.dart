@@ -31,6 +31,8 @@ class CustomCalendarAgenda extends StatelessWidget {
       fullCalendarDay: WeekDay.short,
       selectedDateColor: const Color(0xFF1C64F2),
       dateColor: textColor ?? Colors.black,
+      borderColor: Colors.grey.withOpacity(0.3),
+      borderWidth: 1.0,
       initialDate: DateTime.now(),
       calendarEventColor: TColor.primaryColor2,
       firstDate: DateTime.now().subtract(const Duration(days: 140)),

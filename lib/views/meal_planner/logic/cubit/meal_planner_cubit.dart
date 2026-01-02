@@ -147,10 +147,15 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
   }
 
   /// 🔍 Tìm kiếm meals
-  Future<List<Meal>> searchMeals(String query) async {
-    try {
-      if (query.isEmpty) return [];
+  Future<void> searchMeals(String query) async {
+    if (query.trim().isEmpty) {
+      emit(SearchMealInitial());
+      return;
+    }
 
+    emit(SearchMealLoading());
+
+    try {
       final response = await _supabase
           .from('meals')
           .select()
@@ -160,39 +165,76 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
           .limit(30);
 
       if ((response as List).isEmpty) {
-        return [];
+        emit(SearchMealEmpty());
+        return;
       }
 
-      return (response as List)
+      final meals = (response as List)
           .map((json) => Meal.fromJson(json as Map<String, dynamic>))
           .toList();
+
+      emit(SearchMealLoaded(meals));
     } catch (e) {
-      debugPrint('Error searching meals: $e');
-      return [];
+      debugPrint('❌ Error searching meals: $e');
+      emit(SearchMealError(e.toString()));
     }
   }
 
-  /// 📥 Lấy tất cả meals (cho tab recent)
-  Future<List<Meal>> getAllMeals() async {
-    try {
-      final response = await _supabase
-          .from('meals')
-          .select()
-          .eq('is_verified', true)
-          .order('created_at', ascending: false)
-          .limit(50);
+  /// 📥 Load recent meals của user
+  Future<void> loadRecentMeals() async {
+    emit(SearchMealLoading());
 
-      if ((response as List).isEmpty) {
-        return [];
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) {
+        emit(SearchMealError('User not authenticated'));
+        return;
       }
 
-      return (response as List)
+      // Lấy 10 meals gần nhất từ user_meals
+      final response = await _supabase
+          .from('user_meals')
+          .select('for_meal')
+          .eq('for_user', userId)
+          .order('created_at', ascending: false)
+          .limit(10);
+
+      if ((response as List).isEmpty) {
+        emit(SearchMealEmpty());
+        return;
+      }
+
+      // Lấy unique meal IDs
+      final mealIds = (response as List)
+          .map((e) => e['for_meal'] as String)
+          .toSet()
+          .toList();
+
+      // Fetch chi tiết meals
+      final mealsResponse = await _supabase
+          .from('meals')
+          .select()
+          .inFilter('id', mealIds);
+
+      if ((mealsResponse as List).isEmpty) {
+        emit(SearchMealEmpty());
+        return;
+      }
+
+      final meals = (mealsResponse as List)
           .map((json) => Meal.fromJson(json as Map<String, dynamic>))
           .toList();
+
+      emit(SearchMealLoaded(meals));
     } catch (e) {
-      debugPrint('Error loading meals: $e');
-      return [];
+      debugPrint('❌ Error loading recent meals: $e');
+      emit(SearchMealError(e.toString()));
     }
+  }
+
+  /// 🔄 Reset search về initial state
+  void resetSearch() {
+    emit(SearchMealInitial());
   }
 
   /// 📥 Load meals theo ngày và loại
@@ -206,12 +248,22 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
 
       final dateStr = DateFormat('yyyy-MM-dd').format(date);
 
+      developer.log(
+        '📥 Loading meals for date: $dateStr, userId: $userId',
+        name: 'MealPlannerCubit',
+      );
+
       final response = await _supabase
           .from('user_meals')
           .select()
           .eq('for_user', userId)
           .eq('meal_date', dateStr)
           .order('meal_time', ascending: true);
+
+      developer.log(
+        '📊 Query result: ${(response as List).length} meals found',
+        name: 'MealPlannerCubit',
+      );
 
       if ((response as List).isEmpty) {
         return {'breakfast': [], 'lunch': [], 'dinner': []};
@@ -231,6 +283,15 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
           groupedMeals[mealType]!.add(meal as Map);
         }
       }
+
+      // ✅ Sắp xếp meals trong mỗi loại theo meal_time
+      groupedMeals.forEach((key, mealsList) {
+        mealsList.sort((a, b) {
+          final timeA = a['meal_time'] as String? ?? '00:00';
+          final timeB = b['meal_time'] as String? ?? '00:00';
+          return timeA.compareTo(timeB);
+        });
+      });
 
       return groupedMeals;
     } catch (e) {

@@ -1,28 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:smart_fitness_assistant/core/functions/custom_appbar.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/core/models/meal.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
 import 'package:smart_fitness_assistant/core/functions/color_extension.dart';
 import 'package:smart_fitness_assistant/views/meal_planner/logic/cubit/meal_planner_cubit.dart';
+import 'package:smart_fitness_assistant/views/meal_planner/ui/widgets/components/food_image_header.dart';
+import 'package:smart_fitness_assistant/views/meal_planner/ui/widgets/components/macro_circle_section.dart';
+import 'package:smart_fitness_assistant/views/meal_planner/ui/widgets/components/nutrition_badges.dart';
+import 'package:smart_fitness_assistant/views/meal_planner/ui/widgets/components/nutrition_facts_section.dart';
+import 'package:smart_fitness_assistant/views/meal_planner/ui/widgets/components/serving_size_control.dart';
 
 /// 📋 Chi tiết thông tin dinh dưỡng của món ăn
-class FoodDetails extends StatefulWidget {
+class FoodDetails extends StatelessWidget {
   final Meal meal;
 
   const FoodDetails({super.key, required this.meal});
 
   @override
-  State<FoodDetails> createState() => _FoodDetailsState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => _FoodDetailsCubit(initialServingSize: meal.servingSizeG),
+      child: _FoodDetailsView(meal: meal),
+    );
+  }
 }
 
-class _FoodDetailsState extends State<FoodDetails> {
-  int _servingSize = 100;
+/// 🎯 Cubit riêng cho FoodDetails (local state)
+class _FoodDetailsCubit extends Cubit<int> {
+  _FoodDetailsCubit({required int initialServingSize})
+    : super(initialServingSize);
 
-  /// 🧮 Helper: Tính giá trị dinh dưỡng theo serving size
-  NutritionValues get _nutritionValues =>
-      NutritionValues.calculate(meal: widget.meal, servingSize: _servingSize);
+  void updateServingSize(int delta) {
+    emit((state + delta).clamp(10, 9999));
+  }
+
+  void setServingSize(int value) {
+    emit(value.clamp(10, 9999));
+  }
+}
+
+/// 📱 View của FoodDetails
+class _FoodDetailsView extends StatelessWidget {
+  final Meal meal;
+
+  const _FoodDetailsView({required this.meal});
 
   @override
   Widget build(BuildContext context) {
@@ -30,379 +54,72 @@ class _FoodDetailsState extends State<FoodDetails> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: _buildAppBar(theme),
+      appBar: CustomAppBar(title: meal.name),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            _buildImageSection(theme),
-            _buildMacroCircleSection(theme),
-            if (widget.meal.isVerified) _buildVerifiedBadge(theme),
-            _buildNutritionFactsSection(theme),
-            _buildMoreInfoButton(theme),
-            if (!widget.meal.isVerified) _buildDisclaimerBadge(theme),
-            const SizedBox(height: 20),
-            _buildServingSizeControl(theme),
-            const SizedBox(height: 30),
-            _buildAddButton(theme),
-            const SizedBox(height: 30),
-          ],
-        ),
-      ),
-    );
-  }
+            FoodImageHeader(meal: meal),
+            BlocBuilder<_FoodDetailsCubit, int>(
+              builder: (context, servingSize) {
+                final nutritionValues = NutritionValues.calculate(
+                  meal: meal,
+                  servingSize: servingSize,
+                );
 
-  /// 🧭 AppBar với nút back và favorite
-  PreferredSizeWidget _buildAppBar(ThemeData theme) {
-    return AppBar(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      elevation: 0,
-      leading: const BackButton(),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.favorite_border),
-          onPressed: () {
-            // TODO: Implement favorite feature
-          },
-        ),
-      ],
-    );
-  }
-
-  /// 🖼️ Phần hiển thị ảnh và tên món ăn
-  Widget _buildImageSection(ThemeData theme) {
-    return Column(
-      children: [
-        ClipRRect(
-          borderRadius: const BorderRadius.vertical(
-            bottom: Radius.circular(20),
-          ),
-          child: widget.meal.imageUrl != null
-              ? Image.network(
-                  widget.meal.imageUrl!,
-                  height: 250,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => _buildImagePlaceholder(),
-                )
-              : _buildImagePlaceholder(),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.meal.name,
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '${widget.meal.servingSizeG}g',
-                style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// 📦 Placeholder khi không có ảnh
-  Widget _buildImagePlaceholder() {
-    return Container(
-      height: 250,
-      color: Colors.grey.withOpacity(0.3),
-      child: const Icon(Icons.image_not_supported, size: 60),
-    );
-  }
-
-  /// 📊 Phần hiển thị vòng tròn calories và badges macro
-  Widget _buildMacroCircleSection(ThemeData theme) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _buildCalorieCircle(),
-          const SizedBox(width: 24),
-          _buildMacroBadges(),
-        ],
-      ),
-    );
-  }
-
-  /// 🟡 Vòng tròn hiển thị calories
-  Widget _buildCalorieCircle() {
-    return SizedBox(
-      width: 100,
-      height: 100,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          SizedBox(
-            width: 100,
-            height: 100,
-            child: CircularProgressIndicator(
-              value: 1.0,
-              strokeWidth: 8,
-              backgroundColor: Colors.grey.withOpacity(0.3),
-              valueColor: AlwaysStoppedAnimation(
-                Color.lerp(Colors.blue, Colors.orange, 0.5)!,
-              ),
-            ),
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                '${_nutritionValues.calories}',
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const Text('Cal', style: TextStyle(fontSize: 12)),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// 🏷️ Các badge hiển thị macro
-  Widget _buildMacroBadges() {
-    return Column(
-      children: [
-        _MacroBadge(
-          label: '⚡ ${_nutritionValues.protein.toStringAsFixed(1)}g',
-          percent: _nutritionValues.proteinPercent.toStringAsFixed(0),
-          color: Colors.red,
-        ),
-        const SizedBox(height: 12),
-        _MacroBadge(
-          label: '🌾 ${_nutritionValues.carbs.toStringAsFixed(1)}g',
-          percent: _nutritionValues.carbsPercent.toStringAsFixed(0),
-          color: Colors.blue,
-        ),
-        const SizedBox(height: 12),
-        _MacroBadge(
-          label: '🍯 ${_nutritionValues.fat.toStringAsFixed(1)}g',
-          percent: _nutritionValues.fatPercent.toStringAsFixed(0),
-          color: Colors.amber,
-        ),
-      ],
-    );
-  }
-
-  /// ✅ Badge xác thực
-  Widget _buildVerifiedBadge(ThemeData theme) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.blue.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.verified, color: Colors.blue, size: 20),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                LocaleKey.confirmedByNutritionTeam.tr,
-                style: theme.textTheme.bodySmall?.copyWith(color: Colors.blue),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// ⚠️ Badge cảnh báo chưa xác thực
-  Widget _buildDisclaimerBadge(ThemeData theme) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.orange.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.warning_outlined, color: Colors.orange, size: 20),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                LocaleKey.infoCorrect.tr,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: Colors.orange,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// 📋 Phần hiển thị thông tin dinh dưỡng chi tiết
-  Widget _buildNutritionFactsSection(ThemeData theme) {
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            LocaleKey.nutritionValue.tr,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 16),
-          _NutritionRow(
-            label: LocaleKey.energy.tr,
-            value: '${_nutritionValues.calories} cal',
-          ),
-          const Divider(height: 16),
-          _NutritionRow(
-            label: LocaleKey.carbohydrate.tr,
-            value: '${_nutritionValues.carbs.toStringAsFixed(1)} g',
-          ),
-          const Divider(height: 16),
-          _NutritionRow(
-            label: LocaleKey.fat.tr,
-            value: '${_nutritionValues.fat.toStringAsFixed(1)} g',
-          ),
-          const Divider(height: 16),
-          _NutritionRow(
-            label: LocaleKey.protein.tr,
-            value: '${_nutritionValues.protein.toStringAsFixed(1)} g',
-          ),
-          const Divider(height: 16),
-          _NutritionRow(
-            label: 'Cholesterol',
-            value: widget.meal.cholesterolMg != null
-                ? '${widget.meal.cholesterolMg} mg'
-                : '--',
-          ),
-          const Divider(height: 16),
-          _NutritionRow(
-            label: LocaleKey.fiber.tr,
-            value: widget.meal.fiberG != null
-                ? '${(widget.meal.fiberG! * _servingSize / 100).toStringAsFixed(2)} g'
-                : '--',
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// 📌 Nút hiển thị thêm thông tin
-  Widget _buildMoreInfoButton(ThemeData theme) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: InkWell(
-        onTap: () {
-          // TODO: Show more info
-        },
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          decoration: BoxDecoration(
-            color: theme.primaryColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Center(
-            child: Text(
-              'Hiển thị thêm thông tin',
-              style: TextStyle(
-                color: theme.primaryColor,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// 🔧 Control điều chỉnh serving size
-  Widget _buildServingSizeControl(ThemeData theme) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              'Khẩu phần tùy chỉnh',
-              style: theme.textTheme.bodyMedium,
-            ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              color: theme.cardColor,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                IconButton(
-                  onPressed: () => _updateServingSize(-10),
-                  icon: const Icon(Icons.remove, size: 20),
-                ),
-                SizedBox(
-                  width: 60,
-                  child: TextField(
-                    textAlign: TextAlign.center,
-                    keyboardType: TextInputType.number,
-                    controller: TextEditingController(text: '$_servingSize'),
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.zero,
+                return Column(
+                  children: [
+                    MacroCircleSection(nutritionValues: nutritionValues),
+                    if (meal.isVerified) const VerifiedBadge(),
+                    NutritionFactsSection(
+                      meal: meal,
+                      nutritionValues: nutritionValues,
                     ),
-                    onChanged: (value) {
-                      setState(() {
-                        _servingSize = int.tryParse(value) ?? 100;
-                      });
-                    },
-                  ),
-                ),
-                IconButton(
-                  onPressed: () => _updateServingSize(10),
-                  icon: const Icon(Icons.add, size: 20),
-                ),
-              ],
+                    // const _MoreInfoButton(),
+                    if (!meal.isVerified) const DisclaimerBadge(),
+                    const SizedBox(height: 20),
+                    ServingSizeControl(
+                      servingSize: servingSize,
+                      onUpdateServingSize: (delta) => context
+                          .read<_FoodDetailsCubit>()
+                          .updateServingSize(delta),
+                      onSetServingSize: (value) => context
+                          .read<_FoodDetailsCubit>()
+                          .setServingSize(value),
+                    ),
+                    const SizedBox(height: 30),
+                    _AddMealButton(
+                      meal: meal,
+                      nutritionValues: nutritionValues,
+                    ),
+                    const SizedBox(height: 30),
+                  ],
+                );
+              },
             ),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            'gram',
-            style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
+}
 
-  /// 🔄 Cập nhật serving size
-  void _updateServingSize(int delta) {
-    setState(() {
-      _servingSize = (_servingSize + delta).clamp(10, 9999);
-    });
-  }
+/// ➕ Add meal button
+class _AddMealButton extends StatelessWidget {
+  final Meal meal;
+  final NutritionValues nutritionValues;
 
-  /// ➕ Nút thêm món ăn vào meal planner
-  Widget _buildAddButton(ThemeData theme) {
+  const _AddMealButton({required this.meal, required this.nutritionValues});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: SizedBox(
         width: double.infinity,
         child: ElevatedButton(
-          onPressed: _handleAddMeal,
+          onPressed: () => _handleAddMeal(context),
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 16),
             backgroundColor: theme.primaryColor,
@@ -423,29 +140,27 @@ class _FoodDetailsState extends State<FoodDetails> {
     );
   }
 
-  /// ✅ Xử lý thêm món ăn
-  void _handleAddMeal() {
+  void _handleAddMeal(BuildContext context) {
     final hour = DateTime.now().hour;
     final mealType = _determineMealType(hour);
+    final servingSize = context.read<_FoodDetailsCubit>().state;
 
     context.read<MealPlannerCubit>().addMealToType(mealType, {
-      'id': widget.meal.id,
-      'name': widget.meal.name,
-      'calories': _nutritionValues.calories,
-      'protein': _nutritionValues.protein,
-      'carbs': _nutritionValues.carbs,
-      'fat': _nutritionValues.fat,
-      'serving_size': _servingSize,
+      'id': meal.id,
+      'name': meal.name,
+      'calories': nutritionValues.calories,
+      'protein': nutritionValues.protein,
+      'carbs': nutritionValues.carbs,
+      'fat': nutritionValues.fat,
+      'serving_size': servingSize,
     }, DateTime.now());
 
-    AppSnackBar.success(
-      context,
-      '${widget.meal.name} ${LocaleKey.addedToMeal.tr}',
-    );
-    Navigator.pop(context);
+    AppSnackBar.success(context, '${meal.name} ${LocaleKey.addedToMeal.tr}');
+
+    Navigator.of(context).pop();
+    Navigator.of(context).pop();
   }
 
-  /// 🕐 Xác định loại bữa ăn dựa vào giờ
   String _determineMealType(int hour) {
     if (hour >= 6 && hour < 10) return 'breakfast';
     if (hour >= 10 && hour < 14) return 'lunch';
@@ -455,10 +170,10 @@ class _FoodDetailsState extends State<FoodDetails> {
 }
 
 // =====================================================
-// 📦 HELPER CLASSES (Separation of Concerns)
+// 📦 HELPER CLASSES
 // =====================================================
 
-/// 🧮 Class tính toán giá trị dinh dưỡng
+/// 🧮 Nutrition values calculator
 class NutritionValues {
   final int calories;
   final double protein;
@@ -478,7 +193,6 @@ class NutritionValues {
     required this.fatPercent,
   });
 
-  /// ✅ Factory: Tính toán từ meal và serving size
   factory NutritionValues.calculate({
     required Meal meal,
     required int servingSize,
@@ -502,80 +216,6 @@ class NutritionValues {
       proteinPercent: proteinPercent,
       carbsPercent: carbsPercent,
       fatPercent: fatPercent,
-    );
-  }
-}
-
-/// 🏷️ Widget hiển thị macro badge
-class _MacroBadge extends StatelessWidget {
-  final String label;
-  final String percent;
-  final Color color;
-
-  const _MacroBadge({
-    required this.label,
-    required this.percent,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              '$percent%',
-              style: TextStyle(
-                color: TColor.white,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// 📌 Widget hiển thị hàng thông tin dinh dưỡng
-class _NutritionRow extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _NutritionRow({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label, style: theme.textTheme.bodyMedium),
-        Text(
-          value,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
     );
   }
 }
