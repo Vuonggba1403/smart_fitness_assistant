@@ -451,6 +451,8 @@ Map<String, String> enUs = {
   // Schedule Management
   LocaleKey.deleteScheduleButton: "Delete Schedule",
   LocaleKey.addScheduleTitle: "Add Schedule",
+  LocaleKey.noScheduleYet: "No schedule yet",
+  LocaleKey.tapToAddSchedule: "Tap to add schedule",
 
   // Chatbot
   LocaleKey.viewAllChats: "View All Chats",

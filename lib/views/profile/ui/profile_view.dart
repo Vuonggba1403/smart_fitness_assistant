@@ -114,8 +114,24 @@ class ProfileView extends StatelessWidget {
       final message = state is LogoutSuccess
           ? LocaleKey.logoutSuccess.tr
           : LocaleKey.deleteAcc.tr;
+
+      // Safe navigation - check if context is still mounted
+      if (!context.mounted) return;
+
       AppSnackBar.success(context, message);
-      Get.offAll(() => const LoginView());
+
+      // Use Try-catch to handle navigation errors
+      try {
+        // Remove all routes and go to login
+        Get.offAll(() => const LoginView());
+      } catch (e) {
+        print('Navigation error on logout: $e');
+        // Fallback: try direct navigation
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const LoginView()),
+          (route) => false,
+        );
+      }
     }
     if (state is LoginError)
       AppSnackBar.error(context, LocaleKey.logoutError.tr);

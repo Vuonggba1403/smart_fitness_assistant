@@ -455,6 +455,8 @@ Map<String, String> viVN = {
   // Schedule Management
   LocaleKey.deleteScheduleButton: "Xóa lịch",
   LocaleKey.addScheduleTitle: "Thêm lịch tập",
+  LocaleKey.noScheduleYet: "Chưa có lịch tập",
+  LocaleKey.tapToAddSchedule: "Nhấn để thêm lịch tập",
 
   // Chatbot
   LocaleKey.viewAllChats: "Xem tất cả cuộc trò chuyện",

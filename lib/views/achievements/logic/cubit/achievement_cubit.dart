@@ -1,15 +1,63 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:smart_fitness_assistant/core/services/blockchain_service.dart';
+import 'package:smart_fitness_assistant/core/services/mock_achievement_service.dart';
 import 'package:smart_fitness_assistant/core/models/nft_badge.dart';
 import 'package:smart_fitness_assistant/views/achievements/logic/cubit/achievement_state.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+/// Manages achievement tracking and badge minting for workout milestones
+///
+/// Handles:
+/// - Badge creation after workout completion
+/// - Achievement progress tracking
+/// - Badge showcase management
+/// - User badge collection
 class AchievementCubit extends Cubit<AchievementState> {
-  final BlockchainService _blockchainService = BlockchainService();
+  final MockAchievementService _achievementService = MockAchievementService();
+  final _supabase = Supabase.instance.client;
+
+  // Badge rarity thresholds
+  static const int _legendaryExercises = 20;
+  static const int _legendaryDuration = 60;
+  static const int _epicExercises = 15;
+  static const int _epicDuration = 45;
+  static const int _rareExercises = 10;
+  static const int _rareDuration = 30;
 
   AchievementCubit() : super(AchievementState.initial()) {
+    _initialize();
+  }
+
+  /// Initializes service and pre-defined achievements
+  Future<void> _initialize() async {
+    await _initializeService();
     _initializeAchievements();
   }
 
+  /// Initializes the mock achievement service
+  Future<void> _initializeService() async {
+    try {
+      await _achievementService.initialize();
+      print('✅ Mock Achievement Service initialized');
+    } catch (e) {
+      print('❌ Failed to initialize service: $e');
+    }
+  }
+
+  /// Loads all badges for the current authenticated user
+  Future<void> loadUserBadges() async {
+    try {
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) return;
+
+      final badges = await _achievementService.getUserBadges(userId);
+      emit(state.copyWith(badges: badges));
+      print('✅ Loaded ${badges.length} badges');
+    } catch (e) {
+      print('❌ Error loading badges: $e');
+    }
+  }
+
+  /// Initializes pre-defined achievement milestones
   void _initializeAchievements() {
     final achievements = [
       Achievement(
@@ -57,6 +105,7 @@ class AchievementCubit extends Cubit<AchievementState> {
     emit(state.copyWith(achievements: achievements));
   }
 
+  /// Creates a new badge for completed workout and updates achievements
   Future<NFTBadge?> mintWorkoutBadge({
     required String workoutType,
     required int totalExercises,
@@ -66,6 +115,8 @@ class AchievementCubit extends Cubit<AchievementState> {
     emit(state.copyWith(isMinting: true));
 
     try {
+      final userId = _supabase.auth.currentUser?.id;
+
       final metadata = NFTMetadata(
         workoutType: workoutType,
         totalExercises: totalExercises,
@@ -74,15 +125,15 @@ class AchievementCubit extends Cubit<AchievementState> {
         completedAt: DateTime.now(),
       );
 
-      // Xác định rarity dựa trên achievement
       final rarity = _determineRarity(totalExercises, durationMinutes);
 
-      final badge = await _blockchainService.mintBadge(
+      final badge = await _achievementService.mintBadge(
         name: '$workoutType Completed',
         description:
             'Completed $workoutType workout with $totalExercises exercises',
         rarity: rarity,
         metadata: metadata,
+        userId: userId,
       );
 
       final updatedBadges = [...state.badges, badge];
@@ -94,7 +145,6 @@ class AchievementCubit extends Cubit<AchievementState> {
         ),
       );
 
-      // Update achievements
       _updateAchievements(totalExercises);
 
       return badge;
@@ -104,14 +154,21 @@ class AchievementCubit extends Cubit<AchievementState> {
     }
   }
 
+  /// Determines badge rarity based on workout metrics
   BadgeRarity _determineRarity(int exercises, int duration) {
-    // Logic xác định độ hiếm
-    if (exercises >= 20 && duration >= 60) return BadgeRarity.legendary;
-    if (exercises >= 15 && duration >= 45) return BadgeRarity.epic;
-    if (exercises >= 10 && duration >= 30) return BadgeRarity.rare;
+    if (exercises >= _legendaryExercises && duration >= _legendaryDuration) {
+      return BadgeRarity.legendary;
+    }
+    if (exercises >= _epicExercises && duration >= _epicDuration) {
+      return BadgeRarity.epic;
+    }
+    if (exercises >= _rareExercises && duration >= _rareDuration) {
+      return BadgeRarity.rare;
+    }
     return BadgeRarity.common;
   }
 
+  /// Updates achievement progress after workout completion
   void _updateAchievements(int exercisesCompleted) {
     final updatedAchievements = state.achievements.map((achievement) {
       if (achievement.type == AchievementType.totalWorkouts) {
@@ -140,6 +197,7 @@ class AchievementCubit extends Cubit<AchievementState> {
     emit(state.copyWith(achievements: updatedAchievements));
   }
 
+  /// Updates streak-based achievements with current streak count
   void updateStreakDays(int streakDays) {
     final updatedAchievements = state.achievements.map((achievement) {
       if (achievement.type == AchievementType.streakDays) {
@@ -157,25 +215,33 @@ class AchievementCubit extends Cubit<AchievementState> {
     emit(state.copyWith(achievements: updatedAchievements));
   }
 
+  /// Toggles the showcase status of a badge
   void toggleShowcase(String badgeId) {
     final updatedBadges = state.badges.map((badge) {
       if (badge.id == badgeId) {
-        return NFTBadge(
-          id: badge.id,
-          tokenId: badge.tokenId,
-          name: badge.name,
-          description: badge.description,
-          rarity: badge.rarity,
-          imageUrl: badge.imageUrl,
-          metadata: badge.metadata,
-          mintedAt: badge.mintedAt,
-          ownerAddress: badge.ownerAddress,
-          isShowcased: !badge.isShowcased,
-        );
+        final newIsShowcased = !badge.isShowcased;
+        _achievementService.toggleShowcase(badgeId, newIsShowcased);
+        return _createUpdatedBadge(badge, newIsShowcased);
       }
       return badge;
     }).toList();
 
     emit(state.copyWith(badges: updatedBadges));
+  }
+
+  /// Creates a copy of badge with updated showcase status
+  NFTBadge _createUpdatedBadge(NFTBadge badge, bool isShowcased) {
+    return NFTBadge(
+      id: badge.id,
+      tokenId: badge.tokenId,
+      name: badge.name,
+      description: badge.description,
+      rarity: badge.rarity,
+      imageUrl: badge.imageUrl,
+      metadata: badge.metadata,
+      mintedAt: badge.mintedAt,
+      ownerAddress: badge.ownerAddress,
+      isShowcased: isShowcased,
+    );
   }
 }

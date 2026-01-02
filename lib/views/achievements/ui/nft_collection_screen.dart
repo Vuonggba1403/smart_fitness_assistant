@@ -520,7 +520,7 @@ class NFTCollectionScreen extends StatelessWidget {
 🔗 Token ID: ${badge.tokenId}
 📅 Minted: ${_formatDate(badge.mintedAt)}
 
-#NFTFitness #WorkoutBadge #BlockchainFitness
+#FitnessApp #WorkoutBadge #AchievementUnlocked
 ''';
 
     try {

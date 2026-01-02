@@ -58,7 +58,9 @@ Future<void> main() async {
         BlocProvider(create: (_) => ScheduleCubit()),
         BlocProvider(create: (_) => MealPlannerCubit()),
         BlocProvider(create: (_) => WorkoutPlanCubit()),
-        BlocProvider(create: (_) => AchievementCubit()), // ✅ Thêm dòng này
+        BlocProvider(
+          create: (_) => AchievementCubit()..loadUserBadges(),
+        ), // Load badges on startup
       ],
       child: const MyApp(),
     ),

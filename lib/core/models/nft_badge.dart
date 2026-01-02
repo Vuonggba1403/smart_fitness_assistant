@@ -1,3 +1,7 @@
+/// Represents an achievement badge earned from workout completion
+///
+/// Badges are stored locally and include workout metadata.
+/// This is a demo model designed to simulate NFT-style achievements.
 class NFTBadge {
   final String id;
   final String tokenId;
@@ -23,6 +27,7 @@ class NFTBadge {
     this.isShowcased = false,
   });
 
+  /// Converts badge to JSON for database storage
   Map<String, dynamic> toJson() => {
     'id': id,
     'token_id': tokenId,
@@ -36,20 +41,38 @@ class NFTBadge {
     'is_showcased': isShowcased,
   };
 
-  factory NFTBadge.fromJson(Map<String, dynamic> json) => NFTBadge(
-    id: json['id'],
-    tokenId: json['token_id'],
-    name: json['name'],
-    description: json['description'],
-    rarity: BadgeRarity.values.byName(json['rarity']),
-    imageUrl: json['image_url'],
-    metadata: NFTMetadata.fromJson(json['metadata']),
-    mintedAt: DateTime.parse(json['minted_at']),
-    ownerAddress: json['owner_address'],
-    isShowcased: json['is_showcased'] ?? false,
-  );
+  /// Creates badge from JSON data (from database)
+  factory NFTBadge.fromJson(Map<String, dynamic> json) {
+    // Parse rarity - handle both lowercase and capitalized
+    final rarityStr = (json['rarity'] as String).toLowerCase();
+    final rarity = BadgeRarity.values.firstWhere(
+      (e) => e.name.toLowerCase() == rarityStr,
+      orElse: () => BadgeRarity.common,
+    );
+
+    // Parse metadata - handle both Map and already parsed object
+    final metadataJson = json['metadata'] is Map<String, dynamic>
+        ? json['metadata'] as Map<String, dynamic>
+        : <String, dynamic>{};
+
+    return NFTBadge(
+      id: json['id'] ?? '',
+      tokenId: json['token_id']?.toString() ?? '0',
+      name: json['name'] ?? 'Unknown Badge',
+      description: json['description'] ?? '',
+      rarity: rarity,
+      imageUrl: json['image_url'] ?? '',
+      metadata: NFTMetadata.fromJson(metadataJson),
+      mintedAt: DateTime.parse(json['minted_at']),
+      ownerAddress: json['owner_address'] ?? '',
+      isShowcased: json['is_showcased'] ?? false,
+    );
+  }
 }
 
+/// Contains detailed workout metrics for a badge
+///
+/// Stores the workout session data that earned the badge.
 class NFTMetadata {
   final String workoutType;
   final int totalExercises;
@@ -67,6 +90,7 @@ class NFTMetadata {
     this.extraData,
   });
 
+  /// Converts metadata to JSON for storage
   Map<String, dynamic> toJson() => {
     'workout_type': workoutType,
     'total_exercises': totalExercises,
@@ -76,23 +100,32 @@ class NFTMetadata {
     'extra_data': extraData,
   };
 
-  factory NFTMetadata.fromJson(Map<String, dynamic> json) => NFTMetadata(
-    workoutType: json['workout_type'],
-    totalExercises: json['total_exercises'],
-    durationMinutes: json['duration_minutes'],
-    caloriesBurned: json['calories_burned'],
-    completedAt: DateTime.parse(json['completed_at']),
-    extraData: json['extra_data'],
-  );
+  /// Creates metadata from JSON data
+  factory NFTMetadata.fromJson(Map<String, dynamic> json) {
+    return NFTMetadata(
+      workoutType: json['workout_type'] ?? 'Unknown',
+      totalExercises: json['total_exercises'] ?? 0,
+      durationMinutes: json['duration_minutes'] ?? 0,
+      caloriesBurned: (json['calories_burned'] as num?)?.toDouble() ?? 0.0,
+      completedAt: json['completed_at'] != null
+          ? DateTime.parse(json['completed_at'])
+          : DateTime.now(),
+      extraData: json['extra_data'] as Map<String, dynamic>?,
+    );
+  }
 }
 
+/// Badge rarity levels based on workout difficulty
 enum BadgeRarity {
-  common, // Workout bình thường
-  rare, // 7 day streak
-  epic, // 30 day streak
-  legendary, // 1000 exercises
+  common, // Basic workout completion
+  rare, // Challenging workout (10+ exercises, 30+ minutes)
+  epic, // Intense workout (15+ exercises, 45+ minutes)
+  legendary, // Elite workout (20+ exercises, 60+ minutes)
 }
 
+/// Represents a milestone achievement that can be earned
+///
+/// Tracks progress towards specific fitness goals.
 class Achievement {
   final String id;
   final String name;
@@ -118,8 +151,10 @@ class Achievement {
     this.completedAt,
   });
 
+  /// Calculates completion progress as percentage (0.0 to 1.0)
   double get progress => (currentValue / targetValue).clamp(0.0, 1.0);
 
+  /// Creates a copy with updated values
   Achievement copyWith({
     int? currentValue,
     bool? isCompleted,
@@ -138,10 +173,11 @@ class Achievement {
   );
 }
 
+/// Types of achievements that can be tracked
 enum AchievementType {
-  totalWorkouts,
-  totalExercises,
-  streakDays,
-  totalCalories,
-  specificWorkoutType,
+  totalWorkouts, // Total number of workout sessions
+  totalExercises, // Total number of exercises completed
+  streakDays, // Consecutive days with workouts
+  totalCalories, // Total calories burned
+  specificWorkoutType, // Specific workout category completion
 }

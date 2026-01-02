@@ -2,6 +2,7 @@ import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:smart_fitness_assistant/core/functions/navigate_to.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/core/models/nft_badge.dart';
 import 'package:smart_fitness_assistant/views/achievements/logic/cubit/achievement_cubit.dart';
@@ -10,7 +11,8 @@ import 'package:share_plus/share_plus.dart';
 import 'package:smart_fitness_assistant/core/functions/color_extension.dart';
 import 'package:smart_fitness_assistant/views/social/logic/cubit/social_feed_cubit.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
-import 'package:smart_fitness_assistant/views/exercise_session/logic/cubit/session_cubit.dart'; // ✅ ADD
+import 'package:smart_fitness_assistant/views/exercise_session/logic/cubit/session_cubit.dart';
+import 'package:smart_fitness_assistant/views/auth/main_tab/ui/main_tab_view.dart'; // ✅ ADD
 
 // 📌 1. PARAMETERS - Nhận data từ workout vừa hoàn thành
 class WorkoutCongratulationsScreen extends StatefulWidget {
@@ -27,19 +29,25 @@ class WorkoutCongratulationsScreen extends StatefulWidget {
     required this.caloriesBurned,
   }) : super(key: key);
 
-  // ✅ ADD: Static method show
+  // ✅ ADD: Static method show with safe navigation
   static Future<void> show(BuildContext context, SessionActive state) async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => WorkoutCongratulationsScreen(
-          workoutType: state.categoryName,
-          totalExercises: state.exercises.length,
-          durationMinutes: state.elapsedSeconds ~/ 60,
-          caloriesBurned: state.exercises.length * 50.0,
+    if (!context.mounted) return;
+
+    try {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => WorkoutCongratulationsScreen(
+            workoutType: state.categoryName,
+            totalExercises: state.exercises.length,
+            durationMinutes: state.elapsedSeconds ~/ 60,
+            caloriesBurned: state.exercises.length * 50.0,
+          ),
         ),
-      ),
-    );
+      );
+    } catch (e) {
+      print('Error showing congratulations screen: $e');
+    }
   }
 
   @override
@@ -81,16 +89,15 @@ class _WorkoutCongratulationsScreenState
     super.dispose();
   }
 
-  // 📌 4. MINT NFT BADGE - Core functionality
+  /// Mints a new achievement badge for completed workout
   Future<void> _mintBadge() async {
-    setState(() => _isMinting = true); // Hiển thị loading
+    setState(() => _isMinting = true);
 
-    // Gọi AchievementCubit để mint badge lên blockchain
     final badge = await context.read<AchievementCubit>().mintWorkoutBadge(
-      workoutType: widget.workoutType, // VD: "Full Body Workout"
-      totalExercises: widget.totalExercises, // VD: 12 exercises
-      durationMinutes: widget.durationMinutes, // VD: 45 minutes
-      caloriesBurned: widget.caloriesBurned, // VD: 350 kcal
+      workoutType: widget.workoutType,
+      totalExercises: widget.totalExercises,
+      durationMinutes: widget.durationMinutes,
+      caloriesBurned: widget.caloriesBurned,
     );
 
     if (mounted) {
@@ -348,6 +355,8 @@ class _WorkoutCongratulationsScreenState
             Expanded(
               child: ElevatedButton(
                 onPressed: () {
+                  if (!context.mounted) return;
+
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -367,8 +376,7 @@ class _WorkoutCongratulationsScreenState
             const SizedBox(width: 12),
             Expanded(
               child: OutlinedButton(
-                onPressed: () =>
-                    Navigator.of(context).popUntil((route) => route.isFirst),
+                onPressed: () => navigateTo(context, MainTabView()),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 15),
                   shape: RoundedRectangleBorder(
