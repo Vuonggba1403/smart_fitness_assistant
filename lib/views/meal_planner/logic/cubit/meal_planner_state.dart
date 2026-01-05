@@ -19,6 +19,7 @@ final class MealsLoaded extends MealPlannerState {
   final List<Map> breakfast;
   final List<Map> lunch;
   final List<Map> dinner;
+  final List<Map> snack;
   final int currentCalories;
   final int targetCalories;
   final DateTime selectedDateTime;
@@ -27,6 +28,7 @@ final class MealsLoaded extends MealPlannerState {
     required this.breakfast,
     required this.lunch,
     required this.dinner,
+    required this.snack,
     required this.currentCalories,
     required this.targetCalories,
     required this.selectedDateTime,

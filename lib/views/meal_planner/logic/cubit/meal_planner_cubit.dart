@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:smart_fitness_assistant/core/models/meal.dart';
 import 'package:flutter/foundation.dart';
+import 'package:uuid/uuid.dart';
 
 part 'meal_planner_state.dart';
 
@@ -52,11 +53,15 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
   /// 📥 Load meals theo ngày
   Future<void> loadMealsByDate(DateTime date) async {
     try {
+      debugPrint(
+        '🔵 Loading meals for date: ${DateFormat('yyyy-MM-dd').format(date)}',
+      );
       _selectedDateTime = date;
       _lastLoadedDate = date;
 
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) {
+        debugPrint('❌ User not authenticated in loadMealsByDate');
         emit(MealPlannerError('User not authenticated'));
         return;
       }
@@ -69,22 +74,32 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
           .maybeSingle();
 
       int targetCalories = pref?['daily_calorie_target'] ?? 0;
+      debugPrint('🎯 Target calories: $targetCalories');
 
       // Load meals của ngày
       final mealsByType = await loadMealsByDateAndType(date);
+      debugPrint(
+        '📊 Loaded meals by type: ${mealsByType.map((k, v) => MapEntry(k, v.length))}',
+      );
+
       final currentCalories = _calculateTotalCalories(mealsByType);
+      debugPrint('🔥 Current calories: $currentCalories');
 
       emit(
         MealsLoaded(
           breakfast: mealsByType['breakfast'] ?? [],
           lunch: mealsByType['lunch'] ?? [],
           dinner: mealsByType['dinner'] ?? [],
+          snack: mealsByType['snack'] ?? [],
           currentCalories: currentCalories,
           targetCalories: targetCalories,
           selectedDateTime: date,
         ),
       );
+
+      debugPrint('✅ MealsLoaded state emitted successfully');
     } catch (e) {
+      debugPrint('❌ Error in loadMealsByDate: $e');
       emit(MealPlannerError('Error loading meals: ${e.toString()}'));
     }
   }
@@ -94,14 +109,23 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
     try {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) {
+        debugPrint('❌ User not authenticated');
         emit(MealPlannerError('User not authenticated'));
         return;
       }
 
-      // Lưu meal vào database
-      await _supabase.from('user_meals').insert({
+      debugPrint('🔵 Adding meal: ${meal['name']} to $mealType');
+      debugPrint('📦 Meal data: $meal');
+
+      // ✅ BƯỚC 1: Đảm bảo meal tồn tại trong bảng meals
+      final mealId = await _ensureMealExists(meal);
+
+      debugPrint('✅ Meal ID: $mealId');
+
+      // ✅ BƯỚC 2: Lưu vào user_meals
+      final userMealData = {
         'for_user': userId,
-        'for_meal': meal['id'],
+        'for_meal': mealId,
         'meal_name': meal['name'],
         'meal_type': mealType,
         'calories': meal['calories'] ?? 0,
@@ -111,14 +135,108 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
         'serving_size_g': meal['serving_size'] ?? 100,
         'meal_date': DateFormat('yyyy-MM-dd').format(date),
         'meal_time': DateFormat('HH:mm').format(date),
-      });
+      };
 
-      // Reload và emit state mới
+      debugPrint('📥 Inserting user_meal: $userMealData');
+      await _supabase.from('user_meals').insert(userMealData);
+
+      // ✅ BƯỚC 3: Reload và emit state mới
+      debugPrint('🔄 Reloading meals for date: $date');
       await loadMealsByDate(date);
 
-      debugPrint('✅ Meal added: ${meal['name']}');
-    } catch (e) {
+      debugPrint('✅ Meal added successfully: ${meal['name']} to $mealType');
+    } catch (e, stackTrace) {
+      debugPrint('❌ Error adding meal: $e');
+      debugPrint('Stack trace: $stackTrace');
       emit(MealPlannerError('Error adding meal: ${e.toString()}'));
+    }
+  }
+
+  /// 🔧 Đảm bảo meal tồn tại trong bảng meals (upsert)
+  Future<String> _ensureMealExists(Map meal) async {
+    try {
+      final originalId = meal['id']?.toString() ?? '';
+      final barcode = meal['barcode']?.toString();
+
+      if (originalId.isEmpty) {
+        throw Exception('Meal ID is empty');
+      }
+
+      // 🔍 Nếu là barcode meal (ID không phải UUID), tìm theo barcode
+      if (barcode != null && barcode.isNotEmpty) {
+        debugPrint('🔍 Checking barcode meal: $barcode');
+
+        // Tìm meal theo barcode
+        final existing = await _supabase
+            .from('meals')
+            .select('id')
+            .eq('barcode', barcode)
+            .maybeSingle();
+
+        if (existing != null) {
+          final existingId = existing['id'] as String;
+          debugPrint('✅ Barcode meal exists with UUID: $existingId');
+          return existingId;
+        }
+
+        // Tạo UUID mới cho barcode meal
+        const uuid = Uuid();
+        final newUuid = uuid.v4();
+        debugPrint('➕ Creating new UUID for barcode meal: $newUuid');
+
+        await _supabase.from('meals').insert({
+          'id': newUuid,
+          'name': meal['name'] ?? 'Unknown',
+          'calories': meal['base_calories'] ?? meal['calories'] ?? 0,
+          'serving_size_g': 100, // Always store as per 100g
+          'protein_g': meal['base_protein'] ?? meal['protein'] ?? 0.0,
+          'carbs_g': meal['base_carbs'] ?? meal['carbs'] ?? 0.0,
+          'fat_g': meal['base_fat'] ?? meal['fat'] ?? 0.0,
+          'fiber_g': meal['fiber'] ?? 0.0,
+          'cholesterol_mg': meal['cholesterol'] ?? 0.0,
+          'is_verified': meal['is_verified'] ?? false,
+          'image_url': meal['image_url'],
+          'barcode': barcode,
+        });
+
+        debugPrint('✅ Barcode meal inserted with UUID: $newUuid');
+        return newUuid;
+      }
+
+      // 🔍 Meal thường (có UUID từ database)
+      final existing = await _supabase
+          .from('meals')
+          .select('id')
+          .eq('id', originalId)
+          .maybeSingle();
+
+      if (existing != null) {
+        debugPrint('✅ Meal already exists in database: $originalId');
+        return originalId;
+      }
+
+      // Insert meal mới với UUID hiện có
+      debugPrint('➕ Inserting new meal into database: $originalId');
+      await _supabase.from('meals').insert({
+        'id': originalId,
+        'name': meal['name'] ?? 'Unknown',
+        'calories': meal['base_calories'] ?? meal['calories'] ?? 0,
+        'serving_size_g': 100,
+        'protein_g': meal['base_protein'] ?? meal['protein'] ?? 0.0,
+        'carbs_g': meal['base_carbs'] ?? meal['carbs'] ?? 0.0,
+        'fat_g': meal['base_fat'] ?? meal['fat'] ?? 0.0,
+        'fiber_g': meal['fiber'] ?? 0.0,
+        'cholesterol_mg': meal['cholesterol'] ?? 0.0,
+        'is_verified': meal['is_verified'] ?? false,
+        'image_url': meal['image_url'],
+        'barcode': meal['barcode'],
+      });
+
+      debugPrint('✅ Meal inserted successfully: $originalId');
+      return originalId;
+    } catch (e) {
+      debugPrint('❌ Error ensuring meal exists: $e');
+      rethrow;
     }
   }
 
@@ -266,7 +384,7 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
       );
 
       if ((response as List).isEmpty) {
-        return {'breakfast': [], 'lunch': [], 'dinner': []};
+        return {'breakfast': [], 'lunch': [], 'dinner': [], 'snack': []};
       }
 
       // Nhóm meals theo meal_type
@@ -275,6 +393,7 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
         'breakfast': [],
         'lunch': [],
         'dinner': [],
+        'snack': [],
       };
 
       for (var meal in meals) {
@@ -296,7 +415,7 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
       return groupedMeals;
     } catch (e) {
       debugPrint('Error loading meals by type: $e');
-      return {'breakfast': [], 'lunch': [], 'dinner': []};
+      return {'breakfast': [], 'lunch': [], 'dinner': [], 'snack': []};
     }
   }
 

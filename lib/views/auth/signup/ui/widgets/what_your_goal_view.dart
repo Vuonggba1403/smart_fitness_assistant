@@ -153,7 +153,7 @@ class _WhatYourGoalViewState extends State<WhatYourGoalView> {
                         );
                       },
                     ),
-                    SizedBox(height: media.width * 0.1),
+                    // SizedBox(height: media.width * 0.1),
                     RoundButton(
                       title: isLoading
                           ? 'Loading...'

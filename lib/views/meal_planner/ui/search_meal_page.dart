@@ -4,21 +4,24 @@ import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/functions/custom_appbar.dart';
 import 'package:smart_fitness_assistant/core/functions/navigate_to.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.dart';
+import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/core/models/meal.dart';
-import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
-import 'package:smart_fitness_assistant/views/meal_planner/ui/widgets/food_details.dart';
 import 'package:smart_fitness_assistant/views/meal_planner/logic/cubit/meal_planner_cubit.dart';
+import 'package:smart_fitness_assistant/views/meal_planner/ui/food_details_page.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:smart_fitness_assistant/core/services/open_food_facts_service.dart';
 
-/// 🔍 Màn hình tìm kiếm món ăn
-class SearchMeal extends StatefulWidget {
-  const SearchMeal({super.key});
+/// 🔍 Search Meal Page - Search and scan food
+class SearchMealPage extends StatefulWidget {
+  const SearchMealPage({super.key});
 
   @override
-  State<SearchMeal> createState() => _SearchMealState();
+  State<SearchMealPage> createState() => _SearchMealPageState();
 }
 
-class _SearchMealState extends State<SearchMeal>
+class _SearchMealPageState extends State<SearchMealPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late TextEditingController _searchController;
@@ -116,7 +119,10 @@ class _SearchMealState extends State<SearchMeal>
       indicatorColor: theme.primaryColor,
       tabs: [
         Tab(text: LocaleKey.recent.tr),
-        Tab(text: LocaleKey.createdByMe.tr),
+        Tab(
+          icon: const Icon(Icons.qr_code_scanner),
+          text: LocaleKey.scanBarcode.tr,
+        ),
       ],
     );
   }
@@ -131,7 +137,7 @@ class _SearchMealState extends State<SearchMeal>
     // Nếu không search, hiển thị tabs
     return TabBarView(
       controller: _tabController,
-      children: [_buildRecentTab(), _buildCreatedByMeTab()],
+      children: [_buildRecentTab(), _buildBarcodeScannerTab()],
     );
   }
 
@@ -186,9 +192,14 @@ class _SearchMealState extends State<SearchMeal>
     );
   }
 
-  /// 👤 Tab created by me
-  Widget _buildCreatedByMeTab() {
-    return _buildEmptyState(LocaleKey.noRecipes.tr);
+  /// 📷 Tab barcode scanner
+  Widget _buildBarcodeScannerTab() {
+    return _BarcodeScannerView(
+      onMealFound: (meal) async {
+        // ✅ Navigate to FoodDetails với meal từ API
+        await navigateTo(context, FoodDetailsPage(meal: meal));
+      },
+    );
   }
 
   /// 📋 Danh sách meals
@@ -233,7 +244,7 @@ class _SearchMealState extends State<SearchMeal>
 
   /// 🔀 Navigate to details
   void _navigateToDetails(Meal meal) {
-    navigateTo(context, FoodDetails(meal: meal));
+    navigateTo(context, FoodDetailsPage(meal: meal));
   }
 
   /// ➕ Thêm meal vào planner
@@ -421,5 +432,208 @@ class _NutrientBadge extends StatelessWidget {
         style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
       ),
     );
+  }
+}
+
+// =====================================================
+// 📷 BARCODE SCANNER VIEW
+// =====================================================
+
+/// 📱 Barcode Scanner View
+class _BarcodeScannerView extends StatefulWidget {
+  final Function(Meal) onMealFound;
+
+  const _BarcodeScannerView({required this.onMealFound});
+
+  @override
+  State<_BarcodeScannerView> createState() => __BarcodeScannerViewState();
+}
+
+class __BarcodeScannerViewState extends State<_BarcodeScannerView> {
+  MobileScannerController? _controller;
+  bool _hasPermission = false;
+  bool _isScanning = false;
+  String? _currentBarcode;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkPermission();
+  }
+
+  Future<void> _checkPermission() async {
+    final status = await Permission.camera.request();
+
+    if (status.isGranted) {
+      setState(() {
+        _hasPermission = true;
+        _controller = MobileScannerController(
+          detectionSpeed: DetectionSpeed.normal,
+          facing: CameraFacing.back,
+          formats: const [
+            BarcodeFormat.ean13,
+            BarcodeFormat.ean8,
+            BarcodeFormat.upcA,
+            BarcodeFormat.upcE,
+            BarcodeFormat.qrCode,
+          ],
+        );
+      });
+    } else {
+      setState(() => _hasPermission = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_hasPermission) {
+      return _buildPermissionDenied();
+    }
+
+    if (_controller == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return Stack(
+      children: [
+        MobileScanner(
+          controller: _controller,
+          onDetect: (capture) {
+            if (_isScanning) return;
+
+            final List<Barcode> barcodes = capture.barcodes;
+            for (final barcode in barcodes) {
+              if (barcode.rawValue != null &&
+                  barcode.rawValue != _currentBarcode) {
+                _handleBarcodeDetected(barcode.rawValue!);
+                break;
+              }
+            }
+          },
+        ),
+        _buildOverlay(),
+        _buildInstructions(),
+      ],
+    );
+  }
+
+  Future<void> _handleBarcodeDetected(String barcode) async {
+    setState(() {
+      _isScanning = true;
+      _currentBarcode = barcode;
+    });
+
+    try {
+      final meal = await OpenFoodFactsService.searchByBarcode(barcode);
+
+      if (meal != null && mounted) {
+        widget.onMealFound(meal);
+      } else if (mounted) {
+        _showError(
+          LocaleKey.barcodeNotFound.tr.replaceAll('{barcode}', barcode),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        _showError(LocaleKey.errorScanningBarcode.tr);
+      }
+    } finally {
+      await Future.delayed(const Duration(seconds: 2));
+      if (mounted) {
+        setState(() {
+          _isScanning = false;
+          _currentBarcode = null;
+        });
+      }
+    }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
+    );
+  }
+
+  Widget _buildOverlay() {
+    return Center(
+      child: Container(
+        width: 250,
+        height: 250,
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: _isScanning ? Colors.green : Colors.white,
+            width: 3,
+          ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInstructions() {
+    return Positioned(
+      bottom: 50,
+      left: 0,
+      right: 0,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        margin: const EdgeInsets.symmetric(horizontal: 20),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.7),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          children: [
+            Text(
+              _isScanning
+                  ? '🔍 Đang tìm kiếm sản phẩm...'
+                  : LocaleKey.scanBarcodeInstruction.tr,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.white, fontSize: 14),
+            ),
+            if (_isScanning) ...[
+              const SizedBox(height: 8),
+              const CircularProgressIndicator(color: Colors.white),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPermissionDenied() {
+    final theme = Theme.of(context);
+
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.camera_alt_outlined,
+            size: 80,
+            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            LocaleKey.cameraPermissionRequired.tr,
+            style: theme.textTheme.titleMedium,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () async {
+              await openAppSettings();
+            },
+            child: Text(LocaleKey.openSettings.tr),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
   }
 }

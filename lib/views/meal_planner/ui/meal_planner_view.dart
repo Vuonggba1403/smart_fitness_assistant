@@ -12,7 +12,7 @@ import 'package:smart_fitness_assistant/views/meal_planner/logic/cubit/meal_plan
 import 'package:smart_fitness_assistant/core/functions/color_extension.dart';
 import 'package:smart_fitness_assistant/core/widgets/custom_calendar_agenda.dart';
 import 'package:smart_fitness_assistant/views/activity_level/ui/activity_level_dialog.dart';
-import 'package:smart_fitness_assistant/views/meal_planner/ui/widgets/search_meal.dart';
+import 'package:smart_fitness_assistant/views/meal_planner/ui/search_meal_page.dart';
 import 'package:smart_fitness_assistant/views/activity_level/logic/cubit/activity_level_cubit.dart';
 
 class MealPlannerView extends StatefulWidget {
@@ -133,8 +133,14 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                   'breakfast': state.breakfast,
                   'lunch': state.lunch,
                   'dinner': state.dinner,
+                  'snack': state.snack,
                 }
-              : <String, List<Map>>{'breakfast': [], 'lunch': [], 'dinner': []};
+              : <String, List<Map>>{
+                  'breakfast': [],
+                  'lunch': [],
+                  'dinner': [],
+                  'snack': [],
+                };
 
           return SafeArea(
             child: SingleChildScrollView(
@@ -165,7 +171,7 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                     tag: 'meal_search_bar',
                     child: InkWell(
                       onTap: () {
-                        navigateTo(context, const SearchMeal());
+                        navigateTo(context, const SearchMealPage());
                       },
                       child: Container(
                         margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -239,6 +245,12 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                     title: LocaleKey.dinner.tr,
                     meals: mealsByType['dinner'] ?? [],
                     mealType: 'dinner',
+                  ),
+                  _buildMealSection(
+                    context: context,
+                    title: LocaleKey.snack.tr,
+                    meals: mealsByType['snack'] ?? [],
+                    mealType: 'snack',
                   ),
 
                   SizedBox(height: media.width * 0.04),
@@ -386,7 +398,7 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                   InkWell(
                     onTap: () async {
                       // ✅ Await navigate và reload sau khi quay lại
-                      await navigateTo(context, const SearchMeal());
+                      await navigateTo(context, const SearchMealPage());
                       if (context.mounted) {
                         context.read<MealPlannerCubit>().loadMealsByDate(
                           _selectedDate,
@@ -488,7 +500,7 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                   InkWell(
                     onTap: () async {
                       // ✅ Await navigate và reload sau khi quay lại
-                      await navigateTo(context, const SearchMeal());
+                      await navigateTo(context, const SearchMealPage());
                       if (context.mounted) {
                         context.read<MealPlannerCubit>().loadMealsByDate(
                           _selectedDate,

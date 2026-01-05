@@ -538,4 +538,12 @@ class LocaleKey {
 
   // Common
   static const String errorLoadData = "error_load_data";
+
+  // Barcode Scanner
+  static const String scanBarcode = 'scanBarcode';
+  static const String scanBarcodeInstruction = 'scanBarcodeInstruction';
+  static const String cameraPermissionRequired = 'cameraPermissionRequired';
+  static const String openSettings = 'openSettings';
+  static const String barcodeNotFound = 'barcodeNotFound';
+  static const String errorScanningBarcode = 'errorScanningBarcode';
 }

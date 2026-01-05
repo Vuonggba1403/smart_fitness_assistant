@@ -12,6 +12,7 @@ class Meal {
   final int servingSizeG;
   final bool isVerified;
   final String? category;
+  final String? barcode; // ✅ Thêm field barcode
 
   Meal({
     required this.id,
@@ -27,6 +28,7 @@ class Meal {
     this.servingSizeG = 100,
     this.isVerified = false,
     this.category,
+    this.barcode,
   });
 
   factory Meal.fromJson(Map<String, dynamic> json) {
@@ -48,6 +50,7 @@ class Meal {
       servingSizeG: json['serving_size_g'] as int? ?? 100,
       isVerified: json['is_verified'] as bool? ?? false,
       category: json['category'] as String?,
+      barcode: json['barcode'] as String?,
     );
   }
 
@@ -66,6 +69,7 @@ class Meal {
       'serving_size_g': servingSizeG,
       'is_verified': isVerified,
       'category': category,
+      'barcode': barcode,
     };
   }
 }

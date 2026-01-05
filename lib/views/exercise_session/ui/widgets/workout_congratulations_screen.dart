@@ -132,45 +132,49 @@ class _WorkoutCongratulationsScreenState
 
           // ========== MAIN CONTENT ==========
           SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // 🏆 Trophy Icon
-                  const Icon(
-                    Icons.emoji_events,
-                    size: 100,
-                    color: Colors.amber,
-                  ),
-
-                  // 🎉 Congratulations Text
-                  Text(
-                    LocaleKey.congratulations.tr,
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  children: [
+                    // 🏆 Trophy Icon
+                    const Icon(
+                      Icons.emoji_events,
+                      size: 100,
+                      color: Colors.amber,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
 
-                  // 📊 Workout Stats Card (exercises, duration, calories)
-                  _buildStatCard(context),
-                  const SizedBox(height: 32),
+                    // 🎉 Congratulations Text
+                    Text(
+                      LocaleKey.congratulations.tr,
+                      style: Theme.of(context).textTheme.headlineMedium
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
 
-                  // 🏅 NFT Minting Section
-                  if (_isMinting)
-                    _buildMintingProgress()
-                  else if (_mintedBadge != null)
-                    _buildMintedBadge()
-                  else
-                    const SizedBox.shrink(),
+                    // 📊 Workout Stats Card (exercises, duration, calories)
+                    _buildStatCard(context),
+                    const SizedBox(height: 32),
 
-                  const Spacer(),
+                    // 🏅 NFT Minting Section
+                    if (_isMinting)
+                      _buildMintingProgress()
+                    else if (_mintedBadge != null)
+                      _buildMintedBadge()
+                    else
+                      const SizedBox.shrink(),
 
-                  // ✅ FIX: Action Buttons với Share
-                  _buildActionButtons(context),
-                ],
+                    // Thay Spacer bằng SizedBox với height cố định
+                    const SizedBox(height: 32),
+
+                    // ✅ FIX: Action Buttons với Share
+                    _buildActionButtons(context),
+
+                    // Padding bottom để tránh button bị che bởi keyboard/nav bar
+                    const SizedBox(height: 24),
+                  ],
+                ),
               ),
             ),
           ),

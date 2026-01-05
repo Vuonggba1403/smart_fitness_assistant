@@ -324,6 +324,9 @@ Map<String, String> viVN = {
 
   // Common
   LocaleKey.workoutPlan: "Kế Hoạch Tập Luyện",
+  LocaleKey.workoutPlanTitle: "Kế Hoạch Tập Luyện",
+  LocaleKey.noWorkoutPlan: "Chưa có kế hoạch tập luyện",
+  LocaleKey.eating: "Bữa Ăn",
 
   // Additional keys for complete localization
   LocaleKey.error: "Lỗi",
@@ -487,4 +490,13 @@ Map<String, String> viVN = {
   LocaleKey.username: "Tên người dùng",
   LocaleKey.email: "Email",
   LocaleKey.password: "Mật khẩu",
+
+  // Barcode Scanner
+  LocaleKey.scanBarcode: 'Quét mã vạch',
+  LocaleKey.scanBarcodeInstruction: 'Đặt mã vạch trong khung hình để quét',
+  LocaleKey.cameraPermissionRequired:
+      'Cần quyền truy cập camera để quét mã vạch',
+  LocaleKey.openSettings: 'Mở cài đặt',
+  LocaleKey.barcodeNotFound: 'Không tìm thấy sản phẩm với mã: {barcode}',
+  LocaleKey.errorScanningBarcode: 'Lỗi khi quét mã vạch. Vui lòng thử lại.',
 };

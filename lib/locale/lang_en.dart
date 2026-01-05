@@ -324,6 +324,9 @@ Map<String, String> enUs = {
 
   // Common
   LocaleKey.workoutPlan: "Workout Plan",
+  LocaleKey.workoutPlanTitle: "Workout Plan",
+  LocaleKey.noWorkoutPlan: "No workout plan yet",
+  LocaleKey.eating: "Meals",
   LocaleKey.error: "Error",
   LocaleKey.continuing: "Continuing...",
   LocaleKey.createPlan: "Create Plan",
@@ -479,4 +482,14 @@ Map<String, String> enUs = {
   LocaleKey.username: "Username",
   LocaleKey.email: "Email",
   LocaleKey.password: "Password",
+
+  // Barcode Scanner
+  LocaleKey.scanBarcode: 'Scan Barcode',
+  LocaleKey.scanBarcodeInstruction:
+      'Position the barcode within the frame to scan',
+  LocaleKey.cameraPermissionRequired:
+      'Camera permission is required to scan barcodes',
+  LocaleKey.openSettings: 'Open Settings',
+  LocaleKey.barcodeNotFound: 'Product not found for barcode: {barcode}',
+  LocaleKey.errorScanningBarcode: 'Error scanning barcode. Please try again.',
 };

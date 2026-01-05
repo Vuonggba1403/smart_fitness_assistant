@@ -7,11 +7,9 @@ import 'package:smart_fitness_assistant/core/widgets/custom_circle_proIndicator.
 import 'package:smart_fitness_assistant/core/widgets/custom_scaffold_message.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/views/water_tracker/logic/cubit/water_tracker_cubit.dart';
-import 'package:smart_fitness_assistant/views/water_tracker/logic/water_tracker_helper.dart';
-import 'package:smart_fitness_assistant/views/water_tracker/ui/widgets/water_congratulations_dialog.dart';
-import 'package:smart_fitness_assistant/views/water_tracker/ui/widgets/water_goal_dialog.dart';
-import 'package:smart_fitness_assistant/views/water_tracker/ui/widgets/water_reminder_dialog.dart';
-import 'package:smart_fitness_assistant/views/water_tracker/ui/widgets/water_progress_display.dart';
+import 'package:smart_fitness_assistant/core/services/water_tracker_service.dart';
+import 'package:smart_fitness_assistant/views/water_tracker/ui/widgets/water_tracker_dialogs.dart';
+import 'package:smart_fitness_assistant/views/water_tracker/ui/widgets/water_progress_circle.dart';
 import 'package:smart_fitness_assistant/views/water_tracker/ui/widgets/components/water_amount_selector.dart';
 
 class WaterTrackerView extends StatelessWidget {
@@ -35,9 +33,13 @@ class _WaterTrackerContent extends StatefulWidget {
 
 class _WaterTrackerContentState extends State<_WaterTrackerContent> {
   int _selectedAmount = 200;
+  final _service = WaterTrackerService();
 
   Future<void> _handleGoalUpdate(int currentGoal) async {
-    final newGoal = await WaterGoalDialog.show(context, currentGoal);
+    final newGoal = await WaterTrackerDialogs.showGoalDialog(
+      context,
+      currentGoal,
+    );
 
     if (newGoal != null && mounted) {
       await context.read<WaterTrackerCubit>().updateGoal(newGoal);
@@ -49,7 +51,7 @@ class _WaterTrackerContentState extends State<_WaterTrackerContent> {
   }
 
   Future<void> _handleReminderUpdate(loadedState) async {
-    final newSettings = await WaterReminderDialog.show(
+    final newSettings = await WaterTrackerDialogs.showReminderDialog(
       context,
       loadedState.settings,
     );
@@ -70,14 +72,12 @@ class _WaterTrackerContentState extends State<_WaterTrackerContent> {
 
   @override
   Widget build(BuildContext context) {
-    final media = MediaQuery.of(context).size;
-
     return Scaffold(
       backgroundColor: TColor.primaryColor1,
       body: BlocListener<WaterTrackerCubit, WaterTrackerState>(
         listener: (context, state) {
           if (state is WaterGoalAchieved) {
-            WaterCongratulationsDialog.show(
+            WaterTrackerDialogs.showCongratulationsDialog(
               context,
               state.totalMl,
               state.goalMl,
@@ -130,6 +130,24 @@ class _WaterTrackerContentState extends State<_WaterTrackerContent> {
                           icon: Icon(Icons.settings, color: TColor.white),
                           onPressed: () => _handleGoalUpdate(state.goalMl),
                         ),
+                        // 🧪 DEBUG: Test notification button
+                        if (const bool.fromEnvironment(
+                          'DEBUG_MODE',
+                          defaultValue: false,
+                        ))
+                          IconButton(
+                            icon: Icon(Icons.bug_report, color: TColor.white),
+                            onPressed: () async {
+                              final pending = await _service
+                                  .getPendingNotifications();
+                              if (mounted) {
+                                AppSnackBar.info(
+                                  context,
+                                  '📊 ${pending.length} pending notifications',
+                                );
+                              }
+                            },
+                          ),
                       ],
                     ),
                   ),
@@ -137,7 +155,7 @@ class _WaterTrackerContentState extends State<_WaterTrackerContent> {
                   // Progress Circle
                   Expanded(
                     child: Center(
-                      child: WaterProgressDisplay(
+                      child: WaterProgressCircle(
                         onTap: () {},
                         totalMl: state.totalMl,
                         goalMl: state.goalMl,
@@ -164,9 +182,7 @@ class _WaterTrackerContentState extends State<_WaterTrackerContent> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           Text(
-                            WaterTrackerHelper.getNextReminderText(
-                              state.settings,
-                            ),
+                            _service.getNextReminderText(state.settings),
                             style: TextStyle(
                               color: TColor.white,
                               fontSize: 16,
