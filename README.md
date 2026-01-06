@@ -17,6 +17,32 @@ _Your Personal AI-Powered Fitness Companion_
 
 **SFA (Smart Fitness Assistant)** is a comprehensive mobile fitness application that leverages AI technology to provide personalized workout plans, meal planning, and fitness tracking. Built with Flutter and powered by Google Gemini AI, it offers an intelligent, adaptive approach to achieving your fitness goals.
 
+## 📸 Screenshots
+
+<div align="center">
+
+### Authentication & Onboarding
+
+<img src="assets/picture_readme/login_view.png" width="250" alt="Login"/> <img src="assets/picture_readme/register_view.png" width="250" alt="Register"/> <img src="assets/picture_readme/locale.png" width="250" alt="Language Selection"/>
+
+### Home & Dashboard
+
+<img src="assets/picture_readme/home_view.png" width="250" alt="Home Dashboard"/> <img src="assets/picture_readme/darkmode.png" width="250" alt="Dark Mode"/> <img src="assets/picture_readme/profile.png" width="250" alt="User Profile"/>
+
+### Workout Features
+
+<img src="assets/picture_readme/workout.png" width="250" alt="Workout Tracker"/> <img src="assets/picture_readme/generate_ai.png" width="250" alt="AI Workout Generation"/> <img src="assets/picture_readme/Screenshot 2026-01-06 001119.png" width="250" alt="Workout Details"/>
+
+### Nutrition & Hydration
+
+<img src="assets/picture_readme/meal_planner.png" width="250" alt="Meal Planner"/> <img src="assets/picture_readme/water_tracker.png" width="250" alt="Water Tracker"/>
+
+### AI & Achievements
+
+<img src="assets/picture_readme/chatbot.png" width="250" alt="AI Chatbot"/> <img src="assets/picture_readme/nft_bdage.png" width="250" alt="NFT Badges"/> <img src="assets/picture_readme/congration_nft.png" width="250" alt="Achievement Unlocked"/>
+
+</div>
+
 ## ✨ Key Features
 
 ### 🤖 AI-Powered Planning
