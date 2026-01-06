@@ -53,12 +53,24 @@ class NotificationService {
   }) async {
     // ✅ Convert DateTime thành TZDateTime
     final tzScheduledTime = tz.TZDateTime.from(scheduledTime, tz.local);
+    final now = tz.TZDateTime.now(tz.local);
 
     print('📅 Scheduling notification:');
     print('   ID: $id');
-    print('   Time: $scheduledTime');
-    print('   TZ Time: $tzScheduledTime');
-    print('   Now: ${DateTime.now()}');
+    print('   Title: $title');
+    print('   Body: $body');
+    print('   Scheduled Time (Input): $scheduledTime');
+    print('   Scheduled Time (TZ): $tzScheduledTime');
+    print('   Current Time: $now');
+    print(
+      '   Time Difference: ${tzScheduledTime.difference(now).inMinutes} minutes',
+    );
+
+    if (tzScheduledTime.isBefore(now)) {
+      print(
+        '⚠️ WARNING: Scheduled time is in the past! Notification may not trigger.',
+      );
+    }
 
     const androidDetails = AndroidNotificationDetails(
       'workout_reminders',
@@ -81,16 +93,29 @@ class NotificationService {
       iOS: iosDetails,
     );
 
-    await _notifications.zonedSchedule(
-      id,
-      title,
-      body,
-      tzScheduledTime,
-      details,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-    );
+    try {
+      await _notifications.zonedSchedule(
+        id,
+        title,
+        body,
+        tzScheduledTime,
+        details,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      );
 
-    print('✅ Notification scheduled successfully!');
+      print('✅ Notification scheduled successfully!');
+
+      // Verify notification was scheduled
+      final pending = await getPendingNotifications();
+      final scheduled = pending.where((n) => n.id == id).toList();
+      print(
+        '✅ Verified: ${scheduled.length} pending notification(s) with ID $id',
+      );
+    } catch (e, stackTrace) {
+      print('❌ Error scheduling notification: $e');
+      print('Stack trace: $stackTrace');
+      rethrow;
+    }
   }
 
   Future<void> cancelNotification(int id) async {

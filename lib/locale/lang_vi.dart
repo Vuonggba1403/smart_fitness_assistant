@@ -116,6 +116,7 @@ Map<String, String> viVN = {
       "Hành động này không thể hoàn tác và tất cả dữ liệu sẽ bị xóa vĩnh viễn.",
   LocaleKey.buttonNo: "Hủy",
   LocaleKey.buttonYes: "Có",
+  LocaleKey.ok: "OK",
   LocaleKey.delAcc: "Xóa tài khoản",
   //Work Tracker View
   LocaleKey.gymEx: "Bài tập tại phòng gym",
@@ -148,6 +149,10 @@ Map<String, String> viVN = {
   //Water Tracker
   LocaleKey.dailyGoal: "Mục tiêu hàng ngày",
   LocaleKey.nextReminder: "Nhắc nhở tiếp theo",
+  LocaleKey.waterNightWarningInfo:
+      "💡 Khuyến nghị: Không nên uống nước sau 11h đêm để tránh trữ nước",
+  LocaleKey.waterNightWarningSnackbar:
+      "⚠️ Không nên uống nước sau 11h đêm!\n💤 Hãy để cơ thể nghỉ ngơi, uống nước ban đêm sẽ bị trữ nước.",
   LocaleKey.addWater: "Thêm nước",
   LocaleKey.waterIntake: "Ghi nước một chạm",
   LocaleKey.snackBar: "Cập nhật cài đặt nhắc nhở thành công!",
@@ -247,16 +252,27 @@ Map<String, String> viVN = {
   LocaleKey.scheduleAdded: "✅ Đã thêm lịch tập",
   LocaleKey.scheduleAddFailed: "❌ Thêm lịch tập thất bại",
   LocaleKey.addSchedule: "Thêm lịch tập",
+  LocaleKey.addScheduleTitle: "Thêm lịch tập",
+  LocaleKey.scheduleAddedSuccess: "Đã thêm lịch tập thành công!",
+  LocaleKey.addScheduleFailed: "Không thể thêm lịch tập",
+  LocaleKey.selectWorkout: "Chọn bài tập",
   LocaleKey.selectExercise: "Chọn bài tập",
   LocaleKey.selectExerciseHint: "Chọn bài tập",
+  LocaleKey.pleaseSelectExercise: "Vui lòng chọn bài tập",
+  LocaleKey.pleaseSelectFutureTime: "Vui lòng chọn thời gian trong tương lai",
   LocaleKey.time: "Thời gian",
+  LocaleKey.reminderWhenTime: "Nhắc nhở khi đến giờ",
   LocaleKey.notifyWhenTime: "Nhắc nhở khi đến giờ",
   LocaleKey.addScheduleButton: "Thêm lịch",
   LocaleKey.selectExerciseFirst: "Vui lòng chọn bài tập",
   LocaleKey.selectFutureTime: "Vui lòng chọn thời gian trong tương lai",
+  LocaleKey.markAsCompleted: "Đánh dấu hoàn thành",
   LocaleKey.markedComplete: "✅ Đã đánh dấu hoàn thành",
   LocaleKey.completed2: "Hoàn thành",
   LocaleKey.deleteSchedule: "Xóa lịch",
+  LocaleKey.deleteScheduleButton: "Xóa lịch",
+  LocaleKey.workoutReminder: "Nhắc nhở tập luyện",
+  LocaleKey.workoutReminderBody: "Đã đến giờ tập {workout}!",
 
   // Social
   LocaleKey.editPost: "Chỉnh sửa bài đăng",
@@ -377,6 +393,9 @@ Map<String, String> viVN = {
   LocaleKey.beginner: "Mới bắt đầu",
   LocaleKey.intermediate: "Trung bình",
   LocaleKey.advanced: "Nâng cao",
+  LocaleKey.beginnerTitle: "Mới bắt đầu",
+  LocaleKey.intermediateTitle: "Trung bình",
+  LocaleKey.advancedTitle: "Nâng cao",
   LocaleKey.overTwoYearsExperience: "Hơn 2 năm kinh nghiệm",
   LocaleKey.vegan: "Thuần chay (Vegan)",
   LocaleKey.vegetarian: "Ăn chay",
@@ -405,6 +424,11 @@ Map<String, String> viVN = {
   LocaleKey.atHome: "Tại nhà",
   LocaleKey.selectDietInstruction: "Chọn các chế độ ăn phù hợp (nếu có):",
   LocaleKey.starchless: "Không tinh bột",
+  LocaleKey.vegetarianLabel: "Chay (Vegetarian)",
+  LocaleKey.veganLabel: "Thuần chay (Vegan)",
+  LocaleKey.halalLabel: "Halal",
+  LocaleKey.ketoLabel: "Keto",
+  LocaleKey.highProteinLabel: "Nhiều protein",
 
   // Home Additional
   LocaleKey.noWorkoutsYet: "Chưa có bài tập nào 📋",
@@ -466,14 +490,14 @@ Map<String, String> viVN = {
   LocaleKey.addAnotherSet: "Thêm một set",
   LocaleKey.nextExerciseButton: "Bài tập tiếp theo",
   // Schedule Management
-  LocaleKey.deleteScheduleButton: "Xóa lịch",
-  LocaleKey.addScheduleTitle: "Thêm lịch tập",
   LocaleKey.noScheduleYet: "Chưa có lịch tập",
   LocaleKey.tapToAddSchedule: "Nhấn để thêm lịch tập",
-  LocaleKey.selectWorkout: "Chọn bài tập",
-  LocaleKey.reminderWhenTime: "Nhắc nhở khi đến giờ",
-  LocaleKey.pleaseSelectFutureTime: "Vui lòng chọn thời gian trong tương lai",
-  LocaleKey.scheduleAddedSuccess: "Đã thêm lịch tập",
+  LocaleKey.workoutTimeNotification: "Giờ tập luyện",
+  LocaleKey.startNow: "Bắt đầu ngay",
+  LocaleKey.setReminderAt: "Đã đặt nhắc nhở lúc",
+  LocaleKey.cancelledReminder: "Đã hủy nhắc nhở",
+  LocaleKey.deletedSchedule: "Đã xóa lịch tập",
+  LocaleKey.cannotDeleteSchedule: "Không thể xóa lịch tập",
 
   // Chatbot
   LocaleKey.viewAllChats: "Xem tất cả cuộc trò chuyện",
@@ -498,5 +522,10 @@ Map<String, String> viVN = {
       'Cần quyền truy cập camera để quét mã vạch',
   LocaleKey.openSettings: 'Mở cài đặt',
   LocaleKey.barcodeNotFound: 'Không tìm thấy sản phẩm với mã: {barcode}',
+
+  // Navigation
+  LocaleKey.back: 'Quay lại',
+  LocaleKey.continue_: 'Tiếp tục',
+  LocaleKey.errorPrefix: 'Lỗi:',
   LocaleKey.errorScanningBarcode: 'Lỗi khi quét mã vạch. Vui lòng thử lại.',
 };

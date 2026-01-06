@@ -7,6 +7,10 @@ class ScheduledWorkout {
   final bool isCompleted;
   final DateTime? createdAt;
 
+  // ✅ Joined data from exercise_categories
+  final String? categoryName;
+  final String? categoryImage;
+
   ScheduledWorkout({
     this.id,
     required this.forUser,
@@ -15,9 +19,21 @@ class ScheduledWorkout {
     this.hasNotification = false,
     this.isCompleted = false,
     this.createdAt,
+    this.categoryName,
+    this.categoryImage,
   });
 
   factory ScheduledWorkout.fromJson(Map<String, dynamic> json) {
+    // ✅ Parse joined exercise_categories data
+    String? categoryName;
+    String? categoryImage;
+
+    if (json['exercise_categories'] != null) {
+      final category = json['exercise_categories'] as Map<String, dynamic>;
+      categoryName = category['title_ex'];
+      categoryImage = category['img_url'];
+    }
+
     return ScheduledWorkout(
       id: json['id'],
       forUser: json['for_user'],
@@ -28,6 +44,8 @@ class ScheduledWorkout {
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'])
           : null,
+      categoryName: categoryName,
+      categoryImage: categoryImage,
     );
   }
 
@@ -49,6 +67,8 @@ class ScheduledWorkout {
     bool? hasNotification,
     bool? isCompleted,
     DateTime? createdAt,
+    String? categoryName,
+    String? categoryImage,
   }) {
     return ScheduledWorkout(
       id: id ?? this.id,
@@ -58,6 +78,8 @@ class ScheduledWorkout {
       hasNotification: hasNotification ?? this.hasNotification,
       isCompleted: isCompleted ?? this.isCompleted,
       createdAt: createdAt ?? this.createdAt,
+      categoryName: categoryName ?? this.categoryName,
+      categoryImage: categoryImage ?? this.categoryImage,
     );
   }
 }

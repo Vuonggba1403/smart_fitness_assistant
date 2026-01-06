@@ -9,8 +9,7 @@ import 'package:smart_fitness_assistant/views/auth/cubit/authentication_cubit.da
 import 'package:smart_fitness_assistant/views/workout_plan/logic/cubit/workout_plan_cubit.dart';
 import 'package:smart_fitness_assistant/core/models/workout_plan.dart';
 import 'package:smart_fitness_assistant/views/multi_step_dialog_workout/ui/multi_step_plan_dialog.dart';
-import 'widgets/workout_day_card.dart';
-import 'widgets/workout_session_list_tile.dart';
+import 'widgets/session_list_tiles.dart';
 import 'widgets/meal_session_group.dart';
 
 /// Main view cho Workout Plan
@@ -195,12 +194,42 @@ class _WorkoutPlanContent extends StatelessWidget {
       itemCount: plan.dailyPlans.length,
       itemBuilder: (context, index) {
         final day = plan.dailyPlans[index];
-        return WorkoutDayCard(
-          day: day,
+        return Card(
+          margin: const EdgeInsets.only(bottom: 16),
           child: Column(
-            children: day.workouts
-                .map((workout) => WorkoutSessionListTile(workout: workout))
-                .toList(),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Inline day header
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [TColor.primaryColor1, TColor.primaryColor2],
+                  ),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(12),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Text(
+                      '${LocaleKey.dayNumber.tr} ${day.dayNumber}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Workout sessions
+              Column(
+                children: day.workouts
+                    .map((workout) => WorkoutSessionListTile(workout: workout))
+                    .toList(),
+              ),
+            ],
           ),
         );
       },
@@ -214,9 +243,39 @@ class _WorkoutPlanContent extends StatelessWidget {
       itemCount: plan.dailyPlans.length,
       itemBuilder: (context, index) {
         final day = plan.dailyPlans[index];
-        return WorkoutDayCard(
-          day: day,
-          child: MealSessionGroup(meals: day.meals),
+        return Card(
+          margin: const EdgeInsets.only(bottom: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Inline day header
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [TColor.primaryColor1, TColor.primaryColor2],
+                  ),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(12),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Text(
+                      '${LocaleKey.dayNumber.tr} ${day.dayNumber}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Meal sessions
+              MealSessionGroup(meals: day.meals),
+            ],
+          ),
         );
       },
     );

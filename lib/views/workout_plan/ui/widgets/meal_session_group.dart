@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/models/workout_plan.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
-import 'meal_session_list_tile.dart';
+import 'package:smart_fitness_assistant/views/workout_plan/ui/widgets/session_list_tiles.dart';
 
 /// Widget nhóm các meal sessions theo loại bữa ăn
 class MealSessionGroup extends StatelessWidget {
@@ -88,7 +88,7 @@ class MealSessionGroup extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              '$totalCalories cal',
+              '$totalCalories ${LocaleKey.calories.tr}',
               style: const TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.bold,

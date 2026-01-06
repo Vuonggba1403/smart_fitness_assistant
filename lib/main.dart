@@ -55,7 +55,7 @@ Future<void> main() async {
         BlocProvider(create: (_) => WorkoutTrackerCubit()),
         BlocProvider(create: (_) => SocialFeedCubit()..loadFeed()),
         BlocProvider(create: (_) => ActivityLevelCubit()),
-        BlocProvider(create: (_) => ScheduleCubit()),
+        BlocProvider(create: (_) => ScheduleCubit(notificationService)),
         BlocProvider(create: (_) => MealPlannerCubit()),
         BlocProvider(create: (_) => WorkoutPlanCubit()),
         BlocProvider(

@@ -5,6 +5,7 @@
 ### 1. **Cách Locale Đang Hoạt Động**
 
 Hiện tại app của bạn sử dụng **GetX Translation** với:
+
 - **2 ngôn ngữ**: Tiếng Việt (vi_VI) và Tiếng Anh (en_US)
 - **File quản lý**:
   - `lib/locale/translation_manager.dart` - Quản lý ngôn ngữ
@@ -15,11 +16,13 @@ Hiện tại app của bạn sử dụng **GetX Translation** với:
 ### 2. **Vấn Đề Với Dữ Liệu Từ Supabase**
 
 Dữ liệu từ Supabase (exercise categories, exercises, meals...) **KHÔNG được locale** vì:
+
 - Chúng được lưu trực tiếp trong database
 - Khi lấy về, chỉ có 1 ngôn ngữ (thường là Tiếng Việt hoặc Tiếng Anh)
 - Không có cơ chế chuyển đổi ngôn ngữ
 
-**Ví dụ**: 
+**Ví dụ**:
+
 ```dart
 // Exercise Category từ DB
 ExerciseCategory(
@@ -35,11 +38,13 @@ ExerciseCategory(
 ### **Giải Pháp 1: Thêm Cột Đa Ngôn Ngữ Trong Database** ⭐ (Khuyên Dùng)
 
 #### ✅ **Ưu điểm**:
+
 - Dữ liệu đầy đủ, chính xác
 - Dễ quản lý và mở rộng
 - Performance tốt (không cần xử lý nhiều)
 
 #### ❌ **Nhược điểm**:
+
 - Phải sửa database schema
 - Tốn storage hơn
 
@@ -57,13 +62,13 @@ ADD COLUMN classify_en TEXT;
 
 -- Cập nhật dữ liệu mẫu
 UPDATE exercise_categories
-SET 
+SET
   title_ex_en = 'Chest Workout',
   classify_en = 'Gym Workout'
 WHERE title_ex = 'Bài Tập Ngực';
 
 UPDATE exercise_categories
-SET 
+SET
   title_ex_en = 'Home Abs Workout',
   classify_en = 'Home Workout'
 WHERE title_ex = 'Bài Tập Bụng Tại Nhà';
@@ -97,15 +102,15 @@ class ExerciseCategory extends Equatable {
   final String? id;
   final DateTime? createdAt;
   final String? imgUrl;
-  
+
   // Tiếng Việt (mặc định)
   final String? titleEx;
   final String? classify;
-  
+
   // ✅ THÊM: Tiếng Anh
   final String? titleExEn;
   final String? classifyEn;
-  
+
   final List<dynamic>? exerciseItems;
 
   const ExerciseCategory({
@@ -152,7 +157,7 @@ class ExerciseCategory extends Equatable {
 
   @override
   List<Object?> get props => [
-    id, createdAt, imgUrl, titleEx, classify, 
+    id, createdAt, imgUrl, titleEx, classify,
     titleExEn, classifyEn, exerciseItems, // ✅ THÊM
   ];
 }
@@ -169,21 +174,21 @@ class WorkoutTrackerView extends StatelessWidget {
   Widget build(BuildContext context) {
     // ✅ Lấy ngôn ngữ hiện tại
     final currentLang = Get.locale?.languageCode ?? 'vi';
-    
+
     return StreamBuilder<List<ExerciseCategory>>(
       stream: cubit.streamGymCategories(),
       builder: (context, snapshot) {
         final categories = snapshot.data ?? [];
-        
+
         return ListView.builder(
           itemCount: categories.length,
           itemBuilder: (context, index) {
             final category = categories[index];
-            
+
             // ✅ Hiển thị theo ngôn ngữ
             final title = category.getLocalizedTitle(currentLang);
             final classify = category.getLocalizedClassify(currentLang);
-            
+
             return ListTile(
               title: Text(title), // ✅ Tự động đổi ngôn ngữ
               subtitle: Text(classify),
@@ -201,11 +206,13 @@ class WorkoutTrackerView extends StatelessWidget {
 ### **Giải Pháp 2: Tạo Bảng Translation Riêng** 🔄
 
 #### ✅ **Ưu điểm**:
+
 - Không sửa schema hiện tại
 - Dễ thêm ngôn ngữ mới
 - Phù hợp khi có nhiều ngôn ngữ (> 3)
 
 #### ❌ **Nhược điểm**:
+
 - Phức tạp hơn
 - Query chậm hơn (phải JOIN)
 
@@ -226,7 +233,7 @@ CREATE TABLE translations (
 );
 
 -- Index để query nhanh
-CREATE INDEX idx_translations_lookup 
+CREATE INDEX idx_translations_lookup
 ON translations(entity_type, entity_id, field_name, language_code);
 
 -- Thêm dữ liệu mẫu
@@ -247,12 +254,12 @@ import 'package:get/get.dart';
 
 class TranslationService {
   final _supabase = Supabase.instance.client;
-  
+
   // Cache để giảm số lần query
   final Map<String, Map<String, String>> _cache = {};
 
   /// Lấy bản dịch cho một entity
-  /// 
+  ///
   /// [entityType]: 'exercise_category', 'exercise_item', 'meal'
   /// [entityId]: ID của entity
   /// [fieldName]: 'title', 'description'
@@ -264,10 +271,10 @@ class TranslationService {
     String? languageCode,
   }) async {
     final lang = languageCode ?? Get.locale?.languageCode ?? 'vi';
-    
+
     // Không cần translate nếu đang dùng tiếng Việt (ngôn ngữ gốc)
     if (lang == 'vi') return null;
-    
+
     // Check cache
     final cacheKey = '$entityType:$entityId:$fieldName:$lang';
     if (_cache.containsKey(cacheKey)) {
@@ -285,12 +292,12 @@ class TranslationService {
           .maybeSingle();
 
       final translatedText = response?['translated_text'] as String?;
-      
+
       // Lưu vào cache
       if (translatedText != null) {
         _cache[cacheKey] = translatedText;
       }
-      
+
       return translatedText;
     } catch (e) {
       print('❌ Error loading translation: $e');
@@ -306,7 +313,7 @@ class TranslationService {
     String? languageCode,
   }) async {
     final lang = languageCode ?? Get.locale?.languageCode ?? 'vi';
-    
+
     if (lang == 'vi') return {};
 
     try {
@@ -356,26 +363,26 @@ class ExerciseCategory extends Equatable {
   // ✅ THÊM: Method async để lấy title đã translate
   Future<String> getLocalizedTitleAsync() async {
     if (id == null || titleEx == null) return 'Unknown';
-    
+
     final translated = await _translationService.getTranslation(
       entityType: 'exercise_category',
       entityId: id!,
       fieldName: 'title_ex',
     );
-    
+
     return translated ?? titleEx!;
   }
 
   // ✅ THÊM: Method async để lấy classify đã translate
   Future<String> getLocalizedClassifyAsync() async {
     if (id == null || classify == null) return 'Unknown';
-    
+
     final translated = await _translationService.getTranslation(
       entityType: 'exercise_category',
       entityId: id!,
       fieldName: 'classify',
     );
-    
+
     return translated ?? classify!;
   }
 
@@ -389,10 +396,10 @@ class ExerciseCategory extends Equatable {
 // lib/main.dart
 Future<void> main() async {
   // ... existing code
-  
+
   // ✅ THÊM: Register translation service
   Get.put(TranslationService());
-  
+
   runApp(MyApp());
 }
 ```
@@ -405,18 +412,18 @@ StreamBuilder<List<ExerciseCategory>>(
   stream: cubit.streamGymCategories(),
   builder: (context, snapshot) {
     final categories = snapshot.data ?? [];
-    
+
     return ListView.builder(
       itemCount: categories.length,
       itemBuilder: (context, index) {
         final category = categories[index];
-        
+
         return FutureBuilder<String>(
           // ✅ Load bản dịch
           future: category.getLocalizedTitleAsync(),
           builder: (context, titleSnapshot) {
             final title = titleSnapshot.data ?? category.titleEx ?? 'Loading...';
-            
+
             return ListTile(
               title: Text(title),
             );
@@ -433,11 +440,13 @@ StreamBuilder<List<ExerciseCategory>>(
 ### **Giải Pháp 3: Mapping Trong Code (Không Sửa DB)** 💻
 
 #### ✅ **Ưu điểm**:
+
 - Không cần sửa database
 - Nhanh chóng implement
 - Phù hợp cho dự án nhỏ
 
 #### ❌ **Nhược điểm**:
+
 - Khó maintain khi có nhiều dữ liệu
 - Hardcode trong code
 - Không linh hoạt
@@ -530,16 +539,16 @@ StreamBuilder<List<ExerciseCategory>>(
   stream: cubit.streamGymCategories(),
   builder: (context, snapshot) {
     final categories = snapshot.data ?? [];
-    
+
     return ListView.builder(
       itemCount: categories.length,
       itemBuilder: (context, index) {
         final category = categories[index];
-        
+
         // ✅ Sử dụng method đã translate
         final title = category.getLocalizedTitle();
         final classify = category.getLocalizedClassify();
-        
+
         return ListTile(
           title: Text(title),
           subtitle: Text(classify),
@@ -554,26 +563,29 @@ StreamBuilder<List<ExerciseCategory>>(
 
 ## 🎯 So Sánh Các Giải Pháp
 
-| Tiêu Chí | Giải Pháp 1 (Cột DB) | Giải Pháp 2 (Bảng Translation) | Giải Pháp 3 (Hardcode) |
-|----------|---------------------|-------------------------------|------------------------|
-| **Độ chính xác** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
-| **Performance** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-| **Dễ maintain** | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐ |
-| **Khó implement** | ⭐⭐ | ⭐⭐⭐⭐ | ⭐ |
-| **Scalability** | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐ |
-| **Phù hợp cho** | Dự án vừa/lớn | Nhiều ngôn ngữ | Dự án nhỏ/prototype |
+| Tiêu Chí          | Giải Pháp 1 (Cột DB) | Giải Pháp 2 (Bảng Translation) | Giải Pháp 3 (Hardcode) |
+| ----------------- | -------------------- | ------------------------------ | ---------------------- |
+| **Độ chính xác**  | ⭐⭐⭐⭐⭐           | ⭐⭐⭐⭐⭐                     | ⭐⭐⭐                 |
+| **Performance**   | ⭐⭐⭐⭐⭐           | ⭐⭐⭐                         | ⭐⭐⭐⭐⭐             |
+| **Dễ maintain**   | ⭐⭐⭐⭐             | ⭐⭐⭐                         | ⭐⭐                   |
+| **Khó implement** | ⭐⭐                 | ⭐⭐⭐⭐                       | ⭐                     |
+| **Scalability**   | ⭐⭐⭐⭐             | ⭐⭐⭐⭐⭐                     | ⭐⭐                   |
+| **Phù hợp cho**   | Dự án vừa/lớn        | Nhiều ngôn ngữ                 | Dự án nhỏ/prototype    |
 
 ---
 
 ## 🚀 Khuyến Nghị
 
-### **Nếu bạn mới bắt đầu**: 
+### **Nếu bạn mới bắt đầu**:
+
 → Dùng **Giải Pháp 3** (Hardcode) để test nhanh
 
-### **Nếu dự án production**: 
+### **Nếu dự án production**:
+
 → Dùng **Giải Pháp 1** (Cột DB) vì đơn giản và hiệu quả
 
-### **Nếu cần hỗ trợ nhiều ngôn ngữ (> 3)**: 
+### **Nếu cần hỗ trợ nhiều ngôn ngữ (> 3)**:
+
 → Dùng **Giải Pháp 2** (Bảng Translation)
 
 ---
@@ -591,6 +603,7 @@ StreamBuilder<List<ExerciseCategory>>(
 ## 🔧 Ví Dụ Hoàn Chỉnh (Giải Pháp 1)
 
 ### File: `lib/core/models/exercise_category.dart`
+
 ```dart
 import 'package:equatable/equatable.dart';
 import 'package:get/get.dart';
@@ -599,15 +612,15 @@ class ExerciseCategory extends Equatable {
   final String? id;
   final DateTime? createdAt;
   final String? imgUrl;
-  
+
   // Vietnamese (default)
   final String? titleEx;
   final String? classify;
-  
+
   // English
   final String? titleExEn;
   final String? classifyEn;
-  
+
   final List<dynamic>? exerciseItems;
 
   const ExerciseCategory({
@@ -684,6 +697,7 @@ class ExerciseCategory extends Equatable {
 ```
 
 ### File: `lib/views/workout_tracker/ui/widgets/category_card.dart`
+
 ```dart
 import 'package:flutter/material.dart';
 import 'package:smart_fitness_assistant/core/models/exercise_category.dart';
@@ -707,13 +721,13 @@ class CategoryCard extends StatelessWidget {
           children: [
             if (category.imgUrl != null)
               Image.network(category.imgUrl!),
-            
+
             // ✅ Sử dụng localizedTitle thay vì titleEx
             Text(
               category.localizedTitle,
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            
+
             // ✅ Sử dụng localizedClassify thay vì classify
             Text(
               category.localizedClassify,

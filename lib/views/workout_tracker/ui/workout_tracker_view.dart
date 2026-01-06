@@ -265,7 +265,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => WorkoutTrackerCubit()),
-        BlocProvider(create: (context) => ScheduleCubit()),
+        BlocProvider(create: (context) => ScheduleCubit(NotificationService())),
       ],
       child: Builder(
         builder: (context) {

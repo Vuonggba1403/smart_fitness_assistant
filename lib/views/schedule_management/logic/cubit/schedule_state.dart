@@ -14,6 +14,14 @@ final class ScheduleLoaded extends ScheduleState {
   ScheduleLoaded(this.schedules, this.selectedDate);
 }
 
+final class CategoriesLoading extends ScheduleState {}
+
+final class CategoriesLoaded extends ScheduleState {
+  final List<ExerciseCategory> categories;
+
+  CategoriesLoaded(this.categories);
+}
+
 final class ScheduleError extends ScheduleState {
   final String message;
   ScheduleError(this.message);

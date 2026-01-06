@@ -109,6 +109,7 @@ class LocaleKey {
   static const String buttonNo = "button_no";
   static const String buttonYes = "button_yes";
   static const String buttonStart = "button_start";
+  static const String ok = "ok";
 
   //Work Tracker View
   static const String gymEx = "gym_ex";
@@ -192,16 +193,27 @@ class LocaleKey {
   static const String scheduleAdded = "schedule_added";
   static const String scheduleAddFailed = "schedule_add_failed";
   static const String addSchedule = "add_schedule";
+  static const String addScheduleTitle = "add_schedule_title";
+  static const String scheduleAddedSuccess = "schedule_added_success";
+  static const String addScheduleFailed = "add_schedule_failed";
+  static const String selectWorkout = "select_workout";
   static const String selectExercise = "select_exercise";
   static const String selectExerciseHint = "select_exercise_hint";
+  static const String pleaseSelectExercise = "please_select_exercise";
+  static const String pleaseSelectFutureTime = "please_select_future_time";
   static const String time = "time";
+  static const String reminderWhenTime = "reminder_when_time";
   static const String notifyWhenTime = "notify_when_time";
   static const String addScheduleButton = "add_schedule_button";
   static const String selectExerciseFirst = "select_exercise_first";
   static const String selectFutureTime = "select_future_time";
+  static const String markAsCompleted = "mark_as_completed";
   static const String markedComplete = "marked_complete";
   static const String completed2 = "completed_2";
   static const String deleteSchedule = "delete_schedule";
+  static const String deleteScheduleButton = "delete_schedule_button";
+  static const String workoutReminder = "workout_reminder";
+  static const String workoutReminderBody = "workout_reminder_body";
 
   // Social
   static const String editPost = "edit_post";
@@ -248,6 +260,11 @@ class LocaleKey {
   static const String noFoodFound = "no_food_found";
   static const String selectDiet = "select_diet";
   static const String hasEquipment = "has_equipment";
+  static const String vegetarianLabel = "vegetarian_label";
+  static const String veganLabel = "vegan_label";
+  static const String halalLabel = "halal_label";
+  static const String ketoLabel = "keto_label";
+  static const String highProteinLabel = "high_protein_label";
 
   // Meal Types
   static const String breakfast = "breakfast";
@@ -276,6 +293,9 @@ class LocaleKey {
   //Water Tracker
   static const String dailyGoal = "daily_goal";
   static const String nextReminder = "next_reminder";
+  static const String waterNightWarningInfo = "water_night_warning_info";
+  static const String waterNightWarningSnackbar =
+      "water_night_warning_snackbar";
   static const String addWater = "add_water";
   static const String waterIntake = "water_intake";
   static const String snackBar = "snack_bar";
@@ -443,9 +463,7 @@ class LocaleKey {
   // Schedule Management (unique keys only)
   static const String deletedWorkout = "deleted_workout";
   static const String complete = "complete";
-  static const String pleaseSelectExercise = "please_select_exercise";
   static const String addedSchedule = "added_schedule";
-  static const String addScheduleFailed = "add_schedule_failed";
   static const String addWorkoutSchedule = "add_workout_schedule";
   static const String remindWhenTime = "remind_when_time";
 
@@ -511,14 +529,6 @@ class LocaleKey {
   // Exercise Session
   static const String noActiveSession = "no_active_session";
   static const String kg = "kg";
-
-  // Schedule Management
-  static const String deleteScheduleButton = "delete_schedule_button";
-  static const String addScheduleTitle = "add_schedule_title";
-  static const String selectWorkout = "select_workout";
-  static const String reminderWhenTime = "reminder_when_time";
-  static const String pleaseSelectFutureTime = "please_select_future_time";
-  static const String scheduleAddedSuccess = "schedule_added_success";
 
   // Chatbot
   static const String viewAllChats = "view_all_chats";

@@ -7,12 +7,8 @@ import 'package:smart_fitness_assistant/core/models/activity_level.dart';
 import 'package:smart_fitness_assistant/core/models/user_fitness_profile.dart';
 import 'package:smart_fitness_assistant/views/activity_level/ui/widgets/message_bubble.dart';
 import '../logic/cubit/multi_step_dialog_cubit.dart';
-import 'widgets/step_activity_level.dart';
-import 'widgets/step_fitness_level.dart';
-import 'widgets/step_equipment.dart';
-import 'widgets/step_dietary_preferences.dart';
-import 'widgets/step_food_allergies.dart';
-import 'widgets/step_injuries.dart';
+import 'widgets/step_simple_widgets.dart';
+import 'widgets/step_selection_widgets.dart';
 
 class MultiStepPlanDialog extends StatefulWidget {
   final List<ActivityLevel> activityLevels;

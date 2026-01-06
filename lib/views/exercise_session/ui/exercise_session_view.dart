@@ -8,9 +8,10 @@ import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/views/exercise_session/logic/cubit/session_cubit.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/common/bottom_sheet_details.dart';
-import 'package:smart_fitness_assistant/views/workout_tracker/ui/widgets/common/show_dialog.dart';
 import 'package:smart_fitness_assistant/views/exercise_session/ui/widgets/workout_completion_bottom_sheet.dart';
 import 'package:smart_fitness_assistant/views/exercise_session/ui/widgets/workout_congratulations_screen.dart';
+
+import '../../../core/widgets/custom_alertdialog.dart';
 
 class ExerciseSessionView extends StatelessWidget {
   const ExerciseSessionView({super.key});
@@ -24,18 +25,37 @@ class ExerciseSessionView extends StatelessWidget {
   Future<bool> _showExitDialog(BuildContext context) async {
     final result = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => CustomDialog(
-        title: LocaleKey.titleDialog.tr,
-        content: LocaleKey.contentDialog.tr,
-        okText: 'OK',
-        okColor: TColor.primaryColor1,
+      builder: (dialogContext) => AlertDialog(
+        shape: const RoundedRectangleBorder(),
+        title: Text(LocaleKey.titleDialog.tr),
+        content: Text(LocaleKey.contentDialog.tr),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(
+              LocaleKey.cancel.tr,
+              style: const TextStyle(color: Colors.grey),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(
+              LocaleKey.ok.tr,
+              style: TextStyle(
+                color: TColor.primaryColor1,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
     );
     return result ?? false;
   }
 
+  /// Show completion bottom sheet and handle workout finish
   Future<void> _showCompletionBottomSheet(BuildContext context) async {
-    final state = context.read<SessionCubit>().state; // ✅ FIX
+    final state = context.read<SessionCubit>().state;
     if (state is! SessionActive) return;
 
     final shouldFinish = await WorkoutCompletionBottomSheet.show(
@@ -45,40 +65,23 @@ class ExerciseSessionView extends StatelessWidget {
     );
 
     if (shouldFinish == true && context.mounted) {
-      final saved = await context
-          .read<SessionCubit>()
-          .saveWorkoutSession(); // ✅ FIX
-
-      if (saved && context.mounted) {
-        context.read<SessionCubit>().stopWorkoutSession(); // ✅ FIX
-
-        await WorkoutCongratulationsScreen.show(context, state);
-
-        if (context.mounted) {
-          Navigator.pop(context);
-          await Future.delayed(const Duration(milliseconds: 100));
-          if (context.mounted) {
-            Navigator.pop(context);
-          }
-        }
-      }
+      await _finishWorkoutSession(context, state);
     }
   }
 
-  /// ✅ Hoàn thành workout và hiển thị congratulations screen
-  Future<void> _finishWorkout(BuildContext context, SessionActive state) async {
-    // 1️⃣ Save workout session
+  /// Finish workout session: save, stop, show congratulations
+  Future<void> _finishWorkoutSession(
+    BuildContext context,
+    SessionActive state,
+  ) async {
     final saved = await context.read<SessionCubit>().saveWorkoutSession();
 
     if (!saved || !context.mounted) return;
 
-    // 2️⃣ Stop session
     context.read<SessionCubit>().stopWorkoutSession();
 
-    // 3️⃣ ✅ Navigate to Congratulations Screen - sử dụng static method
     await WorkoutCongratulationsScreen.show(context, state);
 
-    // 4️⃣ Pop back với result = true
     if (context.mounted) {
       Navigator.pop(context, true);
     }
@@ -263,8 +266,7 @@ class ExerciseSessionView extends StatelessWidget {
                 title: buttonText,
                 onPressed: () async {
                   if (state.isWorkoutCompleted) {
-                    // ✅ FIX: Gọi helper method đúng
-                    await _finishWorkout(context, state);
+                    await _finishWorkoutSession(context, state);
                   } else {
                     context.read<SessionCubit>().nextSet();
                   }

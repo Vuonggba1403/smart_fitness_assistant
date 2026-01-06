@@ -29,34 +29,14 @@ class _AddScheduleViewState extends State<AddScheduleView> {
   late DateTime _selectedDate;
   late TimeOfDay _selectedTime;
   bool _hasNotification = false;
-  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _selectedDate = widget.date;
     _selectedTime = TimeOfDay.now();
-    _loadCategories();
-  }
-
-  /// Tải danh sách categories từ database
-  Future<void> _loadCategories() async {
-    try {
-      final response = await _supabase
-          .from('exercise_categories')
-          .select()
-          .order('title_ex');
-
-      setState(() {
-        _categories = response
-            .map((json) => ExerciseCategory.fromJson(json))
-            .toList();
-        _isLoading = false;
-      });
-    } catch (e) {
-      print('❌ Error loading categories: $e');
-      setState(() => _isLoading = false);
-    }
+    // ✅ Load categories từ Cubit
+    context.read<ScheduleCubit>().loadCategories();
   }
 
   /// Hiển thị time picker
@@ -71,7 +51,7 @@ class _AddScheduleViewState extends State<AddScheduleView> {
     }
   }
 
-  /// Lưu lịch tập mới - ✅ FIX: Chỉ lưu category_id
+  /// Lưu lịch tập mới
   Future<void> _save() async {
     if (_selectedCategory == null) {
       AppSnackBar.error(context, LocaleKey.pleaseSelectExercise.tr);
@@ -94,7 +74,6 @@ class _AddScheduleViewState extends State<AddScheduleView> {
       return;
     }
 
-    // ✅ FIX: Chỉ truyền category_id
     final schedule = ScheduledWorkout(
       forUser: userId,
       categoryId: _selectedCategory!.id!,
@@ -119,92 +98,75 @@ class _AddScheduleViewState extends State<AddScheduleView> {
 
     return Scaffold(
       appBar: AppBar(title: Text(LocaleKey.addScheduleTitle.tr)),
-      body: _isLoading
-          ? CustomCircleProgIndicator()
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  /// Chọn bài tập
-                  Text(
-                    LocaleKey.selectWorkout.tr,
-                    style: TextStyle(
-                      color: textColor,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
+      body: BlocBuilder<ScheduleCubit, ScheduleState>(
+        builder: (context, state) {
+          // ✅ Handle loading state
+          if (state is CategoriesLoading) {
+            return CustomCircleProgIndicator();
+          }
+
+          // ✅ Handle loaded categories
+          if (state is CategoriesLoaded) {
+            _categories = state.categories;
+          }
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                /// Chọn bài tập
+                Text(
+                  LocaleKey.selectWorkout.tr,
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  decoration: BoxDecoration(
+                    color: theme.cardColor,
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(color: TColor.gray.withOpacity(0.3)),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<ExerciseCategory>(
+                      value: _selectedCategory,
+                      isExpanded: true,
+                      hint: Text(LocaleKey.selectExerciseHint.tr),
+                      items: _categories.map((category) {
+                        return DropdownMenuItem(
+                          value: category,
+                          child: Text(category.titleEx ?? ''),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() => _selectedCategory = value);
+                      },
                     ),
                   ),
-                  const SizedBox(height: 12),
+                ),
 
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
-                    decoration: BoxDecoration(
-                      color: theme.cardColor,
-                      borderRadius: BorderRadius.circular(15),
-                      border: Border.all(color: TColor.gray.withOpacity(0.3)),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<ExerciseCategory>(
-                        value: _selectedCategory,
-                        isExpanded: true,
-                        hint: Text(LocaleKey.selectExerciseHint.tr),
-                        items: _categories.map((category) {
-                          return DropdownMenuItem(
-                            value: category,
-                            child: Text(category.titleEx ?? ''),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          setState(() => _selectedCategory = value);
-                        },
-                      ),
-                    ),
+                const SizedBox(height: 24),
+
+                /// Chọn thời gian
+                Text(
+                  LocaleKey.time.tr,
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
                   ),
+                ),
+                const SizedBox(height: 12),
 
-                  const SizedBox(height: 24),
-
-                  /// Chọn thời gian
-                  Text(
-                    LocaleKey.time.tr,
-                    style: TextStyle(
-                      color: textColor,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  InkWell(
-                    onTap: _selectTime,
-                    child: Container(
-                      padding: const EdgeInsets.all(15),
-                      decoration: BoxDecoration(
-                        color: theme.cardColor,
-                        borderRadius: BorderRadius.circular(15),
-                        border: Border.all(color: TColor.gray.withOpacity(0.3)),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.access_time, color: TColor.primaryColor1),
-                          const SizedBox(width: 12),
-                          Text(
-                            '${_selectedTime.hour.toString().padLeft(2, '0')}:${_selectedTime.minute.toString().padLeft(2, '0')}',
-                            style: TextStyle(
-                              color: textColor,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  /// Switch bật/tắt thông báo
-                  Container(
+                InkWell(
+                  onTap: _selectTime,
+                  child: Container(
                     padding: const EdgeInsets.all(15),
                     decoration: BoxDecoration(
                       color: theme.cardColor,
@@ -213,35 +175,61 @@ class _AddScheduleViewState extends State<AddScheduleView> {
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.notifications, color: TColor.primaryColor1),
+                        Icon(Icons.access_time, color: TColor.primaryColor1),
                         const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            LocaleKey.reminderWhenTime.tr,
-                            style: TextStyle(color: textColor, fontSize: 14),
+                        Text(
+                          '${_selectedTime.hour.toString().padLeft(2, '0')}:${_selectedTime.minute.toString().padLeft(2, '0')}',
+                          style: TextStyle(
+                            color: textColor,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
                           ),
-                        ),
-                        Switch(
-                          value: _hasNotification,
-                          onChanged: (value) {
-                            setState(() => _hasNotification = value);
-                          },
-                          activeThumbColor: TColor.primaryColor1,
                         ),
                       ],
                     ),
                   ),
+                ),
 
-                  const SizedBox(height: 40),
+                const SizedBox(height: 24),
 
-                  /// Nút thêm lịch
-                  RoundButton(
-                    title: LocaleKey.addSchedule.tr,
-                    onPressed: _save,
+                /// Switch bật/tắt thông báo
+                Container(
+                  padding: const EdgeInsets.all(15),
+                  decoration: BoxDecoration(
+                    color: theme.cardColor,
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(color: TColor.gray.withOpacity(0.3)),
                   ),
-                ],
-              ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.notifications, color: TColor.primaryColor1),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          LocaleKey.reminderWhenTime.tr,
+                          style: TextStyle(color: textColor, fontSize: 14),
+                        ),
+                      ),
+                      Switch(
+                        value: _hasNotification,
+                        onChanged: (value) {
+                          setState(() => _hasNotification = value);
+                        },
+                        activeThumbColor: TColor.primaryColor1,
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 40),
+
+                /// Nút thêm lịch
+                RoundButton(title: LocaleKey.addSchedule.tr, onPressed: _save),
+              ],
             ),
+          );
+        },
+      ),
     );
   }
 }

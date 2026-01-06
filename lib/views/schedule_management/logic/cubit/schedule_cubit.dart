@@ -1,14 +1,45 @@
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
+import 'package:smart_fitness_assistant/core/models/exercise_category.dart';
 import 'package:smart_fitness_assistant/core/models/scheduled_workout.dart';
+import 'package:smart_fitness_assistant/core/services/notification_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 part 'schedule_state.dart';
 
 class ScheduleCubit extends Cubit<ScheduleState> {
-  ScheduleCubit() : super(ScheduleInitial());
+  ScheduleCubit(this._notificationService) : super(ScheduleInitial());
 
   final _supabase = Supabase.instance.client;
+  final NotificationService _notificationService;
+
+  /// Cache categories để tránh query nhiều lần
+  List<ExerciseCategory>? _cachedCategories;
+
+  /// Load danh sách categories
+  Future<void> loadCategories() async {
+    if (_cachedCategories != null) {
+      emit(CategoriesLoaded(_cachedCategories!));
+      return;
+    }
+
+    emit(CategoriesLoading());
+
+    try {
+      final response = await _supabase
+          .from('exercise_categories')
+          .select()
+          .order('title_ex');
+
+      _cachedCategories = response
+          .map((json) => ExerciseCategory.fromJson(json))
+          .toList();
+
+      emit(CategoriesLoaded(_cachedCategories!));
+    } catch (e) {
+      emit(ScheduleError('Failed to load categories: ${e.toString()}'));
+    }
+  }
 
   /// Tải lịch tập theo ngày - ✅ FIX: Join với exercise_categories
   Future<void> loadSchedulesByDate(DateTime date) async {
@@ -52,7 +83,28 @@ class ScheduleCubit extends Cubit<ScheduleState> {
   /// Thêm lịch tập mới
   Future<bool> addSchedule(ScheduledWorkout schedule) async {
     try {
-      await _supabase.from('scheduled_workouts').insert(schedule.toJson());
+      final response = await _supabase
+          .from('scheduled_workouts')
+          .insert(schedule.toJson())
+          .select()
+          .single();
+
+      // ✅ Schedule notification nếu được bật
+      if (schedule.hasNotification) {
+        final scheduleId = response['id'] as String;
+        final categoryName = await _getCategoryName(schedule.categoryId);
+
+        await _notificationService.scheduleWorkoutNotification(
+          id: scheduleId.hashCode,
+          title: 'Workout Reminder',
+          body: 'Time for $categoryName workout!',
+          scheduledTime: schedule.scheduledTime,
+        );
+
+        print(
+          '✅ Notification scheduled for $categoryName at ${schedule.scheduledTime}',
+        );
+      }
 
       // ✅ FIX: Reload lại schedules của ngày đã add
       final scheduledDate = DateTime(
@@ -69,9 +121,34 @@ class ScheduleCubit extends Cubit<ScheduleState> {
     }
   }
 
-  /// Xóa lịch tập - ✅ FIX: Reload data sau khi xóa
+  /// Lấy category name từ cache hoặc database
+  Future<String> _getCategoryName(String categoryId) async {
+    if (_cachedCategories != null) {
+      final category = _cachedCategories!.firstWhere(
+        (c) => c.id == categoryId,
+        orElse: () => const ExerciseCategory(),
+      );
+      return category.titleEx ?? 'Workout';
+    }
+
+    try {
+      final response = await _supabase
+          .from('exercise_categories')
+          .select('title_ex')
+          .eq('id', categoryId)
+          .single();
+      return response['title_ex'] ?? 'Workout';
+    } catch (e) {
+      return 'Workout';
+    }
+  }
+
+  /// Xóa lịch tập - ✅ FIX: Cancel notification và reload data
   Future<bool> deleteSchedule(String scheduleId) async {
     try {
+      // ✅ Cancel notification trước khi xóa
+      await _notificationService.cancelNotification(scheduleId.hashCode);
+
       await _supabase.from('scheduled_workouts').delete().eq('id', scheduleId);
 
       // ✅ FIX: Reload lại schedules của ngày hiện tại
@@ -87,9 +164,12 @@ class ScheduleCubit extends Cubit<ScheduleState> {
     }
   }
 
-  /// Đánh dấu hoàn thành - ✅ FIX: Reload data sau khi complete
+  /// Đánh dấu hoàn thành - ✅ FIX: Cancel notification và reload data
   Future<bool> markScheduleAsCompleted(String scheduleId) async {
     try {
+      // ✅ Cancel notification khi complete
+      await _notificationService.cancelNotification(scheduleId.hashCode);
+
       await _supabase
           .from('scheduled_workouts')
           .update({'is_completed': true})

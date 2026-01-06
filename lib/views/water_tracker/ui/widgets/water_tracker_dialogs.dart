@@ -120,7 +120,7 @@ class WaterTrackerDialogs {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            '💡 Khuyến nghị: Không nên uống nước sau 11h đêm để tránh trữ nước',
+                            LocaleKey.waterNightWarningInfo.tr,
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.blue.shade700,
@@ -161,8 +161,7 @@ class WaterTrackerDialogs {
                         // Hiện cảnh báo
                         AppSnackBar.error(
                           context,
-                          '⚠️ Không nên uống nước sau 11h đêm!\n'
-                          '💤 Hãy để cơ thể nghỉ ngơi, uống nước ban đêm sẽ bị trữ nước.',
+                          LocaleKey.waterNightWarningSnackbar.tr,
                         );
 
                         // Tự động điều chỉnh về 23:00

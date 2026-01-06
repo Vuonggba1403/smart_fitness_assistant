@@ -200,12 +200,12 @@ class _WorkoutCongratulationsScreenState
             ), // "12"
             _buildStatRow(
               LocaleKey.duration.tr,
-              '${widget.durationMinutes} min',
-            ), // "45 min"
+              '${widget.durationMinutes} ${LocaleKey.minutes.tr}',
+            ),
             _buildStatRow(
               LocaleKey.calories.tr,
-              '${widget.caloriesBurned.toInt()} kcal',
-            ), // "350 kcal"
+              '${widget.caloriesBurned.toInt()} ${LocaleKey.kcal.tr}',
+            ),
           ],
         ),
       ),

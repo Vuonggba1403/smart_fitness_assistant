@@ -114,6 +114,7 @@ Map<String, String> enUs = {
       "This action cannot be undone and all data will be permanently deleted.",
   LocaleKey.buttonNo: "No",
   LocaleKey.buttonYes: "Yes",
+  LocaleKey.ok: "OK",
   LocaleKey.delAcc: "Delete Account",
 
   //Work Tracker View
@@ -147,6 +148,10 @@ Map<String, String> enUs = {
   //Water Tracker
   LocaleKey.dailyGoal: "Daily goal",
   LocaleKey.nextReminder: "Next reminder",
+  LocaleKey.waterNightWarningInfo:
+      "💡 Recommendation: Avoid drinking water after 11 PM to prevent water retention",
+  LocaleKey.waterNightWarningSnackbar:
+      "⚠️ Avoid drinking water after 11 PM!\n💤 Let your body rest, drinking water at night can cause water retention.",
   LocaleKey.addWater: "Add Water",
   LocaleKey.waterIntake: "Track Water Intake",
   LocaleKey.snackBar: "Reminder settings updated successfully!",
@@ -246,16 +251,27 @@ Map<String, String> enUs = {
   LocaleKey.scheduleAdded: "✅ Schedule added",
   LocaleKey.scheduleAddFailed: "❌ Failed to add schedule",
   LocaleKey.addSchedule: "Add Schedule",
+  LocaleKey.addScheduleTitle: "Add Workout Schedule",
+  LocaleKey.scheduleAddedSuccess: "Schedule added successfully!",
+  LocaleKey.addScheduleFailed: "Failed to add schedule",
+  LocaleKey.selectWorkout: "Select Workout",
   LocaleKey.selectExercise: "Select Exercise",
   LocaleKey.selectExerciseHint: "Select exercise",
+  LocaleKey.pleaseSelectExercise: "Please select an exercise",
+  LocaleKey.pleaseSelectFutureTime: "Please select a future time",
   LocaleKey.time: "Time",
+  LocaleKey.reminderWhenTime: "Remind me when time comes",
   LocaleKey.notifyWhenTime: "Notify when time comes",
   LocaleKey.addScheduleButton: "Add Schedule",
   LocaleKey.selectExerciseFirst: "Please select exercise",
   LocaleKey.selectFutureTime: "Please select future time",
+  LocaleKey.markAsCompleted: "Mark as Completed",
   LocaleKey.markedComplete: "✅ Marked as complete",
   LocaleKey.completed2: "Completed",
   LocaleKey.deleteSchedule: "Delete schedule",
+  LocaleKey.deleteScheduleButton: "Delete Schedule",
+  LocaleKey.workoutReminder: "Workout Reminder",
+  LocaleKey.workoutReminderBody: "Time for {workout} workout!",
 
   // Social
   LocaleKey.editPost: "Edit Post",
@@ -372,6 +388,9 @@ Map<String, String> enUs = {
   LocaleKey.beginner: "Beginner",
   LocaleKey.intermediate: "Intermediate",
   LocaleKey.advanced: "Advanced",
+  LocaleKey.beginnerTitle: "Beginner",
+  LocaleKey.intermediateTitle: "Intermediate",
+  LocaleKey.advancedTitle: "Advanced",
   LocaleKey.overTwoYearsExperience: "Over 2 years experience",
   LocaleKey.vegan: "Vegan",
   LocaleKey.vegetarian: "Vegetarian",
@@ -400,6 +419,11 @@ Map<String, String> enUs = {
   LocaleKey.atHome: "At Home",
   LocaleKey.selectDietInstruction: "Select your dietary preferences (if any):",
   LocaleKey.starchless: "Starchless",
+  LocaleKey.vegetarianLabel: "Vegetarian",
+  LocaleKey.veganLabel: "Vegan",
+  LocaleKey.halalLabel: "Halal",
+  LocaleKey.ketoLabel: "Keto",
+  LocaleKey.highProteinLabel: "High Protein",
 
   // Workout Tracker
   LocaleKey.noWorkoutsYet: "No workouts yet",
@@ -459,14 +483,14 @@ Map<String, String> enUs = {
   LocaleKey.nextExerciseButton: "Next Exercise",
 
   // Schedule Management
-  LocaleKey.deleteScheduleButton: "Delete Schedule",
-  LocaleKey.addScheduleTitle: "Add Schedule",
   LocaleKey.noScheduleYet: "No schedule yet",
   LocaleKey.tapToAddSchedule: "Tap to add schedule",
-  LocaleKey.selectWorkout: "Select workout",
-  LocaleKey.reminderWhenTime: "Reminder when time comes",
-  LocaleKey.pleaseSelectFutureTime: "Please select a future time",
-  LocaleKey.scheduleAddedSuccess: "Schedule added successfully",
+  LocaleKey.workoutTimeNotification: "Workout Time",
+  LocaleKey.startNow: "Start now",
+  LocaleKey.setReminderAt: "Reminder set at",
+  LocaleKey.cancelledReminder: "Reminder cancelled",
+  LocaleKey.deletedSchedule: "Schedule deleted successfully",
+  LocaleKey.cannotDeleteSchedule: "Cannot delete schedule",
 
   // Chatbot
   LocaleKey.viewAllChats: "View All Chats",
@@ -492,4 +516,9 @@ Map<String, String> enUs = {
   LocaleKey.openSettings: 'Open Settings',
   LocaleKey.barcodeNotFound: 'Product not found for barcode: {barcode}',
   LocaleKey.errorScanningBarcode: 'Error scanning barcode. Please try again.',
+
+  // Navigation
+  LocaleKey.back: 'Back',
+  LocaleKey.continue_: 'Continue',
+  LocaleKey.errorPrefix: 'Error:',
 };

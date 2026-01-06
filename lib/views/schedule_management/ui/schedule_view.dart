@@ -13,7 +13,6 @@ import 'package:smart_fitness_assistant/core/widgets/custom_calendar_agenda.dart
 import 'package:calendar_agenda/calendar_agenda.dart';
 import 'package:smart_fitness_assistant/views/schedule_management/logic/cubit/schedule_cubit.dart';
 import 'package:smart_fitness_assistant/views/schedule_management/ui/widgets/add_schedule_view.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/widgets/round_button.dart';
 
 class ScheduleView extends StatefulWidget {
@@ -24,12 +23,10 @@ class ScheduleView extends StatefulWidget {
 }
 
 class _ScheduleViewState extends State<ScheduleView> {
-  final _supabase = Supabase.instance.client;
   final CalendarAgendaController _calendarAgendaControllerAppBar =
       CalendarAgendaController();
 
   late DateTime _selectedDate;
-  final Map<String, String> _categoryNamesCache = {};
 
   @override
   void initState() {
@@ -40,28 +37,6 @@ class _ScheduleViewState extends State<ScheduleView> {
 
   void _loadSchedulesForSelectedDate() {
     context.read<ScheduleCubit>().loadSchedulesByDate(_selectedDate);
-  }
-
-  // ✅ ADD: Method để lấy category name (có cache)
-  Future<String> _getCategoryName(String categoryId) async {
-    if (_categoryNamesCache.containsKey(categoryId)) {
-      return _categoryNamesCache[categoryId]!;
-    }
-
-    try {
-      final response = await _supabase
-          .from('exercise_categories')
-          .select('title_ex')
-          .eq('id', categoryId)
-          .single();
-
-      final categoryName = response['title_ex'] ?? 'Workout';
-      _categoryNamesCache[categoryId] = categoryName;
-      return categoryName;
-    } catch (e) {
-      print('⚠️ Error loading category name: $e');
-      return 'Workout';
-    }
   }
 
   Future<void> _deleteSchedule(String scheduleId) async {
@@ -248,35 +223,32 @@ class _ScheduleViewState extends State<ScheduleView> {
     Color? textColor,
   ) {
     final timeStr = DateFormat('h:mm a').format(schedule.scheduledTime);
+    // ✅ Use joined categoryName directly
+    final categoryName = schedule.categoryName ?? 'Workout';
 
-    return FutureBuilder<String>(
-      future: _getCategoryName(schedule.categoryId),
-      builder: (context, snapshot) {
-        final categoryName = snapshot.data ?? 'Workout';
-
-        return InkWell(
-          onTap: () => _showScheduleOptions(schedule, categoryName),
-          child: Container(
-            height: 35,
-            width: availWidth * 0.5,
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            alignment: Alignment.centerLeft,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(colors: TColor.secondaryG),
-              borderRadius: BorderRadius.circular(17.5),
-            ),
-            child: Text(
-              "$categoryName, $timeStr",
-              maxLines: 1,
-              style: TextStyle(color: TColor.white, fontSize: 12),
-            ),
-          ),
-        );
-      },
+    return InkWell(
+      onTap: () => _showScheduleOptions(schedule),
+      child: Container(
+        height: 35,
+        width: availWidth * 0.5,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        alignment: Alignment.centerLeft,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(colors: TColor.secondaryG),
+          borderRadius: BorderRadius.circular(17.5),
+        ),
+        child: Text(
+          "$categoryName, $timeStr",
+          maxLines: 1,
+          style: TextStyle(color: TColor.white, fontSize: 12),
+        ),
+      ),
     );
   }
 
-  void _showScheduleOptions(ScheduledWorkout schedule, String categoryName) {
+  void _showScheduleOptions(ScheduledWorkout schedule) {
+    final categoryName = schedule.categoryName ?? 'Workout';
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -307,7 +279,7 @@ class _ScheduleViewState extends State<ScheduleView> {
               const SizedBox(height: 20),
 
               RoundButton(
-                title: "Hoàn thành",
+                title: LocaleKey.markAsCompleted.tr,
                 onPressed: () {
                   Navigator.pop(context);
                   _markAsCompleted(schedule.id!);

@@ -56,7 +56,7 @@ class WorkoutCompletionBottomSheet {
 
             // Thông tin số sets hoàn thành
             Text(
-              '${LocaleKey.youCompleted.tr} $completedSets/$totalSets sets',
+              '${LocaleKey.youCompleted.tr} $completedSets/$totalSets ${LocaleKey.sets.tr}',
               style: TextStyle(
                 color: textColor,
                 fontSize: 16,
