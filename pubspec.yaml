@@ -72,6 +72,7 @@ dev_dependencies:
   flutter_lints: ^6.0.0 # Recommended lint rules for Flutter
   flutter_test:
     sdk: flutter # Flutter testing framework
+  flutter_launcher_icons: ^0.13.1 # Generate launcher icons
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -111,3 +112,14 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+# Flutter Launcher Icons Configuration
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/logo/fitness_logo.png"
+  min_sdk_android: 21
+  # Android adaptive icon
+  adaptive_icon_background: "#1C1C1E" # Dark background matching logo
+  adaptive_icon_foreground: "assets/logo/fitness_logo.png"
+  # iOS
+  remove_alpha_ios: true

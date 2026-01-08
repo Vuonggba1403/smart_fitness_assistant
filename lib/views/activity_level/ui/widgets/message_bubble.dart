@@ -12,13 +12,13 @@ class MessageBubble extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        /// 🟣 Avatar (FIXED SIZE)
+        /// 🔵 Avatar (FIXED SIZE)
         const CircleAvatar(
           radius: 20,
           backgroundColor: Color(0xFFBB86FC),
           child: Padding(
             padding: EdgeInsets.all(4),
-            child: Image(image: AssetImage("assets/img/kitty.png")),
+            child: Image(image: AssetImage("assets/img/robot-assistant.png")),
           ),
         ),
 

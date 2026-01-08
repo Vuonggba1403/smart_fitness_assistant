@@ -168,6 +168,7 @@ class LocaleKey {
   // Workout Plan
   static const String noPlan = "no_plan";
   static const String sevenDayPlan = "seven_day_plan";
+  static const String thirtyDayPlan = "thirty_day_plan";
   static const String confirmDeletePlan = "confirm_delete_plan";
   static const String confirmDeletePlanMessage = "confirm_delete_plan_message";
   static const String deletePlan = "delete_plan";
@@ -241,6 +242,7 @@ class LocaleKey {
   static const String workoutType = "workout_type";
   static const String duration = "duration";
   static const String calories = "calories";
+  static const String dailyCalorieTarget = "daily_calorie_target";
   static const String minting = "minting";
   static const String shareWorkout = "share_workout";
   static const String backToHome = "back_to_home";
@@ -280,6 +282,38 @@ class LocaleKey {
   static const String friday = "friday";
   static const String saturday = "saturday";
   static const String sunday = "sunday";
+
+  // Streak Badge
+  static const String daysStreak = "days_streak";
+  static const String record = "record";
+  static const String totalSessions = "total_sessions";
+  static const String refresh = "refresh";
+
+  // Rarity
+  static const String common = "common";
+  static const String rare = "rare";
+  static const String epic = "epic";
+  static const String legendary = "legendary";
+
+  // Achievements
+  static const String nftBadgeCollection = "nft_badge_collection";
+  static const String showcased = "showcased";
+  static const String allBadges = "all_badges";
+
+  // Injury Categories
+  static const String injuryCategoryBack = "injury_category_back";
+  static const String injuryCategoryKnee = "injury_category_knee";
+  static const String injuryCategoryShoulder = "injury_category_shoulder";
+  static const String injuryCategoryWrist = "injury_category_wrist";
+  static const String injuryCategoryAnkle = "injury_category_ankle";
+  static const String injuryCategoryNeck = "injury_category_neck";
+  static const String injuryCategoryElbow = "injury_category_elbow";
+  static const String injuryCategoryHip = "injury_category_hip";
+  static const String injuryCategoryFoot = "injury_category_foot";
+  static const String injuryCategoryLeg = "injury_category_leg";
+  static const String injuryCategoryThigh = "injury_category_thigh";
+  static const String injuryCategoryGroin = "injury_category_groin";
+  static const String injuryCategoryChest = "injury_category_chest";
 
   // Common
   static const String workoutPlan = "workout_plan";
@@ -386,6 +420,7 @@ class LocaleKey {
 
   // Home Additional
   static const String noWorkoutsYet = "no_workouts_yet";
+  static const String startYourFirstWorkout = "start_your_first_workout";
 
   // Water Tracker Additional
   static const String drinkWaterReminder = "drink_water_reminder";
@@ -489,17 +524,10 @@ class LocaleKey {
   // Pagination
   static const String noMoreData = "no_more_data";
 
-  // NFT Collection
-  static const String nftBadgeCollection = "nft_badge_collection";
+  // NFT Collection (additional keys)
   static const String noBadgesYet = "no_badges_yet";
   static const String completeBadgesMessage = "complete_badges_message";
-  static const String showcased = "showcased";
-  static const String allBadges = "all_badges";
   static const String collectionStats = "collection_stats";
-  static const String common = "common";
-  static const String rare = "rare";
-  static const String epic = "epic";
-  static const String legendary = "legendary";
   static const String workoutDetails = "workout_details";
   static const String type = "type";
   static const String minted = "minted";
@@ -525,6 +553,22 @@ class LocaleKey {
   static const String continue_ = "continue_";
   static const String errorPrefix = "error_prefix";
   static const String selectDietaryPreferences = "select_dietary_preferences";
+  static const String activityLevelGreeting = "activity_level_greeting";
+  static const String workoutHistory = "workout_history";
+  static const String totalWorkoutTime = "total_workout_time";
+  static const String totalCaloriesConsumed = "total_calories_consumed";
+  static const String noHistoryYet = "no_history_yet";
+
+  // Workout Streak
+  static const String dayStreak = "day_streak";
+  static const String startYourStreak = "start_your_streak";
+  static const String completeFirstWorkout = "complete_first_workout";
+  static const String daysTo = "days_to";
+  // static const String record = "record";
+  static const String danger = "danger";
+  static const String streakMilestone = "streak_milestone";
+  static const String congratsStreak = "congrats_streak";
+  static const String dontBreakStreak = "dont_break_streak";
 
   // Exercise Session
   static const String noActiveSession = "no_active_session";
@@ -556,4 +600,25 @@ class LocaleKey {
   static const String openSettings = 'openSettings';
   static const String barcodeNotFound = 'barcodeNotFound';
   static const String errorScanningBarcode = 'errorScanningBarcode';
+
+  // Workout Plan - New Keys
+  static const String selectDayToView = 'select_day_to_view';
+  static const String overallProgress = 'overall_progress';
+  static const String days = 'days';
+  static const String completed = 'completed';
+  static const String pause = 'pause';
+  static const String resume = 'resume';
+  static const String completeWorkout = 'complete_workout';
+  static const String confirmCompleteWorkout = 'confirm_complete_workout';
+  static const String workouts = 'workouts';
+  static const String noWorkouts = 'no_workouts';
+  static const String noMeals = 'no_meals';
+  static const String completedSevenDayPlan = 'completed_seven_day_plan';
+  static const String yourAchievement = 'your_achievement';
+  static const String daysCompleted = 'days_completed';
+  static const String totalDays = 'total_days';
+  static const String mintingBadge = 'minting_badge';
+  static const String badgeMinted = 'badge_minted';
+  static const String badgeMintedSuccess = 'badge_minted_success';
+  static const String viewBadges = 'view_badges';
 }

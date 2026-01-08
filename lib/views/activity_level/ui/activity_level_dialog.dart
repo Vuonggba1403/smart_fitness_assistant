@@ -115,9 +115,12 @@ class _ActivityLevelDialogState extends State<ActivityLevelDialog> {
           title: FutureBuilder<String>(
             future: _usernameFuture,
             builder: (_, snap) {
+              final username = snap.data ?? 'User';
               return MessageBubble(
-                text:
-                    'Xin chào ${snap.data ?? 'User'}! Cường độ hoạt động của bạn là ...',
+                text: LocaleKey.activityLevelGreeting.tr.replaceAll(
+                  '{username}',
+                  username,
+                ),
               );
             },
           ),
@@ -171,7 +174,7 @@ class _ActivityLevelDialogState extends State<ActivityLevelDialog> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                level.title,
+                                level.localizedTitle,
                                 style: const TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w600,
@@ -179,7 +182,7 @@ class _ActivityLevelDialogState extends State<ActivityLevelDialog> {
                               ),
                               const SizedBox(height: 6),
                               Text(
-                                level.description,
+                                level.localizedDescription,
                                 style: TextStyle(
                                   fontSize: 13,
                                   color: textColor.withOpacity(0.6),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
 
 class Injury {
   final String id;
@@ -16,6 +18,34 @@ class Injury {
     required this.severity,
     required this.description,
   });
+
+  // Lấy tên theo locale hiện tại
+  String get localizedName {
+    final locale = Get.locale?.languageCode ?? 'vi';
+    return locale == 'en' ? nameEn : name;
+  }
+
+  // ✅ Lấy category theo locale hiện tại
+  String get localizedCategory {
+    final categoryMap = {
+      'Lưng': LocaleKey.injuryCategoryBack,
+      'Đầu gối': LocaleKey.injuryCategoryKnee,
+      'Vai': LocaleKey.injuryCategoryShoulder,
+      'Cổ tay': LocaleKey.injuryCategoryWrist,
+      'Mắt cá chân': LocaleKey.injuryCategoryAnkle,
+      'Cổ': LocaleKey.injuryCategoryNeck,
+      'Khuỷu tay': LocaleKey.injuryCategoryElbow,
+      'Hông': LocaleKey.injuryCategoryHip,
+      'Bàn chân': LocaleKey.injuryCategoryFoot,
+      'Chân': LocaleKey.injuryCategoryLeg,
+      'Đùi': LocaleKey.injuryCategoryThigh,
+      'Háng': LocaleKey.injuryCategoryGroin,
+      'Ngực': LocaleKey.injuryCategoryChest,
+    };
+
+    final localeKey = categoryMap[category];
+    return localeKey?.tr ?? category;
+  }
 
   factory Injury.fromJson(Map<String, dynamic> json) {
     return Injury(
@@ -53,8 +83,21 @@ class Injury {
     }
   }
 
-  /// Lấy label tiếng Việt cho severity
+  /// Lấy label cho severity theo locale
   static String getSeverityLabel(String severity) {
+    final locale = Get.locale?.languageCode ?? 'vi';
+    if (locale == 'en') {
+      switch (severity) {
+        case 'common':
+          return 'Common';
+        case 'moderate':
+          return 'Moderate';
+        case 'severe':
+          return 'Severe';
+        default:
+          return 'Other';
+      }
+    }
     switch (severity) {
       case 'common':
         return 'Phổ biến';

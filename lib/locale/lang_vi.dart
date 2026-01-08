@@ -226,6 +226,7 @@ Map<String, String> viVN = {
   // Workout Plan
   LocaleKey.noPlan: "Chưa có kế hoạch tập luyện",
   LocaleKey.sevenDayPlan: "Kế hoạch 7 ngày",
+  LocaleKey.thirtyDayPlan: "Kế hoạch 30 ngày",
   LocaleKey.confirmDeletePlan: "Xoá Kế Hoạch Tập Luyện",
   LocaleKey.confirmDeletePlanMessage:
       "Bạn có chắc chắn muốn xoá kế hoạch tập luyện này không? Hành động này không thể hoàn tác.",
@@ -301,6 +302,7 @@ Map<String, String> viVN = {
   LocaleKey.workoutType: "Workout Type",
   LocaleKey.duration: "Duration",
   LocaleKey.calories: "Calories",
+  LocaleKey.dailyCalorieTarget: "Mục tiêu calo hàng ngày",
   LocaleKey.minting: "Đang tạo NFT Badge...",
   LocaleKey.shareWorkout: "Chia sẻ",
   LocaleKey.backToHome: "Về Trang Chủ",
@@ -394,8 +396,11 @@ Map<String, String> viVN = {
   LocaleKey.intermediate: "Trung bình",
   LocaleKey.advanced: "Nâng cao",
   LocaleKey.beginnerTitle: "Mới bắt đầu",
+  LocaleKey.beginnerSubtitle: "Chưa có kinh nghiệm",
   LocaleKey.intermediateTitle: "Trung bình",
+  LocaleKey.intermediateSubtitle: "Có chút kinh nghiệm",
   LocaleKey.advancedTitle: "Nâng cao",
+  LocaleKey.advancedSubtitle: "Vận động viên có kinh nghiệm",
   LocaleKey.overTwoYearsExperience: "Hơn 2 năm kinh nghiệm",
   LocaleKey.vegan: "Thuần chay (Vegan)",
   LocaleKey.vegetarian: "Ăn chay",
@@ -429,6 +434,25 @@ Map<String, String> viVN = {
   LocaleKey.halalLabel: "Halal",
   LocaleKey.ketoLabel: "Keto",
   LocaleKey.highProteinLabel: "Nhiều protein",
+  LocaleKey.selectDietaryPreferences: "Chọn chế độ ăn phù hợp (nếu có):",
+  LocaleKey.activityLevelGreeting:
+      "Xin chào {username}! Cường độ hoạt động của bạn là gì?",
+  LocaleKey.workoutHistory: "Lịch Sử Luyện Tập",
+  LocaleKey.totalWorkoutTime: "Tổng Thời Gian Tập",
+  LocaleKey.totalCaloriesConsumed: "Tổng Calo Ăn Uống",
+  LocaleKey.noHistoryYet: "Chưa có lịch sử luyện tập",
+  LocaleKey.minutes: "phút",
+
+  // Workout Streak
+  LocaleKey.dayStreak: "Streak Ngày",
+  LocaleKey.startYourStreak: "Bắt đầu streak của bạn",
+  LocaleKey.completeFirstWorkout: "Hoàn thành buổi tập đầu tiên",
+  LocaleKey.daysTo: "ngày tới",
+  LocaleKey.record: "Kỷ lục",
+  LocaleKey.danger: "Nguy hiểm",
+  LocaleKey.streakMilestone: "Cột mốc streak",
+  LocaleKey.congratsStreak: "Chúc mừng! Bạn đã đạt",
+  LocaleKey.dontBreakStreak: "Đừng phá vỡ streak của bạn!",
 
   // Home Additional
   LocaleKey.noWorkoutsYet: "Chưa có bài tập nào 📋",
@@ -480,7 +504,9 @@ Map<String, String> viVN = {
   LocaleKey.viewCollection: "Xem bộ sưu tập",
   LocaleKey.home: "Trang chủ",
   LocaleKey.shareAchievement: "Chia sẻ thành tích",
+  // ignore: equal_keys_in_map
   LocaleKey.minutes: "phút",
+  LocaleKey.startYourFirstWorkout: "🏋️ Dành cho bạn",
 
   // Exercise Session
   LocaleKey.noActiveSession: "Không có phiên tập nào",
@@ -498,6 +524,7 @@ Map<String, String> viVN = {
   LocaleKey.cancelledReminder: "Đã hủy nhắc nhở",
   LocaleKey.deletedSchedule: "Đã xóa lịch tập",
   LocaleKey.cannotDeleteSchedule: "Không thể xóa lịch tập",
+  LocaleKey.complete: "Hoàn thành",
 
   // Chatbot
   LocaleKey.viewAllChats: "Xem tất cả cuộc trò chuyện",
@@ -528,4 +555,57 @@ Map<String, String> viVN = {
   LocaleKey.continue_: 'Tiếp tục',
   LocaleKey.errorPrefix: 'Lỗi:',
   LocaleKey.errorScanningBarcode: 'Lỗi khi quét mã vạch. Vui lòng thử lại.',
+
+  // Workout Plan - New Keys
+  LocaleKey.selectDayToView: 'Chọn ngày để xem chi tiết',
+  LocaleKey.overallProgress: 'Tiến độ tổng thể',
+  LocaleKey.days: 'ngày',
+  LocaleKey.pause: 'Tạm dừng',
+  LocaleKey.resume: 'Tiếp tục',
+  LocaleKey.completeWorkout: 'Hoàn thành tập luyện',
+  LocaleKey.confirmCompleteWorkout:
+      'Bạn có chắc chắn muốn hoàn thành bài tập này?',
+  LocaleKey.workouts: 'Bài tập',
+  LocaleKey.noWorkouts: 'Không có bài tập',
+  LocaleKey.noMeals: 'Không có bữa ăn',
+  LocaleKey.completedSevenDayPlan: 'Bạn đã hoàn thành kế hoạch 30 ngày!',
+  LocaleKey.yourAchievement: 'Thành tích của bạn',
+  LocaleKey.daysCompleted: 'Ngày hoàn thành',
+  LocaleKey.totalDays: 'Tổng số ngày',
+  LocaleKey.mintingBadge: 'Đang tạo huy hiệu NFT...',
+  LocaleKey.badgeMinted: 'Đã tạo huy hiệu thành công',
+  LocaleKey.badgeMintedSuccess: '✅ Huy hiệu NFT đã được tạo thành công!',
+  LocaleKey.viewBadges: 'Xem huy hiệu',
+  LocaleKey.completed: 'Hoàn thành',
+  // Streak Badge
+  LocaleKey.daysStreak: "ngày streak",
+  LocaleKey.record: "Kỷ lục",
+  LocaleKey.totalSessions: "Tổng buổi",
+  LocaleKey.refresh: "Làm mới",
+
+  // Rarity
+  LocaleKey.common: "Phổ thông",
+  LocaleKey.rare: "Hiếm",
+  LocaleKey.epic: "Sử thi",
+  LocaleKey.legendary: "Huyền thoại",
+
+  // Achievements
+  LocaleKey.nftBadgeCollection: "Bộ sưu tập huy hiệu",
+  LocaleKey.showcased: "Đang trưng bày",
+  LocaleKey.allBadges: "Tất cả huy hiệu",
+
+  // Injury Categories
+  LocaleKey.injuryCategoryBack: "Lưng",
+  LocaleKey.injuryCategoryKnee: "Đầu gối",
+  LocaleKey.injuryCategoryShoulder: "Vai",
+  LocaleKey.injuryCategoryWrist: "Cổ tay",
+  LocaleKey.injuryCategoryAnkle: "Mắt cá chân",
+  LocaleKey.injuryCategoryNeck: "Cổ",
+  LocaleKey.injuryCategoryElbow: "Khuỷu tay",
+  LocaleKey.injuryCategoryHip: "Hông",
+  LocaleKey.injuryCategoryFoot: "Bàn chân",
+  LocaleKey.injuryCategoryLeg: "Chân",
+  LocaleKey.injuryCategoryThigh: "Đùi",
+  LocaleKey.injuryCategoryGroin: "Háng",
+  LocaleKey.injuryCategoryChest: "Ngực",
 };

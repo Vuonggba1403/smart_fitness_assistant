@@ -142,7 +142,7 @@ class StepInjuries extends StatelessWidget {
               _SelectedChips<Injury>(
                 items: state.selectedInjuries.toList(),
                 onDelete: cubit.toggleInjury,
-                getLabel: (injury) => injury.name,
+                getLabel: (injury) => injury.localizedName,
                 backgroundColor: (injury) =>
                     Injury.getSeverityColor(injury.severity).withOpacity(0.2),
                 iconColor: (injury) => Injury.getSeverityColor(injury.severity),
@@ -361,7 +361,7 @@ class _InjuriesList extends StatelessWidget {
                         ),
                         color: Colors.grey.withOpacity(0.1),
                         child: Text(
-                          injury.category,
+                          injury.localizedCategory,
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
@@ -393,23 +393,25 @@ class _InjuriesList extends StatelessWidget {
                         ),
                       ),
                       title: Text(
-                        injury.name,
+                        injury.localizedName,
                         style: const TextStyle(fontSize: 13),
                       ),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            injury.nameEn,
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: Theme.of(
-                                context,
-                              ).textTheme.bodyMedium?.color?.withOpacity(0.5),
-                              fontStyle: FontStyle.italic,
+                          if (Get.locale?.languageCode != 'en')
+                            Text(
+                              injury.nameEn,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Theme.of(
+                                  context,
+                                ).textTheme.bodyMedium?.color?.withOpacity(0.5),
+                                fontStyle: FontStyle.italic,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 2),
+                          if (Get.locale?.languageCode != 'en')
+                            const SizedBox(height: 2),
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 6,

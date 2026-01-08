@@ -12,6 +12,7 @@ import 'package:smart_fitness_assistant/views/auth/cubit/authentication_cubit.da
 import 'package:smart_fitness_assistant/views/home/logic/cubit/home_cubit.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/bmi_card.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/daily_activity_section.dart';
+import 'package:smart_fitness_assistant/views/home/ui/widgets/compact_streak_badge.dart';
 import 'package:smart_fitness_assistant/views/home/ui/widgets/lastest_workout_view.dart';
 import 'package:smart_fitness_assistant/views/workout_plan/ui/workout_plan_view.dart';
 
@@ -126,14 +127,22 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
                                       fontSize: 12,
                                     ),
                                   ),
-                                  Text(
-                                    user?.username ?? "UserName",
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w700,
-                                    ),
+                                  Row(
+                                    children: [
+                                      Flexible(
+                                        child: Text(
+                                          user?.username ?? "UserName",
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      const CompactStreakBadge(),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -185,8 +194,8 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
 
                         SizedBox(height: media.width * 0.05),
                         CustomContainerCheck(
-                          name: "🏋️By Yourself",
-                          title: "Check",
+                          name: LocaleKey.startYourFirstWorkout.tr,
+                          title: LocaleKey.check.tr,
                           onPressed: () {
                             navigateTo(context, WorkoutPlanView());
                           },

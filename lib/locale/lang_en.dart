@@ -77,6 +77,7 @@ Map<String, String> enUs = {
   LocaleKey.seeMore: 'See More',
   LocaleKey.todayTarget: "Today Target",
   LocaleKey.check: "Check",
+  LocaleKey.startYourFirstWorkout: "🏋️By Yourself",
   //BMI
   LocaleKey.bmi: "BMI (Body Mass Index)",
   LocaleKey.classificationBMI1: "Underweight Class III",
@@ -225,6 +226,7 @@ Map<String, String> enUs = {
   // Workout Plan
   LocaleKey.noPlan: "No workout plan",
   LocaleKey.sevenDayPlan: "7-Day Plan",
+  LocaleKey.thirtyDayPlan: "30-Day Workout Plan",
   LocaleKey.confirmDeletePlan: "Delete Workout Plan",
   LocaleKey.confirmDeletePlanMessage:
       "Are you sure you want to delete this workout plan? This action cannot be undone.",
@@ -300,6 +302,7 @@ Map<String, String> enUs = {
   LocaleKey.workoutType: "Workout Type",
   LocaleKey.duration: "Duration",
   LocaleKey.calories: "Calories",
+  LocaleKey.dailyCalorieTarget: "Daily Calorie Target",
   LocaleKey.minting: "Minting NFT Badge...",
   LocaleKey.shareWorkout: "Share",
   LocaleKey.backToHome: "Back to Home",
@@ -389,8 +392,11 @@ Map<String, String> enUs = {
   LocaleKey.intermediate: "Intermediate",
   LocaleKey.advanced: "Advanced",
   LocaleKey.beginnerTitle: "Beginner",
+  LocaleKey.beginnerSubtitle: "Just starting out",
   LocaleKey.intermediateTitle: "Intermediate",
+  LocaleKey.intermediateSubtitle: "Some experience",
   LocaleKey.advancedTitle: "Advanced",
+  LocaleKey.advancedSubtitle: "Experienced athlete",
   LocaleKey.overTwoYearsExperience: "Over 2 years experience",
   LocaleKey.vegan: "Vegan",
   LocaleKey.vegetarian: "Vegetarian",
@@ -424,7 +430,24 @@ Map<String, String> enUs = {
   LocaleKey.halalLabel: "Halal",
   LocaleKey.ketoLabel: "Keto",
   LocaleKey.highProteinLabel: "High Protein",
-
+  LocaleKey.selectDietaryPreferences: "Select dietary preferences:",
+  LocaleKey.activityLevelGreeting:
+      "Hello {username}! What is your activity level?",
+  LocaleKey.workoutHistory: "Workout History",
+  LocaleKey.totalWorkoutTime: "Total Workout Time",
+  LocaleKey.totalCaloriesConsumed: "Total Calories Consumed",
+  LocaleKey.noHistoryYet: "No workout history yet",
+  LocaleKey.minutes: "min",
+  // Workout Streak
+  LocaleKey.dayStreak: "Day Streak",
+  LocaleKey.startYourStreak: "Start Your Streak",
+  LocaleKey.completeFirstWorkout: "Complete your first workout",
+  LocaleKey.daysTo: "days to",
+  LocaleKey.record: "Record",
+  LocaleKey.danger: "Danger",
+  LocaleKey.streakMilestone: "Streak Milestone",
+  LocaleKey.congratsStreak: "Congratulations! You've reached",
+  LocaleKey.dontBreakStreak: "Don't break your streak!",
   // Workout Tracker
   LocaleKey.noWorkoutsYet: "No workouts yet",
   LocaleKey.drinkWaterReminder: "Remember to drink water!",
@@ -491,6 +514,7 @@ Map<String, String> enUs = {
   LocaleKey.cancelledReminder: "Reminder cancelled",
   LocaleKey.deletedSchedule: "Schedule deleted successfully",
   LocaleKey.cannotDeleteSchedule: "Cannot delete schedule",
+  LocaleKey.complete: "Complete",
 
   // Chatbot
   LocaleKey.viewAllChats: "View All Chats",
@@ -521,4 +545,58 @@ Map<String, String> enUs = {
   LocaleKey.back: 'Back',
   LocaleKey.continue_: 'Continue',
   LocaleKey.errorPrefix: 'Error:',
+
+  // Workout Plan - New Keys
+  LocaleKey.selectDayToView: 'Select a day to view details',
+  LocaleKey.overallProgress: 'Overall Progress',
+  LocaleKey.days: 'days',
+  LocaleKey.pause: 'Pause',
+  LocaleKey.resume: 'Resume',
+  LocaleKey.completeWorkout: 'Complete Workout',
+  LocaleKey.confirmCompleteWorkout:
+      'Are you sure you want to complete this workout?',
+  LocaleKey.workouts: 'Workouts',
+  LocaleKey.noWorkouts: 'No workouts',
+  LocaleKey.noMeals: 'No meals',
+  LocaleKey.completedSevenDayPlan: 'You completed the 30-day plan!',
+  LocaleKey.yourAchievement: 'Your Achievement',
+  LocaleKey.daysCompleted: 'Days Completed',
+  LocaleKey.totalDays: 'Total Days',
+  LocaleKey.mintingBadge: 'Minting NFT Badge...',
+  LocaleKey.badgeMinted: 'Badge minted successfully',
+  LocaleKey.badgeMintedSuccess: '✅ NFT Badge minted successfully!',
+  LocaleKey.viewBadges: 'View Badges',
+  LocaleKey.completed: 'Completed',
+
+  // Streak Badge
+  LocaleKey.daysStreak: "day streak",
+  LocaleKey.record: "Record",
+  LocaleKey.totalSessions: "Total",
+  LocaleKey.refresh: "Refresh",
+
+  // Rarity
+  LocaleKey.common: "Common",
+  LocaleKey.rare: "Rare",
+  LocaleKey.epic: "Epic",
+  LocaleKey.legendary: "Legendary",
+
+  // Achievements
+  LocaleKey.nftBadgeCollection: "NFT Badge Collection",
+  LocaleKey.showcased: "Showcased",
+  LocaleKey.allBadges: "All Badges",
+
+  // Injury Categories
+  LocaleKey.injuryCategoryBack: "Back",
+  LocaleKey.injuryCategoryKnee: "Knee",
+  LocaleKey.injuryCategoryShoulder: "Shoulder",
+  LocaleKey.injuryCategoryWrist: "Wrist",
+  LocaleKey.injuryCategoryAnkle: "Ankle",
+  LocaleKey.injuryCategoryNeck: "Neck",
+  LocaleKey.injuryCategoryElbow: "Elbow",
+  LocaleKey.injuryCategoryHip: "Hip",
+  LocaleKey.injuryCategoryFoot: "Foot",
+  LocaleKey.injuryCategoryLeg: "Leg",
+  LocaleKey.injuryCategoryThigh: "Thigh",
+  LocaleKey.injuryCategoryGroin: "Groin",
+  LocaleKey.injuryCategoryChest: "Chest",
 };

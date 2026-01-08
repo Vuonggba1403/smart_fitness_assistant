@@ -32,3 +32,44 @@ final class ActivityLevelsLoaded extends WorkoutPlanState {
   final List<ActivityLevel> levels;
   ActivityLevelsLoaded(this.levels);
 }
+
+// ========== WORKOUT SESSION STATES ==========
+
+/// Workout đang bắt đầu
+final class WorkoutStarted extends WorkoutPlanState {
+  final int dayNumber;
+  WorkoutStarted(this.dayNumber);
+}
+
+/// Timer tick (mỗi giây)
+final class WorkoutTimerTick extends WorkoutPlanState {
+  final int elapsedSeconds;
+  WorkoutTimerTick(this.elapsedSeconds);
+}
+
+/// Workout đã tạm dừng
+final class WorkoutPaused extends WorkoutPlanState {
+  final int dayNumber;
+  final int elapsedSeconds;
+  WorkoutPaused(this.dayNumber, this.elapsedSeconds);
+}
+
+/// Workout tiếp tục
+final class WorkoutResumed extends WorkoutPlanState {
+  final int dayNumber;
+  final int elapsedSeconds;
+  WorkoutResumed(this.dayNumber, this.elapsedSeconds);
+}
+
+/// Hoàn thành workout của 1 ngày
+final class WorkoutDayCompleted extends WorkoutPlanState {
+  final int dayNumber;
+  final int durationSeconds;
+  WorkoutDayCompleted(this.dayNumber, this.durationSeconds);
+}
+
+/// Hoàn thành toàn bộ workout plan (7 ngày)
+final class WorkoutPlanCompleted extends WorkoutPlanState {
+  final WorkoutPlanProgress progress;
+  WorkoutPlanCompleted(this.progress);
+}

@@ -62,7 +62,7 @@ class BadgeCardWidget extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
-                  badge.rarity.name.toUpperCase(),
+                  badge.rarity.localized.toUpperCase(),
                   style: const TextStyle(fontSize: 10, color: Colors.white),
                 ),
               ),

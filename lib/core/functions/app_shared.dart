@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart'; // ✅ Add for debugPrint
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_fitness_assistant/core/models/chat_history_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -217,5 +218,66 @@ class AppShared {
 
     if (response == null) return null;
     return response['plan_data'] as Map<String, dynamic>?;
+  }
+
+  // ==================== WORKOUT PLAN PROGRESS ====================
+
+  /// Lấy key cho workout plan progress của user
+  static String _getWorkoutPlanProgressKey(String userId) {
+    return 'workout_plan_progress_$userId';
+  }
+
+  /// Lưu workout plan progress của user
+  static Future<void> saveWorkoutPlanProgress(
+    String userId,
+    Map<String, dynamic> progressJson,
+  ) async {
+    final key = _getWorkoutPlanProgressKey(userId);
+    await _prefs.setString(key, jsonEncode(progressJson));
+  }
+
+  /// Lấy workout plan progress của user
+  static Future<Map<String, dynamic>?> getWorkoutPlanProgress(
+    String userId,
+  ) async {
+    final key = _getWorkoutPlanProgressKey(userId);
+    final jsonString = _prefs.getString(key);
+
+    if (jsonString == null) return null;
+
+    try {
+      return jsonDecode(jsonString) as Map<String, dynamic>;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Xóa workout plan progress của user
+  static Future<void> deleteWorkoutPlanProgress(String userId) async {
+    final key = _getWorkoutPlanProgressKey(userId);
+    await _prefs.remove(key);
+  }
+
+  // ==================== DAILY CALORIE TARGET ====================
+
+  /// Lấy daily calorie target từ Supabase user preferences
+  static Future<int?> getDailyCalorieTarget(String userId) async {
+    try {
+      // ✅ Query từ user_activity_preferences với cột for_user (giống daily_activity_section)
+      final response = await _supabase
+          .from('user_activity_preferences')
+          .select('daily_calorie_target')
+          .eq('for_user', userId)
+          .maybeSingle();
+
+      if (response != null && response['daily_calorie_target'] != null) {
+        return response['daily_calorie_target'] as int;
+      }
+
+      return null; // ✅ Return null thay vì default 2000
+    } catch (e) {
+      debugPrint('❌ Error loading calorie target: $e');
+      return null; // ✅ Return null khi có lỗi
+    }
   }
 }

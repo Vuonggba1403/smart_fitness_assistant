@@ -88,16 +88,23 @@ class WorkoutPlanRepository {
     required UserFitnessProfile fitnessProfile,
     required List<ExerciseItem> exercises,
     required List<Meal> meals,
+    int? dailyCalorieTarget,
   }) async {
     try {
       final userContext = _buildUserContext(
         user,
         activityLevel,
         fitnessProfile,
+        dailyCalorieTarget,
       );
       final exercisesList = _buildExercisesListWithIndex(exercises);
       final mealsList = _buildMealsListWithIndex(meals);
-      final prompt = _buildPrompt(userContext, exercisesList, mealsList);
+      final prompt = _buildPrompt(
+        userContext,
+        exercisesList,
+        mealsList,
+        dailyCalorieTarget,
+      );
 
       log('📤 Sending prompt to Gemini AI...');
 
@@ -127,7 +134,12 @@ class WorkoutPlanRepository {
     UserDataModel user,
     ActivityLevel level,
     UserFitnessProfile fitnessProfile,
+    int? dailyCalorieTarget,
   ) {
+    final calorieInfo = dailyCalorieTarget != null
+        ? '- Mục tiêu calo hàng ngày: $dailyCalorieTarget kcal (từ Meal Planner)'
+        : '- Mục tiêu calo hàng ngày: Tự động tính toán dựa trên mục tiêu';
+
     return '''
 User Profile:
 - Tuổi: ${user.age}
@@ -137,6 +149,7 @@ User Profile:
 - Mục tiêu: ${user.your_goals}
 - Mức độ hoạt động: ${level.title} (${level.description})
 - Activity Factor: ${level.activityFactor}
+$calorieInfo
 
 ${fitnessProfile.toPromptString()}
 ''';
@@ -167,9 +180,14 @@ ${fitnessProfile.toPromptString()}
   }
 
   /// Build prompt cho AI
-  String _buildPrompt(String userContext, String exercises, String meals) {
+  String _buildPrompt(
+    String userContext,
+    String exercises,
+    String meals,
+    int? dailyCalorieTarget,
+  ) {
     return '''
-You are a professional fitness coach. Create a 7-day workout and meal plan.
+You are a professional fitness coach. Create a 30-day workout and meal plan.
 
 $userContext
 
@@ -179,8 +197,9 @@ $meals
 
 ⚠️⚠️⚠️ CRITICAL REQUIREMENTS - READ CAREFULLY ⚠️⚠️⚠️
 
-1. ✅ USE INDEX NUMBERS (0-29) for exercise_id and meal_id
-   Example CORRECT: "exercise_id": 5
+1. ✅ USE INDEX NUMBERS (0-${exercises.length - 1}) for exercise_id
+   USE INDEX NUMBERS (0-${meals.length - 1}) for meal_id
+   Example CORRECT: "exercise_id": 5, "meal_id": 12
    Example WRONG: "exercise_id": "abc123"
 
 2. ✅ Return PURE JSON ONLY - NO markdown, NO explanations
@@ -195,11 +214,28 @@ $meals
 
 7. ✅ Create balanced workout targeting different muscle groups
 
-8. ✅ Calculate meals to match user's calorie needs
+8. ✅ Calculate meals to match user's DAILY CALORIE TARGET from profile
+   ${dailyCalorieTarget != null ? '⚠️ USER TARGET: $dailyCalorieTarget kcal/day - USE THIS EXACT VALUE!' : 'Calculate based on user goals and activity level'}
 
-9. ✅ Include 3-4 exercises per day
+9. ⚠️ MANDATORY: Include exactly 4-5 exercises per day (NO LESS than 4)
 
-10. ✅ Include 3-4 meals per day
+10. ⚠️⚠️ ABSOLUTELY MANDATORY - EVERY DAY MUST HAVE MEALS ⚠️⚠️
+    Include exactly 3-4 meals per day:
+    - MUST have: "Bữa sáng" (Breakfast)
+    - MUST have: "Bữa trưa" (Lunch)  
+    - MUST have: "Bữa tối" (Dinner)
+    - OPTIONAL: "Bữa phụ" (Snack) if user needs more calories
+    
+    ❌ CRITICAL: Do NOT skip meals for any day!
+    ❌ Every single day (1-30) MUST have at least 3 meals!
+    ❌ If you skip meals, the plan will be REJECTED!
+
+11. ✅ Distribute calories across meals to reach ${dailyCalorieTarget ?? 'target'}:
+    - Breakfast: 25-30% of daily calories
+    - Lunch: 35-40% of daily calories
+    - Dinner: 25-30% of daily calories
+    - Snack: 10-15% of daily calories (if included)
+    ${dailyCalorieTarget != null ? '⚠️ Total daily calories MUST be close to $dailyCalorieTarget kcal!' : ''}
 
 EXACT JSON FORMAT (NO EXCEPTIONS):
 [
@@ -212,6 +248,24 @@ EXACT JSON FORMAT (NO EXCEPTIONS):
         "sets": 3,
         "reps": 12,
         "duration_minutes": 30
+      },
+      {
+        "exercise_id": 1,
+        "sets": 3,
+        "reps": 15,
+        "duration_minutes": 25
+      },
+      {
+        "exercise_id": 2,
+        "sets": 4,
+        "reps": 10,
+        "duration_minutes": 20
+      },
+      {
+        "exercise_id": 3,
+        "sets": 3,
+        "reps": 12,
+        "duration_minutes": 15
       }
     ],
     "meals": [
@@ -219,16 +273,37 @@ EXACT JSON FORMAT (NO EXCEPTIONS):
         "meal_type": "Bữa sáng",
         "meal_id": 5,
         "serving_size": 1.0
+      },
+      {
+        "meal_type": "Bữa trưa",
+        "meal_id": 12,
+        "serving_size": 1.0
+      },
+      {
+        "meal_type": "Bữa tối",
+        "meal_id": 18,
+        "serving_size": 1.0
+      },
+      {
+        "meal_type": "Bữa phụ",
+        "meal_id": 25,
+        "serving_size": 1.0
       }
     ]
   }
 ]
 
 REMEMBER: 
-- Use INDEX numbers (0-29) for exercise_id and meal_id
+- Use INDEX numbers (0-${meals.length - 1}) for meal_id, (0-${exercises.length - 1}) for exercise_id
 - Return ONLY the JSON array
-- Day names: "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy", "Chủ Nhật"
+- ❗ CRITICAL: Each day MUST have 4-5 exercises AND 3-4 meals (DO NOT skip meals!)
+- Day names cycle: "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy", "Chủ Nhật" (repeat for 30 days)
+- Every day from 1 to 30 MUST include a "meals" array with at least 3 meal objects
+
+Return ONLY the JSON array, NO markdown, NO explanations.
 - Meal types: "Bữa sáng", "Bữa trưa", "Bữa tối", "Bữa phụ"
+- Create progressive difficulty: easier exercises at start, more challenging towards day 30
+- Vary muscle groups to allow recovery
 ''';
   }
 
@@ -282,8 +357,8 @@ REMEMBER:
         throw Exception('Invalid JSON format');
       }
 
-      if (dailyPlansJson.length != 7) {
-        log('⚠️ Warning: Expected 7 days, got ${dailyPlansJson.length}');
+      if (dailyPlansJson.length != 30) {
+        log('⚠️ Warning: Expected 30 days, got ${dailyPlansJson.length}');
       }
 
       final dailyPlans = <DailyPlan>[];
@@ -291,54 +366,85 @@ REMEMBER:
       for (var dayData in dailyPlansJson) {
         // Parse workouts với INDEX
         final workouts = <WorkoutSession>[];
-        for (var workoutData in dayData['workouts']) {
-          final exerciseIndex = workoutData['exercise_id'];
+        if (dayData['workouts'] != null && dayData['workouts'] is List) {
+          for (var workoutData in dayData['workouts']) {
+            final exerciseIndex = workoutData['exercise_id'];
 
-          int index = exerciseIndex is int
-              ? exerciseIndex
-              : int.tryParse(exerciseIndex.toString()) ?? 0;
+            int index = exerciseIndex is int
+                ? exerciseIndex
+                : int.tryParse(exerciseIndex.toString()) ?? 0;
 
-          if (index < 0 || index >= exercises.length) {
-            log('⚠️ Invalid exercise index: $index, using 0');
-            index = 0;
+            if (index < 0 || index >= exercises.length) {
+              log('⚠️ Invalid exercise index: $index, using 0');
+              index = 0;
+            }
+
+            final exercise = exercises[index];
+
+            workouts.add(
+              WorkoutSession(
+                exercise: exercise,
+                sets: workoutData['sets'] as int,
+                reps: workoutData['reps'] as int,
+                durationMinutes: workoutData['duration_minutes'] as int?,
+              ),
+            );
           }
+        }
 
-          final exercise = exercises[index];
-
-          workouts.add(
-            WorkoutSession(
-              exercise: exercise,
-              sets: workoutData['sets'] as int,
-              reps: workoutData['reps'] as int,
-              durationMinutes: workoutData['duration_minutes'] as int?,
-            ),
+        // Validate workout count
+        if (workouts.length < 4) {
+          log(
+            '⚠️ Day ${dayData['day_number']} has only ${workouts.length} exercises, expected 4-5',
           );
         }
 
         // Parse meals với INDEX
         final mealSessions = <MealSession>[];
-        for (var mealData in dayData['meals']) {
-          final mealIndex = mealData['meal_id'];
+        if (dayData['meals'] != null && dayData['meals'] is List) {
+          for (var mealData in dayData['meals']) {
+            final mealIndex = mealData['meal_id'];
 
-          int index = mealIndex is int
-              ? mealIndex
-              : int.tryParse(mealIndex.toString()) ?? 0;
+            int index = mealIndex is int
+                ? mealIndex
+                : int.tryParse(mealIndex.toString()) ?? 0;
 
-          if (index < 0 || index >= meals.length) {
-            log('⚠️ Invalid meal index: $index, using 0');
-            index = 0;
+            if (index < 0 || index >= meals.length) {
+              log('⚠️ Invalid meal index: $index, using 0');
+              index = 0;
+            }
+
+            final meal = meals[index];
+
+            mealSessions.add(
+              MealSession(
+                mealType: mealData['meal_type'] as String,
+                meal: meal,
+                servingSize:
+                    (mealData['serving_size'] as num?)?.toDouble() ?? 1.0,
+              ),
+            );
           }
+        } else {
+          log('⚠️ No meals found for day ${dayData['day_number']}');
+        }
 
-          final meal = meals[index];
-
-          mealSessions.add(
-            MealSession(
-              mealType: mealData['meal_type'] as String,
-              meal: meal,
-              servingSize:
-                  (mealData['serving_size'] as num?)?.toDouble() ?? 1.0,
-            ),
+        // Validate meal count
+        if (mealSessions.length < 3) {
+          log(
+            '⚠️ Day ${dayData['day_number']} has only ${mealSessions.length} meals, expected 3-4',
           );
+        }
+
+        // Validate required meal types
+        final mealTypes = mealSessions.map((m) => m.mealType).toSet();
+        final requiredTypes = ['Bữa sáng', 'Bữa trưa', 'Bữa tối'];
+        for (var required in requiredTypes) {
+          if (!mealTypes.contains(required)) {
+            log(
+              '⚠️ Day ${dayData['day_number']} missing required meal type: $required',
+            );
+          }
         }
 
         dailyPlans.add(
@@ -352,6 +458,11 @@ REMEMBER:
       }
 
       log('✅ Successfully parsed plan with ${dailyPlans.length} days');
+
+      // Debug meals count
+      for (var day in dailyPlans) {
+        log('📅 Parsed Day ${day.dayNumber}: ${day.meals.length} meals');
+      }
 
       return WorkoutPlan(
         id: const Uuid().v4(),

@@ -2,6 +2,10 @@
 ///
 /// Badges are stored locally and include workout metadata.
 /// This is a demo model designed to simulate NFT-style achievements.
+
+import 'package:get/get.dart';
+import 'package:smart_fitness_assistant/locale/locale_key.dart';
+
 class NFTBadge {
   final String id;
   final String tokenId;
@@ -121,6 +125,22 @@ enum BadgeRarity {
   rare, // Challenging workout (10+ exercises, 30+ minutes)
   epic, // Intense workout (15+ exercises, 45+ minutes)
   legendary, // Elite workout (20+ exercises, 60+ minutes)
+}
+
+/// ✅ Extension để locale rarity
+extension BadgeRarityExtension on BadgeRarity {
+  String get localized {
+    switch (this) {
+      case BadgeRarity.common:
+        return LocaleKey.common.tr;
+      case BadgeRarity.rare:
+        return LocaleKey.rare.tr;
+      case BadgeRarity.epic:
+        return LocaleKey.epic.tr;
+      case BadgeRarity.legendary:
+        return LocaleKey.legendary.tr;
+    }
+  }
 }
 
 /// Represents a milestone achievement that can be earned
