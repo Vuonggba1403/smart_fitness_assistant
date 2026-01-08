@@ -21,10 +21,21 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
   List<UpcomingWorkout>? _cachedUpcomingWorkouts;
   List<double>? _cachedWeeklyStats;
   Map<String, Map<String, WorkoutProgress>>? _cachedProgress = {};
+  List<ExerciseCategory>? _cachedCategories;
+  List<ExerciseCategory>? _cachedGymCategories;
+  List<ExerciseCategory>? _cachedHomeCategories;
+  Map<String, int>? _cachedExerciseCounts;
+  Map<String, Map<String, WorkoutProgress>>? _cachedCategoryProgress;
 
   // ============ Public Getters ============
   List<UpcomingWorkout>? get cachedUpcomingWorkouts => _cachedUpcomingWorkouts;
   List<double>? get cachedWeeklyStats => _cachedWeeklyStats;
+  List<ExerciseCategory>? get cachedCategories => _cachedCategories;
+  List<ExerciseCategory>? get cachedGymCategories => _cachedGymCategories;
+  List<ExerciseCategory>? get cachedHomeCategories => _cachedHomeCategories;
+  Map<String, int>? get cachedExerciseCounts => _cachedExerciseCounts;
+  Map<String, Map<String, WorkoutProgress>>? get cachedCategoryProgress =>
+      _cachedCategoryProgress;
 
   Future<void> _autoLoadInitialData() async {
     await Future.wait([
@@ -42,6 +53,11 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
     _cachedUpcomingWorkouts = null;
     _cachedWeeklyStats = null;
     _cachedProgress = {};
+    _cachedCategories = null;
+    _cachedGymCategories = null;
+    _cachedHomeCategories = null;
+    _cachedExerciseCounts = null;
+    _cachedCategoryProgress = null;
   }
 
   // ============================================================
@@ -97,6 +113,101 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
 
   // ============================================================
   // CATEGORIES
+  // ============================================================
+  // EXERCISE CATEGORIES - With Caching
+  // ============================================================
+
+  /// Load tất cả exercise categories với cache
+  Future<List<ExerciseCategory>> loadExerciseCategories({
+    bool forceRefresh = false,
+  }) async {
+    if (!forceRefresh && _cachedCategories != null) {
+      return _cachedCategories!;
+    }
+
+    try {
+      final response = await _supabase.from('exercise_categories').select();
+      final categories = response
+          .map((json) => ExerciseCategory.fromJson(json))
+          .toList();
+
+      categories.sort((a, b) {
+        if (a.createdAt == null || b.createdAt == null) return 0;
+        return a.createdAt!.compareTo(b.createdAt!);
+      });
+
+      _cachedCategories = categories;
+      _cachedGymCategories = categories.where((c) => c.isGymCategory).toList();
+      _cachedHomeCategories = categories
+          .where((c) => c.isHomeCategory)
+          .toList();
+
+      return categories;
+    } catch (e) {
+      print('❌ Error loading categories: $e');
+      return _cachedCategories ?? [];
+    }
+  }
+
+  /// Load gym categories with pre-loaded counts and progress
+  Future<List<ExerciseCategory>> loadGymCategories({
+    bool forceRefresh = false,
+  }) async {
+    if (!forceRefresh && _cachedGymCategories != null) {
+      return _cachedGymCategories!;
+    }
+
+    final categories = await loadExerciseCategories(forceRefresh: forceRefresh);
+    final gymCategories = categories.where((c) => c.isGymCategory).toList();
+
+    // Pre-load counts and progress for all gym categories
+    await _preloadCategoryData(gymCategories);
+
+    return gymCategories;
+  }
+
+  /// Load home categories with pre-loaded counts and progress
+  Future<List<ExerciseCategory>> loadHomeCategories({
+    bool forceRefresh = false,
+  }) async {
+    if (!forceRefresh && _cachedHomeCategories != null) {
+      return _cachedHomeCategories!;
+    }
+
+    final categories = await loadExerciseCategories(forceRefresh: forceRefresh);
+    final homeCategories = categories.where((c) => c.isHomeCategory).toList();
+
+    // Pre-load counts and progress for all home categories
+    await _preloadCategoryData(homeCategories);
+
+    return homeCategories;
+  }
+
+  /// Pre-loads exercise counts and progress for all categories
+  Future<void> _preloadCategoryData(List<ExerciseCategory> categories) async {
+    _cachedExerciseCounts ??= {};
+    _cachedCategoryProgress ??= {};
+
+    await Future.wait(
+      categories.map((category) async {
+        final categoryId = category.id ?? '';
+        if (categoryId.isEmpty) return;
+
+        // Load count and progress in parallel
+        final results = await Future.wait([
+          getExerciseCount(categoryId),
+          loadProgress(categoryId),
+        ]);
+
+        _cachedExerciseCounts![categoryId] = results[0] as int;
+        _cachedCategoryProgress![categoryId] =
+            results[1] as Map<String, WorkoutProgress>;
+      }),
+    );
+  }
+
+  // ============================================================
+  // LEGACY STREAM METHODS - Giữ lại để backward compatibility
   // ============================================================
 
   Stream<List<ExerciseCategory>> streamExerciseCategoriesWithCount() {
@@ -319,6 +430,105 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
       return stats;
     } catch (e, stackTrace) {
       return List.filled(7, 0.0);
+    }
+  }
+
+  // ============================================================
+  // NOTIFICATION MANAGEMENT
+  // ============================================================
+
+  /// Generates unique notification ID for workout
+  int generateNotificationId(String userId, String categoryId) {
+    return 200000 +
+        (userId.hashCode.abs() % 10000) +
+        (categoryId.hashCode.abs() % 10000);
+  }
+
+  /// Enables notification for a scheduled workout
+  Future<bool> enableWorkoutNotification({
+    required String categoryId,
+    required String categoryName,
+    required DateTime scheduledTime,
+    required Function(int, String, String, DateTime) scheduleCallback,
+  }) async {
+    try {
+      final userId = _getUserId();
+      if (userId == null) return false;
+
+      final notificationId = generateNotificationId(userId, categoryId);
+
+      await scheduleCallback(
+        notificationId,
+        'Workout Time',
+        '$categoryName - Start Now',
+        scheduledTime,
+      );
+
+      await _supabase
+          .from('scheduled_workouts')
+          .update({'has_notification': true})
+          .eq('for_user', userId)
+          .eq('category_id', categoryId);
+
+      await loadUpcomingWorkouts(forceRefresh: true);
+
+      return true;
+    } catch (e) {
+      print('❌ Error enabling notification: $e');
+      return false;
+    }
+  }
+
+  /// Disables notification for a scheduled workout
+  Future<bool> disableWorkoutNotification({
+    required String categoryId,
+    required Function(int) cancelCallback,
+  }) async {
+    try {
+      final userId = _getUserId();
+      if (userId == null) return false;
+
+      final notificationId = generateNotificationId(userId, categoryId);
+      await cancelCallback(notificationId);
+
+      await _supabase
+          .from('scheduled_workouts')
+          .update({'has_notification': false})
+          .eq('for_user', userId)
+          .eq('category_id', categoryId);
+
+      await loadUpcomingWorkouts(forceRefresh: true);
+
+      return true;
+    } catch (e) {
+      print('❌ Error disabling notification: $e');
+      return false;
+    }
+  }
+
+  /// Deletes a scheduled workout
+  Future<bool> deleteScheduledWorkout(String categoryId) async {
+    try {
+      final userId = _getUserId();
+      if (userId == null) return false;
+
+      final scheduleResponse = await _supabase
+          .from('scheduled_workouts')
+          .select('id')
+          .eq('for_user', userId)
+          .eq('category_id', categoryId)
+          .single();
+
+      final scheduleId = scheduleResponse['id'] as String;
+
+      await _supabase.from('scheduled_workouts').delete().eq('id', scheduleId);
+
+      await loadUpcomingWorkouts(forceRefresh: true);
+
+      return true;
+    } catch (e) {
+      print('❌ Error deleting schedule: $e');
+      return false;
     }
   }
 
