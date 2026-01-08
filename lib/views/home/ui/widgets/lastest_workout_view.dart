@@ -36,7 +36,7 @@ class LatestWorkoutView extends StatelessWidget {
             ? Padding(
                 padding: const EdgeInsets.all(20),
                 child: Text(
-                  "Chưa có bài tập nào 📋",
+                  LocaleKey.noWorkoutsYet.tr,
                   style: TextStyle(
                     color: textColor?.withOpacity(0.6),
                     fontSize: 14,

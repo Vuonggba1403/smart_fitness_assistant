@@ -141,7 +141,7 @@ class _AddScheduleViewState extends State<AddScheduleView> {
                       items: _categories.map((category) {
                         return DropdownMenuItem(
                           value: category,
-                          child: Text(category.titleEx ?? ''),
+                          child: Text(category.localizedTitleEx),
                         );
                       }).toList(),
                       onChanged: (value) {

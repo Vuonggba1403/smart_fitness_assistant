@@ -183,7 +183,7 @@ class SocialCreatePostDialog extends StatelessWidget {
                                         const SizedBox(width: 8),
                                         Expanded(
                                           child: Text(
-                                            selectedCategory!.titleEx ?? 'N/A',
+                                            selectedCategory!.localizedTitleEx,
                                             style: TextStyle(
                                               color: textColor,
                                               fontSize: 14,
@@ -200,7 +200,7 @@ class SocialCreatePostDialog extends StatelessWidget {
                                 return DropdownMenuItem(
                                   value: category,
                                   child: Text(
-                                    category.titleEx ?? 'N/A',
+                                    category.localizedTitleEx,
                                     style: TextStyle(
                                       color: textColor,
                                       fontSize: 14,

@@ -1,3 +1,5 @@
+import 'package:smart_fitness_assistant/core/models/exercise_category.dart';
+
 class ScheduledWorkout {
   final String? id;
   final String forUser;
@@ -30,7 +32,8 @@ class ScheduledWorkout {
 
     if (json['exercise_categories'] != null) {
       final category = json['exercise_categories'] as Map<String, dynamic>;
-      categoryName = category['title_ex'];
+      final exerciseCategory = ExerciseCategory.fromJson(category);
+      categoryName = exerciseCategory.localizedTitleEx;
       categoryImage = category['img_url'];
     }
 

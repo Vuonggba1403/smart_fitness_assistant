@@ -62,6 +62,7 @@ class ScheduleCubit extends Cubit<ScheduleState> {
             *,
             exercise_categories!inner(
               title_ex,
+              title_ex_en,
               img_url
             )
           ''')
@@ -134,10 +135,11 @@ class ScheduleCubit extends Cubit<ScheduleState> {
     try {
       final response = await _supabase
           .from('exercise_categories')
-          .select('title_ex')
+          .select('title_ex, title_ex_en')
           .eq('id', categoryId)
           .single();
-      return response['title_ex'] ?? 'Workout';
+      final category = ExerciseCategory.fromJson(response);
+      return category.localizedTitleEx;
     } catch (e) {
       return 'Workout';
     }

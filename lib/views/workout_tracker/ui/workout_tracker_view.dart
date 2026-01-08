@@ -441,44 +441,15 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
 
         // Empty state
         if (upcomingWorkouts.isEmpty) {
-          return Container(
+          return Padding(
             padding: const EdgeInsets.all(20),
-            margin: const EdgeInsets.symmetric(vertical: 10),
-            decoration: BoxDecoration(
-              color: TColor.primaryColor1.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(15),
-              border: Border.all(
-                color: TColor.primaryColor1.withOpacity(0.3),
-                width: 1,
+            child: Text(
+              LocaleKey.noScheduleYet.tr,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: textColor?.withOpacity(0.6),
+                fontSize: 14,
               ),
-            ),
-            child: Column(
-              children: [
-                Icon(
-                  Icons.calendar_today_outlined,
-                  size: 40,
-                  color: TColor.primaryColor1.withOpacity(0.5),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  LocaleKey.noScheduleYet.tr,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: textColor,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  LocaleKey.tapToAddSchedule.tr,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: textColor?.withOpacity(0.6),
-                    fontSize: 14,
-                  ),
-                ),
-              ],
             ),
           );
         }

@@ -221,6 +221,7 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
           *,
           exercise_categories!inner(
             title_ex,
+            title_ex_en,
             img_url
           )
         ''')
@@ -255,6 +256,7 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
             *,
             exercise_categories!inner(
               title_ex,
+              title_ex_en,
               img_url
             )
           ''')
@@ -370,7 +372,8 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
       final categoryData = schedule['exercise_categories'];
       if (categoryData == null) continue;
 
-      final categoryName = categoryData['title_ex'] ?? 'Workout';
+      final category = ExerciseCategory.fromJson(categoryData);
+      final categoryName = category.localizedTitleEx;
       final imageUrl = categoryData['img_url'] ?? '';
 
       final exercisesCount = await getExerciseCount(categoryId);

@@ -7,6 +7,7 @@ import 'package:smart_fitness_assistant/core/functions/color_extension.dart';
 import 'package:smart_fitness_assistant/core/widgets/round_button.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:smart_fitness_assistant/core/models/exercise_item.dart';
+import 'package:smart_fitness_assistant/core/models/exercise_category.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_fitness_assistant/views/workout_tracker/logic/cubit/workout_tracker_cubit.dart';
 import 'package:smart_fitness_assistant/views/exercise_session/logic/cubit/session_cubit.dart';
@@ -224,9 +225,10 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
                               if (state is WorkoutDetailLoaded) {
                                 final categoryId =
                                     widget.dObj['id']?.toString() ?? '';
-                                final categoryName =
-                                    widget.dObj['title_ex']?.toString() ??
-                                    'Workout';
+                                final category = ExerciseCategory.fromJson(
+                                  widget.dObj as Map<String, dynamic>,
+                                );
+                                final categoryName = category.localizedTitleEx;
 
                                 // ✅ Await result
                                 final result = await Navigator.push<bool>(
@@ -300,7 +302,9 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.dObj["title_ex"]?.toString() ?? "Workout",
+                    ExerciseCategory.fromJson(
+                      widget.dObj as Map<String, dynamic>,
+                    ).localizedTitleEx,
                     style: TextStyle(
                       color: textColor,
                       fontSize: 25,

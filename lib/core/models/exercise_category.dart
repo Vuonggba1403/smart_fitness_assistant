@@ -1,20 +1,13 @@
 import 'package:equatable/equatable.dart';
+import 'package:get/get.dart';
 
-/// Model đại diện cho một danh mục bài tập (Exercise Category)
-/// Map trực tiếp từ bảng exercise_categories trong Supabase
-///
-/// Chứa thông tin:
-/// - id: ID unique của category
-/// - createdAt: Thời gian tạo
-/// - imgUrl: URL hình ảnh
-/// - titleEx: Tên danh mục
-/// - exerciseItems: Danh sách các bài tập (nếu có join)
-/// - classify: Phân loại 'gym' hoặc 'home'
 class ExerciseCategory extends Equatable {
   final String? id;
   final DateTime? createdAt;
   final String? imgUrl;
   final String? titleEx;
+  final String? titleExEn;
+  final String? titleExVi;
   final List<dynamic>? exerciseItems;
   final String? classify;
 
@@ -23,9 +16,19 @@ class ExerciseCategory extends Equatable {
     this.createdAt,
     this.imgUrl,
     this.titleEx,
+    this.titleExEn,
+    this.titleExVi,
     this.exerciseItems,
     this.classify,
   });
+
+  /// Lấy title theo locale hiện tại
+  String get localizedTitleEx {
+    final locale = Get.locale?.languageCode ?? 'vi';
+    if (locale == 'en' && titleExEn != null) return titleExEn!;
+    if (locale == 'vi' && titleExVi != null) return titleExVi!;
+    return titleEx ?? 'Workout';
+  }
 
   /// Tạo ExerciseCategory từ JSON/Map
   factory ExerciseCategory.fromJson(Map<String, dynamic> json) {
@@ -35,7 +38,13 @@ class ExerciseCategory extends Equatable {
           ? null
           : DateTime.parse(json['created_at'] as String),
       imgUrl: json['img_url'] as String?,
-      titleEx: json['title_ex'] as String?,
+      titleEx:
+          json['title_ex'] as String?, // Cột 'title_ex' chính là tiếng Việt
+      titleExEn:
+          json['title_ex_en']
+              as String?, // Cột 'title_ex_en' chính là tiếng Anh
+      titleExVi:
+          json['title_ex'] as String?, // Cột 'title_ex' chính là tiếng Việt
       exerciseItems: json['exercise_items'] as List<dynamic>?,
       classify: json['classify'] as String?,
     );
@@ -57,6 +66,8 @@ class ExerciseCategory extends Equatable {
     DateTime? createdAt,
     String? imgUrl,
     String? titleEx,
+    String? titleExEn,
+    String? titleExVi,
     List<dynamic>? exerciseItems,
     String? classify,
   }) {
@@ -65,6 +76,8 @@ class ExerciseCategory extends Equatable {
       createdAt: createdAt ?? this.createdAt,
       imgUrl: imgUrl ?? this.imgUrl,
       titleEx: titleEx ?? this.titleEx,
+      titleExEn: titleExEn ?? this.titleExEn,
+      titleExVi: titleExVi ?? this.titleExVi,
       exerciseItems: exerciseItems ?? this.exerciseItems,
       classify: classify ?? this.classify,
     );
@@ -89,6 +102,8 @@ class ExerciseCategory extends Equatable {
     createdAt,
     imgUrl,
     titleEx,
+    titleExEn,
+    titleExVi,
     exerciseItems,
     classify,
   ];

@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:smart_fitness_assistant/core/functions/app_shared.dart';
+import 'package:smart_fitness_assistant/core/models/exercise_category.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 part 'home_state.dart';
 
@@ -46,6 +47,7 @@ class HomeCubit extends Cubit<HomeState> {
             total_exercises,
             exercise_categories!inner(
               title_ex,
+              title_ex_en,
               img_url
             )
           ''')
@@ -62,12 +64,13 @@ class HomeCubit extends Cubit<HomeState> {
 
         // ✅ Lấy data từ exercise_categories
         final category = workout['exercise_categories'];
-        final categoryName = category['title_ex'] as String;
+        final exerciseCategory = ExerciseCategory.fromJson(category);
+        final categoryName = exerciseCategory.localizedTitleEx;
         final imageUrl =
             category['img_url'] as String? ?? 'assets/img/default_workout.png';
 
         return {
-          'name': categoryName, // ✅ Từ exercise_categories.title_ex
+          'name': categoryName, // ✅ Từ exercise_categories.localizedTitleEx
           'image': imageUrl, // ✅ Từ exercise_categories.img_url
           'time_ago': timeAgo,
           'progress': progress,

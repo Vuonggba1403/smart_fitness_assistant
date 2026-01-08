@@ -118,7 +118,7 @@ class WhatTrainRow extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          category.titleEx ?? 'Workout',
+          category.localizedTitleEx,
           style: TextStyle(
             color: TColor.black,
             fontSize: 14,
