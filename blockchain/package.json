@@ -1,0 +1,26 @@
+{
+  "name": "fitness-nft-contract",
+  "version": "1.0.0",
+  "description": "Smart Fitness Assistant NFT Smart Contract",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy:mumbai": "hardhat run scripts/deploy.js --network polygonMumbai",
+    "deploy:amoy": "hardhat run scripts/deploy.js --network polygonAmoy",
+    "deploy:polygon": "hardhat run scripts/deploy.js --network polygon",
+    "deploy:bsc-test": "hardhat run scripts/deploy.js --network bscTestnet",
+    "deploy:sepolia": "hardhat run scripts/deploy.js --network sepolia",
+    "verify": "hardhat verify --network polygonMumbai"
+  },
+  "keywords": ["nft", "fitness", "blockchain", "polygon"],
+  "author": "Smart Fitness Assistant",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "hardhat": "^2.19.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.0",
+    "dotenv": "^16.3.1"
+  }
+}

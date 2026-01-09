@@ -171,7 +171,7 @@ class _WorkoutPlanContentState extends State<_WorkoutPlanContent> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.fitness_center, size: 80, color: Colors.grey.shade400),
+          Image.asset('assets/img/no-sport.png', width: 100, height: 100),
           const SizedBox(height: 16),
           Text(
             LocaleKey.noWorkoutPlan.tr,
