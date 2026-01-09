@@ -22,7 +22,7 @@ class WorkoutSessionListTile extends StatelessWidget {
         placeholderIcon: Icons.fitness_center,
       ),
       title: Text(
-        workout.exercise.title,
+        workout.exercise.localizedTitle,
         style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
       ),
       subtitle: _WorkoutSubtitle(workout: workout),

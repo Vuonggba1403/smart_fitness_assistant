@@ -126,7 +126,11 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
     }
 
     try {
-      final response = await _supabase.from('exercise_categories').select();
+      final response = await _supabase.from('exercise_categories').select('''
+        *,
+        title_ex,
+        title_ex_en
+      ''');
       final categories = response
           .map((json) => ExerciseCategory.fromJson(json))
           .toList();
@@ -553,6 +557,7 @@ class WorkoutTrackerCubit extends Cubit<WorkoutTrackerState> {
             devices!inner(
               id,
               name,
+              name_en,
               img_url
             )
           ''')

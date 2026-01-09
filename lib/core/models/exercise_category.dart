@@ -25,6 +25,9 @@ class ExerciseCategory extends Equatable {
   /// Lấy title theo locale hiện tại
   String get localizedTitleEx {
     final locale = Get.locale?.languageCode ?? 'vi';
+    print(
+      '🌐 Category locale: $locale, titleEx: $titleEx, titleExEn: $titleExEn, titleExVi: $titleExVi',
+    );
     if (locale == 'en' && titleExEn != null) return titleExEn!;
     if (locale == 'vi' && titleExVi != null) return titleExVi!;
     return titleEx ?? 'Workout';
@@ -56,6 +59,8 @@ class ExerciseCategory extends Equatable {
     'created_at': createdAt?.toIso8601String(),
     'img_url': imgUrl,
     'title_ex': titleEx,
+    'title_ex_en': titleExEn,
+    'title_ex_vi': titleExVi,
     'exercise_items': exerciseItems,
     'classify': classify,
   };

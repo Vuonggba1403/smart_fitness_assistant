@@ -53,7 +53,7 @@ class _FoodDetailsView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: CustomAppBar(title: meal.name),
+      appBar: CustomAppBar(title: meal.localizedName),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -136,7 +136,7 @@ class _FoodImageHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                meal.name,
+                meal.localizedName,
                 style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -607,6 +607,7 @@ class _AddMealButton extends StatelessWidget {
     context.read<MealPlannerCubit>().addMealToType(mealType, {
       'id': meal.id,
       'name': meal.name,
+      'name_en': meal.nameEn,
       'calories': nutritionValues.calories, // Scaled calories cho user_meals
       'protein': nutritionValues.protein,
       'carbs': nutritionValues.carbs,
@@ -625,7 +626,10 @@ class _AddMealButton extends StatelessWidget {
     }, DateTime.now());
 
     debugPrint('🍽️ addMealToType called successfully');
-    AppSnackBar.success(context, '${meal.name} ${LocaleKey.addedToMeal.tr}');
+    AppSnackBar.success(
+      context,
+      '${meal.localizedName} ${LocaleKey.addedToMeal.tr}',
+    );
 
     Navigator.of(context).pop();
     Navigator.of(context).pop();

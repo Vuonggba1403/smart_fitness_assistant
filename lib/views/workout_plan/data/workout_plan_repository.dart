@@ -65,7 +65,10 @@ class WorkoutPlanRepository {
   /// Fetch meals từ Supabase (with optional limit for performance)
   Future<List<Meal>> fetchMeals({int? limit}) async {
     try {
-      dynamic query = _supabase.from('meals').select().eq('is_verified', true);
+      dynamic query = _supabase
+          .from('meals')
+          .select('*, name_en, description_en')
+          .eq('is_verified', true);
 
       // Add limit if specified (for better performance)
       if (limit != null) {

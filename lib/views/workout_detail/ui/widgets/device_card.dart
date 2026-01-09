@@ -25,11 +25,12 @@ class DeviceCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.all(8),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            height: media.width * 0.35,
-            width: media.width * 0.35,
+            height: media.width * 0.3,
+            width: media.width * 0.3,
             decoration: BoxDecoration(
               border: Border.all(color: TColor.primaryColor1, width: 1),
               gradient: LinearGradient(
@@ -40,24 +41,21 @@ class DeviceCard extends StatelessWidget {
             alignment: Alignment.center,
             child: CachedNetworkImage(
               imageUrl: imageUrl,
-              width: media.width * 0.2,
-              height: media.width * 0.2,
+              width: media.width * 0.18,
+              height: media.width * 0.18,
               fit: BoxFit.contain,
               placeholder: (context, url) => CustomCircleProgIndicator(),
-              errorWidget: (context, url, error) => Icon(
-                Icons.fitness_center,
-                color: textColor?.withOpacity(0.3),
-                size: media.width * 0.2,
-              ),
+              errorWidget: (context, url, error) =>
+                  Image.asset("assets/img/no-sport.png"),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 6.0),
             child: SizedBox(
-              width: media.width * 0.35,
+              width: media.width * 0.3,
               child: Text(
                 deviceName,
-                style: TextStyle(color: textColor, fontSize: 12),
+                style: const TextStyle(fontSize: 11),
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,

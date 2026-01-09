@@ -1,7 +1,11 @@
+import 'package:get/get.dart';
+
 class Meal {
   final String id;
   final String name;
+  final String? nameEn;
   final String? description;
+  final String? descriptionEn;
   final String? imageUrl;
   final int calories;
   final double proteinG;
@@ -12,12 +16,14 @@ class Meal {
   final int servingSizeG;
   final bool isVerified;
   final String? category;
-  final String? barcode; // ✅ Thêm field barcode
+  final String? barcode;
 
   Meal({
     required this.id,
     required this.name,
+    this.nameEn,
     this.description,
+    this.descriptionEn,
     this.imageUrl,
     required this.calories,
     required this.proteinG,
@@ -31,11 +37,30 @@ class Meal {
     this.barcode,
   });
 
+  /// Localized getters
+  String get localizedName {
+    final locale = Get.locale?.languageCode;
+    if (locale == 'en' && nameEn != null && nameEn!.isNotEmpty) {
+      return nameEn!;
+    }
+    return name;
+  }
+
+  String? get localizedDescription {
+    final locale = Get.locale?.languageCode;
+    if (locale == 'en' && descriptionEn != null && descriptionEn!.isNotEmpty) {
+      return descriptionEn;
+    }
+    return description;
+  }
+
   factory Meal.fromJson(Map<String, dynamic> json) {
     return Meal(
       id: json['id'] as String,
       name: json['name'] as String,
+      nameEn: json['name_en'] as String?,
       description: json['description'] as String?,
+      descriptionEn: json['description_en'] as String?,
       imageUrl: json['image_url'] as String?,
       calories: json['calories'] as int,
       proteinG: (json['protein_g'] as num).toDouble(),

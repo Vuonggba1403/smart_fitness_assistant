@@ -62,7 +62,7 @@ class ExerciseCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    exercise.title,
+                    exercise.localizedTitle,
                     style: TextStyle(
                       color: textColor,
                       fontSize: 14,

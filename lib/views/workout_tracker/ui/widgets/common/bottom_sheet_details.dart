@@ -77,7 +77,7 @@ class ExerciseDetailBottomSheet extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            exercise.title,
+            exercise.localizedTitle,
             style: TextStyle(
               color: textColor,
               fontSize: 20,
@@ -103,7 +103,8 @@ class ExerciseDetailBottomSheet extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (exercise.description.isNotEmpty) _buildDescription(textColor),
+            if (exercise.localizedDescription.isNotEmpty)
+              _buildDescription(textColor),
             _buildExerciseImage(media, textColor),
             const SizedBox(height: 24),
             _buildDevicesSection(textColor),
@@ -135,7 +136,7 @@ class ExerciseDetailBottomSheet extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Text(
-          exercise.description,
+          exercise.localizedDescription,
           style: TextStyle(
             color: textColor?.withOpacity(0.8),
             fontSize: 14,
@@ -196,7 +197,7 @@ class ExerciseDetailBottomSheet extends StatelessWidget {
                   final idx = entry.key;
                   final device = entry.value;
                   return _buildChip(
-                    label: device.name,
+                    label: device.localizedName,
                     isSelected: true,
                     textColor: textColor,
                     key: ValueKey('device_${exercise.id}_$idx'),
@@ -229,7 +230,7 @@ class ExerciseDetailBottomSheet extends StatelessWidget {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: exercise.muscleGroups.asMap().entries.map((entry) {
+          children: exercise.localizedMuscleGroups.asMap().entries.map((entry) {
             final idx = entry.key;
             final group = entry.value;
             return _buildChip(

@@ -119,7 +119,7 @@ class DevicesSection extends StatelessWidget {
         itemBuilder: (context, index) {
           final device = uniqueDevices[index];
           return DeviceCard(
-            deviceName: device.name,
+            deviceName: device.localizedName,
             imageUrl: device.imgUrl ?? '',
           );
         },

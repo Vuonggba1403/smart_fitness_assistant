@@ -1,5 +1,6 @@
 import 'dart:developer' as developer;
 import 'package:bloc/bloc.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:smart_fitness_assistant/core/models/meal.dart';
@@ -122,11 +123,19 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
 
       debugPrint('✅ Meal ID: $mealId');
 
-      // ✅ BƯỚC 2: Lưu vào user_meals
+      // ✅ BƯỚC 2: Lưu vào user_meals (với tên theo locale)
+      final locale = Get.locale?.languageCode;
+      final mealName =
+          (locale == 'en' &&
+              meal['name_en'] != null &&
+              (meal['name_en'] as String).isNotEmpty)
+          ? meal['name_en']
+          : meal['name'];
+
       final userMealData = {
         'for_user': userId,
         'for_meal': mealId,
-        'meal_name': meal['name'],
+        'meal_name': mealName,
         'meal_type': mealType,
         'calories': meal['calories'] ?? 0,
         'protein_g': meal['protein'] ?? 0.0,
@@ -276,7 +285,7 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
     try {
       final response = await _supabase
           .from('meals')
-          .select()
+          .select('*, name_en, description_en')
           .ilike('name', '%$query%')
           .eq('is_verified', true)
           .order('name')
@@ -331,7 +340,7 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
       // Fetch chi tiết meals
       final mealsResponse = await _supabase
           .from('meals')
-          .select()
+          .select('*, name_en, description_en')
           .inFilter('id', mealIds);
 
       if ((mealsResponse as List).isEmpty) {
@@ -373,7 +382,7 @@ class MealPlannerCubit extends Cubit<MealPlannerState> {
 
       final response = await _supabase
           .from('user_meals')
-          .select()
+          .select('*, meals!user_meals_for_meal_fkey(name, name_en)')
           .eq('for_user', userId)
           .eq('meal_date', dateStr)
           .order('meal_time', ascending: true);

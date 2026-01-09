@@ -316,7 +316,7 @@ class ExerciseSessionView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      state.currentExercise.title,
+                      state.currentExercise.localizedTitle,
                       style: TextStyle(
                         color: textColor,
                         fontSize: 18,
@@ -468,7 +468,7 @@ class ExerciseSessionView extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              exercise.title,
+                              exercise.localizedTitle,
                               style: TextStyle(
                                 color: textColor,
                                 fontSize: 14,
@@ -540,7 +540,7 @@ class ExerciseSessionView extends StatelessWidget {
                                       side: BorderSide(color: TColor.gray),
                                     ),
                                     child: Text(
-                                      'Chi tiết',
+                                      LocaleKey.details.tr,
                                       style: TextStyle(
                                         color: textColor,
                                         fontSize: 13,
@@ -568,7 +568,7 @@ class ExerciseSessionView extends StatelessWidget {
                                       size: 18,
                                     ),
                                     label: Text(
-                                      'Thêm set',
+                                      LocaleKey.addSet.tr,
                                       style: TextStyle(
                                         color: TColor.white,
                                         fontSize: 13,
@@ -667,6 +667,14 @@ class _EditableSetRowState extends State<_EditableSetRow> {
 
   @override
   Widget build(BuildContext context) {
+    final media = MediaQuery.of(context).size;
+
+    // ✅ Responsive spacing và sizing dựa trên màn hình
+    final checkboxSize = media.width * 0.075; // ~30px on 400px screen
+    final textFieldWidth = media.width * 0.12; // ~48px on 400px screen
+    final spacing1 = media.width * 0.025; // ~10px
+    final spacing2 = media.width * 0.03; // ~12px
+
     // ✅ Thêm màu xanh lá cây khi set hoàn thành
     final backgroundColor = widget.set.isCompleted
         ? Colors.green.withOpacity(0.15)
@@ -687,26 +695,21 @@ class _EditableSetRowState extends State<_EditableSetRow> {
           // Checkbox
           InkWell(
             onTap: () {
-              context.read<SessionCubit>().toggleSetCompletion(
-                // ✅ FIX
-                widget.index,
-              );
+              context.read<SessionCubit>().toggleSetCompletion(widget.index);
             },
             child: Container(
-              width: 30,
-              height: 30,
+              width: checkboxSize,
+              height: checkboxSize,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: widget.set.isCompleted
-                      ? Colors
-                            .green // ✅ Đổi màu checkbox thành xanh lá
+                      ? Colors.green
                       : TColor.gray.withOpacity(0.3),
                   width: 2,
                 ),
                 color: widget.set.isCompleted
-                    ? Colors
-                          .green // ✅ Đổi màu checkbox thành xanh lá
+                    ? Colors.green
                     : Colors.transparent,
               ),
               child: widget.set.isCompleted
@@ -715,7 +718,7 @@ class _EditableSetRowState extends State<_EditableSetRow> {
             ),
           ),
 
-          const SizedBox(width: 15),
+          SizedBox(width: spacing1),
 
           // Set number
           Text(
@@ -727,11 +730,11 @@ class _EditableSetRowState extends State<_EditableSetRow> {
             ),
           ),
 
-          const SizedBox(width: 20),
+          SizedBox(width: spacing2),
 
           // Weight (editable TextField)
           Container(
-            width: 50,
+            width: textFieldWidth,
             height: 36,
             decoration: BoxDecoration(
               color: TColor.white,
@@ -754,7 +757,6 @@ class _EditableSetRowState extends State<_EditableSetRow> {
                 final number = int.tryParse(value);
                 if (number != null && number > 0) {
                   context.read<SessionCubit>().updateSetWeight(
-                    // ✅ FIX
                     widget.index,
                     number.toDouble(),
                   );
@@ -763,18 +765,18 @@ class _EditableSetRowState extends State<_EditableSetRow> {
             ),
           ),
 
-          const SizedBox(width: 10),
+          SizedBox(width: spacing1 * 0.8),
 
           Text(
             LocaleKey.kg.tr,
             style: TextStyle(color: widget.textColor, fontSize: 14),
           ),
 
-          const SizedBox(width: 20),
+          SizedBox(width: spacing2),
 
           // Reps (editable TextField)
           Container(
-            width: 50,
+            width: textFieldWidth,
             height: 36,
             decoration: BoxDecoration(
               color: TColor.white,
@@ -797,7 +799,6 @@ class _EditableSetRowState extends State<_EditableSetRow> {
                 final number = int.tryParse(value);
                 if (number != null && number > 0) {
                   context.read<SessionCubit>().updateSetReps(
-                    // ✅ FIX
                     widget.index,
                     number,
                   );
@@ -806,7 +807,7 @@ class _EditableSetRowState extends State<_EditableSetRow> {
             ),
           ),
 
-          const SizedBox(width: 10),
+          SizedBox(width: spacing1 * 0.6),
 
           Text(
             LocaleKey.repetitions.tr,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get/get_utils/src/extensions/internacionalization.dart';
+import 'package:get/get.dart';
 import 'package:calendar_agenda/calendar_agenda.dart';
 import 'package:intl/intl.dart';
 import 'dart:developer' as developer;
@@ -454,7 +454,7 @@ class _MealPlannerViewState extends State<MealPlannerView> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              meal['meal_name'] ?? 'Unknown',
+                              _getLocalizedMealName(meal),
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 fontWeight: FontWeight.w500,
                               ),
@@ -526,6 +526,26 @@ class _MealPlannerViewState extends State<MealPlannerView> {
   /// 🗑️ REMOVE MEAL
   void _removeMeal(String mealId) {
     context.read<MealPlannerCubit>().removeMeal(mealId);
+  }
+
+  /// 🌐 GET LOCALIZED MEAL NAME
+  String _getLocalizedMealName(Map meal) {
+    // Nếu có join data từ bảng meals
+    if (meal['meals'] != null && meal['meals'] is Map) {
+      final mealData = meal['meals'] as Map;
+      final locale = Get.locale?.languageCode;
+
+      // Hiển thị theo locale hiện tại
+      if (locale == 'en' &&
+          mealData['name_en'] != null &&
+          (mealData['name_en'] as String).isNotEmpty) {
+        return mealData['name_en'];
+      }
+      return mealData['name'] ?? 'Unknown';
+    }
+
+    // Fallback về meal_name cũ nếu không có join
+    return meal['meal_name'] ?? 'Unknown';
   }
 
   @override

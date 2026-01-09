@@ -261,7 +261,10 @@ class _SearchMealPageState extends State<SearchMealPage>
       'fat': meal.fatG,
     }, DateTime.now());
 
-    AppSnackBar.success(context, '${meal.name} ${LocaleKey.addedToMeal.tr}');
+    AppSnackBar.success(
+      context,
+      '${meal.localizedName} ${LocaleKey.addedToMeal.tr}',
+    );
     Navigator.pop(context); // ✅ Pop SearchMeal
   }
 
@@ -356,7 +359,7 @@ class _MealCard extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                meal.name,
+                meal.localizedName,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),

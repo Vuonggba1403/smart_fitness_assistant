@@ -319,7 +319,7 @@ class SessionCubit extends Cubit<SessionState> {
       exerciseDetails.add(
         ExerciseSessionDetail(
           exerciseId: exercise.id,
-          exerciseName: exercise.title,
+          exerciseName: exercise.localizedTitle,
           sets: setDetails,
         ),
       );

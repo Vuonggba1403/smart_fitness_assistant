@@ -27,7 +27,7 @@ class MultiStepDialogCubit extends Cubit<MultiStepDialogState> {
     try {
       final response = await Supabase.instance.client
           .from('meals')
-          .select()
+          .select('*, name_en, description_en')
           .eq('is_verified', true)
           .order('name', ascending: true);
 
