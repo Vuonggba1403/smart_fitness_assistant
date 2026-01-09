@@ -23,10 +23,18 @@ class StreakService {
     int? durationMinutes,
     int? caloriesBurned,
   }) async {
+    print('🔥 StreakService.recordWorkout called');
+    print('   User ID: $userId');
+    print('   Exercises: $exercisesCompleted');
+    print('   Duration: $durationMinutes min');
+    print('   Calories: $caloriesBurned');
+
     final now = DateTime.now();
     final dateOnly = DateTime(now.year, now.month, now.day);
+    print('   Date: $dateOnly');
 
     // Kiểm tra đã workout hôm nay chưa
+    print('🔍 Checking if already worked out today...');
     final existingHistory = await _supabase
         .from('streak_history')
         .select()
@@ -34,7 +42,11 @@ class StreakService {
         .eq('workout_date', dateOnly.toIso8601String().split('T')[0])
         .maybeSingle();
 
+    print('   Existing history: ${existingHistory != null}');
+
     if (existingHistory != null) {
+      print('⚠️ Already worked out today! Not recording again.');
+
       final streakData = await _supabase
           .from('workout_streaks')
           .select()
@@ -55,16 +67,20 @@ class StreakService {
     }
 
     // Get current streak data
+    print('📊 Getting current streak data...');
     final streakData = await _supabase
         .from('workout_streaks')
         .select()
         .eq('for_user', userId)
         .maybeSingle();
 
+    print('   Existing streak data: ${streakData != null}');
+
     int newStreak = 1;
     bool isNewRecord = false;
 
     if (streakData != null) {
+      print('✅ Found existing streak data');
       final lastWorkout = DateTime.parse(streakData['last_workout_date']);
       final lastWorkoutDateOnly = DateTime(
         lastWorkout.year,
@@ -73,37 +89,66 @@ class StreakService {
       );
 
       final daysDifference = dateOnly.difference(lastWorkoutDateOnly).inDays;
+      print('   Last workout: $lastWorkoutDateOnly');
+      print('   Days difference: $daysDifference');
+
+      // Lấy streak_start_date hiện tại
+      DateTime? currentStreakStartDate;
+      if (streakData['streak_start_date'] != null) {
+        currentStreakStartDate = DateTime.parse(
+          streakData['streak_start_date'],
+        );
+      }
 
       if (daysDifference == 1) {
         newStreak = (streakData['current_streak'] as int) + 1;
+        print('✅ Consecutive day! New streak: $newStreak');
+        // Giữ nguyên streak_start_date
       } else if (daysDifference > 1) {
         newStreak = 1;
+        print('❌ Missed day(s)! Streak reset to 1');
+        // Reset streak_start_date thành hôm nay
+        currentStreakStartDate = dateOnly;
+      } else if (daysDifference == 0) {
+        // Same day workout - không tăng streak
+        newStreak = streakData['current_streak'] as int;
       }
 
       final previousLongest = streakData['longest_streak'] as int;
       isNewRecord = newStreak > previousLongest;
+      print('   Previous longest: $previousLongest');
+      print('   New record: $isNewRecord');
 
+      print('💾 Updating streak in database...');
       await _supabase
           .from('workout_streaks')
           .update({
             'current_streak': newStreak,
             'longest_streak': isNewRecord ? newStreak : previousLongest,
             'last_workout_date': now.toIso8601String(),
+            'streak_start_date': (currentStreakStartDate ?? dateOnly)
+                .toIso8601String(),
             'total_workouts': (streakData['total_workouts'] as int) + 1,
           })
           .eq('for_user', userId);
+      print('✅ Streak updated in database');
     } else {
+      print('🆕 No existing streak data, creating new...');
       await _supabase.from('workout_streaks').insert({
         'for_user': userId,
         'current_streak': 1,
         'longest_streak': 1,
         'last_workout_date': now.toIso8601String(),
+        'streak_start_date': dateOnly
+            .toIso8601String(), // ✅ Thêm streak_start_date
         'total_workouts': 1,
       });
+      print('✅ New streak record created');
       isNewRecord = true;
     }
 
     // Record history
+    print('📝 Recording workout in history...');
     await _supabase.from('streak_history').insert({
       'for_user': userId,
       'workout_date': dateOnly.toIso8601String(),
@@ -112,15 +157,23 @@ class StreakService {
       'duration_minutes': durationMinutes ?? 0,
       'calories_burned': caloriesBurned ?? 0,
     });
+    print('✅ Workout history recorded');
 
     // ✅ Check milestone & mint NFT
     StreakMilestone? achievedMilestone;
     if (_isStreakMilestone(newStreak)) {
+      print('🎯 Milestone reached: $newStreak days');
       achievedMilestone = await _handleMilestone(userId, newStreak);
     }
 
     // ✅ Clear cache sau khi update
+    print('🗑️ Clearing streak cache...');
     clearCache();
+
+    print('✅ === STREAK RECORDING COMPLETE ===');
+    print('   New Streak: $newStreak days');
+    print('   Longest: ${isNewRecord ? newStreak : "unchanged"}');
+    print('   Is New Record: $isNewRecord');
 
     return StreakResult(
       success: true,

@@ -1,18 +1,24 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:smart_fitness_assistant/core/services/streak_service.dart';
 import 'package:smart_fitness_assistant/locale/locale_key.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-/// Compact streak badge hiển thị bên cạnh username (TikTok style)
-class CompactStreakBadge extends StatefulWidget {
-  const CompactStreakBadge({super.key});
-
-  @override
-  State<CompactStreakBadge> createState() => _CompactStreakBadgeState();
+/// Abstract class để expose public method
+abstract class CompactStreakBadgeState extends State<CompactStreakBadge> {
+  void refreshStreak();
 }
 
-class _CompactStreakBadgeState extends State<CompactStreakBadge>
+/// Compact streak badge hiển thị bên cạnh username (TikTok style)
+class CompactStreakBadge extends StatefulWidget {
+  const CompactStreakBadge({Key? key}) : super(key: key);
+
+  @override
+  CompactStreakBadgeState createState() => _CompactStreakBadgeState();
+}
+
+class _CompactStreakBadgeState extends CompactStreakBadgeState
     with SingleTickerProviderStateMixin {
   final _streakService = StreakService();
   final _supabase = Supabase.instance.client;
@@ -21,12 +27,13 @@ class _CompactStreakBadgeState extends State<CompactStreakBadge>
   bool _loading = true;
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
+  Timer? _refreshTimer;
 
   @override
   void initState() {
     super.initState();
 
-    // ✅ Không load ngay mà dùng cache
+    // ✅ Load streak data
     _loadStreakData(forceRefresh: false);
 
     // Pulse animation for active streak
@@ -38,18 +45,47 @@ class _CompactStreakBadgeState extends State<CompactStreakBadge>
     _pulseAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
+
+    // ✅ Auto refresh mỗi 5 giây để catch streak updates
+    _refreshTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (mounted) {
+        debugPrint('⏰ Auto-refreshing streak badge...');
+        _loadStreakData(forceRefresh: true);
+      }
+    });
+  }
+
+  @override
+  void didUpdateWidget(CompactStreakBadge oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // ✅ Refresh streak khi widget update (user quay lại từ workout)
+    refreshStreak();
+  }
+
+  /// Public method để refresh streak từ parent
+  @override
+  void refreshStreak() {
+    debugPrint('🔄 Refreshing streak badge...');
+    _loadStreakData(forceRefresh: true);
   }
 
   Future<void> _loadStreakData({bool forceRefresh = false}) async {
     try {
       final userId = _supabase.auth.currentUser?.id;
-      if (userId == null) return;
+      if (userId == null) {
+        debugPrint('⚠️ No user ID found');
+        return;
+      }
+
+      debugPrint('📊 Loading streak data (forceRefresh: $forceRefresh)...');
 
       // ✅ Pass forceRefresh parameter
       final data = await _streakService.getStreakData(
         userId,
         forceRefresh: forceRefresh,
       );
+
+      debugPrint('📊 Streak data loaded: ${data?.currentStreak ?? 0} days');
 
       if (mounted) {
         setState(() {
@@ -58,7 +94,7 @@ class _CompactStreakBadgeState extends State<CompactStreakBadge>
         });
       }
     } catch (e) {
-      debugPrint('Error loading streak: $e');
+      debugPrint('❌ Error loading streak: $e');
       if (mounted) {
         setState(() => _loading = false);
       }
@@ -67,6 +103,7 @@ class _CompactStreakBadgeState extends State<CompactStreakBadge>
 
   @override
   void dispose() {
+    _refreshTimer?.cancel();
     _pulseController.dispose();
     super.dispose();
   }

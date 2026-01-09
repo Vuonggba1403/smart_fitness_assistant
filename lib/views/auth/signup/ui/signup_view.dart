@@ -77,6 +77,7 @@ class _SignUpFormState extends State<_SignUpForm> {
       builder: (context, state) {
         return Scaffold(
           backgroundColor: theme.scaffoldBackgroundColor,
+          resizeToAvoidBottomInset: true,
           body: SingleChildScrollView(
             child: SafeArea(
               child: Padding(

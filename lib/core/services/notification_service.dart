@@ -131,4 +131,64 @@ class NotificationService {
   Future<List<PendingNotificationRequest>> getPendingNotifications() async {
     return await _notifications.pendingNotificationRequests();
   }
+
+  /// Schedule water reminder notification
+  Future<void> scheduleWaterNotification({
+    required int id,
+    required String title,
+    required String body,
+    required DateTime scheduledTime,
+  }) async {
+    final tzScheduledTime = tz.TZDateTime.from(scheduledTime, tz.local);
+    final now = tz.TZDateTime.now(tz.local);
+
+    print('💧 Scheduling water notification:');
+    print('   ID: $id');
+    print('   Scheduled Time: $tzScheduledTime');
+    print(
+      '   Time Difference: ${tzScheduledTime.difference(now).inMinutes} minutes',
+    );
+
+    if (tzScheduledTime.isBefore(now)) {
+      print('⚠️ WARNING: Scheduled time is in the past!');
+    }
+
+    const androidDetails = AndroidNotificationDetails(
+      'water_reminders',
+      'Water Reminders',
+      channelDescription: 'Nhắc nhở uống nước',
+      importance: Importance.high,
+      priority: Priority.high,
+      playSound: true,
+      enableVibration: true,
+    );
+
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    const details = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
+
+    try {
+      await _notifications.zonedSchedule(
+        id,
+        title,
+        body,
+        tzScheduledTime,
+        details,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      );
+
+      print('✅ Water notification scheduled successfully!');
+    } catch (e, stackTrace) {
+      print('❌ Error scheduling water notification: $e');
+      print('Stack trace: $stackTrace');
+      rethrow;
+    }
+  }
 }

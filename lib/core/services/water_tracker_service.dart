@@ -11,6 +11,13 @@ class WaterTrackerService {
 
   String? get currentUserId => _supabase.auth.currentUser?.id;
 
+  /// Initialize notification service (call once when app starts)
+  Future<void> initializeNotificationService() async {
+    await _notificationService.initialize();
+    await _notificationService.requestPermissions();
+    print('✅ Water Tracker notification service initialized');
+  }
+
   // ========== Settings Operations ==========
 
   /// Load water goal settings từ database
@@ -183,7 +190,7 @@ class WaterTrackerService {
         final reminderId = _generateReminderId(userId, nextReminder);
         _scheduledReminderIds.add(reminderId);
 
-        await _notificationService.scheduleWorkoutNotification(
+        await _notificationService.scheduleWaterNotification(
           id: reminderId,
           title: '💧 Đã đến giờ uống nước!',
           body: 'Hãy uống nước để giữ sức khỏe nhé! 🥤',

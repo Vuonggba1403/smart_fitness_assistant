@@ -345,7 +345,16 @@ class WorkoutPlanCubit extends Cubit<WorkoutPlanState> {
 
   /// Hoàn thành workout cho ngày hiện tại
   Future<void> completeWorkout() async {
-    if (_currentDayNumber == 0 || _currentProgress == null) return;
+    log('🏋️ Attempting to complete workout...');
+    log('   Current Day: $_currentDayNumber');
+    log('   Current Progress: ${_currentProgress != null}');
+
+    if (_currentDayNumber == 0 || _currentProgress == null) {
+      log(
+        '❌ Cannot complete workout: day=$_currentDayNumber, progress=${_currentProgress != null}',
+      );
+      return;
+    }
 
     _workoutTimer?.cancel();
 
@@ -354,6 +363,9 @@ class WorkoutPlanCubit extends Cubit<WorkoutPlanState> {
       (d) => d.dayNumber == _currentDayNumber,
     );
     final totalExercises = dayPlan?.workouts.length ?? 0;
+
+    log('💪 Total exercises: $totalExercises');
+    log('⏱️ Duration: $_elapsedSeconds seconds');
 
     // Update progress
     final dayProgress = _currentProgress!.getProgressForDay(_currentDayNumber);
@@ -370,8 +382,10 @@ class WorkoutPlanCubit extends Cubit<WorkoutPlanState> {
       );
       await _saveProgress();
 
+      log('✅ Progress saved, now recording streak...');
       // ✅ STREAK: Record workout completion
       await _recordWorkoutStreak(totalExercises, _elapsedSeconds);
+      log('✅ Streak recording completed');
 
       // Kiểm tra xem đã hoàn thành toàn bộ plan chưa
       if (_currentProgress!.isPlanCompleted) {
@@ -392,10 +406,20 @@ class WorkoutPlanCubit extends Cubit<WorkoutPlanState> {
 
   /// Record workout in streak system
   Future<void> _recordWorkoutStreak(int exercises, int durationSeconds) async {
+    log('🔥 === RECORDING WORKOUT STREAK ===');
+    log('   User ID: $_userId');
+    log('   Exercises: $exercises');
+    log('   Duration: $durationSeconds seconds');
+
     try {
-      if (_userId == null) return;
+      if (_userId == null) {
+        log('❌ ERROR: User ID is null, cannot record streak');
+        return;
+      }
 
       final streakService = StreakService();
+      log('🔥 Calling StreakService.recordWorkout...');
+
       final result = await streakService.recordWorkout(
         _userId!,
         exercisesCompleted: exercises,
@@ -403,6 +427,11 @@ class WorkoutPlanCubit extends Cubit<WorkoutPlanState> {
         caloriesBurned: ((durationSeconds / 60) * 5)
             .round(), // Estimate: 5 cal/min
       );
+
+      log('🔥 StreakService response:');
+      log('   Success: ${result.success}');
+      log('   Current Streak: ${result.currentStreak}');
+      log('   Message: ${result.message}');
 
       if (result.success) {
         log('🔥 Streak updated: ${result.currentStreak} days');
@@ -412,9 +441,12 @@ class WorkoutPlanCubit extends Cubit<WorkoutPlanState> {
           log('🎯 MILESTONE: ${result.achievedMilestone!.name}');
           // Will trigger NFT minting in UI
         }
+      } else {
+        log('⚠️ Streak not updated: ${result.message}');
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       log('❌ Error recording streak: $e');
+      log('Stack trace: $stackTrace');
     }
   }
 

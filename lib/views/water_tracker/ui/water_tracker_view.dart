@@ -33,7 +33,18 @@ class _WaterTrackerContent extends StatefulWidget {
 
 class _WaterTrackerContentState extends State<_WaterTrackerContent> {
   int _selectedAmount = 200;
-  final _service = WaterTrackerService();
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeNotifications();
+  }
+
+  /// Khởi tạo notification service
+  Future<void> _initializeNotifications() async {
+    final service = WaterTrackerService();
+    await service.initializeNotificationService();
+  }
 
   Future<void> _handleGoalUpdate(int currentGoal) async {
     final newGoal = await WaterTrackerDialogs.showGoalDialog(
@@ -138,7 +149,8 @@ class _WaterTrackerContentState extends State<_WaterTrackerContent> {
                           IconButton(
                             icon: Icon(Icons.bug_report, color: TColor.white),
                             onPressed: () async {
-                              final pending = await _service
+                              final service = WaterTrackerService();
+                              final pending = await service
                                   .getPendingNotifications();
                               if (mounted) {
                                 AppSnackBar.info(
@@ -182,7 +194,9 @@ class _WaterTrackerContentState extends State<_WaterTrackerContent> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           Text(
-                            _service.getNextReminderText(state.settings),
+                            WaterTrackerService().getNextReminderText(
+                              state.settings,
+                            ),
                             style: TextStyle(
                               color: TColor.white,
                               fontSize: 16,

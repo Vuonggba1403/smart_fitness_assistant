@@ -61,6 +61,10 @@ class _WhatYourGoalViewState extends State<WhatYourGoalView> {
       listener: (context, state) {
         if (state is SignUpSuccess) {
           if (!mounted) return;
+
+          // Đóng bàn phím trước khi navigate
+          FocusScope.of(context).unfocus();
+
           AppSnackBar.success(context, LocaleKey.registerSuccess.tr);
 
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -82,6 +86,7 @@ class _WhatYourGoalViewState extends State<WhatYourGoalView> {
 
         return Scaffold(
           appBar: CustomAppBar(title: LocaleKey.whatYourGoal.tr),
+          resizeToAvoidBottomInset: true,
           body: SafeArea(
             child: SingleChildScrollView(
               child: Padding(
@@ -153,7 +158,7 @@ class _WhatYourGoalViewState extends State<WhatYourGoalView> {
                         );
                       },
                     ),
-                    // SizedBox(height: media.width * 0.1),
+                    SizedBox(height: media.width * 0.4),
                     RoundButton(
                       title: isLoading
                           ? 'Loading...'

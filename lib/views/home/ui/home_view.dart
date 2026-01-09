@@ -23,7 +23,14 @@ class HomeView extends StatefulWidget {
   State<HomeView> createState() => _HomeViewState();
 }
 
-class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
+class _HomeViewState extends State<HomeView>
+    with WidgetsBindingObserver, RouteAware {
+  final GlobalKey<CompactStreakBadgeState> _streakBadgeKey = GlobalKey();
+
+  // Route observer để detect khi quay về trang này
+  static final RouteObserver<PageRoute> routeObserver =
+      RouteObserver<PageRoute>();
+
   @override
   void initState() {
     super.initState();
@@ -32,20 +39,27 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
   }
 
   @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Subscribe to route observer
+    final route = ModalRoute.of(context);
+    if (route is PageRoute) {
+      routeObserver.subscribe(this, route);
+    }
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // ✅ THÊM: Auto refresh khi quay lại từ workout
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _loadData();
-      }
-    });
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  // ✅ Gọi khi quay về trang này từ trang khác
+  @override
+  void didPopNext() {
+    debugPrint('🔙 Returned to Home screen, refreshing...');
+    _loadData();
   }
 
   // ✅ THÊM: Refresh khi app resume (từ background về foreground)
@@ -58,12 +72,18 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
 
   // ✅ Method load data - SIMPLE VERSION
   Future<void> _loadData() async {
+    debugPrint('🏠 HomeView: Loading data...');
+
     // ✅ Chỉ cần load user data và language
     context.read<AuthenticationCubit>().getUserData();
 
     final cubit = context.read<HomeCubit>();
     await cubit.loadLatestWorkouts(); // ✅ Reload latest workouts
     await cubit.loadDailyActivity(); // ✅ Reload daily stats nếu có
+
+    // ✅ Refresh streak badge khi quay lại
+    debugPrint('🏠 HomeView: Refreshing streak badge...');
+    _streakBadgeKey.currentState?.refreshStreak();
 
     // ✅ HomeCubit tự động load latest workouts trong initState
     // Không cần gọi thêm gì ở đây
@@ -141,7 +161,7 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
                                         ),
                                       ),
                                       const SizedBox(width: 8),
-                                      const CompactStreakBadge(),
+                                      CompactStreakBadge(key: _streakBadgeKey),
                                     ],
                                   ),
                                 ],
