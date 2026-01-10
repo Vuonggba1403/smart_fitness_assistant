@@ -94,14 +94,64 @@ class WorkoutPlanRepository {
     int? dailyCalorieTarget,
   }) async {
     try {
+      // ✅ Filter exercises theo user profile trước khi gửi AI
+      final filteredExercises = _filterExercises(exercises, fitnessProfile);
+      log(
+        '📊 Filtered exercises: ${exercises.length} → ${filteredExercises.length}',
+      );
+
+      // ✅ Filter meals theo dietary preferences trước khi gửi AI
+      final filteredMeals = _filterMeals(meals, fitnessProfile);
+      log('📊 Filtered meals: ${meals.length} → ${filteredMeals.length}');
+
+      // ✅ Validation: Đảm bảo có đủ exercises và meals
+      if (filteredExercises.length < 10) {
+        log(
+          '⚠️ Warning: Only ${filteredExercises.length} exercises available after filtering. Using unfiltered list.',
+        );
+        // Fallback: Sử dụng danh sách gốc nếu filter quá nhiều
+        return generatePlan(
+          user: user,
+          activityLevel: activityLevel,
+          fitnessProfile: UserFitnessProfile(
+            fitnessLevel: fitnessProfile.fitnessLevel,
+            equipment: fitnessProfile.equipment,
+            // Bỏ qua injuries để có nhiều exercises hơn
+            injuries: [],
+          ),
+          exercises: exercises,
+          meals: meals,
+          dailyCalorieTarget: dailyCalorieTarget,
+        );
+      }
+
+      if (filteredMeals.length < 10) {
+        log(
+          '⚠️ Warning: Only ${filteredMeals.length} meals available after filtering. Using unfiltered list.',
+        );
+        // Fallback: Sử dụng danh sách gốc
+        return generatePlan(
+          user: user,
+          activityLevel: activityLevel,
+          fitnessProfile: UserFitnessProfile(
+            fitnessLevel: fitnessProfile.fitnessLevel,
+            equipment: fitnessProfile.equipment,
+            // Bỏ qua dietary preferences để có nhiều meals hơn
+          ),
+          exercises: exercises,
+          meals: meals,
+          dailyCalorieTarget: dailyCalorieTarget,
+        );
+      }
+
       final userContext = _buildUserContext(
         user,
         activityLevel,
         fitnessProfile,
         dailyCalorieTarget,
       );
-      final exercisesList = _buildExercisesListWithIndex(exercises);
-      final mealsList = _buildMealsListWithIndex(meals);
+      final exercisesList = _buildExercisesListWithIndex(filteredExercises);
+      final mealsList = _buildMealsListWithIndex(filteredMeals);
       final prompt = _buildPrompt(
         userContext,
         exercisesList,
@@ -121,8 +171,8 @@ class WorkoutPlanRepository {
 
       final plan = _parseAIResponseWithIndex(
         response!.output!,
-        exercises,
-        meals,
+        filteredExercises,
+        filteredMeals,
       );
 
       return plan;
@@ -158,27 +208,214 @@ ${fitnessProfile.toPromptString()}
 ''';
   }
 
+  /// ✅ Filter exercises dựa trên UserFitnessProfile
+  List<ExerciseItem> _filterExercises(
+    List<ExerciseItem> exercises,
+    UserFitnessProfile profile,
+  ) {
+    return exercises.where((exercise) {
+      // 1. Filter theo equipment
+      if (profile.equipment == 'home') {
+        // Chỉ lấy exercises không cần thiết bị phức tạp
+        final hasGymEquipment = exercise.devices.any((device) {
+          final deviceName = device.name.toLowerCase();
+          return deviceName.contains('barbell') ||
+              deviceName.contains('tạ đòn') ||
+              deviceName.contains('machine') ||
+              deviceName.contains('máy') ||
+              deviceName.contains('cable') ||
+              deviceName.contains('dây cáp');
+        });
+        if (hasGymEquipment) return false;
+      }
+
+      // 2. Filter theo injuries
+      for (var injury in profile.injuries) {
+        final injuryLower = injury.toLowerCase();
+
+        // Back injuries - tránh exercises tác động lên lưng
+        if (injuryLower.contains('back') || injuryLower.contains('lưng')) {
+          final muscleGroups = exercise.muscleGroups.join(' ').toLowerCase();
+          if (muscleGroups.contains('lưng') ||
+              muscleGroups.contains('back') ||
+              exercise.title.toLowerCase().contains('deadlift') ||
+              exercise.title.toLowerCase().contains('gánh tạ')) {
+            return false;
+          }
+        }
+
+        // Knee injuries - tránh exercises tác động lên đầu gối
+        if (injuryLower.contains('knee') || injuryLower.contains('gối')) {
+          final titleLower = exercise.title.toLowerCase();
+          if (titleLower.contains('squat') ||
+              titleLower.contains('lunge') ||
+              titleLower.contains('gánh') ||
+              titleLower.contains('chạy') ||
+              titleLower.contains('run')) {
+            return false;
+          }
+        }
+
+        // Shoulder injuries - tránh exercises tác động lên vai
+        if (injuryLower.contains('shoulder') || injuryLower.contains('vai')) {
+          final muscleGroups = exercise.muscleGroups.join(' ').toLowerCase();
+          if (muscleGroups.contains('vai') ||
+              muscleGroups.contains('shoulder') ||
+              exercise.title.toLowerCase().contains('press') ||
+              exercise.title.toLowerCase().contains('đẩy')) {
+            return false;
+          }
+        }
+      }
+
+      return true;
+    }).toList();
+  }
+
+  /// ✅ Filter meals dựa trên dietary preferences và allergies
+  List<Meal> _filterMeals(List<Meal> meals, UserFitnessProfile profile) {
+    return meals.where((meal) {
+      final mealName = meal.name.toLowerCase();
+      final mealDesc = (meal.description ?? '').toLowerCase();
+
+      // 1. Filter theo dietary preferences
+      for (var pref in profile.dietaryPreferences) {
+        final prefLower = pref.toLowerCase();
+
+        if (prefLower.contains('vegetarian') || prefLower.contains('chay')) {
+          // Loại bỏ món có thịt, cá
+          if (mealName.contains('thịt') ||
+              mealName.contains('meat') ||
+              mealName.contains('gà') ||
+              mealName.contains('chicken') ||
+              mealName.contains('cá') ||
+              mealName.contains('fish') ||
+              mealName.contains('heo') ||
+              mealName.contains('pork') ||
+              mealName.contains('bò') ||
+              mealName.contains('beef') ||
+              mealDesc.contains('thịt') ||
+              mealDesc.contains('meat')) {
+            return false;
+          }
+        }
+
+        if (prefLower.contains('vegan')) {
+          // Loại bỏ tất cả sản phẩm động vật
+          if (mealName.contains('thịt') ||
+              mealName.contains('meat') ||
+              mealName.contains('sữa') ||
+              mealName.contains('milk') ||
+              mealName.contains('trứng') ||
+              mealName.contains('egg') ||
+              mealName.contains('phô mai') ||
+              mealName.contains('cheese') ||
+              mealDesc.contains('thịt') ||
+              mealDesc.contains('sữa') ||
+              mealDesc.contains('trứng')) {
+            return false;
+          }
+        }
+
+        if (prefLower.contains('halal')) {
+          // Loại bỏ thịt heo
+          if (mealName.contains('heo') ||
+              mealName.contains('pork') ||
+              mealName.contains('lợn') ||
+              mealDesc.contains('heo') ||
+              mealDesc.contains('pork')) {
+            return false;
+          }
+        }
+      }
+
+      // 2. Filter theo food allergies
+      for (var allergy in profile.foodAllergies) {
+        final allergyLower = allergy.toLowerCase();
+
+        if (allergyLower.contains('peanut') || allergyLower.contains('đậu')) {
+          if (mealName.contains('đậu') ||
+              mealName.contains('peanut') ||
+              mealDesc.contains('đậu phộng')) {
+            return false;
+          }
+        }
+
+        if (allergyLower.contains('shellfish') ||
+            allergyLower.contains('hải sản')) {
+          if (mealName.contains('tôm') ||
+              mealName.contains('cua') ||
+              mealName.contains('shrimp') ||
+              mealName.contains('crab') ||
+              mealDesc.contains('hải sản')) {
+            return false;
+          }
+        }
+
+        if (allergyLower.contains('dairy') || allergyLower.contains('sữa')) {
+          if (mealName.contains('sữa') ||
+              mealName.contains('milk') ||
+              mealName.contains('phô mai') ||
+              mealName.contains('cheese') ||
+              mealDesc.contains('sữa')) {
+            return false;
+          }
+        }
+
+        if (allergyLower.contains('gluten')) {
+          if (mealName.contains('bánh mì') ||
+              mealName.contains('bread') ||
+              mealName.contains('mì') ||
+              mealName.contains('noodle') ||
+              mealDesc.contains('gluten')) {
+            return false;
+          }
+        }
+      }
+
+      return true;
+    }).toList();
+  }
+
   /// Build exercises list với INDEX
   String _buildExercisesListWithIndex(List<ExerciseItem> exercises) {
     final buffer = StringBuffer('Available Exercises (USE INDEX):\n');
-    for (var i = 0; i < exercises.take(30).length; i++) {
-      final ex = exercises[i];
+
+    // ✅ Lấy tối đa 30 exercises từ danh sách đã được filter
+    final exercisesToUse = exercises.take(30).toList();
+
+    for (var i = 0; i < exercisesToUse.length; i++) {
+      final ex = exercisesToUse[i];
       buffer.writeln('[INDEX: $i] ${ex.title} (${ex.muscleGroupsString})');
     }
-    buffer.writeln('\n✅ CRITICAL: Use INDEX number (0-29) as exercise_id');
+
+    buffer.writeln(
+      '\n✅ CRITICAL: Use INDEX number (0-${exercisesToUse.length - 1}) as exercise_id',
+    );
+    buffer.writeln('⚠️ Total available exercises: ${exercisesToUse.length}');
+
     return buffer.toString();
   }
 
   /// Build meals list với INDEX
   String _buildMealsListWithIndex(List<Meal> meals) {
     final buffer = StringBuffer('Available Meals (USE INDEX):\n');
-    for (var i = 0; i < meals.take(30).length; i++) {
-      final meal = meals[i];
+
+    // ✅ Lấy tối đa 30 meals từ danh sách đã được filter
+    final mealsToUse = meals.take(30).toList();
+
+    for (var i = 0; i < mealsToUse.length; i++) {
+      final meal = mealsToUse[i];
       buffer.writeln(
         '[INDEX: $i] ${meal.name} (${meal.calories} cal, P:${meal.proteinG}g C:${meal.carbsG}g F:${meal.fatG}g)',
       );
     }
-    buffer.writeln('\n✅ CRITICAL: Use INDEX number (0-29) as meal_id');
+
+    buffer.writeln(
+      '\n✅ CRITICAL: Use INDEX number (0-${mealsToUse.length - 1}) as meal_id',
+    );
+    buffer.writeln('⚠️ Total available meals: ${mealsToUse.length}');
+
     return buffer.toString();
   }
 

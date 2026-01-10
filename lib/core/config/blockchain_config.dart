@@ -11,7 +11,7 @@ class BlockchainConfig {
   static const String blockExplorerUrl = 'https://amoy.polygonscan.com';
 
   // Contract ABI (Application Binary Interface)
-  // Simplified ABI for main functions
+  // Fixed ABI with all required "name" fields for web3dart compatibility
   static const String contractABI = '''[
     {
       "inputs": [
@@ -20,7 +20,7 @@ class BlockchainConfig {
         {"name": "metadataURI", "type": "string"}
       ],
       "name": "mintStreakBadge",
-      "outputs": [{"type": "uint256"}],
+      "outputs": [{"name": "", "type": "uint256"}],
       "stateMutability": "nonpayable",
       "type": "function"
     },
@@ -31,14 +31,14 @@ class BlockchainConfig {
         {"name": "metadataURI", "type": "string"}
       ],
       "name": "mintWorkoutBadge",
-      "outputs": [{"type": "uint256"}],
+      "outputs": [{"name": "", "type": "uint256"}],
       "stateMutability": "nonpayable",
       "type": "function"
     },
     {
       "inputs": [{"name": "user", "type": "address"}],
       "name": "getUserBadges",
-      "outputs": [{"type": "uint256[]"}],
+      "outputs": [{"name": "", "type": "uint256[]"}],
       "stateMutability": "view",
       "type": "function"
     },
@@ -47,6 +47,7 @@ class BlockchainConfig {
       "name": "getBadgeMetadata",
       "outputs": [
         {
+          "name": "",
           "type": "tuple",
           "components": [
             {"name": "badgeType", "type": "uint8"},
@@ -63,21 +64,21 @@ class BlockchainConfig {
     {
       "inputs": [],
       "name": "totalSupply",
-      "outputs": [{"type": "uint256"}],
+      "outputs": [{"name": "", "type": "uint256"}],
       "stateMutability": "view",
       "type": "function"
     },
     {
       "inputs": [{"name": "tokenId", "type": "uint256"}],
       "name": "ownerOf",
-      "outputs": [{"type": "address"}],
+      "outputs": [{"name": "", "type": "address"}],
       "stateMutability": "view",
       "type": "function"
     },
     {
       "inputs": [{"name": "tokenId", "type": "uint256"}],
       "name": "tokenURI",
-      "outputs": [{"type": "string"}],
+      "outputs": [{"name": "", "type": "string"}],
       "stateMutability": "view",
       "type": "function"
     },

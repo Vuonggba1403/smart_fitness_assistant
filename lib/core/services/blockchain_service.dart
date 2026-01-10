@@ -36,19 +36,34 @@ class BlockchainService {
     if (_initialized) return;
 
     try {
+      print('🔄 Starting blockchain initialization...');
+
+      // Debug: Check config values
+      print('📍 Contract Address: ${BlockchainConfig.contractAddress}');
+      print('🌐 RPC URL: ${BlockchainConfig.rpcUrl}');
+      print('🔢 Chain ID: ${BlockchainConfig.chainId}');
+
       // Create HTTP client for RPC calls
+      print('🔄 Creating Web3 client...');
       _client = Web3Client(BlockchainConfig.rpcUrl, Client());
+      print('✅ Web3 client created');
 
       // Parse contract ABI
+      print('🔄 Parsing contract ABI...');
+      print('📄 ABI length: ${BlockchainConfig.contractABI.length} chars');
       final abiJson = jsonDecode(BlockchainConfig.contractABI) as List;
+      print('✅ ABI parsed: ${abiJson.length} entries');
 
       // Create contract instance
+      print('🔄 Creating contract instance...');
       _contract = DeployedContract(
         ContractAbi.fromJson(jsonEncode(abiJson), 'FitnessNFT'),
         EthereumAddress.fromHex(BlockchainConfig.contractAddress),
       );
+      print('✅ Contract instance created');
 
       // Initialize contract functions
+      print('🔄 Loading contract functions...');
       _mintStreakBadge = _contract.function('mintStreakBadge');
       _mintWorkoutBadge = _contract.function('mintWorkoutBadge');
       _getUserBadges = _contract.function('getUserBadges');
@@ -56,11 +71,13 @@ class BlockchainService {
       _totalSupply = _contract.function('totalSupply');
       _ownerOf = _contract.function('ownerOf');
       _tokenURI = _contract.function('tokenURI');
+      print('✅ Contract functions loaded');
 
       _initialized = true;
-      print('✅ BlockchainService initialized');
-    } catch (e) {
+      print('✅ BlockchainService initialized successfully');
+    } catch (e, stackTrace) {
       print('❌ Error initializing BlockchainService: $e');
+      print('📋 Stack trace: $stackTrace');
       rethrow;
     }
   }

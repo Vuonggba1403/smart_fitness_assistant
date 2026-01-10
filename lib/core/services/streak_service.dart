@@ -201,6 +201,7 @@ class StreakService {
     return milestones.firstWhere((m) => m > current, orElse: () => 500);
   }
 
+  //Đạt streak milestones
   String _getMilestoneName(int days) {
     switch (days) {
       case 7:

@@ -1,19 +1,40 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smart_fitness_assistant/core/services/mock_achievement_service.dart';
+import 'package:smart_fitness_assistant/core/services/blockchain_service.dart';
 import 'package:smart_fitness_assistant/core/models/nft_badge.dart';
 import 'package:smart_fitness_assistant/views/achievements/logic/cubit/achievement_state.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Manages achievement tracking and badge minting for workout milestones
 ///
+/// Supports TWO MODES:
+/// 1. MOCK MODE (default): Fast, free, uses Supabase database
+/// 2. BLOCKCHAIN MODE: Real NFTs on Polygon (requires wallet & testnet MATIC)
+///
+/// To enable blockchain: Set useBlockchain = true
 /// Handles:
 /// - Badge creation after workout completion
 /// - Achievement progress tracking
 /// - Badge showcase management
 /// - User badge collection
 class AchievementCubit extends Cubit<AchievementState> {
-  final MockAchievementService _achievementService = MockAchievementService();
+  // Services
+  final MockAchievementService _mockService = MockAchievementService();
+  final BlockchainService _blockchainService = BlockchainService();
   final _supabase = Supabase.instance.client;
+
+  // 🔧 CONFIG: Toggle blockchain mode
+  // Set to true to mint real NFTs on Polygon blockchain
+  // Set to false to use mock service (faster, no cost)
+  static const bool useBlockchain = true; // ✅ ENABLED for testing
+
+  // 🔐 BLOCKCHAIN CONFIG (only needed if useBlockchain = true)
+  // ⚠️ SECURITY: In production, fetch from secure backend
+  // For testnet demo, you can hardcode here
+  static const String ownerPrivateKey =
+      '79058a6b72e672efad15bd16d6706a3d0c81b08d313b479f62f2566dd1283f6d'; // Your private key
+  static const String userWalletAddress =
+      '0xbf415e204220c66732243c1B5DBfB45310dcC3bc'; // Your wallet address
 
   // Badge rarity thresholds
   static const int _legendaryExercises = 20;
@@ -33,11 +54,19 @@ class AchievementCubit extends Cubit<AchievementState> {
     _initializeAchievements();
   }
 
-  /// Initializes the mock achievement service
+  /// Initializes the achievement service (Mock or Blockchain)
   Future<void> _initializeService() async {
     try {
-      await _achievementService.initialize();
-      print('✅ Mock Achievement Service initialized');
+      if (useBlockchain) {
+        await _blockchainService.initialize();
+        print('✅ Blockchain Service initialized (Real NFT mode)');
+        print('🌐 Network: Polygon Amoy Testnet');
+        print('📝 Contract: 0x365d5d61596E2d1FaA9111c20C428009c69748cd');
+      } else {
+        await _mockService.initialize();
+        print('✅ Mock Achievement Service initialized (Demo mode)');
+        print('💾 Storage: Supabase database');
+      }
     } catch (e) {
       print('❌ Failed to initialize service: $e');
     }
@@ -49,9 +78,14 @@ class AchievementCubit extends Cubit<AchievementState> {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) return;
 
-      final badges = await _achievementService.getUserBadges(userId);
+      // Always load from database (both modes save there)
+      final badges = await _mockService.getUserBadges(userId);
       emit(state.copyWith(badges: badges));
       print('✅ Loaded ${badges.length} badges');
+
+      if (useBlockchain) {
+        print('🔗 Blockchain mode: Badges are also on-chain');
+      }
     } catch (e) {
       print('❌ Error loading badges: $e');
     }
@@ -106,6 +140,10 @@ class AchievementCubit extends Cubit<AchievementState> {
   }
 
   /// Creates a new badge for completed workout and updates achievements
+  ///
+  /// HYBRID MODE:
+  /// - Always saves to database (fast, reliable)
+  /// - If useBlockchain=true: Also mints real NFT on Polygon
   Future<NFTBadge?> mintWorkoutBadge({
     required String workoutType,
     required int totalExercises,
@@ -127,7 +165,8 @@ class AchievementCubit extends Cubit<AchievementState> {
 
       final rarity = _determineRarity(totalExercises, durationMinutes);
 
-      final badge = await _achievementService.mintBadge(
+      // 1. ALWAYS save to database (mock service)
+      final badge = await _mockService.mintBadge(
         name: '$workoutType Completed',
         description:
             'Completed $workoutType workout with $totalExercises exercises',
@@ -135,6 +174,27 @@ class AchievementCubit extends Cubit<AchievementState> {
         metadata: metadata,
         userId: userId,
       );
+
+      // 2. OPTIONAL: Mint real NFT on blockchain
+      if (useBlockchain) {
+        try {
+          print('🔗 Minting NFT on Polygon blockchain...');
+          final tokenId = await _blockchainService.mintWorkoutBadge(
+            userAddress: userWalletAddress,
+            workoutCount: totalExercises,
+            privateKey: ownerPrivateKey,
+          );
+          print('✅ NFT minted on-chain! Token ID: $tokenId');
+          print(
+            '🔍 View on PolygonScan: https://amoy.polygonscan.com/token/0x365d5d61596E2d1FaA9111c20C428009c69748cd?a=$tokenId',
+          );
+        } catch (blockchainError) {
+          print(
+            '⚠️ Blockchain mint failed (badge still saved in database): $blockchainError',
+          );
+          // Don't fail the whole operation if blockchain fails
+        }
+      }
 
       final updatedBadges = [...state.badges, badge];
       emit(
@@ -220,7 +280,7 @@ class AchievementCubit extends Cubit<AchievementState> {
     final updatedBadges = state.badges.map((badge) {
       if (badge.id == badgeId) {
         final newIsShowcased = !badge.isShowcased;
-        _achievementService.toggleShowcase(badgeId, newIsShowcased);
+        _mockService.toggleShowcase(badgeId, newIsShowcased);
         return _createUpdatedBadge(badge, newIsShowcased);
       }
       return badge;
