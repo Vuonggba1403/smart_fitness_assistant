@@ -340,12 +340,4 @@ The app uses Supabase (PostgreSQL) with the following main tables:
 - Flutter community for excellent packages and support
 - All contributors and testers
 
----
 
-<div align="center">
-
-**Built with Flutter 💙**
-
-_Stay fit, stay smart!_ 🏋️‍♂️💪
-
-</div>
