@@ -332,29 +332,6 @@ The app uses Supabase (PostgreSQL) with the following main tables:
 - `posts` - Social feed posts
 - `comments` - Post comments
 
-## 🤝 Contributing
-
-This is a private project. For contribution guidelines, please contact the project maintainer.
-
-## 📄 License
-
-This project is private and proprietary. All rights reserved.
-
-## 👨‍💻 Development Team
-
-Developed with ❤️ by the Smart Fitness team
-
-## 📞 Support
-
-For support, feature requests, or bug reports, please contact the development team.
-
-## 🔄 Version History
-
-- **v1.0.0** - Initial release
-  - Core workout tracking features
-  - AI-powered workout and meal planning
-  - Social features and NFT badges
-  - Multi-language support
 
 ## 🙏 Acknowledgments
 
